@@ -283,3 +283,66 @@ body {
     border-right-color: var(--border);
   }
 }
+
+/* ---------- Loading + error states ---------- */
+.app--loading,
+.app--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader {
+  text-align: center;
+}
+
+.loader-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader-text {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.error-card {
+  text-align: center;
+  padding: 32px;
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--blur));
+  border: var(--border);
+  border-radius: var(--radius);
+  max-width: 400px;
+}
+
+.error-card h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.error-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ---------- Location pill ---------- */
+.location-pill {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--blur));
+  border: var(--border);
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
