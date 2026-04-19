@@ -2,10 +2,10 @@
 
 import { CalendarDays, Droplets } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
-import { formatDayLabel } from "../utils/dates";
+import { formatDayLabel, parseLocalDate } from "../utils/dates";
 import WeatherIcon from "./WeatherIcon";
 
-function DayRow({ day, weekMin, weekMax, unit, convertTemp }) {
+function DayRow({ day, weekMin, weekMax, convertTemp }) {
   const info = getWeather(day.weather_code);
   const label = formatDayLabel(day.date);
   const high = convertTemp(day.temp_max);
@@ -58,7 +58,7 @@ function DayRow({ day, weekMin, weekMax, unit, convertTemp }) {
   );
 }
 
-export default function ForecastCard({ weather, unit, convertTemp }) {
+export default function ForecastCard({ weather, convertTemp }) {
   const daily = weather.daily;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -73,7 +73,7 @@ export default function ForecastCard({ weather, unit, convertTemp }) {
       precipitation_sum: daily.precipitation_sum?.[i] || 0,
     }))
     .filter((day) => {
-      const dayDate = new Date(day.date);
+      const dayDate = parseLocalDate(day.date);
       dayDate.setHours(0, 0, 0, 0);
       return dayDate >= today;
     })
@@ -99,7 +99,6 @@ export default function ForecastCard({ weather, unit, convertTemp }) {
             day={day}
             weekMin={weekMin}
             weekMax={weekMax}
-            unit={unit}
             convertTemp={convertTemp}
           />
         ))}

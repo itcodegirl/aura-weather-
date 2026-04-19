@@ -1,11 +1,19 @@
 // src/utils/dates.js
 
 /**
+ * Parses a bare ISO calendar date like "2024-04-19" as local midnight
+ * instead of UTC midnight, which avoids day shifts in US timezones.
+ */
+export function parseLocalDate(isoDate) {
+  return new Date(`${isoDate}T00:00:00`);
+}
+
+/**
  * Formats a date string (ISO) as a human-readable day label.
  * Returns "Today", "Tomorrow", or abbreviated weekday name.
  */
 export function formatDayLabel(isoDate) {
-  const date = new Date(isoDate);
+  const date = parseLocalDate(isoDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -24,7 +32,7 @@ export function formatDayLabel(isoDate) {
  * Short date like "Apr 18"
  */
 export function formatShortDate(isoDate) {
-  return new Date(isoDate).toLocaleDateString("en-US", {
+  return parseLocalDate(isoDate).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
