@@ -9,10 +9,22 @@ import WeatherIcon from "./WeatherIcon";
  * and how much has already fallen today.
  */
 function analyzeRain(hourly) {
+  // Guard against empty/malformed data
+  if (!hourly?.time?.length || !hourly?.precipitation_probability?.length) {
+    return {
+      hours: [],
+      nextRain: null,
+      peak: { probability: 0, time: new Date(), amount: 0 },
+      total: 0,
+      soFarToday: 0,
+      peakAmount: 0,
+    };
+  }
+
   const now = new Date();
   const startIdx = hourly.time.findIndex((t) => new Date(t) >= now);
   const idx = startIdx === -1 ? 0 : startIdx;
-
+  
   const hours = hourly.time.slice(idx, idx + 24).map((t, i) => ({
     time: new Date(t),
     probability: hourly.precipitation_probability[idx + i] || 0,
