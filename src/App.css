@@ -111,6 +111,17 @@ a:focus-visible,
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob {
+    animation: none;
+    filter: blur(12px);
+  }
+
+  .unit-toggle {
+    backdrop-filter: blur(4px);
+  }
+}
+
 @keyframes drift {
   0%,
   100% {

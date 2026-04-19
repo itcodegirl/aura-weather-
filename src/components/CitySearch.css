@@ -93,6 +93,14 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .city-search-input-wrap,
+  .city-search-dropdown {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
 .city-search-state {
   display: flex;
   align-items: center;
