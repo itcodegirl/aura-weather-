@@ -127,7 +127,7 @@ function WindIntelligence({ weather }) {
           <span className="wind-compass-label wind-compass-w">W</span>
           <div
             className="wind-compass-arrow"
-            style={{ transform: `rotate(${wind_direction_10m || 0}deg)` }}
+            style={{ transform:`rotate(${(wind_direction_10m || 0) + 180}deg)` }}
           >
             ▲
           </div>

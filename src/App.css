@@ -675,7 +675,7 @@ button {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--text-dim);
+  color: var(--text-muted);
 }
 
 .storm-grid {
