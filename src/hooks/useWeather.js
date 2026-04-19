@@ -11,16 +11,16 @@ const DEFAULT_LOCATION = {
   country: "United States",
 };
 
+function getFallbackLocationName(weatherData, lat, lon) {
+  const timezoneCity = weatherData?.timezone?.split("/").at(-1)?.replace(/_/g, " ");
+  return timezoneCity || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+}
+
 export function useWeather() {
   const [weather, setWeather] = useState(null);
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const getFallbackLocationName = useCallback((weatherData, lat, lon) => {
-    const timezoneCity = weatherData?.timezone?.split("/").at(-1)?.replace(/_/g, " ");
-    return timezoneCity || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-  }, []);
 
   // Core fetch function — reusable for any lat/lon
   const loadWeather = useCallback(
@@ -44,7 +44,7 @@ export function useWeather() {
         setLoading(false);
       }
     },
-    [getFallbackLocationName]
+    []
   );
 
   // On mount: try geolocation, fall back to Chicago
