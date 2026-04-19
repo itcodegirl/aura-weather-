@@ -19,7 +19,8 @@
   --text-dim: rgba(255, 255, 255, 0.62);
 
   /* Typography */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ---------- Reset + base ---------- */
@@ -73,12 +74,24 @@ button {
   pointer-events: none;
   animation: drift 8s ease-in-out infinite;
 }
-.ambient-blob--tl { top: -160px; left: -160px; }
-.ambient-blob--br { bottom: -160px; right: -160px; animation-delay: 2s; }
+.ambient-blob--tl {
+  top: -160px;
+  left: -160px;
+}
+.ambient-blob--br {
+  bottom: -160px;
+  right: -160px;
+  animation-delay: 2s;
+}
 
 @keyframes drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(30px, -20px) scale(1.1); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -20px) scale(1.1);
+  }
 }
 
 /* ---------- Header ---------- */
@@ -136,11 +149,18 @@ button {
   gap: 16px;
 }
 
-
 /* Bento cell spans */
-.bento-hero  { grid-column: span 4; grid-row: span 2; min-height: 380px; }
-.bento-aqi   { grid-column: span 1; }
-.bento-uv    { grid-column: span 1; }
+.bento-hero {
+  grid-column: span 4;
+  grid-row: span 2;
+  min-height: 380px;
+}
+.bento-aqi {
+  grid-column: span 1;
+}
+.bento-uv {
+  grid-column: span 1;
+}
 
 /* metric-card cells (until fully built out) */
 .metric-card {
@@ -175,6 +195,7 @@ button {
   border: var(--border);
   border-radius: var(--radius);
   padding: 24px;
+  min-width: 0;
   min-height: 180px;
   box-shadow:
     var(--shadow),
@@ -293,7 +314,9 @@ button {
   justify-content: center;
 }
 
-.loader { text-align: center; }
+.loader {
+  text-align: center;
+}
 
 .loader-spinner {
   width: 48px;
@@ -305,7 +328,11 @@ button {
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .loader-text {
   font-size: 13px;
@@ -323,12 +350,20 @@ button {
   max-width: 400px;
 }
 
-.error-card h2 { font-size: 20px; margin-bottom: 8px; }
-.error-card p  { color: var(--text-muted); font-size: 14px; }
+.error-card h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.error-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  .bento { grid-template-columns: repeat(2, 1fr); }
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .bento-hero {
     grid-column: span 2;
     grid-row: auto;
@@ -338,15 +373,29 @@ button {
   .bento-uv {
     grid-column: span 1;
   }
-  .hero-temp { font-size: 72px; }
-  .hero-icon { font-size: 72px; }
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hero-temp {
+    font-size: 72px;
+  }
+  .hero-icon {
+    font-size: 72px;
+  }
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 500px) {
-  .hero-main { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .hero-temp { font-size: 64px; }
-  .hero-temp-unit { font-size: 32px; }
+  .hero-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .hero-temp {
+    font-size: 64px;
+  }
+  .hero-temp-unit {
+    font-size: 32px;
+  }
 }
 
 /* ---------- Rain card ---------- */
@@ -389,7 +438,9 @@ button {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
   min-width: 32px;
 }
 
@@ -551,12 +602,12 @@ button {
 .forecast-row {
   display: grid;
   grid-template-columns:
-    80px      /* Day name */
-    32px      /* Icon */
-    56px      /* Precip */
-    40px      /* Low temp */
-    1fr       /* Range bar */
-    40px;     /* High temp */
+    80px /* Day name */
+    32px /* Icon */
+    56px /* Precip */
+    40px /* Low temp */
+    1fr /* Range bar */
+    40px; /* High temp */
   align-items: center;
   gap: 16px;
   padding: 10px 12px;
@@ -635,17 +686,21 @@ button {
 @media (max-width: 600px) {
   .forecast-row {
     grid-template-columns:
-      60px      /* Day */
-      24px      /* Icon */
-      44px      /* Precip */
-      32px      /* Low */
-      1fr       /* Range */
-      32px;     /* High */
+      60px /* Day */
+      24px /* Icon */
+      44px /* Precip */
+      32px /* Low */
+      1fr /* Range */
+      32px; /* High */
     gap: 10px;
     padding: 10px 8px;
   }
-  .forecast-day { font-size: 13px; }
-  .forecast-icon { font-size: 18px; }
+  .forecast-day {
+    font-size: 13px;
+  }
+  .forecast-icon {
+    font-size: 18px;
+  }
 }
 
 /* ---------- Storm Watch panel ---------- */
@@ -777,10 +832,26 @@ button {
   letter-spacing: 0.05em;
 }
 
-.wind-compass-n { top: 3px; left: 50%; transform: translateX(-50%); }
-.wind-compass-e { right: 5px; top: 50%; transform: translateY(-50%); }
-.wind-compass-s { bottom: 3px; left: 50%; transform: translateX(-50%); }
-.wind-compass-w { left: 5px; top: 50%; transform: translateY(-50%); }
+.wind-compass-n {
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.wind-compass-e {
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.wind-compass-s {
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.wind-compass-w {
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
 .wind-compass-arrow {
   position: absolute;
@@ -831,12 +902,18 @@ button {
 
 /* Responsive */
 @media (max-width: 900px) {
-  .bento-storm { grid-column: span 2; }
-  .storm-grid { grid-template-columns: repeat(2, 1fr); }
+  .bento-storm {
+    grid-column: span 2;
+  }
+  .storm-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 500px) {
-  .storm-grid { grid-template-columns: 1fr; }
+  .storm-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- Hourly Temperature Chart ---------- */
@@ -846,6 +923,7 @@ button {
   flex-direction: column;
   gap: 16px;
   padding: 24px;
+  min-width: 0;
   min-height: 280px;
   height: 280px;
 }
@@ -873,9 +951,10 @@ button {
 
 .chart-body {
   flex: 1;
-  min-height: 200px;
+  min-width: 0;
+  min-height: 220px;
   width: 100%;
-  height: 200px;
+  height: 220px;
   position: relative;
 }
 
@@ -914,163 +993,170 @@ button {
 @media (max-width: 900px) {
   .bento-chart {
     grid-column: span 2;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
   }
 }
 
 /* ---------- Header actions wrapper ---------- */
 .app-header-actions {
   display: flex;
-    align-items: center;
-      gap: 10px;
-        flex-wrap: wrap;
-        }
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
-        /* ---------- City search ---------- */
-        .city-search {
-          position: relative;
-            width: 260px;
-            }
+/* ---------- City search ---------- */
+.city-search {
+  position: relative;
+  width: 260px;
+}
 
-            .city-search-input-wrap {
-              position: relative;
-                display: flex;
-                  align-items: center;
-                    background: var(--bg-card);
-                      backdrop-filter: blur(var(--blur));
-                        -webkit-backdrop-filter: blur(var(--blur));
-                          border: var(--border);
-                            border-radius: 999px;
-                              padding: 0 12px;
-                                transition: background 0.2s ease, border-color 0.2s ease;
-                                }
+.city-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: var(--border);
+  border-radius: 999px;
+  padding: 0 12px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
 
-                                .city-search-input-wrap:focus-within {
-                                  background: rgba(255, 255, 255, 0.18);
-                                    border-color: rgba(255, 255, 255, 0.4);
-                                    }
+.city-search-input-wrap:focus-within {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
 
-                                    .city-search-icon {
-                                      color: var(--text-muted);
-                                        flex-shrink: 0;
-                                        }
+.city-search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
 
-                                        .city-search-input {
-                                          flex: 1;
-                                            background: none;
-                                              border: none;
-                                                outline: none;
-                                                  padding: 10px 8px;
-                                                    font-family: inherit;
-                                                      font-size: 13px;
-                                                        color: var(--text);
-                                                          width: 100%;
-                                                          }
+.city-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 10px 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  width: 100%;
+}
 
-                                                          .city-search-input::metric-card {
-                                                            color: var(--text-dim);
-                                                            }
+.city-search-input::metric-card {
+  color: var(--text-dim);
+}
 
-                                                            .city-search-clear {
-                                                              display: flex;
-                                                                align-items: center;
-                                                                  justify-content: center;
-                                                                    color: var(--text-dim);
-                                                                      padding: 4px;
-                                                                        border-radius: 50%;
-                                                                          transition: color 0.2s ease, background 0.2s ease;
-                                                                          }
+.city-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  padding: 4px;
+  border-radius: 50%;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
 
-                                                                          .city-search-clear:hover {
-                                                                            color: var(--text);
-                                                                              background: rgba(255, 255, 255, 0.1);
-                                                                              }
+.city-search-clear:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+}
 
-                                                                              /* Dropdown */
-                                                                              .city-search-dropdown {
-                                                                                position: absolute;
-                                                                                  top: calc(100% + 6px);
-                                                                                    left: 0;
-                                                                                      right: 0;
-                                                                                        background: rgba(15, 23, 42, 0.92);
-                                                                                          backdrop-filter: blur(16px);
-                                                                                            -webkit-backdrop-filter: blur(16px);
-                                                                                              border: 1px solid rgba(255, 255, 255, 0.15);
-                                                                                                border-radius: 16px;
-                                                                                                  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-                                                                                                    overflow: hidden;
-                                                                                                      z-index: 50;
-                                                                                                        max-height: 320px;
-                                                                                                          overflow-y: auto;
-                                                                                                          }
+/* Dropdown */
+.city-search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  z-index: 50;
+  max-height: 320px;
+  overflow-y: auto;
+}
 
-                                                                                                          .city-search-state {
-                                                                                                            display: flex;
-                                                                                                              align-items: center;
-                                                                                                                gap: 8px;
-                                                                                                                  padding: 12px 16px;
-                                                                                                                    font-size: 13px;
-                                                                                                                      color: var(--text-muted);
-                                                                                                                      }
+.city-search-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
 
-                                                                                                                      .city-search-state--error {
-                                                                                                                        color: #f87171;
-                                                                                                                        }
+.city-search-state--error {
+  color: #f87171;
+}
 
-                                                                                                                        .city-search-spinner {
-                                                                                                                          animation: spin 0.8s linear infinite;
-                                                                                                                          }
+.city-search-spinner {
+  animation: spin 0.8s linear infinite;
+}
 
-                                                                                                                          .city-search-result {
-                                                                                                                            display: flex;
-                                                                                                                              align-items: center;
-                                                                                                                                gap: 10px;
-                                                                                                                                  width: 100%;
-                                                                                                                                    padding: 12px 16px;
-                                                                                                                                      text-align: left;
-                                                                                                                                        transition: background 0.15s ease;
-                                                                                                                                          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                                                                                                                                          }
+.city-search-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
 
-                                                                                                                                          .city-search-result:last-child {
-                                                                                                                                            border-bottom: none;
-                                                                                                                                            }
+.city-search-result:last-child {
+  border-bottom: none;
+}
 
-                                                                                                                                            .city-search-result:hover,
-                                                                                                                                            .city-search-result:focus {
-                                                                                                                                              background: rgba(255, 255, 255, 0.08);
-                                                                                                                                                outline: none;
-                                                                                                                                                }
+.city-search-result:hover,
+.city-search-result:focus {
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
 
-                                                                                                                                                .city-search-result-icon {
-                                                                                                                                                  color: var(--text-dim);
-                                                                                                                                                    flex-shrink: 0;
-                                                                                                                                                    }
+.city-search-result-icon {
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
 
-                                                                                                                                                    .city-search-result-text {
-                                                                                                                                                      flex: 1;
-                                                                                                                                                        min-width: 0;
-                                                                                                                                                        }
+.city-search-result-text {
+  flex: 1;
+  min-width: 0;
+}
 
-                                                                                                                                                        .city-search-result-name {
-                                                                                                                                                          font-size: 14px;
-                                                                                                                                                            font-weight: 600;
-                                                                                                                                                              color: var(--text);
-                                                                                                                                                                white-space: nowrap;
-                                                                                                                                                                  overflow: hidden;
-                                                                                                                                                                    text-overflow: ellipsis;
-                                                                                                                                                                    }
+.city-search-result-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-                                                                                                                                                                    .city-search-result-meta {
-                                                                                                                                                                      font-size: 11px;
-                                                                                                                                                                        color: var(--text-dim);
-                                                                                                                                                                          margin-top: 1px;
-                                                                                                                                                                          }
+.city-search-result-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
 
-                                                                                                                                                                          /* Responsive: shrink search on small screens */
-                                                                                                                                                                          @media (max-width: 700px) {
-                                                                                                                                                                            .city-search {
-                                                                                                                                                                                width: 100%;
-                                                                                                                                                                                    order: -1;          /* show search above the toggle on mobile */
-                                                                                                                                                                                        flex-basis: 100%;
-                                                                                                                                                                                          }
-                                                                                                                                                                                          }
+/* Responsive: shrink search on small screens */
+@media (max-width: 700px) {
+  .city-search {
+    width: 100%;
+    order: -1; /* show search above the toggle on mobile */
+    flex-basis: 100%;
+  }
+}
