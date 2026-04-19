@@ -71,8 +71,30 @@ a:focus-visible,
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  isolation: isolate;
+  background: #6366f1;
+}
+
+.app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: inherit;
+  pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
   transition: background 1.2s ease;
+}
+
+.app::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: inherit;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .app-inner {
@@ -120,6 +142,14 @@ a:focus-visible,
 
   .bento {
     gap: 12px;
+  }
+
+  .app::before {
+    position: absolute;
+  }
+
+  .app::after {
+    opacity: 0.12;
   }
 }
 
