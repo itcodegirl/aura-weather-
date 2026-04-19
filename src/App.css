@@ -242,6 +242,31 @@ button {
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
 }
 
+.weather-icon {
+  display: block;
+}
+
+.weather-icon--animated {
+  animation: weather-icon-float 5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes weather-icon-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-icon--animated {
+    animation: none;
+  }
+}
+
 .hero-temp {
   font-size: 96px;
   font-weight: 200;
