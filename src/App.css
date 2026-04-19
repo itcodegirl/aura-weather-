@@ -35,6 +35,11 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 /* ---------- App shell ---------- */
 .app {
   position: relative;
@@ -150,6 +155,10 @@ button {
 .unit-btn.is-active {
   background: #fff;
   color: #0f172a;
+}
+
+.unit-btn:focus-visible {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(14, 165, 233, 0.8);
 }
 
 /* ---------- Bento grid ---------- */
