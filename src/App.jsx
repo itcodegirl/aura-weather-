@@ -38,7 +38,7 @@ function App() {
     return (
       <div className="app app--error">
         <div className="error-card">
-          <h2>Something went sideways</h2>
+          <h1>Something went sideways</h1>
           <p>{error}</p>
         </div>
       </div>

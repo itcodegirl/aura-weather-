@@ -26,11 +26,12 @@ function StormRisk({ weather }) {
       <div
         className="storm-level"
         style={{ color: risk.color }}
-        aria-label={stormRiskSummary}
+        aria-label={risk.level}
+        aria-describedby="storm-risk-summary"
       >
         {risk.level}
       </div>
-      <div className="storm-risk-accessibility">
+      <div id="storm-risk-summary" className="storm-risk-accessibility">
         {stormRiskSummary}
       </div>
       <div className="storm-risk-meter" aria-hidden="true">
@@ -103,6 +104,7 @@ function PressureTrend({ weather }) {
         aria-label={trendLabel}
       >
         <title>{trendLabel}</title>
+        <desc>{trendLabel}</desc>
         <polyline
           points={points}
           fill="none"
