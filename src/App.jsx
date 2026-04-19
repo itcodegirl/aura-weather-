@@ -18,6 +18,38 @@ function App() {
     [unit]
   );
 
+  const getAqiStatus = (aqi) => {
+    if (aqi === null || aqi === undefined) {
+      return { label: "", color: "rgba(148, 163, 184, 0.92)" };
+    }
+    if (aqi <= 50) {
+      return { label: "Good", color: "#22c55e" };
+    }
+    if (aqi <= 100) {
+      return { label: "Moderate", color: "#eab308" };
+    }
+    return { label: "Unhealthy", color: "#ef4444" };
+  };
+
+  const getUvStatus = (uv) => {
+    if (uv === null || uv === undefined) {
+      return { label: "", color: "rgba(148, 163, 184, 0.92)" };
+    }
+    if (uv <= 2) {
+      return { label: "Low", color: "#22c55e" };
+    }
+    if (uv <= 5) {
+      return { label: "Moderate", color: "#eab308" };
+    }
+    if (uv <= 7) {
+      return { label: "High", color: "#f97316" };
+    }
+    if (uv <= 10) {
+      return { label: "Very High", color: "#f43f5e" };
+    }
+    return { label: "Extreme", color: "#7f1d1d" };
+  };
+
   if (loading) {
     return (
       <div className="app app--loading">
@@ -28,7 +60,7 @@ function App() {
           aria-label="Loading weather data"
         >
           <div className="loader-spinner" />
-          <p className="loader-text">Fetching atmosphere…</p>
+          <p className="loader-text">Fetching atmosphere{"\u2026"}</p>
         </div>
       </div>
     );
@@ -48,6 +80,8 @@ function App() {
   const weatherInfo = getWeather(weather.current.weather_code);
   const background = gradientCss(weatherInfo.gradient);
   const uvToday = weather.daily?.uv_index_max?.[0];
+  const aqiStatus = getAqiStatus(weather.aqi);
+  const uvStatus = getUvStatus(uvToday);
 
   return (
     <div className="app" style={{ background }}>
@@ -78,14 +112,14 @@ function App() {
                 className={`unit-btn ${unit === "F" ? "is-active" : ""}`}
                 aria-pressed={unit === "F"}
               >
-                °F
+                {"\u00B0F"}
               </button>
               <button
                 onClick={() => setUnit("C")}
                 className={`unit-btn ${unit === "C" ? "is-active" : ""}`}
                 aria-pressed={unit === "C"}
               >
-                °C
+                {"\u00B0C"}
               </button>
             </div>
           </div>
@@ -102,15 +136,27 @@ function App() {
           <section className="bento-aqi metric-card">
             <span className="metric-label">Air Quality</span>
             <span className="metric-value">
-              {weather.aqi != null ? weather.aqi : "—"}
+              {weather.aqi != null ? weather.aqi : "\u2014"}
             </span>
+            {aqiStatus.label && (
+              <span className="metric-pill" style={{ "--status-color": aqiStatus.color }}>
+                <span className="metric-dot" />
+                <span>{aqiStatus.label}</span>
+              </span>
+            )}
           </section>
 
           <section className="bento-uv metric-card">
             <span className="metric-label">UV Index</span>
             <span className="metric-value">
-              {uvToday != null ? uvToday.toFixed(1) : "—"}
+              {uvToday != null ? uvToday.toFixed(1) : "\u2014"}
             </span>
+            {uvStatus.label && (
+              <span className="metric-pill" style={{ "--status-color": uvStatus.color }}>
+                <span className="metric-dot" />
+                <span>{uvStatus.label}</span>
+              </span>
+            )}
           </section>
 
           <RainCard weather={weather} />
