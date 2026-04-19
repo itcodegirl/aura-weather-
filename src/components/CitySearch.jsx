@@ -102,6 +102,7 @@ export default function CitySearch({ onSelect }) {
   const handleKeyDown = (event) => {
     if (event.key === "Escape") {
       setOpen(false);
+      setActiveIndex(-1);
       inputRef.current?.blur();
       return;
     }
@@ -155,9 +156,7 @@ export default function CitySearch({ onSelect }) {
   };
 
   const activeDescendant =
-    activeIndex >= 0
-      ? `city-search-option-${activeIndex}`
-      : undefined;
+    showDropdown && activeIndex >= 0 ? `city-search-option-${activeIndex}` : undefined;
 
   return (
     <div className="city-search" ref={containerRef}>
@@ -170,12 +169,13 @@ export default function CitySearch({ onSelect }) {
           onChange={handleChange}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search cityâ€¦"
+          placeholder="Search city..."
           className="city-search-input"
           aria-label="Search for a city"
           aria-expanded={showDropdown}
           aria-controls="city-search-results"
           aria-autocomplete="list"
+          aria-haspopup="listbox"
           role="combobox"
           aria-activedescendant={activeDescendant}
           autoComplete="off"
@@ -200,20 +200,27 @@ export default function CitySearch({ onSelect }) {
           aria-label="City suggestions"
         >
           {loading && (
-            <li className="city-search-state">
+            <li
+              className="city-search-state"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               <Loader2 size={14} className="city-search-spinner" />
-              <span>Searchingâ€¦</span>
+              <span>Searching...</span>
             </li>
           )}
 
           {!loading && error && (
-            <li className="city-search-state city-search-state--error">
+            <li className="city-search-state city-search-state--error" role="status">
               {error}
             </li>
           )}
 
           {!loading && !error && results.length === 0 && query.length >= 2 && (
-            <li className="city-search-state">No cities found</li>
+            <li className="city-search-state" role="status">
+              No cities found
+            </li>
           )}
 
           {!loading &&
@@ -223,9 +230,8 @@ export default function CitySearch({ onSelect }) {
                 id={`city-search-option-${index}`}
                 role="option"
                 aria-selected={index === activeIndex}
-                className={`city-search-result${
-                  index === activeIndex ? " is-active" : ""
-                }`}
+                tabIndex={-1}
+                className={`city-search-result${index === activeIndex ? " is-active" : ""}`}
                 onMouseMove={() => setActiveIndex(index)}
                 onMouseDown={(event) => {
                   event.preventDefault();
@@ -237,7 +243,7 @@ export default function CitySearch({ onSelect }) {
                   <div className="city-search-result-name">{city.name}</div>
                   <div className="city-search-result-meta">
                     {city.admin1 && <span>{city.admin1}</span>}
-                    {city.admin1 && city.country && <span> Â· </span>}
+                    {city.admin1 && city.country && <span> � </span>}
                     {city.country && <span>{city.country}</span>}
                   </div>
                 </div>
@@ -248,3 +254,4 @@ export default function CitySearch({ onSelect }) {
     </div>
   );
 }
+
