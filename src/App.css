@@ -113,17 +113,6 @@ a:focus-visible,
   }
 }
 
-@media (prefers-reduced-motion: reduce), (max-width: 500px) {
-  .ambient-blob {
-    animation: none;
-    filter: blur(12px);
-  }
-
-  :root {
-    --card-backdrop-blur: 4px;
-  }
-}
-
 @media (max-width: 500px) {
   :root {
     --card-backdrop-blur: 10px;
@@ -131,6 +120,17 @@ a:focus-visible,
 
   .bento {
     gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob {
+    animation: none;
+    filter: blur(12px);
+  }
+
+  :root {
+    --card-backdrop-blur: 4px;
   }
 }
 
