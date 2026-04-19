@@ -17,7 +17,7 @@ function DayRow({ day, weekMin, weekMax, convertTemp }) {
   const endPct = ((day.temp_max - weekMin) / weekRange) * 100;
 
   return (
-    <div className="forecast-row">
+    <div className="forecast-row" role="listitem">
       <div className="forecast-day">{label}</div>
 
       <div className="forecast-icon" aria-label={info.label}>
