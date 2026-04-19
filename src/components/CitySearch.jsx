@@ -11,6 +11,7 @@ export default function CitySearch({ onSelect }) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   const containerRef = useRef(null);
   const inputRef = useRef(null);
@@ -34,6 +35,16 @@ export default function CitySearch({ onSelect }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const showDropdown = open && (loading || results.length > 0 || error);
+
+  useEffect(() => {
+    if (!showDropdown || results.length === 0) {
+      setActiveIndex(-1);
+      return;
+    }
+    setActiveIndex((prev) => (prev < 0 ? 0 : Math.min(prev, results.length - 1)));
+  }, [showDropdown, results]);
+
   const runSearch = async (term) => {
     const currentRequest = ++requestIdRef.current;
     setLoading(true);
@@ -56,6 +67,7 @@ export default function CitySearch({ onSelect }) {
     const nextQuery = event.target.value;
     setQuery(nextQuery);
     setOpen(true);
+    setActiveIndex(-1);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -83,6 +95,7 @@ export default function CitySearch({ onSelect }) {
     setQuery("");
     setResults([]);
     setOpen(false);
+    setActiveIndex(-1);
     inputRef.current?.blur();
   };
 
@@ -90,9 +103,42 @@ export default function CitySearch({ onSelect }) {
     if (event.key === "Escape") {
       setOpen(false);
       inputRef.current?.blur();
-    } else if (event.key === "Enter" && results.length > 0) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      if (results.length === 0) return;
       event.preventDefault();
-      handleSelect(results[0]);
+      if (!showDropdown) {
+        setOpen(true);
+        setActiveIndex(0);
+        return;
+      }
+      setActiveIndex((prev) =>
+        prev < 0 ? 0 : Math.min(prev + 1, results.length - 1)
+      );
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      if (results.length === 0) return;
+      event.preventDefault();
+      if (!showDropdown) {
+        setOpen(true);
+        setActiveIndex(results.length - 1);
+        return;
+      }
+      setActiveIndex((prev) => Math.max(prev - 1, 0));
+      return;
+    }
+
+    if (event.key === "Enter" && results.length > 0) {
+      event.preventDefault();
+      const targetIndex = activeIndex >= 0 ? activeIndex : 0;
+      const city = results[targetIndex];
+      if (city) {
+        handleSelect(city);
+      }
     }
   };
 
@@ -104,10 +150,14 @@ export default function CitySearch({ onSelect }) {
     setResults([]);
     setError(null);
     setLoading(false);
+    setActiveIndex(-1);
     inputRef.current?.focus();
   };
 
-  const showDropdown = open && (loading || results.length > 0 || error);
+  const activeDescendant =
+    activeIndex >= 0
+      ? `city-search-option-${activeIndex}`
+      : undefined;
 
   return (
     <div className="city-search" ref={containerRef}>
@@ -120,11 +170,14 @@ export default function CitySearch({ onSelect }) {
           onChange={handleChange}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search city…"
+          placeholder="Search cityâ€¦"
           className="city-search-input"
           aria-label="Search for a city"
           aria-expanded={showDropdown}
           aria-controls="city-search-results"
+          aria-autocomplete="list"
+          role="combobox"
+          aria-activedescendant={activeDescendant}
           autoComplete="off"
         />
         {query && (
@@ -140,48 +193,57 @@ export default function CitySearch({ onSelect }) {
       </div>
 
       {showDropdown && (
-        <div
+        <ul
           id="city-search-results"
           className="city-search-dropdown"
           role="listbox"
+          aria-label="City suggestions"
         >
           {loading && (
-            <div className="city-search-state">
+            <li className="city-search-state">
               <Loader2 size={14} className="city-search-spinner" />
-              <span>Searching…</span>
-            </div>
+              <span>Searchingâ€¦</span>
+            </li>
           )}
 
           {!loading && error && (
-            <div className="city-search-state city-search-state--error">
+            <li className="city-search-state city-search-state--error">
               {error}
-            </div>
+            </li>
           )}
 
           {!loading && !error && results.length === 0 && query.length >= 2 && (
-            <div className="city-search-state">No cities found</div>
+            <li className="city-search-state">No cities found</li>
           )}
 
           {!loading &&
-            results.map((city) => (
-              <button
+            results.map((city, index) => (
+              <li
                 key={`${city.latitude}-${city.longitude}-${city.id || city.name}`}
-                onClick={() => handleSelect(city)}
-                className="city-search-result"
+                id={`city-search-option-${index}`}
                 role="option"
+                aria-selected={index === activeIndex}
+                className={`city-search-result${
+                  index === activeIndex ? " is-active" : ""
+                }`}
+                onMouseMove={() => setActiveIndex(index)}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  handleSelect(city);
+                }}
               >
                 <MapPin size={14} className="city-search-result-icon" />
                 <div className="city-search-result-text">
                   <div className="city-search-result-name">{city.name}</div>
                   <div className="city-search-result-meta">
                     {city.admin1 && <span>{city.admin1}</span>}
-                    {city.admin1 && city.country && <span> · </span>}
+                    {city.admin1 && city.country && <span> Â· </span>}
                     {city.country && <span>{city.country}</span>}
                   </div>
                 </div>
-              </button>
+              </li>
             ))}
-        </div>
+        </ul>
       )}
     </div>
   );
