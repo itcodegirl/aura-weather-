@@ -1,7 +1,15 @@
 // src/components/HourlyCard.jsx
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Area, AreaChart, ReferenceLine, Tooltip, XAxis, YAxis } from "recharts";
+import { useMemo } from "react";
+import {
+  Area,
+  AreaChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { LineChart as LineIcon } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
 import "./HourlyCard.css";
@@ -40,7 +48,9 @@ function ChartTooltip({ active, payload, unit }) {
     <div className="chart-tooltip">
       <div className="chart-tooltip-time">{data.label}</div>
       <div className="chart-tooltip-temp">
-        {data.temp}°{unit}
+        {data.temp}
+        {"\u00B0"}
+        {unit}
       </div>
       <div className="chart-tooltip-condition">{info.label}</div>
     </div>
@@ -48,36 +58,11 @@ function ChartTooltip({ active, payload, unit }) {
 }
 
 export default function HourlyCard({ weather, unit, convertTemp }) {
-  const chartBodyRef = useRef(null);
-  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
   const hourlyData = useMemo(() => buildHourlyData(weather?.hourly, convertTemp), [
     weather?.hourly,
     convertTemp,
   ]);
   const data = hourlyData;
-
-  useEffect(() => {
-    const element = chartBodyRef.current;
-    if (!element) return undefined;
-
-    const updateSize = () => {
-      const nextWidth = Math.floor(element.clientWidth);
-      const nextHeight = Math.floor(element.clientHeight);
-
-      setChartSize((current) =>
-        current.width === nextWidth && current.height === nextHeight
-          ? current
-          : { width: nextWidth, height: nextHeight }
-      );
-    };
-
-    updateSize();
-
-    const observer = new ResizeObserver(updateSize);
-    observer.observe(element);
-
-    return () => observer.disconnect();
-  }, []);
 
   if (!data.length) {
     return (
@@ -102,7 +87,6 @@ export default function HourlyCard({ weather, unit, convertTemp }) {
   const minTemp = Math.floor(Math.min(...temps) - 2);
   const maxTemp = Math.ceil(Math.max(...temps) + 2);
   const nowLabel = data[0]?.label;
-  const canRenderChart = chartSize.width > 0 && chartSize.height > 0;
 
   return (
     <section className="bento-chart hourly-chart">
@@ -114,11 +98,9 @@ export default function HourlyCard({ weather, unit, convertTemp }) {
         <span className="chart-subtitle">Next 24 hours</span>
       </header>
 
-      <div className="chart-body" ref={chartBodyRef}>
-        {canRenderChart ? (
+      <div className="chart-body">
+        <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            width={chartSize.width}
-            height={chartSize.height}
             data={data}
             margin={{ top: 20, right: 16, left: 0, bottom: 0 }}
           >
@@ -146,7 +128,7 @@ export default function HourlyCard({ weather, unit, convertTemp }) {
               axisLine={false}
               tickLine={false}
               width={32}
-              tickFormatter={(value) => `${value}°`}
+              tickFormatter={(value) => `${value}\u00B0`}
             />
 
             <Tooltip
@@ -185,7 +167,7 @@ export default function HourlyCard({ weather, unit, convertTemp }) {
               }}
             />
           </AreaChart>
-        ) : null}
+        </ResponsiveContainer>
       </div>
     </section>
   );
