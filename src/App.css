@@ -91,6 +91,7 @@ a:focus-visible,
   background: rgba(255, 255, 255, 0.12);
   filter: blur(32px);
   will-change: transform;
+  transform: translateZ(0);
   pointer-events: none;
   animation: drift 8s ease-in-out infinite;
 }
@@ -112,7 +113,7 @@ a:focus-visible,
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce), (max-width: 500px) {
   .ambient-blob {
     animation: none;
     filter: blur(12px);
