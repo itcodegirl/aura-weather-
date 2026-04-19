@@ -6,7 +6,7 @@ A sophisticated weather dashboard with a bento-grid layout, weather-reactive gra
 
 
 
-![Aura screenshot placeholder](./public/screenshot.png)
+![Aura screenshot metric-card](./public/screenshot.png)
 
 
 
