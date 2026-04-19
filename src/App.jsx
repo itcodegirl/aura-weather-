@@ -6,7 +6,7 @@ import HeroCard from "./components/HeroCard";
 import RainCard from "./components/RainCard";
 import ForecastCard from "./components/ForecastCard";
 import StormWatch from "./components/StormWatch";
-import HourlyChart from "./components/HourlyChart";
+import HourlyCard from "./components/HourlyCard";
 
 function App() {
   const { weather, location, loading, error } = useWeather();
@@ -98,13 +98,13 @@ function App() {
 
           <RainCard weather={weather} />
 
+          <HourlyCard weather={weather} unit={unit} convertTemp={convertTemp} />
+
           <StormWatch
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
             />
-
-          <HourlyChart weather={weather} unit={unit} convertTemp={convertTemp} />
 
           <ForecastCard
             weather={weather}

@@ -9,7 +9,7 @@ import {
   classifyWind,
 } from "../utils/meteorology";
 
-// ---------- Sub-modules ----------
+// ---------- Sub-modules ---------F-
 
 function StormRisk({ weather }) {
   const cape = weather.hourly.cape?.[0] || 0;

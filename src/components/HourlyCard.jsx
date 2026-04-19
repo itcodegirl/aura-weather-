@@ -1,44 +1,42 @@
-// src/components/HourlyChart.jsx
-
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
 } from "recharts";
 import { LineChart as LineIcon } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
 
-/**
- * Builds a clean array of { time, temp, code } for the next 24 hours,
- * starting from the current hour.
- */
 function buildHourlyData(hourly, convertTemp) {
+  if (!hourly?.time?.length || !hourly?.temperature_2m?.length) {
+    return [];
+  }
+
   const now = new Date();
   const startIdx = hourly.time.findIndex((t) => new Date(t) >= now);
   const idx = startIdx === -1 ? 0 : startIdx;
 
   return hourly.time.slice(idx, idx + 24).map((t, i) => {
     const date = new Date(t);
+
     return {
       time: date,
-      label: date.toLocaleTimeString("en-US", { hour: "numeric", hour12: true }),
-      shortLabel: date.toLocaleTimeString("en-US", { hour: "numeric", hour12: true }).replace(" ", ""),
+      label: date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        hour12: true,
+      }),
       temp: convertTemp(hourly.temperature_2m[idx + i]),
-      code: hourly.weather_code[idx + i],
+      code: hourly.weather_code?.[idx + i] ?? 0,
     };
   });
 }
 
-/**
- * Custom tooltip shown on hover.
- * Much cleaner than Recharts' default styling.
- */
 function ChartTooltip({ active, payload, unit }) {
   if (!active || !payload?.length) return null;
+
   const data = payload[0].payload;
   const info = getWeather(data.code);
 
@@ -53,18 +51,31 @@ function ChartTooltip({ active, payload, unit }) {
   );
 }
 
-export default function HourlyChart({ weather, unit, convertTemp }) {
-  const data = buildHourlyData(weather.hourly, convertTemp);
+export default function HourlyCard({ weather, unit, convertTemp }) {
+  const data = buildHourlyData(weather?.hourly, convertTemp);
 
-  // Only show every 3rd X-axis label for breathing room
+  if (!data.length) {
+    return (
+      <section className="bento-chart hourly-chart">
+        <header className="chart-header">
+          <div className="chart-title">
+            <LineIcon size={16} />
+            <span>Hourly Temperature</span>
+          </div>
+          <span className="chart-subtitle">Next 24 hours</span>
+        </header>
+
+        <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
+          <p className="loader-text">Hourly outlook unavailable.</p>
+        </div>
+      </section>
+    );
+  }
+
   const xTicks = data.filter((_, i) => i % 3 === 0).map((d) => d.label);
-
-  // Compute min/max so Y-axis padding looks intentional
   const temps = data.map((d) => d.temp);
   const minTemp = Math.floor(Math.min(...temps) - 2);
   const maxTemp = Math.ceil(Math.max(...temps) + 2);
-
-  // Current hour marker — always the first data point
   const nowLabel = data[0]?.label;
 
   return (
@@ -79,10 +90,7 @@ export default function HourlyChart({ weather, unit, convertTemp }) {
 
       <div className="chart-body">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{ top: 20, right: 16, left: 0, bottom: 0 }}
-          >
+          <AreaChart data={data} margin={{ top: 20, right: 16, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.7} />
@@ -107,7 +115,7 @@ export default function HourlyChart({ weather, unit, convertTemp }) {
               axisLine={false}
               tickLine={false}
               width={32}
-              tickFormatter={(v) => `${v}°`}
+              tickFormatter={(value) => `${value}°`}
             />
 
             <Tooltip
