@@ -198,6 +198,11 @@ function ComfortIndex({ weather, unit, convertTemp }) {
   );
 }
 
+const MemoizedStormRisk = memo(StormRisk);
+const MemoizedPressureTrend = memo(PressureTrend);
+const MemoizedWindIntelligence = memo(WindIntelligence);
+const MemoizedComfortIndex = memo(ComfortIndex);
+
 function StormWatch({ weather, unit, convertTemp }) {
   return (
     <section className="bento-storm storm-watch">
@@ -210,10 +215,17 @@ function StormWatch({ weather, unit, convertTemp }) {
       </header>
 
       <div className="storm-grid">
-        <StormRisk weather={weather} />
-        <PressureTrend weather={weather} />
-        <WindIntelligence weather={weather} unit={unit} />
-        <ComfortIndex weather={weather} unit={unit} convertTemp={convertTemp} />
+        <MemoizedStormRisk weather={weather} />
+        <MemoizedPressureTrend weather={weather} />
+        <MemoizedWindIntelligence
+          weather={weather}
+          unit={unit}
+        />
+        <MemoizedComfortIndex
+          weather={weather}
+          unit={unit}
+          convertTemp={convertTemp}
+        />
       </div>
     </section>
   );
