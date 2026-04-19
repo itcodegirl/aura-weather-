@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Area, AreaChart, ReferenceLine, Tooltip, XAxis, YAxis } from "recharts";
 import { LineChart as LineIcon } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
@@ -44,7 +45,32 @@ function ChartTooltip({ active, payload, unit }) {
 }
 
 export default function HourlyCard({ weather, unit, convertTemp }) {
+  const chartBodyRef = useRef(null);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
   const data = buildHourlyData(weather?.hourly, convertTemp);
+
+  useEffect(() => {
+    const element = chartBodyRef.current;
+    if (!element) return undefined;
+
+    const updateSize = () => {
+      const nextWidth = Math.floor(element.clientWidth);
+      const nextHeight = Math.floor(element.clientHeight);
+
+      setChartSize((current) =>
+        current.width === nextWidth && current.height === nextHeight
+          ? current
+          : { width: nextWidth, height: nextHeight }
+      );
+    };
+
+    updateSize();
+
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
 
   if (!data.length) {
     return (
@@ -69,6 +95,7 @@ export default function HourlyCard({ weather, unit, convertTemp }) {
   const minTemp = Math.floor(Math.min(...temps) - 2);
   const maxTemp = Math.ceil(Math.max(...temps) + 2);
   const nowLabel = data[0]?.label;
+  const canRenderChart = chartSize.width > 0 && chartSize.height > 0;
 
   return (
     <section className="bento-chart hourly-chart">
@@ -80,76 +107,78 @@ export default function HourlyCard({ weather, unit, convertTemp }) {
         <span className="chart-subtitle">Next 24 hours</span>
       </header>
 
-      <div className="chart-body">
-        <AreaChart
-          data={data}
-          responsive
-          style={{ width: "100%", height: "100%", minWidth: 0, minHeight: 220 }}
-          margin={{ top: 20, right: 16, left: 0, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.7} />
-              <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
-            </linearGradient>
-          </defs>
+      <div className="chart-body" ref={chartBodyRef}>
+        {canRenderChart ? (
+          <AreaChart
+            width={chartSize.width}
+            height={chartSize.height}
+            data={data}
+            margin={{ top: 20, right: 16, left: 0, bottom: 0 }}
+          >
+            <defs>
+              <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.7} />
+                <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
+              </linearGradient>
+            </defs>
 
-          <XAxis
-            dataKey="label"
-            ticks={xTicks}
-            interval={0}
-            stroke="rgba(255,255,255,0.35)"
-            tick={{ fontSize: 10, fill: "rgba(255,255,255,0.65)" }}
-            axisLine={false}
-            tickLine={false}
-          />
+            <XAxis
+              dataKey="label"
+              ticks={xTicks}
+              interval={0}
+              stroke="rgba(255,255,255,0.35)"
+              tick={{ fontSize: 10, fill: "rgba(255,255,255,0.65)" }}
+              axisLine={false}
+              tickLine={false}
+            />
 
-          <YAxis
-            domain={[minTemp, maxTemp]}
-            stroke="rgba(255,255,255,0.35)"
-            tick={{ fontSize: 10, fill: "rgba(255,255,255,0.65)" }}
-            axisLine={false}
-            tickLine={false}
-            width={32}
-            tickFormatter={(value) => `${value}°`}
-          />
+            <YAxis
+              domain={[minTemp, maxTemp]}
+              stroke="rgba(255,255,255,0.35)"
+              tick={{ fontSize: 10, fill: "rgba(255,255,255,0.65)" }}
+              axisLine={false}
+              tickLine={false}
+              width={32}
+              tickFormatter={(value) => `${value}°`}
+            />
 
-          <Tooltip
-            content={<ChartTooltip unit={unit} />}
-            cursor={{
-              stroke: "rgba(255,255,255,0.3)",
-              strokeDasharray: "4 4",
-            }}
-          />
+            <Tooltip
+              content={<ChartTooltip unit={unit} />}
+              cursor={{
+                stroke: "rgba(255,255,255,0.3)",
+                strokeDasharray: "4 4",
+              }}
+            />
 
-          <ReferenceLine
-            x={nowLabel}
-            stroke="rgba(255,255,255,0.4)"
-            strokeDasharray="3 3"
-            label={{
-              value: "Now",
-              position: "top",
-              fill: "rgba(255,255,255,0.75)",
-              fontSize: 10,
-              fontWeight: 600,
-            }}
-          />
+            <ReferenceLine
+              x={nowLabel}
+              stroke="rgba(255,255,255,0.4)"
+              strokeDasharray="3 3"
+              label={{
+                value: "Now",
+                position: "top",
+                fill: "rgba(255,255,255,0.75)",
+                fontSize: 10,
+                fontWeight: 600,
+              }}
+            />
 
-          <Area
-            type="monotone"
-            dataKey="temp"
-            stroke="#fbbf24"
-            strokeWidth={2.5}
-            fill="url(#tempGradient)"
-            dot={false}
-            activeDot={{
-              r: 5,
-              fill: "#fff",
-              stroke: "#fbbf24",
-              strokeWidth: 2,
-            }}
-          />
-        </AreaChart>
+            <Area
+              type="monotone"
+              dataKey="temp"
+              stroke="#fbbf24"
+              strokeWidth={2.5}
+              fill="url(#tempGradient)"
+              dot={false}
+              activeDot={{
+                r: 5,
+                fill: "#fff",
+                stroke: "#fbbf24",
+                strokeWidth: 2,
+              }}
+            />
+          </AreaChart>
+        ) : null}
       </div>
     </section>
   );
