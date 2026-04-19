@@ -43,7 +43,7 @@ function App() {
   const weatherInfo = getWeather(weather.current.weather_code);
   const background = gradientCss(weatherInfo.gradient);
 
-  const uvToday = weather.daily.uv_index_max[0];
+  const uvToday = weather.daily?.uv_index_max?.[0];
 
   return (
     <div className="app" style={{ background }}>
@@ -91,19 +91,19 @@ function App() {
             convertTemp={convertTemp}
           />
 
-          <section className="bento-aqi placeholder">
-            <span className="placeholder-label">Air Quality</span>
-            <span className="placeholder-value">
-              {weather.aqi != null ? weather.aqi : "—"}
-            </span>
-          </section>
+          <section className="bento-aqi metric-card">
+  <span className="metric-label">Air Quality</span>
+  <span className="metric-value">
+    {weather.aqi != null ? weather.aqi : "—"}
+  </span>
+</section>
 
-          <section className="bento-uv placeholder">
-            <span className="placeholder-label">UV Index</span>
-            <span className="placeholder-value">
-              {uvToday != null ? uvToday.toFixed(1) : "—"}
-            </span>
-          </section>
+<section className="bento-uv metric-card">
+  <span className="metric-label">UV Index</span>
+  <span className="metric-value">
+    {uvToday != null ? uvToday.toFixed(1) : "—"}
+  </span>
+</section>
 
           <RainCard weather={weather} />
 
