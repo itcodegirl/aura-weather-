@@ -51,6 +51,10 @@ function App() {
 
   return (
     <div className="app" style={{ background }}>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       <div className="ambient-blob ambient-blob--tl" />
       <div className="ambient-blob ambient-blob--br" />
 
@@ -87,7 +91,7 @@ function App() {
           </div>
         </header>
 
-        <main className="bento">
+        <main className="bento" id="main-content">
           <HeroCard
             weather={weather}
             location={location}

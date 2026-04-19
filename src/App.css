@@ -40,6 +40,26 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
+.skip-link {
+  position: absolute;
+  z-index: 20;
+  top: 12px;
+  left: 12px;
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  text-decoration: none;
+  color: #0f172a;
+  background: #ffffff;
+  transform: translateY(-140%);
+  transition: transform 0.18s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 /* ---------- App shell ---------- */
 .app {
   position: relative;
@@ -276,6 +296,11 @@ button:focus-visible {
 }
 
 .error-card h2 {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.error-card h1 {
   margin-bottom: 8px;
   font-size: 20px;
 }
