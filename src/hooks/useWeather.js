@@ -1,9 +1,13 @@
 // src/hooks/useWeather.js
 
 import { useState, useEffect, useCallback } from "react";
-import { fetchWeather, fetchAirQuality, reverseGeocode } from "../services/weatherApi";
+import {
+  fetchWeather,
+  fetchAirQuality,
+  reverseGeocode,
+} from "../services/weatherApi";
 
-// Chicago fallback — your home city
+// Chicago fallback — Aura's default when geolocation isn't available
 const DEFAULT_LOCATION = {
   lat: 41.8781,
   lon: -87.6298,
@@ -37,7 +41,19 @@ export function useWeather() {
 
   // On mount: try geolocation, fall back to Chicago
   useEffect(() => {
+    // Hard safety net — if geolocation hangs silently, fall back after 6s
+    const fallbackTimer = setTimeout(() => {
+      loadWeather(
+        DEFAULT_LOCATION.lat,
+        DEFAULT_LOCATION.lon,
+        DEFAULT_LOCATION.name,
+        DEFAULT_LOCATION.country
+      );
+    }, 6000);
+
     if (!navigator.geolocation) {
+      clearTimeout(fallbackTimer);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- idiomatic mount-time data fetch; no user event to respond to
       loadWeather(
         DEFAULT_LOCATION.lat,
         DEFAULT_LOCATION.lon,
@@ -49,16 +65,18 @@ export function useWeather() {
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        clearTimeout(fallbackTimer);
         const { latitude, longitude } = pos.coords;
         const place = await reverseGeocode(latitude, longitude);
         loadWeather(
           latitude,
           longitude,
-          place?.name || "Your Location",
+          place?.name || `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}°`,
           place?.country || ""
         );
       },
       () => {
+        clearTimeout(fallbackTimer);
         // User denied geolocation — use fallback
         loadWeather(
           DEFAULT_LOCATION.lat,
@@ -69,6 +87,8 @@ export function useWeather() {
       },
       { timeout: 5000 }
     );
+
+    return () => clearTimeout(fallbackTimer);
   }, [loadWeather]);
 
   return { weather, location, loading, error, loadWeather };
