@@ -60,14 +60,25 @@ export default function ForecastCard({ weather, unit, convertTemp }) {
   const daily = weather.daily;
 
   // Build a clean array of 7 days
-  const days = daily.time.map((date, i) => ({
+  // Build a clean array, filtering out any days before today
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const days = daily.time
+  .map((date, i) => ({
     date,
     weather_code: daily.weather_code[i],
     temp_max: daily.temperature_2m_max[i],
     temp_min: daily.temperature_2m_min[i],
     precipitation_probability_max: daily.precipitation_probability_max[i] || 0,
     precipitation_sum: daily.precipitation_sum?.[i] || 0,
-  }));
+  }))
+  .filter((day) => {
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+    return dayDate >= today;
+  })
+  .slice(0, 7);
 
   // Week-wide min/max for range bar normalization
   const weekMin = Math.min(...days.map((d) => d.temp_min));
