@@ -1,5 +1,6 @@
 // src/components/HeroCard.jsx
 
+import { memo } from "react";
 import { MapPin, Wind, Droplets, Gauge, Eye } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
 import WeatherIcon from "./WeatherIcon";
@@ -17,7 +18,7 @@ function Stat({ icon, label, value }) {
   );
 }
 
-export default function HeroCard({ weather, location, unit, convertTemp }) {
+function HeroCard({ weather, location, unit, convertTemp }) {
   const current = weather.current;
   const info = getWeather(current.weather_code);
   const tempUnit = unit === "F" ? "°F" : "°C";
@@ -93,3 +94,5 @@ export default function HeroCard({ weather, location, unit, convertTemp }) {
     </section>
   );
 }
+
+export default memo(HeroCard);

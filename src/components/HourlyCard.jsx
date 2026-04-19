@@ -1,6 +1,6 @@
 // src/components/HourlyCard.jsx
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -57,7 +57,7 @@ function ChartTooltip({ active, payload, unit }) {
   );
 }
 
-export default function HourlyCard({ weather, unit, convertTemp }) {
+function HourlyCard({ weather, unit, convertTemp }) {
   const hourlyData = useMemo(() => buildHourlyData(weather?.hourly, convertTemp), [
     weather?.hourly,
     convertTemp,
@@ -172,3 +172,5 @@ export default function HourlyCard({ weather, unit, convertTemp }) {
     </section>
   );
 }
+
+export default memo(HourlyCard);

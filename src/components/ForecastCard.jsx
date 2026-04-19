@@ -1,5 +1,6 @@
 // src/components/ForecastCard.jsx
 
+import { memo } from "react";
 import { CalendarDays, Droplets } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
 import { formatDayLabel, parseLocalDate } from "../utils/dates";
@@ -59,7 +60,7 @@ function DayRow({ day, weekMin, weekMax, convertTemp }) {
   );
 }
 
-export default function ForecastCard({ weather, convertTemp }) {
+function ForecastCard({ weather, convertTemp }) {
   const daily = weather.daily;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -107,3 +108,5 @@ export default function ForecastCard({ weather, convertTemp }) {
     </section>
   );
 }
+
+export default memo(ForecastCard);
