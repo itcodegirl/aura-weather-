@@ -20,6 +20,7 @@ export async function fetchWeather(lat, lon) {
       "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum",
     temperature_unit: "fahrenheit",
     wind_speed_unit: "mph",
+    precipitation_unit: "inch",
     timezone: "auto",
     forecast_days: "7",
   });

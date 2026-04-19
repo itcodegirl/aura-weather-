@@ -8,8 +8,8 @@
  * Palettes are chosen to match the emotional tone of the weather.
  */
 export const weatherCodes = {
-  0:  { label: "Clear",            icon: "☀️", gradient: ["#f59e0b", "#f97316", "#ef4444"] },
-  1:  { label: "Mostly Clear",     icon: "🌤️", gradient: ["#fbbf24", "#f59e0b", "#ec4899"] },
+  0:  { label: "Clear",            icon: "☀️", gradient: ["#fb923c", "#ec4899", "#6366f1"] },
+  1:  { label: "Mostly Clear",     icon: "🌤️", gradient: ["#fbbf24", "#f472b6", "#818cf8"] },
   2:  { label: "Partly Cloudy",    icon: "⛅", gradient: ["#60a5fa", "#818cf8", "#a78bfa"] },
   3:  { label: "Overcast",         icon: "☁️", gradient: ["#94a3b8", "#64748b", "#334155"] },
   45: { label: "Foggy",            icon: "🌫️", gradient: ["#cbd5e1", "#94a3b8", "#64748b"] },

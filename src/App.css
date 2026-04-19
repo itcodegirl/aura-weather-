@@ -1,16 +1,25 @@
 /* ---------- Design tokens ---------- */
 :root {
+  /* Radii */
   --radius: 24px;
   --radius-sm: 16px;
+
+  /* Effects */
   --blur: 24px;
-  --border: 1px solid rgba(255, 255, 255, 0.18);
-  --bg-card: rgba(255, 255, 255, 0.10);
-  --bg-card-hover: rgba(255, 255, 255, 0.14);
-  --text: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.70);
-  --text-dim: rgba(255, 255, 255, 0.50);
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --border: 1px solid rgba(255, 255, 255, 0.22);
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  /* Card backgrounds */
+  --bg-card: rgba(255, 255, 255, 0.12);
+  --bg-card-hover: rgba(255, 255, 255, 0.16);
+
+  /* Text colors — optimized for contrast on any gradient */
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.82);
+  --text-dim: rgba(255, 255, 255, 0.62);
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ---------- Reset + base ---------- */
@@ -137,8 +146,11 @@ button {
 .placeholder {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 24
+  px;
 }
 
 .placeholder-label {
@@ -157,6 +169,7 @@ button {
 
 /* Remove hover on non-interactive cards */
 .bento > section {
+  position: relative;
   background: var(--bg-card);
   backdrop-filter: blur(var(--blur));
   -webkit-backdrop-filter: blur(var(--blur));
@@ -164,7 +177,9 @@ button {
   border-radius: var(--radius);
   padding: 24px;
   min-height: 180px;
-  box-shadow: var(--shadow);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 /* ---------- Hero card ---------- */
 .hero-card {
