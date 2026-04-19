@@ -3,6 +3,7 @@
 import { CalendarDays, Droplets } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
 import { formatDayLabel } from "../utils/dates";
+import WeatherIcon from "./WeatherIcon";
 
 /**
  * Renders a single day row in the forecast.
@@ -25,8 +26,8 @@ function DayRow({ day, minTemp, maxTemp, weekMin, weekMax, unit, convertTemp }) 
       <div className="forecast-day">{label}</div>
 
       <div className="forecast-icon" aria-label={info.label}>
-        {info.icon}
-      </div>
+  <WeatherIcon code={day.weather_code} size={22} />
+</div>
 
       <div className="forecast-precip">
         {day.precipitation_probability_max >= 20 ? (

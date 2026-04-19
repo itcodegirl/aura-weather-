@@ -2,6 +2,7 @@
 
 import { MapPin, Wind, Droplets, Gauge, Thermometer } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
+import WeatherIcon from "./WeatherIcon";
 
 function Stat({ icon, label, value }) {
   return (
@@ -40,7 +41,9 @@ export default function HeroCard({ weather, location, unit, convertTemp }) {
       </header>
 
       <div className="hero-main">
-        <div className="hero-icon" aria-hidden="true">{info.icon}</div>
+        <div className="hero-icon">
+  <WeatherIcon code={current.weather_code} size={120} animated />
+</div>
         <div className="hero-temp-block">
           <div className="hero-temp">
             {convertTemp(current.temperature_2m)}

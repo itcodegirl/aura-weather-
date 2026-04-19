@@ -215,9 +215,10 @@ button {
 }
 
 .hero-icon {
-  font-size: 96px;
-  line-height: 1;
-  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
 }
 
 .hero-temp {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CloudRain, Droplets, Clock } from "lucide-react";
-
+import WeatherIcon from "./WeatherIcon";
 /**
  * Analyzes hourly precipitation data for the next 24 hours.
  * Returns next rain window, peak hour, total expected inches,
@@ -81,7 +81,9 @@ export default function RainCard({ weather }) {
 
       {isDry ? (
         <div className="rain-empty">
-          <div className="rain-empty-icon">☀️</div>
+        <div className="rain-empty-icon">
+        <WeatherIcon code={0} size={44} />
+          </div>
           <div className="rain-empty-title">No rain expected</div>
           <div className="rain-empty-sub">
             Peak chance just {peak.probability}% at {formatHour(peak.time)}
