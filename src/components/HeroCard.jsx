@@ -48,19 +48,19 @@ function HeroCard({
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
   const windDisplay = formatWindSpeed(current.wind_speed_10m, unit);
   const dewPoint = toDisplayTemp(current.dew_point_2m);
-  const hasClimateComparison =
-    climateComparison && Number.isFinite(climateComparison.differenceF);
+  const hasClimateComparison = climateComparison
+    && (Number.isFinite(climateComparison.difference) ||
+        Number.isFinite(climateComparison.differenceF));
+  const climateDeltaRaw = Number.isFinite(climateComparison?.difference)
+    ? climateComparison.difference
+    : climateComparison?.differenceF;
   const climateDelta = hasClimateComparison
-    ? Math.round(
-        unit === "C"
-          ? Math.abs(climateComparison.differenceF) * (5 / 9)
-          : Math.abs(climateComparison.differenceF)
-      )
+    ? convertTemp(Math.abs(Number(climateDeltaRaw)), climateComparison?.differenceUnit || "F")
     : 0;
   let climateDirection = "";
   if (hasClimateComparison) {
-    if (climateComparison.differenceF > 0) climateDirection = "warmer";
-    else if (climateComparison.differenceF < 0) climateDirection = "colder";
+    if (climateDeltaRaw > 0) climateDirection = "warmer";
+    else if (climateDeltaRaw < 0) climateDirection = "colder";
     else climateDirection = "about the same";
   }
   const climateSource = hasClimateComparison

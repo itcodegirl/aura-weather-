@@ -214,6 +214,7 @@ function App() {
   const citySearchRef = useRef(null);
   const {
     weather,
+    weatherDataUnit,
     location,
     loading,
     error,
@@ -226,8 +227,15 @@ function App() {
   } = useWeather(unit, { climateEnabled: showClimateContext });
 
   const convertTemp = useCallback(
-    (f) => (unit === "F" ? Math.round(f) : Math.round(((f - 32) * 5) / 9)),
-    [unit]
+    (value, sourceUnit = weatherDataUnit || "F") => {
+      if (!Number.isFinite(Number(value))) return "\u2014";
+      const normalizedSource = sourceUnit === "C" ? "C" : "F";
+
+      if (unit === normalizedSource) return Math.round(value);
+      if (unit === "F") return Math.round((Number(value) * 9) / 5 + 32);
+      return Math.round(((Number(value) - 32) * 5) / 9);
+    },
+    [unit, weatherDataUnit]
   );
 
   useEffect(() => {

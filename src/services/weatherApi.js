@@ -9,6 +9,7 @@ const ENDPOINTS = {
 const GEOCODE_RESULTS_LIMIT = 5;
 
 const TIMEOUT_MS = 10_000;
+const DEFAULT_TEMPERATURE_UNIT = "fahrenheit";
 
 function getSignal(signal) {
   if (signal) return signal;
@@ -99,6 +100,7 @@ function toF(value) {
  * from Open-Meteo. No API key required.
  */
 export async function fetchWeather(lat, lon, options = {}) {
+  const { signal, temperatureUnit = DEFAULT_TEMPERATURE_UNIT } = options;
   const params = new URLSearchParams({
     latitude: lat,
     longitude: lon,
@@ -110,7 +112,7 @@ export async function fetchWeather(lat, lon, options = {}) {
       "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum",
     minutely_15:
       "weather_code,precipitation_probability,precipitation",
-    temperature_unit: "fahrenheit",
+    temperature_unit: temperatureUnit,
     wind_speed_unit: "mph",
     precipitation_unit: "inch",
     timezone: "auto",
@@ -118,9 +120,7 @@ export async function fetchWeather(lat, lon, options = {}) {
     past_hours: "48",
   });
 
-  return fetchJson(`${ENDPOINTS.weather}?${params}`, {
-    signal: options.signal,
-  });
+  return fetchJson(`${ENDPOINTS.weather}?${params}`, { signal });
 }
 
 /**
@@ -133,6 +133,7 @@ export async function fetchHistoricalTemperatureAverage(
   timezone,
   options = {}
 ) {
+  const { signal, temperatureUnit = DEFAULT_TEMPERATURE_UNIT } = options;
   const { year, month, day, monthDayLabel } = getDateInTimeZone(timezone);
   const startYear = year - 30;
   const endYear = year - 1;
@@ -150,13 +151,11 @@ export async function fetchHistoricalTemperatureAverage(
     start_date: start,
     end_date: end,
     daily: "temperature_2m_mean,temperature_2m_min,temperature_2m_max",
-    temperature_unit: "fahrenheit",
+    temperature_unit: temperatureUnit,
     timezone: timezone || "UTC",
   });
 
-  const data = await fetchJson(`${ENDPOINTS.archive}?${params}`, {
-    signal: options.signal,
-  });
+  const data = await fetchJson(`${ENDPOINTS.archive}?${params}`, { signal });
   const times = data?.daily?.time;
   if (!Array.isArray(times) || !times.length) {
     return null;
@@ -187,8 +186,12 @@ export async function fetchHistoricalTemperatureAverage(
     return null;
   }
 
+  const averageTemperature = Number((total / sampleCount).toFixed(1));
+
   return {
-    averageTemperatureF: Number((total / sampleCount).toFixed(1)),
+    averageTemperature,
+    averageTemperatureF: averageTemperature,
+    averageTemperatureUnit: temperatureUnit,
     sampleYears: sampleCount,
     referenceDateLabel: monthDayLabel,
     timeRange: `${startYear}-${endYear}`,

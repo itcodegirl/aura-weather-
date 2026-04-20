@@ -19,16 +19,33 @@ const LAST_LOCATION_KEY = "aura-weather-last-location";
 const SAVED_LOCATION_NOTICE = "Showing your previously selected location";
 const GEOLOCATION_TIMEOUT_MS = 5000;
 const LOCATION_FALLBACK_DELAY_MS = 6000;
+const DEFAULT_DATA_UNIT = "F";
+
+function normalizeUnit(value) {
+  return value === "C" ? "C" : "F";
+}
+
+function getApiTemperatureUnit(unit) {
+  return unit === "C" ? "celsius" : "fahrenheit";
+}
 
 function getPersistedLocation() {
   try {
+    if (typeof window === "undefined" || !window.localStorage) return null;
     const saved = window.localStorage.getItem(LAST_LOCATION_KEY);
     if (!saved) return null;
 
     const parsed = JSON.parse(saved);
     const lat = Number(parsed?.lat);
     const lon = Number(parsed?.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon) ||
+      Math.abs(lat) > 90 ||
+      Math.abs(lon) > 180
+    ) {
+      return null;
+    }
 
     return {
       lat,
@@ -43,7 +60,9 @@ function getPersistedLocation() {
 
 function persistLocation(lat, lon, name, country) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+  if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return;
   try {
+    if (typeof window === "undefined" || !window.localStorage) return;
     window.localStorage.setItem(
       LAST_LOCATION_KEY,
       JSON.stringify({
@@ -75,6 +94,7 @@ export function useWeather(unit = "F", options = {}) {
 
   const [weather, setWeather] = useState(null);
   const [location, setLocation] = useState(null);
+  const [weatherDataUnit, setWeatherDataUnit] = useState(DEFAULT_DATA_UNIT);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastRequest, setLastRequest] = useState(null);
@@ -101,12 +121,14 @@ export function useWeather(unit = "F", options = {}) {
   }, []);
 
   const loadWeather = useCallback(
-    async (lat, lon, name, country, requestUnit = unit, options = {}) => {
+    async (lat, lon, name, country, requestUnit = unit, loadOptions = {}) => {
       if (!isMountedRef.current) return;
 
-      const { fallbackNotice } = options;
+      const { fallbackNotice } = loadOptions;
+      const requestDataUnit = normalizeUnit(requestUnit);
+      const apiTemperatureUnit = getApiTemperatureUnit(requestDataUnit);
       const requestId = requestIdRef.current + 1;
-      const signature = `${lat},${lon},${requestUnit},${climateEnabled ? 1 : 0}`;
+      const signature = `${lat},${lon},${requestDataUnit},${climateEnabled ? 1 : 0}`;
 
       requestIdRef.current = requestId;
       abortInFlightRequest();
@@ -118,12 +140,15 @@ export function useWeather(unit = "F", options = {}) {
       setLoading(true);
       setError(null);
       setLocationNotice(fallbackNotice || null);
-      setLastRequest({ lat, lon, name, country, unit: requestUnit });
+      setLastRequest({ lat, lon, name, country, unit: requestDataUnit });
       setClimateComparison(null);
 
       try {
         const [weatherData, aqi] = await Promise.all([
-          fetchWeather(lat, lon, { signal: controller.signal }),
+          fetchWeather(lat, lon, {
+            signal: controller.signal,
+            temperatureUnit: apiTemperatureUnit,
+          }),
           fetchAirQuality(lat, lon, { signal: controller.signal }),
         ]);
 
@@ -132,7 +157,10 @@ export function useWeather(unit = "F", options = {}) {
               lat,
               lon,
               weatherData?.timezone,
-              { signal: controller.signal }
+              {
+                signal: controller.signal,
+                temperatureUnit: apiTemperatureUnit,
+              }
             )
           : null;
 
@@ -144,13 +172,21 @@ export function useWeather(unit = "F", options = {}) {
           name || getFallbackLocationName(weatherData, lat, lon);
         if (!isMountedRef.current) return;
         const currentTemperature = Number(weatherData?.current?.temperature_2m);
+        const historicalTemperature =
+          historicalAverage &&
+          Number.isFinite(
+            historicalAverage.averageTemperature ??
+              historicalAverage.averageTemperatureF
+          )
+            ? historicalAverage.averageTemperature ?? historicalAverage.averageTemperatureF
+            : null;
         const climateDelta =
           Number.isFinite(currentTemperature) &&
-          historicalAverage &&
-          Number.isFinite(historicalAverage.averageTemperatureF)
-            ? currentTemperature - historicalAverage.averageTemperatureF
+          Number.isFinite(historicalTemperature)
+            ? currentTemperature - historicalTemperature
             : null;
 
+        setWeatherDataUnit(requestDataUnit);
         setWeather({ ...weatherData, aqi });
         setLocation({
           lat,
@@ -162,7 +198,12 @@ export function useWeather(unit = "F", options = {}) {
         if (!isMountedRef.current) return;
         setClimateComparison(
           historicalAverage && Number.isFinite(climateDelta)
-            ? { ...historicalAverage, differenceF: climateDelta }
+            ? {
+                ...historicalAverage,
+                difference: climateDelta,
+                differenceF: climateDelta,
+                differenceUnit: requestDataUnit,
+              }
             : null
         );
       } catch (error) {
@@ -197,16 +238,16 @@ export function useWeather(unit = "F", options = {}) {
 
   const scheduleWeatherLoadAsync = useCallback(
     (lat, lon, name, country, requestUnit = unit, options = {}) => {
-      return window.setTimeout(() => {
+      queueMicrotask(() => {
         scheduleWeatherLoad(lat, lon, name, country, requestUnit, options);
-      }, 0);
+      });
     },
     [scheduleWeatherLoad, unit]
   );
 
   const loadCurrentLocation = useCallback(
     (options = {}) => {
-      const requestUnit = options.unit || unit;
+      const requestUnit = normalizeUnit(options.unit || unit);
       const fallbackNotice = options.fallbackNotice || LOCATION_FALLBACK_NOTICE;
 
       if (!navigator.geolocation) {
@@ -256,13 +297,14 @@ export function useWeather(unit = "F", options = {}) {
 
   const retryWeather = useCallback(() => {
     const fallbackRequest = lastRequest || DEFAULT_LOCATION;
+    const retryUnit = normalizeUnit(fallbackRequest.unit || unit);
 
     scheduleWeatherLoad(
       fallbackRequest.lat,
       fallbackRequest.lon,
       fallbackRequest.name,
       fallbackRequest.country,
-      fallbackRequest.unit || unit
+      retryUnit
     );
   }, [lastRequest, scheduleWeatherLoad, unit]);
 
@@ -370,6 +412,7 @@ export function useWeather(unit = "F", options = {}) {
 
   return {
     weather,
+    weatherDataUnit,
     location,
     loading,
     error,
