@@ -244,6 +244,20 @@ export function useWeather(unit = "F", options = {}) {
     [loadWeather, unit]
   );
 
+  const loadDefaultLocation = useCallback(
+    (requestUnit = unit, fallbackNotice = LOCATION_FALLBACK_NOTICE) => {
+      scheduleWeatherLoad(
+        DEFAULT_LOCATION.lat,
+        DEFAULT_LOCATION.lon,
+        DEFAULT_LOCATION.name,
+        DEFAULT_LOCATION.country,
+        requestUnit,
+        { fallbackNotice }
+      );
+    },
+    [scheduleWeatherLoad, unit]
+  );
+
   const scheduleWeatherLoadAsync = useCallback(
     (lat, lon, name, country, requestUnit = unit, options = {}) => {
       queueMicrotask(() => {
@@ -260,14 +274,7 @@ export function useWeather(unit = "F", options = {}) {
 
       if (!hasGeolocationSupport()) {
         setIsLocatingCurrent(false);
-        scheduleWeatherLoad(
-          DEFAULT_LOCATION.lat,
-          DEFAULT_LOCATION.lon,
-          DEFAULT_LOCATION.name,
-          DEFAULT_LOCATION.country,
-          requestUnit,
-          { fallbackNotice }
-        );
+        loadDefaultLocation(requestUnit, fallbackNotice);
         return;
       }
 
@@ -341,14 +348,7 @@ export function useWeather(unit = "F", options = {}) {
 
       if (!hasGeolocationSupport()) {
         clearTimeout(fallbackTimer);
-        scheduleWeatherLoadAsync(
-          DEFAULT_LOCATION.lat,
-          DEFAULT_LOCATION.lon,
-          DEFAULT_LOCATION.name,
-          DEFAULT_LOCATION.country,
-          unit,
-          { fallbackNotice: LOCATION_FALLBACK_NOTICE }
-        );
+        loadDefaultLocation(unit, LOCATION_FALLBACK_NOTICE);
         return () => {
           clearTimeout(fallbackTimer);
           abortInFlightRequest();
@@ -363,14 +363,7 @@ export function useWeather(unit = "F", options = {}) {
         },
         () => {
           clearTimeout(fallbackTimer);
-          scheduleWeatherLoadAsync(
-            DEFAULT_LOCATION.lat,
-            DEFAULT_LOCATION.lon,
-            DEFAULT_LOCATION.name,
-            DEFAULT_LOCATION.country,
-            unit,
-            { fallbackNotice: LOCATION_FALLBACK_NOTICE }
-          );
+          loadDefaultLocation(unit, LOCATION_FALLBACK_NOTICE);
         },
         { timeout: GEOLOCATION_TIMEOUT_MS }
       );
