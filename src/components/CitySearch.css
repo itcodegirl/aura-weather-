@@ -1,36 +1,52 @@
 .city-search {
   position: relative;
-  width: 320px;
+  flex: 1 1 460px;
+  width: min(100%, 620px);
+  min-width: 260px;
 }
 
 .city-search-input-wrap {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  border-radius: var(--radius-pill);
-  transition: border-color 0.2s ease, background 0.2s ease;
+  min-height: var(--header-control-height);
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(157, 203, 255, 0.34);
+  background:
+    linear-gradient(180deg, rgba(15, 31, 61, 0.68), rgba(10, 22, 45, 0.64)),
+    rgba(8, 17, 38, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(225, 240, 255, 0.16),
+    0 8px 20px rgba(4, 10, 24, 0.22);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .city-search-input-wrap:focus-within {
-  border-color: rgba(110, 231, 255, 0.58);
-  background: rgba(9, 20, 44, 0.76);
+  border-color: rgba(130, 228, 255, 0.74);
+  background:
+    linear-gradient(180deg, rgba(18, 37, 73, 0.74), rgba(11, 24, 49, 0.7)),
+    rgba(9, 20, 44, 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(229, 244, 255, 0.2),
+    0 0 0 3px rgba(64, 196, 255, 0.14),
+    0 10px 26px rgba(4, 10, 24, 0.26);
 }
 
 .city-search-icon {
   flex-shrink: 0;
-  color: var(--text-muted);
+  color: rgba(198, 226, 255, 0.95);
 }
 
 .city-search-input {
   flex: 1;
   width: 100%;
-  padding: 11px 8px;
+  padding: 10px 10px;
   border: none;
   outline: none;
   background: none;
-  color: var(--text);
-  font-size: 14px;
+  color: #f3f8ff;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -41,8 +57,8 @@
 .city-search-clear {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   color: var(--text-dim);
   transition: color 0.2s ease, background 0.2s ease;
@@ -55,7 +71,7 @@
 
 .city-search-dropdown {
   position: absolute;
-  inset: calc(100% + 8px) 0 auto;
+  inset: calc(100% + 10px) 0 auto;
   z-index: 50;
   max-height: 320px;
   overflow: hidden auto;
@@ -129,11 +145,19 @@
   font-weight: 700;
 }
 
-.city-search-result-meta {
+  .city-search-result-meta {
   margin-top: 1px;
   color: var(--text-dim);
   font-size: 13px;
   font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .city-search {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 
