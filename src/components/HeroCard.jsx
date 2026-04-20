@@ -27,11 +27,27 @@ function HeroCard({
   climateComparison,
   style,
 }) {
+  if (!weather?.current || !location) {
+    return (
+      <section className="bento-hero hero-card" style={style}>
+        <header className="hero-meta">
+          <div className="hero-location">
+            <MapPin size={14} />
+            <span>Location unavailable</span>
+          </div>
+          <p className="hero-date">Loading weather</p>
+        </header>
+      </section>
+    );
+  }
+
   const current = weather.current;
   const info = getWeather(current.weather_code);
+  const toDisplayTemp = (value) =>
+    Number.isFinite(Number(value)) ? convertTemp(Number(value)) : "\u2014";
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
   const windDisplay = formatWindSpeed(current.wind_speed_10m, unit);
-  const dewPoint = convertTemp(current.dew_point_2m);
+  const dewPoint = toDisplayTemp(current.dew_point_2m);
   const hasClimateComparison =
     climateComparison && Number.isFinite(climateComparison.differenceF);
   const climateDelta = hasClimateComparison
@@ -70,7 +86,7 @@ function HeroCard({
         <div className="hero-location">
           <MapPin size={14} />
           <span>
-            {location.name}
+            {location.name || "Current location"}
             {location.country ? `, ${location.country}` : ""}
           </span>
         </div>
@@ -83,18 +99,18 @@ function HeroCard({
         </div>
         <div className="hero-temp-block">
           <div className="hero-temp">
-            {convertTemp(current.temperature_2m)}
+            {toDisplayTemp(current.temperature_2m)}
             <span className="hero-temp-unit">{tempUnit}</span>
           </div>
-        <div className="hero-condition">{info.label}</div>
-        <div className="hero-feels">
-          Feels like {convertTemp(current.apparent_temperature)}
-          {tempUnit}
+          <div className="hero-condition">{info.label}</div>
+          <div className="hero-feels">
+            Feels like {toDisplayTemp(current.apparent_temperature)}
+            {tempUnit}
+          </div>
+          {hasClimateComparison && (
+            <p className="hero-insight">{climateMessage}</p>
+          )}
         </div>
-        {hasClimateComparison && (
-          <p className="hero-insight">{climateMessage}</p>
-        )}
-      </div>
       </div>
 
       <div className="hero-stats">
@@ -106,12 +122,20 @@ function HeroCard({
         <Stat
           icon={<Droplets size={18} />}
           label="Humidity"
-          value={`${Math.round(current.relative_humidity_2m)}%`}
+          value={`${
+            Number.isFinite(Number(current.relative_humidity_2m))
+              ? `${Math.round(current.relative_humidity_2m)}%`
+              : "\u2014"
+          }`}
         />
         <Stat
           icon={<Gauge size={18} />}
           label="Pressure"
-          value={`${Math.round(current.surface_pressure)} hPa`}
+          value={`${
+            Number.isFinite(Number(current.surface_pressure))
+              ? `${Math.round(current.surface_pressure)} hPa`
+              : "\u2014"
+          }`}
         />
         <Stat
           icon={<Thermometer size={18} />}
