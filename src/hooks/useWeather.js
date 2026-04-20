@@ -17,6 +17,8 @@ const LOCATION_FALLBACK_NOTICE =
   "Location not available \u2014 showing Chicago";
 const LAST_LOCATION_KEY = "aura-weather-last-location";
 const SAVED_LOCATION_NOTICE = "Showing your previously selected location";
+const GEOLOCATION_TIMEOUT_MS = 5000;
+const LOCATION_FALLBACK_DELAY_MS = 6000;
 
 function getPersistedLocation() {
   try {
@@ -199,6 +201,7 @@ export function useWeather(unit = "F", options = {}) {
       setIsLocatingCurrent(true);
       navigator.geolocation.getCurrentPosition(
         (pos) => {
+          if (!isMountedRef.current) return;
           const { latitude, longitude } = pos.coords;
           loadWeather(
             latitude,
@@ -210,6 +213,7 @@ export function useWeather(unit = "F", options = {}) {
           setIsLocatingCurrent(false);
         },
         () => {
+          if (!isMountedRef.current) return;
           setIsLocatingCurrent(false);
           loadWeather(
             DEFAULT_LOCATION.lat,
@@ -220,7 +224,7 @@ export function useWeather(unit = "F", options = {}) {
             { fallbackNotice }
           );
         },
-        { timeout: 5000 }
+        { timeout: GEOLOCATION_TIMEOUT_MS }
       );
     },
     [loadWeather, unit]
@@ -263,7 +267,7 @@ export function useWeather(unit = "F", options = {}) {
         unit,
         { fallbackNotice: LOCATION_FALLBACK_NOTICE }
       );
-    }, 6000);
+    }, LOCATION_FALLBACK_DELAY_MS);
 
     if (!navigator.geolocation) {
       clearTimeout(fallbackTimer);
@@ -295,8 +299,8 @@ export function useWeather(unit = "F", options = {}) {
           { fallbackNotice: LOCATION_FALLBACK_NOTICE }
         );
       },
-      { timeout: 5000 }
-    );
+        { timeout: GEOLOCATION_TIMEOUT_MS }
+      );
 
     return () => {
       isMountedRef.current = false;
