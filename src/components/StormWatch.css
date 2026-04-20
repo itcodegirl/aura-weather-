@@ -1,7 +1,7 @@
 .bento-storm {
   display: flex;
   flex-direction: column;
-  grid-column: span 6;
+  grid-column: span 12;
   gap: 16px;
   min-height: auto;
 }
@@ -16,8 +16,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 650;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -25,7 +26,7 @@
 .storm-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .storm-snapshot {
@@ -43,7 +44,7 @@
   border: 1px solid var(--chip-accent);
   background: rgba(8, 17, 35, 0.5);
   color: #e7f1ff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.03em;
 }
@@ -61,7 +62,7 @@
 }
 
 .storm-level {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1;
 }
@@ -77,12 +78,12 @@
 
 .storm-detail-label {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .storm-detail-value {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 

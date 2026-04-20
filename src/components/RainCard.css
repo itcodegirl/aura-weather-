@@ -1,9 +1,9 @@
-﻿.bento-rain {
+.bento-rain {
   display: flex;
   flex-direction: column;
-  grid-column: span 2;
+  grid-column: span 4;
   gap: 14px;
-  min-height: 258px;
+  min-height: 272px;
 }
 
 .rain-header {
@@ -16,8 +16,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
@@ -35,7 +37,7 @@
   height: 40px;
   border-radius: var(--radius-pill);
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   display: grid;
   place-items: center;
@@ -54,15 +56,15 @@
 
 .rain-primary-value {
   font-family: var(--font-display);
-  font-size: 30px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 650;
   line-height: 1.02;
   letter-spacing: -0.03em;
 }
 
 .rain-primary-label {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -77,20 +79,20 @@
   align-items: center;
   gap: 8px;
   padding: 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(181, 207, 252, 0.14);
   background: rgba(7, 15, 32, 0.48);
 }
 
 .rain-stat-value {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
 }
 
 .rain-stat-label {
   margin-top: 2px;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -112,14 +114,14 @@
   justify-content: space-between;
   gap: 8px;
   padding: 8px 10px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(181, 207, 252, 0.14);
   background: rgba(7, 15, 32, 0.44);
 }
 
 .rain-history-pill-label {
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -127,7 +129,7 @@
 
 .rain-history-pill-value {
   color: #eef5ff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -147,13 +149,13 @@
 }
 
 .rain-empty-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .rain-empty-sub {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -167,7 +169,7 @@
 
 .rain-timeline-summary {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -193,4 +195,5 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
 

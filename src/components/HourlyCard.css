@@ -1,7 +1,7 @@
-﻿.bento-chart {
+.bento-chart {
   display: flex;
   flex-direction: column;
-  grid-column: span 4;
+  grid-column: span 5;
   gap: 14px;
   min-width: 0;
   min-height: clamp(240px, 32vw, 340px);
@@ -17,8 +17,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 650;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -45,7 +46,7 @@
 .chart-tooltip-time {
   margin-bottom: 2px;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -62,7 +63,9 @@
 .chart-tooltip-condition {
   margin-top: 3px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
+
+
 
