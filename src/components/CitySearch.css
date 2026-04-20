@@ -1,4 +1,4 @@
-.city-search {
+﻿.city-search {
   position: relative;
   width: 272px;
 }
@@ -132,6 +132,7 @@
 .city-search-result-meta {
   margin-top: 1px;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
+

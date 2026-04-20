@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from "react";
+﻿import { useCallback, useRef, useEffect } from "react";
 import { CloudOff } from "lucide-react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
@@ -429,7 +429,7 @@ function App() {
         )}
         {isBackgroundLoading && (
           <p className="app-status app-status--loading" role="status" aria-live="polite">
-            Updating weather for your current settings…
+            Updating weather for your current settings...
           </p>
         )}
         {showRefreshError && (
@@ -561,4 +561,5 @@ function App() {
 }
 
 export default App;
+
 

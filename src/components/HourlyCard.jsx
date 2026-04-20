@@ -77,6 +77,27 @@ function ChartTooltip({ active, payload, unit }) {
   );
 }
 
+function getHourlySummary(data, unit) {
+  if (!Array.isArray(data) || data.length === 0) {
+    return "Hourly temperature data is temporarily unavailable.";
+  }
+
+  const validTemps = data
+    .map((entry) => Number(entry?.temp))
+    .filter((value) => Number.isFinite(value));
+  if (validTemps.length === 0) {
+    return "Hourly temperature data is temporarily unavailable.";
+  }
+
+  const firstLabel = data[0]?.label || "now";
+  const lastLabel = data[data.length - 1]?.label || "later";
+  const current = validTemps[0];
+  const minimum = Math.min(...validTemps);
+  const maximum = Math.max(...validTemps);
+
+  return `From ${firstLabel} to ${lastLabel}, temperatures range from ${minimum} to ${maximum} degrees ${unit}. Current reading is ${current} degrees ${unit}.`;
+}
+
 function HourlyCard({
   weather,
   unit,
@@ -99,10 +120,15 @@ function HourlyCard({
 
   const topColor = chartTopColor || palette[0];
   const bottomColor = chartBottomColor || palette[2] || palette[1];
+  const chartSummary = useMemo(() => getHourlySummary(data, unit), [data, unit]);
 
   if (!data.length) {
     return (
-      <section className="bento-chart hourly-chart" style={style}>
+      <section
+        className="bento-chart hourly-chart"
+        style={style}
+        aria-label="Hourly temperature chart"
+      >
         <header className="chart-header">
           <h2 className="chart-title">
             <LineIcon size={16} />
@@ -150,6 +176,7 @@ function HourlyCard({
         </header>
 
       <div className="chart-body">
+        <p className="sr-only">{chartSummary}</p>
         <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={180}>
           <AreaChart
             data={data}

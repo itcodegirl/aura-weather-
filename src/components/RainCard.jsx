@@ -131,6 +131,24 @@ function formatHour(date) {
   return date.toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
 }
 
+function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
+  if (!Array.isArray(hours) || hours.length === 0) {
+    return "Hourly precipitation timeline is temporarily unavailable.";
+  }
+
+  const peakTime = peak?.time instanceof Date ? formatHour(peak.time) : "later";
+  const peakProbability = Number.isFinite(Number(peak?.probability))
+    ? Math.round(Number(peak.probability))
+    : 0;
+  const projectedTotal = formatPrecipitation(total, unit, dataUnit);
+
+  if (nextRain?.time instanceof Date) {
+    return `Rain is most likely around ${formatHour(nextRain.time)}. Peak chance is ${peakProbability}% near ${peakTime}. Projected 24-hour accumulation is ${projectedTotal}.`;
+  }
+
+  return `No immediate rain onset detected. Peak chance is ${peakProbability}% near ${peakTime}. Projected 24-hour accumulation is ${projectedTotal}.`;
+}
+
 function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
   const [mode, setMode] = useState("chance");
   const rainAnalysis = useMemo(() => analyzeRain(weather?.hourly), [weather?.hourly]);
@@ -145,6 +163,10 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
     past24h,
     past48h,
   } = rainAnalysis;
+  const timelineSummary = useMemo(
+    () => getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit),
+    [hours, nextRain, peak, total, unit, dataUnit]
+  );
 
   const isDry = peak.probability < 20 && total < 0.01;
 
@@ -287,6 +309,7 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
           );
         })}
       </div>
+      <p className="rain-timeline-summary">{timelineSummary}</p>
 
       <div className="rain-timeline-labels">
         <span>Now</span>
