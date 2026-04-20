@@ -161,7 +161,7 @@ function WindIntelligence({ weather, unit, weatherDataUnit = unit }) {
     weatherDataUnit
   );
   const direction = windDirectionName(Number.isFinite(safeDirection) ? safeDirection : 0);
-  const strength = classifyWind(sustained, unit);
+  const strength = classifyWind(sustained, weatherDataUnit);
 
   return (
     <div className="storm-module">
