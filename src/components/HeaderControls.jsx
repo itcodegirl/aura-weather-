@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CitySearch from "./CitySearch";
 
 export default function HeaderControls({
@@ -12,6 +12,37 @@ export default function HeaderControls({
   setUnit,
 }) {
   const [showMobileSettings, setShowMobileSettings] = useState(false);
+  const controlsRef = useRef(null);
+
+  useEffect(() => {
+    if (!showMobileSettings) {
+      return undefined;
+    }
+
+    const handleDocumentPointerDown = (event) => {
+      if (
+        controlsRef.current &&
+        event.target instanceof Node &&
+        !controlsRef.current.contains(event.target)
+      ) {
+        setShowMobileSettings(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setShowMobileSettings(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleDocumentPointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentPointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [showMobileSettings]);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -35,7 +66,7 @@ export default function HeaderControls({
   }, []);
 
   return (
-    <div className="app-header-actions">
+    <div className="app-header-actions" ref={controlsRef}>
       <div className="app-header-primary">
         <CitySearch
           ref={citySearchRef}
@@ -64,8 +95,10 @@ export default function HeaderControls({
         <button
           type="button"
           className="settings-toggle"
+          aria-label={showMobileSettings ? "Hide display settings" : "Show display settings"}
           aria-expanded={showMobileSettings}
           aria-controls="mobile-settings-panel"
+          aria-haspopup="true"
           onClick={() => setShowMobileSettings((current) => !current)}
         >
           Display

@@ -11,8 +11,10 @@ import NowcastCard from "./components/NowcastCard";
 import HeaderControls from "./components/HeaderControls";
 import WeatherIcon from "./components/WeatherIcon";
 
-const StormWatch = lazy(() => import("./components/StormWatch"));
-const HourlyCard = lazy(() => import("./components/HourlyCard"));
+const loadStormWatch = () => import("./components/StormWatch");
+const loadHourlyCard = () => import("./components/HourlyCard");
+const StormWatch = lazy(loadStormWatch);
+const HourlyCard = lazy(loadHourlyCard);
 
 function clamp(value, min, max) {
   const numeric = Number(value);
@@ -289,6 +291,38 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
     window.addEventListener("keydown", handleShortcut);
 
     return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let idleId;
+    let timeoutId;
+
+    const preloadHeavyPanels = () => {
+      if (cancelled) return;
+      void loadHourlyCard();
+      void loadStormWatch();
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(preloadHeavyPanels, { timeout: 2000 });
+    } else {
+      timeoutId = window.setTimeout(preloadHeavyPanels, 1200);
+    }
+
+    return () => {
+      cancelled = true;
+      if (typeof window.cancelIdleCallback === "function" && idleId !== undefined) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   if (showGlobalLoading) {
