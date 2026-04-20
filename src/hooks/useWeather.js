@@ -317,7 +317,7 @@ export function useWeather(unit = "F", options = {}) {
 
   const loadCurrentLocation = useCallback(
     (options = {}) => {
-      const requestUnit = normalizeTemperatureUnit(options.unit || unit);
+      const requestUnit = options.unit || unit;
       const fallbackNotice = options.fallbackNotice || LOCATION_FALLBACK_NOTICE;
 
       requestCurrentPositionWithFallback({
@@ -373,8 +373,8 @@ export function useWeather(unit = "F", options = {}) {
           DEFAULT_LOCATION.name,
           DEFAULT_LOCATION.country,
           unit,
-        { fallbackNotice: LOCATION_FALLBACK_NOTICE }
-      );
+          { fallbackNotice: LOCATION_FALLBACK_NOTICE }
+        );
       }, LOCATION_FALLBACK_DELAY_MS);
 
       requestCurrentPositionWithFallback({
