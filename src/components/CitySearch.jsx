@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useRef,
+  useId,
   forwardRef,
   useImperativeHandle,
 } from "react";
@@ -35,6 +36,9 @@ function CitySearch({ onSelect }, ref) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(null);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const id = useId();
+  const resultsId = `${id}-results`;
+  const optionIdPrefix = `${id}-option`;
 
   const containerRef = useRef(null);
   const inputRef = useRef(null);
@@ -93,19 +97,19 @@ function CitySearch({ onSelect }, ref) {
     const controller = new AbortController();
     geocodeRequestRef.current = controller;
 
-      try {
-        const cities = await geocodeCity(term, { signal: controller.signal });
-        if (
-          isMountedRef.current &&
-          currentRequest === requestIdRef.current
-        ) {
-          setResults(
-            Array.isArray(cities)
-              ? cities.filter((city) => city && typeof city === "object")
-              : []
-          );
-          setError(null);
-        }
+    try {
+      const cities = await geocodeCity(term, { signal: controller.signal });
+      if (
+        isMountedRef.current &&
+        currentRequest === requestIdRef.current
+      ) {
+        setResults(
+          Array.isArray(cities)
+            ? cities.filter((city) => city && typeof city === "object")
+            : []
+        );
+        setError(null);
+      }
     } catch (error) {
       if (
         isMountedRef.current &&
@@ -234,9 +238,8 @@ function CitySearch({ onSelect }, ref) {
 
   const activeDescendant =
     showDropdown && activeIndexSafe >= 0
-      ? `city-search-option-${activeIndexSafe}`
+      ? `${optionIdPrefix}-${activeIndexSafe}`
       : undefined;
-  const resultsId = "city-search-results";
 
   useImperativeHandle(ref, () => ({
     focus: () => {
@@ -326,7 +329,7 @@ function CitySearch({ onSelect }, ref) {
               return (
                 <li
                   key={getCityKey(city, index)}
-                  id={`city-search-option-${index}`}
+                  id={`${optionIdPrefix}-${index}`}
                   role="option"
                   aria-selected={index === activeIndexSafe}
                   tabIndex={-1}

@@ -35,11 +35,11 @@ export default function HeaderControls({
       }
     };
 
-    document.addEventListener("mousedown", handleDocumentPointerDown);
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
     document.addEventListener("keydown", handleEscape);
 
     return () => {
-      document.removeEventListener("mousedown", handleDocumentPointerDown);
+      document.removeEventListener("pointerdown", handleDocumentPointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
   }, [showMobileSettings]);
@@ -108,6 +108,8 @@ export default function HeaderControls({
       <div
         id="mobile-settings-panel"
         className={`app-header-secondary ${showMobileSettings ? "is-open" : ""}`}
+        role="region"
+        aria-label="Display settings"
       >
         <div
           className="toggle-pill"

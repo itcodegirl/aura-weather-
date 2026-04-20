@@ -294,6 +294,11 @@ a:focus-visible,
   -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
 }
 
+.settings-toggle[aria-expanded="true"] {
+  color: #021127;
+  background: linear-gradient(145deg, #f9fcff, #d9eaff);
+}
+
 .unit-toggle,
 .toggle-pill,
 .current-location-btn,

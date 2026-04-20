@@ -220,8 +220,21 @@ function MetricDensityBar({ value, max, statusColor }) {
 
 const CLIMATE_CONTEXT_KEY = "aura-weather-climate-context";
 const UNIT_PREFERENCE_KEY = "aura-weather-unit-preference";
+const GROUP_LABEL_IDS = {
+  currentConditions: "group-current-conditions",
+  nearTermOutlook: "group-near-term-outlook",
+  riskSignals: "group-risk-signals",
+  weekAhead: "group-week-ahead",
+};
 
-function App() {  const [unit, setUnit] = useLocalStorageState(
+const METRIC_LABEL_IDS = {
+  airQuality: "metric-air-quality",
+  uvIndex: "metric-uv-index",
+  sunlight: "metric-sunlight",
+};
+
+function App() {
+  const [unit, setUnit] = useLocalStorageState(
     UNIT_PREFERENCE_KEY,
     DEFAULT_UNIT,
     {
@@ -378,7 +391,7 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
   const dayLengthLabel = formatDayLength(dayLengthMinutes);
 
   return (
-      <div className="app" style={{ background }}>
+    <div className="app" style={{ background }}>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -435,8 +448,16 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
           </p>
         )}
 
-        <main className="bento" id="main-content">
-          <p className="bento-group-label" style={GROUP_LABEL_STYLE_VARIABLES[0]}>
+        <main
+          className="bento"
+          id="main-content"
+          aria-busy={isBackgroundLoading}
+        >
+          <p
+            id={GROUP_LABEL_IDS.currentConditions}
+            className="bento-group-label"
+            style={GROUP_LABEL_STYLE_VARIABLES[0]}
+          >
             Current Conditions
           </p>
           <HeroCard
@@ -452,8 +473,11 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
           <section
             className="bento-aqi metric-card metric-card--meter"
             style={CARD_STYLE_VARIABLES[1]}
+            aria-labelledby={METRIC_LABEL_IDS.airQuality}
           >
-            <span className="metric-label">Air Quality</span>
+            <h2 id={METRIC_LABEL_IDS.airQuality} className="metric-label">
+              Air Quality
+            </h2>
             <ArcGauge
               value={weather.aqi}
               max={300}
@@ -477,8 +501,11 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
           <section
             className="bento-uv metric-card metric-card--meter"
             style={CARD_STYLE_VARIABLES[2]}
+            aria-labelledby={METRIC_LABEL_IDS.uvIndex}
           >
-            <span className="metric-label">UV Index</span>
+            <h2 id={METRIC_LABEL_IDS.uvIndex} className="metric-label">
+              UV Index
+            </h2>
             <ArcGauge
               value={uvToday}
               max={11}
@@ -499,15 +526,25 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
             />
           </section>
 
-          <section className="bento-sunlight metric-card" style={CARD_STYLE_VARIABLES[3]}>
-            <span className="metric-label">Sunlight</span>
+          <section
+            className="bento-sunlight metric-card"
+            style={CARD_STYLE_VARIABLES[3]}
+            aria-labelledby={METRIC_LABEL_IDS.sunlight}
+          >
+            <h2 id={METRIC_LABEL_IDS.sunlight} className="metric-label">
+              Sunlight
+            </h2>
             <div className="metric-sunline">{`Sunrise ${sunriseLabel} \u2192 Sunset ${sunsetLabel}`}</div>
             {dayLengthLabel ? (
               <div className="metric-sun-length">Daylight {dayLengthLabel}</div>
             ) : null}
           </section>
 
-          <p className="bento-group-label" style={GROUP_LABEL_STYLE_VARIABLES[1]}>
+          <p
+            id={GROUP_LABEL_IDS.nearTermOutlook}
+            className="bento-group-label"
+            style={GROUP_LABEL_STYLE_VARIABLES[1]}
+          >
             Near-Term Outlook
           </p>
           <RainCard
@@ -535,7 +572,11 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
               style={CARD_STYLE_VARIABLES[6]}
             />
           </Suspense>
-          <p className="bento-group-label" style={GROUP_LABEL_STYLE_VARIABLES[2]}>
+          <p
+            id={GROUP_LABEL_IDS.riskSignals}
+            className="bento-group-label"
+            style={GROUP_LABEL_STYLE_VARIABLES[2]}
+          >
             Risk Signals
           </p>
           <Suspense
@@ -555,7 +596,11 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
               style={CARD_STYLE_VARIABLES[7]}
             />
           </Suspense>
-          <p className="bento-group-label" style={GROUP_LABEL_STYLE_VARIABLES[3]}>
+          <p
+            id={GROUP_LABEL_IDS.weekAhead}
+            className="bento-group-label"
+            style={GROUP_LABEL_STYLE_VARIABLES[3]}
+          >
             Week Ahead
           </p>
           <ForecastCard
@@ -571,11 +616,5 @@ function App() {  const [unit, setUnit] = useLocalStorageState(
 }
 
 export default App;
-
-
-
-
-
-
 
 
