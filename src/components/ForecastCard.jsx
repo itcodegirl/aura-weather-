@@ -3,9 +3,13 @@
 import { memo } from "react";
 import { CalendarDays, Droplets } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
-import { formatDayLabel, parseLocalDate } from "../utils/dates";
+import { formatDayLabel } from "../utils/dates";
 import WeatherIcon from "./WeatherIcon";
 import "./ForecastCard.css";
+
+function parseForecastDate(isoDate) {
+  return new Date(`${isoDate}T00:00:00`);
+}
 
 function DayRow({ day, weekMin, weekMax, convertTemp }) {
   const info = getWeather(day.weather_code);
@@ -75,7 +79,7 @@ function ForecastCard({ weather, convertTemp }) {
       precipitation_sum: daily.precipitation_sum?.[i] || 0,
     }))
     .filter((day) => {
-      const dayDate = parseLocalDate(day.date);
+      const dayDate = parseForecastDate(day.date);
       dayDate.setHours(0, 0, 0, 0);
       return dayDate >= today;
     })
