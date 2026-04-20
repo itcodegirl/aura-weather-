@@ -65,6 +65,7 @@ function HourlyCard({
   chartBottomColor,
   style,
 }) {
+  const currentWeatherCode = weather?.current?.weather_code;
   const hourlyData = useMemo(() => buildHourlyData(weather?.hourly, convertTemp), [
     weather?.hourly,
     convertTemp,
@@ -72,9 +73,9 @@ function HourlyCard({
   const data = hourlyData;
   const palette = useMemo(() => {
     const hourlyCodes = data.map((entry) => entry.code).filter((value) => Number.isFinite(value));
-    const primaryCode = hourlyCodes[0] ?? weather?.current?.weather_code ?? 0;
+    const primaryCode = hourlyCodes[0] ?? currentWeatherCode ?? 0;
     return getWeather(primaryCode).gradient || ["#fbbf24", "#f59e0b", "#fbbf24"];
-  }, [data, weather?.current?.weather_code]);
+  }, [data, currentWeatherCode]);
 
   const topColor = chartTopColor || palette[0];
   const bottomColor = chartBottomColor || palette[2] || palette[1];

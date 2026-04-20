@@ -63,13 +63,10 @@ function CitySearch({ onSelect }, ref) {
       error ||
       query.length >= MIN_SEARCH_QUERY_LENGTH);
 
-  useEffect(() => {
-    if (!showDropdown || results.length === 0) {
-      setActiveIndex(-1);
-      return;
-    }
-    setActiveIndex((prev) => (prev < 0 ? 0 : Math.min(prev, results.length - 1)));
-  }, [showDropdown, results]);
+  const activeIndexSafe =
+    showDropdown && activeIndex >= 0 && results.length > 0
+      ? Math.min(activeIndex, results.length - 1)
+      : -1;
 
   const runSearch = async (term) => {
     if (!isMountedRef.current) return;
@@ -185,7 +182,7 @@ function CitySearch({ onSelect }, ref) {
 
     if (event.key === "Enter" && results.length > 0) {
       event.preventDefault();
-      const targetIndex = activeIndex >= 0 ? activeIndex : 0;
+      const targetIndex = activeIndexSafe >= 0 ? activeIndexSafe : 0;
       const city = results[targetIndex];
       if (city) {
         handleSelect(city);
@@ -207,7 +204,9 @@ function CitySearch({ onSelect }, ref) {
   };
 
   const activeDescendant =
-    showDropdown && activeIndex >= 0 ? `city-search-option-${activeIndex}` : "";
+    showDropdown && activeIndexSafe >= 0
+      ? `city-search-option-${activeIndexSafe}`
+      : "";
   const resultsId = "city-search-results";
 
   useImperativeHandle(ref, () => ({
@@ -291,9 +290,9 @@ function CitySearch({ onSelect }, ref) {
                 key={`${city.latitude}-${city.longitude}-${city.id || city.name}`}
                 id={`city-search-option-${index}`}
                 role="option"
-                aria-selected={index === activeIndex}
+                aria-selected={index === activeIndexSafe}
                 tabIndex={-1}
-                className={`city-search-result${index === activeIndex ? " is-active" : ""}`}
+                className={`city-search-result${index === activeIndexSafe ? " is-active" : ""}`}
                 onMouseMove={() => setActiveIndex(index)}
                 onMouseDown={(event) => {
                   event.preventDefault();

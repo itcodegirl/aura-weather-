@@ -123,7 +123,7 @@ export function useWeather(unit = "F", options = {}) {
 
       try {
         const [weatherData, aqi] = await Promise.all([
-          fetchWeather(lat, lon, requestUnit, { signal: controller.signal }),
+          fetchWeather(lat, lon, { signal: controller.signal }),
           fetchAirQuality(lat, lon, { signal: controller.signal }),
         ]);
 

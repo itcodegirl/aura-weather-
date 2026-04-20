@@ -98,7 +98,7 @@ function toF(value) {
  * Fetches current weather, hourly forecast, and 7-day daily forecast
  * from Open-Meteo. No API key required.
  */
-export async function fetchWeather(lat, lon, unit = "F", options = {}) {
+export async function fetchWeather(lat, lon, options = {}) {
   const params = new URLSearchParams({
     latitude: lat,
     longitude: lon,

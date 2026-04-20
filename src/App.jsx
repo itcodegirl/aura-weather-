@@ -152,7 +152,7 @@ function App() {
       if (stored === "F" || stored === "C") {
         return stored;
       }
-    } catch (error) {
+    } catch {
       // localStorage may be unavailable in restricted contexts.
     }
 
@@ -163,7 +163,7 @@ function App() {
       const stored = window.localStorage.getItem(CLIMATE_CONTEXT_KEY);
       if (stored === "off") return false;
       if (stored === "on") return true;
-    } catch (error) {
+    } catch {
       // localStorage may be unavailable in restricted contexts.
     }
     return true;
@@ -249,7 +249,7 @@ function App() {
         CLIMATE_CONTEXT_KEY,
         showClimateContext ? "on" : "off"
       );
-    } catch (error) {
+    } catch {
       // localStorage may be unavailable in restricted contexts.
     }
   }, [showClimateContext]);
@@ -257,7 +257,7 @@ function App() {
   useEffect(() => {
     try {
       window.localStorage.setItem(UNIT_PREFERENCE_KEY, unit);
-    } catch (error) {
+    } catch {
       // localStorage may be unavailable in restricted contexts.
     }
   }, [unit]);
