@@ -530,7 +530,7 @@ a:focus-visible,
 @keyframes weather-icon-breathe {
   0%,
   100% {
-    transform: scale(0.9);
+    transform: scale(0.95);
   }
   50% {
     transform: scale(1.05);
@@ -564,7 +564,15 @@ a:focus-visible,
 
 .error-card h1 {
   margin-bottom: 8px;
-  font-size: 20px;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.error-card-icon {
+  margin: 0 auto 8px;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
 }
 
 .error-card p {

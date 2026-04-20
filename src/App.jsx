@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { CloudOff } from "lucide-react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
 import { getWeather, gradientCss } from "./utils/weatherCodes";
@@ -128,6 +129,7 @@ function App() {
           <WeatherIcon
             code={0}
             size={80}
+            animated={false}
             className="loader-weather-icon"
           />
           <p className="loader-text">Fetching atmosphere{"\u2026"}</p>
@@ -140,6 +142,7 @@ function App() {
     return (
       <div className="app app--error">
         <div className="error-card">
+          <CloudOff size={42} className="error-card-icon" aria-hidden="true" />
           <h1>Something went sideways</h1>
           <p>{error}</p>
           <button
