@@ -27,11 +27,26 @@ const SAVED_LOCATION_NOTICE = "Showing your previously selected location";
 const GEOLOCATION_TIMEOUT_MS = 5000;
 const LOCATION_FALLBACK_DELAY_MS = GEOLOCATION_TIMEOUT_MS + 1000;
 const DEFAULT_DATA_UNIT = "F";
+const LAST_LOCATION_TTL_DAYS = 30;
 
 function normalizeLocationName(value, fallback = "") {
   if (typeof value !== "string") return fallback;
   const trimmed = value.trim();
   return trimmed || fallback;
+}
+
+function hasValidLastLocationTimestamp(saved) {
+  if (!saved?.updatedAt) {
+    return true;
+  }
+  const savedTime = Date.parse(saved.updatedAt);
+  if (!Number.isFinite(savedTime)) {
+    return false;
+  }
+
+  const ageMs = Date.now() - savedTime;
+  const maxAgeMs = LAST_LOCATION_TTL_DAYS * 24 * 60 * 60 * 1000;
+  return ageMs >= 0 && ageMs <= maxAgeMs;
 }
 
 function hasGeolocationSupport() {
@@ -51,6 +66,11 @@ function getPersistedLocation() {
     if (!saved) return null;
 
     const parsed = JSON.parse(saved);
+    if (!hasValidLastLocationTimestamp(parsed)) {
+      window.localStorage.removeItem(LAST_LOCATION_KEY);
+      return null;
+    }
+
     const coordinates = parseCoordinates(parsed?.lat, parsed?.lon);
     if (!coordinates) {
       window.localStorage.removeItem(LAST_LOCATION_KEY);
