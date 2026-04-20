@@ -182,14 +182,9 @@ export function useWeather(unit = "F", options = {}) {
           name || getFallbackLocationName(weatherData, lat, lon);
         if (!isMountedRef.current) return;
         const currentTemperature = Number(weatherData?.current?.temperature_2m);
-        const historicalTemperature =
-          historicalAverage &&
-          Number.isFinite(
-            historicalAverage.averageTemperature ??
-              historicalAverage.averageTemperatureF
-          )
-            ? historicalAverage.averageTemperature ?? historicalAverage.averageTemperatureF
-            : null;
+        const historicalTemperature = Number(
+          historicalAverage?.averageTemperature
+        );
         const climateDelta =
           Number.isFinite(currentTemperature) &&
           Number.isFinite(historicalTemperature)
@@ -211,7 +206,6 @@ export function useWeather(unit = "F", options = {}) {
             ? {
                 ...historicalAverage,
                 difference: climateDelta,
-                differenceF: climateDelta,
                 differenceUnit: requestDataUnit,
               }
             : null

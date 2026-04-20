@@ -199,7 +199,7 @@ function WindIntelligence({ weather, unit, weatherDataUnit = unit }) {
   );
 }
 
-function ComfortIndex({ weather, unit, convertTemp }) {
+function ComfortIndex({ weather, unit, weatherDataUnit = unit, convertTemp }) {
   const dewpoint = weather?.current?.dew_point_2m;
   const safeDewpoint = Number(dewpoint);
   const dewpointDisplay = Number.isFinite(safeDewpoint)
@@ -207,8 +207,8 @@ function ComfortIndex({ weather, unit, convertTemp }) {
     : "\u2014";
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
   const comfort = classifyComfort(
-    Number.isFinite(safeDewpoint) ? safeDewpoint : 50,
-    unit
+    safeDewpoint,
+    weatherDataUnit
   );
 
   return (
@@ -262,6 +262,7 @@ function StormWatch({ weather, unit, weatherDataUnit, convertTemp, style }) {
         <MemoizedComfortIndex
           weather={weather}
           unit={unit}
+          weatherDataUnit={weatherDataUnit}
           convertTemp={convertTemp}
         />
       </div>

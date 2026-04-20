@@ -92,7 +92,7 @@ function getDateInTimeZone(timeZone) {
   };
 }
 
-function toF(value) {
+function toNumber(value) {
   if (!Number.isFinite(value)) return null;
   return Number(value);
 }
@@ -175,9 +175,9 @@ export async function fetchHistoricalTemperatureAverage(
   for (let i = 0; i < times.length; i += 1) {
     if (!times[i]?.endsWith(targetSuffix)) continue;
 
-    const mean = toF(Number(data.daily.temperature_2m_mean?.[i]));
-    const min = toF(Number(data.daily.temperature_2m_min?.[i]));
-    const max = toF(Number(data.daily.temperature_2m_max?.[i]));
+    const mean = toNumber(Number(data.daily.temperature_2m_mean?.[i]));
+    const min = toNumber(Number(data.daily.temperature_2m_min?.[i]));
+    const max = toNumber(Number(data.daily.temperature_2m_max?.[i]));
 
     let sample = mean;
     if (!Number.isFinite(sample) && Number.isFinite(min) && Number.isFinite(max)) {
@@ -197,7 +197,6 @@ export async function fetchHistoricalTemperatureAverage(
 
   return {
     averageTemperature,
-    averageTemperatureF: averageTemperature,
     averageTemperatureUnit: temperatureUnit,
     sampleYears: sampleCount,
     referenceDateLabel: monthDayLabel,

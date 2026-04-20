@@ -49,12 +49,11 @@ function HeroCard({
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
   const windDisplay = formatWindSpeed(current.wind_speed_10m, unit, weatherDataUnit);
   const dewPoint = toDisplayTemp(current.dew_point_2m);
-  const hasClimateComparison = climateComparison
-    && (Number.isFinite(climateComparison.difference) ||
-        Number.isFinite(climateComparison.differenceF));
+  const hasClimateComparison = climateComparison &&
+    Number.isFinite(climateComparison.difference);
   const climateDeltaRaw = Number.isFinite(climateComparison?.difference)
     ? climateComparison.difference
-    : climateComparison?.differenceF;
+    : null;
   const climateDelta = hasClimateComparison
     ? convertTemp(Math.abs(Number(climateDeltaRaw)), climateComparison?.differenceUnit || "F")
     : 0;
