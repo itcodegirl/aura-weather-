@@ -1,7 +1,7 @@
 // src/components/HeroCard.jsx
 
 import { memo } from "react";
-import { MapPin, Wind, Droplets, Gauge, Eye } from "lucide-react";
+import { MapPin, Wind, Droplets, Gauge, Thermometer } from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
 import WeatherIcon from "./WeatherIcon";
 import "./HeroCard.css";
@@ -27,11 +27,7 @@ function HeroCard({ weather, location, unit, convertTemp }) {
       ? Math.round(current.wind_speed_10m)
       : Math.round(current.wind_speed_10m * 1.60934);
   const windUnit = unit === "F" ? "mph" : "km/h";
-  const visibilityMiles = current.visibility / 1609.34;
-  const visibilityLabel =
-    visibilityMiles >= 10
-      ? `${Math.round(visibilityMiles)} mi`
-      : `${visibilityMiles.toFixed(1)} mi`;
+  const dewPoint = convertTemp(current.dew_point_2m);
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -86,9 +82,9 @@ function HeroCard({ weather, location, unit, convertTemp }) {
           value={`${Math.round(current.surface_pressure)} hPa`}
         />
         <Stat
-          icon={<Eye size={18} />}
-          label="Visibility"
-          value={visibilityLabel}
+          icon={<Thermometer size={18} />}
+          label="Dew Point"
+          value={`${dewPoint}${tempUnit}`}
         />
       </div>
     </section>
