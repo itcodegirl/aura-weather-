@@ -50,7 +50,7 @@ function ArcGauge({
   const r = 44;
   const start = -140;
   const end = 100;
-  const safeValue = Number.isFinite(value) ? value.toFixed(decimals) : "—";
+  const safeValue = Number.isFinite(value) ? value.toFixed(decimals) : "\u2014";
 
   return (
     <div className="metric-gauge" aria-label={`${label} ${safeValue}`}>
@@ -132,9 +132,9 @@ function serializeClimatePreference(showClimateContext) {
 }
 
 function formatClock(value) {
-  if (!value) return "—";
+  if (!value) return "\u2014";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "\u2014";
   return date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -458,7 +458,7 @@ function App() {
 
           <section className="bento-sunlight metric-card" style={CARD_STYLE_VARIABLES[3]}>
             <span className="metric-label">Sunlight</span>
-            <div className="metric-sunline">{`Sunrise ${sunriseLabel} → Sunset ${sunsetLabel}`}</div>
+            <div className="metric-sunline">{`Sunrise ${sunriseLabel} \u2192 Sunset ${sunsetLabel}`}</div>
             {dayLengthLabel ? (
               <div className="metric-sun-length">Daylight {dayLengthLabel}</div>
             ) : null}
@@ -493,3 +493,4 @@ function App() {
 }
 
 export default App;
+

@@ -38,7 +38,7 @@ function analyzeNowcast(minutely15) {
 
   const rows = time
     .slice(normalizedStartIdx, normalizedStartIdx + NOWCAST_WINDOW_SIZE)
-    .map((timestamp, i) => {
+    .map((_, i) => {
       const idx = normalizedStartIdx + i;
       const probability = clampProbability(toFiniteNumber(precipitation_probability[idx], 0));
       const rainAmount = Math.max(toFiniteNumber(precipitation[idx], 0), 0);
@@ -48,7 +48,6 @@ function analyzeNowcast(minutely15) {
         rainAmount > 0 ||
         RAIN_WEATHER_CODES.has(code);
       return {
-        timestamp: new Date(timestamp),
         probability,
         rainAmount,
         isWet,
