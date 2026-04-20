@@ -176,6 +176,8 @@ export function useWeather(unit = "F", options = {}) {
 
       const requestDataUnit = normalizeTemperatureUnit(requestUnit);
       const apiTemperatureUnit = getApiTemperatureUnit(requestDataUnit);
+      const requestName = normalizeLocationName(name, DEFAULT_LOCATION.name);
+      const requestCountry = normalizeLocationName(country, DEFAULT_LOCATION.country);
       const requestId = requestIdRef.current + 1;
       const signature = `${safeLat},${safeLon},${requestDataUnit},${climateEnabled ? 1 : 0}`;
 
@@ -189,6 +191,13 @@ export function useWeather(unit = "F", options = {}) {
       setLoading(true);
       setError(null);
       setLocationNotice(fallbackNotice || null);
+      setLastRequest({
+        lat: safeLat,
+        lon: safeLon,
+        name: requestName,
+        country: requestCountry,
+        unit: requestDataUnit,
+      });
       setClimateComparison(null);
 
       try {
