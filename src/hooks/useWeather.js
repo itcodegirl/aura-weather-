@@ -28,6 +28,12 @@ const GEOLOCATION_TIMEOUT_MS = 5000;
 const LOCATION_FALLBACK_DELAY_MS = GEOLOCATION_TIMEOUT_MS + 1000;
 const DEFAULT_DATA_UNIT = "F";
 
+function normalizeLocationName(value, fallback = "") {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.trim();
+  return trimmed || fallback;
+}
+
 function hasGeolocationSupport() {
   return (
     typeof navigator !== "undefined" &&
@@ -206,10 +212,15 @@ export function useWeather(unit = "F", options = {}) {
         setLocation({
           lat: safeLat,
           lon: safeLon,
-          name: resolvedName,
+          name: normalizeLocationName(resolvedName, DEFAULT_LOCATION.name),
           country: country || "",
         });
-        persistLocation(safeLat, safeLon, resolvedName, country || "");
+        persistLocation(
+          safeLat,
+          safeLon,
+          normalizeLocationName(resolvedName, DEFAULT_LOCATION.name),
+          country || ""
+        );
         if (!isMountedRef.current) return;
         setClimateComparison(
           historicalAverage && Number.isFinite(climateDelta)
@@ -372,16 +383,6 @@ export function useWeather(unit = "F", options = {}) {
 
   useEffect(() => {
     const persisted = getPersistedLocation();
-    if (persisted) {
-      scheduleWeatherLoadAsync(
-        persisted.lat,
-        persisted.lon,
-        persisted.name || DEFAULT_LOCATION.name,
-        persisted.country || DEFAULT_LOCATION.country,
-        unit,
-        { fallbackNotice: SAVED_LOCATION_NOTICE }
-      );
-    } else {
       const fallbackTimer = setTimeout(() => {
         scheduleWeatherLoadAsync(
           DEFAULT_LOCATION.lat,
@@ -393,8 +394,20 @@ export function useWeather(unit = "F", options = {}) {
         );
       }, LOCATION_FALLBACK_DELAY_MS);
 
-      requestCurrentPositionWithFallback({
-        requestUnit: unit,
+      queueMicrotask(() => {
+        requestCurrentPositionWithFallback({
+          requestUnit: unit,
+          fallbackNotice: LOCATION_FALLBACK_NOTICE,
+          onSuccess: ({ coords }) => {
+            clearTimeout(fallbackTimer);
+            scheduleWeatherLoadAsync(coords.latitude, coords.longitude);
+          },
+          onFallback: () => {
+            clearTimeout(fallbackTimer);
+            loadDefaultLocation(unit, LOCATION_FALLBACK_NOTICE);
+          },
+        });
+      });
         fallbackNotice: LOCATION_FALLBACK_NOTICE,
         onSuccess: ({ latitude, longitude }) => {
           clearTimeout(fallbackTimer);
