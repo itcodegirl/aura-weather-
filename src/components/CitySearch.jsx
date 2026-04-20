@@ -1,11 +1,11 @@
 // src/components/CitySearch.jsx
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Search, MapPin, X, Loader2 } from "lucide-react";
 import { geocodeCity } from "../services/weatherApi";
 import "./CitySearch.css";
 
-export default function CitySearch({ onSelect }) {
+function CitySearch({ onSelect }, ref) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -159,6 +159,12 @@ export default function CitySearch({ onSelect }) {
     showDropdown && activeIndex >= 0 ? `city-search-option-${activeIndex}` : "";
   const resultsId = "city-search-results";
 
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+  }));
+
   return (
     <div className="city-search" ref={containerRef}>
       <div className="city-search-input-wrap">
@@ -259,3 +265,5 @@ export default function CitySearch({ onSelect }) {
     </div>
   );
 }
+
+export default forwardRef(CitySearch);

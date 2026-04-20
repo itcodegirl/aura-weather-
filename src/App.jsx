@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { CloudOff } from "lucide-react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
@@ -103,6 +103,7 @@ function formatDayLength(totalMinutes) {
 
 function App() {
   const [unit, setUnit] = useState("F");
+  const citySearchRef = useRef(null);
   const {
     weather,
     location,
@@ -149,6 +150,30 @@ function App() {
     }
     return { label: "Extreme", color: "#7f1d1d" };
   };
+
+  useEffect(() => {
+    const handleShortcut = (event) => {
+      const isMetaOrCtrl = event.metaKey || event.ctrlKey;
+      if (!isMetaOrCtrl || event.key.toLowerCase() !== "k") return;
+
+      const activeElement = event.target;
+      const isTypingTarget =
+        activeElement instanceof HTMLElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          activeElement.isContentEditable ||
+          activeElement.tagName === "SELECT");
+
+      if (isTypingTarget) return;
+
+      event.preventDefault();
+      citySearchRef.current?.focus();
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
 
   if (loading) {
     return (
@@ -228,6 +253,7 @@ function App() {
 
           <div className="app-header-actions">
             <CitySearch
+              ref={citySearchRef}
               onSelect={(city) =>
                 loadWeather(city.lat, city.lon, city.name, city.country)
               }
