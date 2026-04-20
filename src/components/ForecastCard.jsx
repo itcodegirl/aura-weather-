@@ -11,7 +11,7 @@ function parseForecastDate(isoDate) {
   return new Date(`${isoDate}T00:00:00`);
 }
 
-function DayRow({ day, weekMin, weekMax, convertTemp }) {
+function DayRow({ day, weekMin, weekMax, convertTemp, rangeGradient }) {
   const info = getWeather(day.weather_code);
   const label = formatDayLabel(day.date);
   const high = convertTemp(day.temp_max);
@@ -52,6 +52,7 @@ function DayRow({ day, weekMin, weekMax, convertTemp }) {
           style={{
             left: `${startPct}%`,
             width: `${Math.max(endPct - startPct, 3)}%`,
+            background: rangeGradient,
           }}
         />
       </div>
@@ -87,6 +88,10 @@ function ForecastCard({ weather, convertTemp, style }) {
 
   const weekMin = Math.min(...days.map((d) => d.temp_min));
   const weekMax = Math.max(...days.map((d) => d.temp_max));
+  const rangeGradientStart = weekMin <= 40 ? "#60a5fa" : "#f59e0b";
+  const rangeGradientEnd =
+    weekMax >= 95 ? "#ef4444" : weekMax >= 82 ? "#f97316" : "#fbbf24";
+  const rangeGradient = `linear-gradient(to right, ${rangeGradientStart}, ${rangeGradientEnd})`;
 
   if (!days.length) {
     return (
@@ -123,6 +128,7 @@ function ForecastCard({ weather, convertTemp, style }) {
             weekMin={weekMin}
             weekMax={weekMax}
             convertTemp={convertTemp}
+            rangeGradient={rangeGradient}
           />
         ))}
       </ul>
