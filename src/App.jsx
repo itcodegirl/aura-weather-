@@ -6,6 +6,7 @@ import { getWeather, gradientCss } from "./utils/weatherCodes";
 import HeroCard from "./components/HeroCard";
 import RainCard from "./components/RainCard";
 import ForecastCard from "./components/ForecastCard";
+import NowcastCard from "./components/NowcastCard";
 import StormWatch from "./components/StormWatch";
 import HourlyCard from "./components/HourlyCard";
 import CitySearch from "./components/CitySearch";
@@ -263,24 +264,26 @@ function App() {
           </section>
 
           <RainCard weather={weather} style={{ "--i": 3 }} />
+          <NowcastCard weather={weather} style={{ "--i": 4 }} />
           <HourlyCard
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
             chartTopColor={weatherInfo?.gradient?.[0]}
             chartBottomColor={weatherInfo?.gradient?.[1]}
-            style={{ "--i": 4 }}
+            style={{ "--i": 5 }}
           />
           <StormWatch
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
-            style={{ "--i": 5 }}
+            style={{ "--i": 6 }}
           />
           <ForecastCard
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
+            style={{ "--i": 7 }}
           />
         </main>
       </div>

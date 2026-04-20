@@ -22,6 +22,8 @@ export async function fetchWeather(lat, lon, unit = "F") {
       "temperature_2m,weather_code,precipitation_probability,precipitation,surface_pressure,cape,wind_gusts_10m",
     daily:
       "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum",
+    minutely_15:
+      "weather_code,precipitation_probability,precipitation",
     temperature_unit: "fahrenheit",
     wind_speed_unit: unit === "C" ? "kmh" : "mph",
     precipitation_unit: "inch",
