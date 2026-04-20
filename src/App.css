@@ -346,14 +346,41 @@ a:focus-visible,
   animation:
     hero-landing 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   animation-delay: calc(var(--i, 0) * 90ms);
+  --card-glass-start: rgba(255, 255, 255, 0.18);
+  --card-glass-end: rgba(255, 255, 255, 0.1);
+  --card-glass-blur: 40px;
+  --card-glass-inset: rgba(255, 255, 255, 0.22);
 }
 
 .bento-aqi {
   grid-column: span 1;
+  --card-glass-start: rgba(255, 255, 255, 0.08);
+  --card-glass-end: rgba(255, 255, 255, 0.04);
+  --card-glass-blur: 18px;
+  --card-glass-inset: rgba(255, 255, 255, 0.12);
 }
 
 .bento-uv {
   grid-column: span 1;
+  --card-glass-start: rgba(255, 255, 255, 0.08);
+  --card-glass-end: rgba(255, 255, 255, 0.04);
+  --card-glass-blur: 18px;
+  --card-glass-inset: rgba(255, 255, 255, 0.12);
+}
+
+.bento-rain,
+.rain-card {
+  --card-glass-start: rgba(255, 255, 255, 0.08);
+  --card-glass-end: rgba(255, 255, 255, 0.04);
+  --card-glass-blur: 18px;
+  --card-glass-inset: rgba(255, 255, 255, 0.12);
+}
+
+.bento-storm {
+  --card-glass-start: rgba(255, 255, 255, 0.18);
+  --card-glass-end: rgba(255, 255, 255, 0.1);
+  --card-glass-blur: 40px;
+  --card-glass-inset: rgba(255, 255, 255, 0.22);
 }
 
 .metric-card {
@@ -453,16 +480,22 @@ a:focus-visible,
   animation:
     card-slide-up 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   animation-delay: calc(var(--i, 0) * 90ms);
+  --card-glass-start: rgba(255, 255, 255, 0.12);
+  --card-glass-end: rgba(255, 255, 255, 0.06);
+  --card-glass-blur: 24px;
+  --card-glass-inset: rgba(255, 255, 255, 0.15);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.1) 100%
+    var(--card-glass-start) 0%,
+    var(--card-glass-end) 100%
   );
+  backdrop-filter: blur(var(--card-glass-blur));
+  -webkit-backdrop-filter: blur(var(--card-glass-blur));
   border: var(--border);
   border-radius: var(--radius);
   box-shadow:
     var(--shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    inset 0 1px 0 var(--card-glass-inset);
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
