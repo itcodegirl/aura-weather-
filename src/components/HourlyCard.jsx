@@ -57,7 +57,14 @@ function ChartTooltip({ active, payload, unit }) {
   );
 }
 
-function HourlyCard({ weather, unit, convertTemp, style }) {
+function HourlyCard({
+  weather,
+  unit,
+  convertTemp,
+  chartTopColor = "#fbbf24",
+  chartBottomColor = "#fbbf24",
+  style,
+}) {
   const hourlyData = useMemo(() => buildHourlyData(weather?.hourly, convertTemp), [
     weather?.hourly,
     convertTemp,
@@ -108,8 +115,12 @@ function HourlyCard({ weather, unit, convertTemp, style }) {
           >
             <defs>
               <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.7} />
-                <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
+                <stop offset="0%" stopColor={chartTopColor} stopOpacity={0.7} />
+                <stop
+                  offset="100%"
+                  stopColor={chartBottomColor}
+                  stopOpacity={0}
+                />
               </linearGradient>
             </defs>
 
@@ -157,14 +168,14 @@ function HourlyCard({ weather, unit, convertTemp, style }) {
             <Area
               type="monotone"
               dataKey="temp"
-              stroke="#fbbf24"
+              stroke={chartTopColor}
               strokeWidth={2.5}
               fill="url(#tempGradient)"
               dot={false}
               activeDot={{
                 r: 5,
                 fill: "#fff",
-                stroke: "#fbbf24",
+                stroke: chartTopColor,
                 strokeWidth: 2,
               }}
             />

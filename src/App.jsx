@@ -191,6 +191,8 @@ function App() {
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
+            chartTopColor={weatherInfo?.gradient?.[0]}
+            chartBottomColor={weatherInfo?.gradient?.[1]}
             style={{ "--i": 4 }}
           />
           <StormWatch
