@@ -143,14 +143,22 @@ export function windDirectionName(degrees) {
  * Classify wind strength (simplified Beaufort scale).
  */
 function toMph(speed, unit) {
-  if (unit === "C") {
-    return speed / WIND_SPEED_CONVERSION;
+  const safeSpeed = Number(speed);
+  if (!Number.isFinite(safeSpeed)) {
+    return Number.NaN;
   }
-  return speed;
+
+  if (unit === "C") {
+    return safeSpeed / WIND_SPEED_CONVERSION;
+  }
+  return safeSpeed;
 }
 
 export function classifyWind(speed, unit = "F") {
   const mph = toMph(speed, unit);
+  if (!Number.isFinite(mph)) {
+    return "Unknown";
+  }
 
   if (mph < 4) return "Calm";
   if (mph < 13) return "Light breeze";
