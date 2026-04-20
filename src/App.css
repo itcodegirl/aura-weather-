@@ -163,11 +163,23 @@ a:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   .ambient-blob {
     animation: none;
-    filter: blur(12px);
+    filter: blur(8px);
+    transform: none;
   }
 
   :root {
-    --card-backdrop-blur: 4px;
+    --card-backdrop-blur: 12px;
+  }
+
+  .unit-toggle,
+  .city-search-input-wrap,
+  .city-search-dropdown,
+  .chart-tooltip,
+  .metric-pill,
+  .bento > section {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: none;
   }
 }
 
