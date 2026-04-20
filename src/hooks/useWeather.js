@@ -96,6 +96,11 @@ function getPersistedLocation() {
 function persistLocation(lat, lon, name, country) {
   const coordinates = parseCoordinates(lat, lon);
   if (!coordinates) return;
+  const normalizedName = normalizeLocationName(name, DEFAULT_LOCATION.name);
+  const normalizedCountry = normalizeLocationName(
+    country,
+    DEFAULT_LOCATION.country
+  );
 
   try {
     if (typeof window === "undefined" || !window.localStorage) return;
@@ -104,8 +109,8 @@ function persistLocation(lat, lon, name, country) {
       JSON.stringify({
         lat: coordinates.latitude,
         lon: coordinates.longitude,
-        name: name || "",
-        country: country || "",
+        name: normalizedName,
+        country: normalizedCountry,
         updatedAt: new Date().toISOString(),
       })
     );
