@@ -283,14 +283,18 @@ export function useWeather(unit = "F", options = {}) {
     }) => {
       const normalizedRequestUnit = normalizeTemperatureUnit(requestUnit);
       const finishLookup = () => {
-        if (trackCurrentLookup) {
-          setIsLocatingCurrent(false);
+        if (!trackCurrentLookup || !isMountedRef.current) {
+          return;
         }
+        setIsLocatingCurrent(false);
+      };
+      const finalizeLookup = (handler, ...args) => {
+        handler?.(...args);
+        finishLookup();
       };
 
       if (!hasGeolocationSupport()) {
-        onFallback?.(normalizedRequestUnit, fallbackNotice);
-        finishLookup();
+        finalizeLookup(onFallback, normalizedRequestUnit, fallbackNotice);
         return;
       }
 
@@ -301,19 +305,15 @@ export function useWeather(unit = "F", options = {}) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           if (!isMountedRef.current) {
-            finishLookup();
             return;
           }
-          onSuccess?.(position, normalizedRequestUnit);
-          finishLookup();
+          finalizeLookup(onSuccess, position, normalizedRequestUnit);
         },
         () => {
           if (!isMountedRef.current) {
-            finishLookup();
             return;
           }
-          onFallback?.(normalizedRequestUnit, fallbackNotice);
-          finishLookup();
+          finalizeLookup(onFallback, normalizedRequestUnit, fallbackNotice);
         },
         { timeout: GEOLOCATION_TIMEOUT_MS }
       );
