@@ -49,7 +49,7 @@ function ArcGauge({
   const r = 44;
   const start = -140;
   const end = 100;
-  const safeValue = Number.isFinite(value) ? value.toFixed(decimals) : "\u2014";
+  const safeValue = Number.isFinite(value) ? value.toFixed(decimals) : "—";
 
   return (
     <div className="metric-gauge" aria-label={`${label} ${safeValue}`}>
@@ -501,4 +501,3 @@ function App() {
 }
 
 export default App;
-
