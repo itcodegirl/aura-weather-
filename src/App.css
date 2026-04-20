@@ -118,6 +118,11 @@ a:focus-visible,
   transform: translateY(0);
 }
 
+#main-content:focus-visible {
+  outline: 2px solid #f8fafc;
+  outline-offset: 8px;
+}
+
 .app {
   position: relative;
   min-height: 100vh;

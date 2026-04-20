@@ -1,6 +1,6 @@
 // src/components/StormWatch.jsx
 
-import { memo } from "react";
+import { memo, useId } from "react";
 import {
   Zap,
   TrendingUp,
@@ -20,7 +20,7 @@ import {
 import { formatWindSpeed } from "../utils/windUnits";
 import "./StormWatch.css";
 
-function StormRisk({ weather }) {
+function StormRisk({ weather, summaryId }) {
   const cape = Number(weather?.hourly?.cape?.[0]);
   const safeCape = Number.isFinite(cape) ? cape : 0;
   const currentCode = weather?.current?.weather_code ?? 0;
@@ -37,11 +37,11 @@ function StormRisk({ weather }) {
         className="storm-level"
         style={{ color: risk.color }}
         aria-label={risk.level}
-        aria-describedby="storm-risk-summary"
+        aria-describedby={summaryId}
       >
         {risk.level}
       </div>
-      <div id="storm-risk-summary" className="storm-risk-accessibility">
+      <div id={summaryId} className="storm-risk-accessibility">
         {stormRiskSummary}
       </div>
       <div className="storm-risk-meter" aria-hidden="true">
@@ -242,6 +242,7 @@ const MemoizedWindIntelligence = memo(WindIntelligence);
 const MemoizedComfortIndex = memo(ComfortIndex);
 
 function StormWatch({ weather, unit, weatherDataUnit, convertTemp, style }) {
+  const stormRiskSummaryId = useId();
   const overviewCape = Number(weather?.hourly?.cape?.[0]);
   const safeOverviewCape = Number.isFinite(overviewCape) ? overviewCape : 0;
   const overviewRisk = classifyStormRisk(
@@ -285,7 +286,7 @@ function StormWatch({ weather, unit, weatherDataUnit, convertTemp, style }) {
       </div>
 
       <div className="storm-grid">
-        <MemoizedStormRisk weather={weather} />
+        <MemoizedStormRisk weather={weather} summaryId={stormRiskSummaryId} />
         <MemoizedPressureTrend weather={weather} />
         <MemoizedWindIntelligence
           weather={weather}

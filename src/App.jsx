@@ -452,6 +452,7 @@ function App() {
           className="bento"
           id="main-content"
           aria-busy={isBackgroundLoading}
+          tabIndex={-1}
         >
           <p
             id={GROUP_LABEL_IDS.currentConditions}

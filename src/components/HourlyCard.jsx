@@ -1,6 +1,6 @@
 // src/components/HourlyCard.jsx
 
-import { memo, useMemo } from "react";
+import { memo, useId, useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -107,6 +107,10 @@ function HourlyCard({
   style,
 }) {
   const currentWeatherCode = weather?.current?.weather_code;
+  const chartId = useId();
+  const chartTitleId = `${chartId}-title`;
+  const chartSummaryId = `${chartId}-summary`;
+  const chartGradientId = `${chartId}-temp-gradient`.replace(/:/g, "");
   const hourlyData = useMemo(() => buildHourlyData(weather?.hourly, convertTemp), [
     weather?.hourly,
     convertTemp,
@@ -127,17 +131,18 @@ function HourlyCard({
       <section
         className="bento-chart hourly-chart"
         style={style}
-        aria-label="Hourly temperature chart"
+        aria-labelledby={chartTitleId}
+        aria-describedby={chartSummaryId}
       >
         <header className="chart-header">
-          <h2 className="chart-title">
+          <h2 id={chartTitleId} className="chart-title">
             <LineIcon size={16} />
             <span>Hourly Temperature</span>
           </h2>
           <span className="chart-subtitle">Next 24h</span>
         </header>
 
-      <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
+        <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
           <p className="loader-text" role="status" aria-live="polite">
             Hourly temperature data is temporarily unavailable.
           </p>
@@ -166,24 +171,31 @@ function HourlyCard({
   const nowLabel = data[0]?.label;
 
   return (
-      <section className="bento-chart hourly-chart" style={style}>
-        <header className="chart-header">
-          <h2 className="chart-title">
-            <LineIcon size={16} />
-            <span>Hourly Temperature</span>
-          </h2>
-          <span className="chart-subtitle">Next 24h</span>
-        </header>
+    <section
+      className="bento-chart hourly-chart"
+      style={style}
+      aria-labelledby={chartTitleId}
+      aria-describedby={chartSummaryId}
+    >
+      <header className="chart-header">
+        <h2 id={chartTitleId} className="chart-title">
+          <LineIcon size={16} />
+          <span>Hourly Temperature</span>
+        </h2>
+        <span className="chart-subtitle">Next 24h</span>
+      </header>
 
       <div className="chart-body">
-        <p className="sr-only">{chartSummary}</p>
+        <p id={chartSummaryId} className="sr-only">
+          {chartSummary}
+        </p>
         <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={180}>
           <AreaChart
             data={data}
             margin={{ top: 20, right: 16, left: 0, bottom: 0 }}
           >
             <defs>
-              <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={topColor} stopOpacity={0.7} />
                 <stop
                   offset="100%"
@@ -221,25 +233,27 @@ function HourlyCard({
               }}
             />
 
-            <ReferenceLine
-              x={nowLabel}
-              stroke="rgba(255,255,255,0.4)"
-              strokeDasharray="3 3"
-              label={{
-                value: "Now",
-                position: "top",
-                fill: "rgba(255,255,255,0.75)",
-                fontSize: 10,
-                fontWeight: 600,
-              }}
-            />
+            {nowLabel ? (
+              <ReferenceLine
+                x={nowLabel}
+                stroke="rgba(255,255,255,0.4)"
+                strokeDasharray="3 3"
+                label={{
+                  value: "Now",
+                  position: "top",
+                  fill: "rgba(255,255,255,0.75)",
+                  fontSize: 10,
+                  fontWeight: 600,
+                }}
+              />
+            ) : null}
 
             <Area
               type="monotone"
               dataKey="temp"
               stroke={topColor}
               strokeWidth={2.5}
-              fill="url(#tempGradient)"
+              fill={`url(#${chartGradientId})`}
               dot={false}
               activeDot={{
                 r: 5,
