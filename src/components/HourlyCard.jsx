@@ -25,7 +25,11 @@ function buildHourlyData(hourly, convertTemp) {
   }
 
   const now = new Date();
-  const startIdx = hourly.time.findIndex((t) => new Date(t) >= now);
+  const nowMs = now.getTime();
+  const startIdx = hourly.time.findIndex((t) => {
+    const timestamp = new Date(t).getTime();
+    return Number.isFinite(timestamp) && timestamp >= nowMs;
+  });
   const idx = startIdx === -1 ? 0 : startIdx;
 
   return hourly.time

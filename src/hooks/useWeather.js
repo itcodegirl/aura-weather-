@@ -211,7 +211,7 @@ export function useWeather(unit = "F", options = {}) {
       if (!isMountedRef.current) return;
       setLoading(true);
       setError(null);
-      setLocationNotice(fallbackNotice || null);
+      setLocationNotice(fallbackNotice ?? null);
       setLastRequest({
         lat: safeLat,
         lon: safeLon,
