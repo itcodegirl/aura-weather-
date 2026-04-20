@@ -56,7 +56,12 @@ function CitySearch({ onSelect }, ref) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const showDropdown = open && (loading || results.length > 0 || error);
+  const showDropdown =
+    open &&
+    (loading ||
+      results.length > 0 ||
+      error ||
+      query.length >= MIN_SEARCH_QUERY_LENGTH);
 
   useEffect(() => {
     if (!showDropdown || results.length === 0) {
