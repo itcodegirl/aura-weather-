@@ -1,4 +1,4 @@
-﻿import { useCallback, useRef, useEffect, useState } from "react";
+﻿import { useCallback, useRef, useEffect, useState, lazy, Suspense } from "react";
 import { CloudOff } from "lucide-react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
@@ -8,10 +8,11 @@ import HeroCard from "./components/HeroCard";
 import RainCard from "./components/RainCard";
 import ForecastCard from "./components/ForecastCard";
 import NowcastCard from "./components/NowcastCard";
-import StormWatch from "./components/StormWatch";
-import HourlyCard from "./components/HourlyCard";
 import CitySearch from "./components/CitySearch";
 import WeatherIcon from "./components/WeatherIcon";
+
+const StormWatch = lazy(() => import("./components/StormWatch"));
+const HourlyCard = lazy(() => import("./components/HourlyCard"));
 
 function clamp(value, min, max) {
   const numeric = Number(value);
@@ -88,6 +89,16 @@ const GROUP_LABEL_STYLE_VARIABLES = [
   { "--group-i": 2 },
   { "--group-i": 3 },
 ];
+
+function CardFallback({ className, style, title }) {
+  return (
+    <section className={`${className} loading-card`} style={style}>
+      <p className="loading-card-title" role="status" aria-live="polite">
+        {title}
+      </p>
+    </section>
+  );
+}
 
 const DEFAULT_UNIT = "F";
 const CLIMATE_CONTEXT_DEFAULT = true;
@@ -570,24 +581,44 @@ function App() {
             style={CARD_STYLE_VARIABLES[4]}
           />
           <NowcastCard weather={weather} style={CARD_STYLE_VARIABLES[5]} />
-          <HourlyCard
-            weather={weather}
-            unit={unit}
-            convertTemp={convertTemp}
-            chartTopColor={weatherInfo?.gradient?.[0]}
-            chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
-            style={CARD_STYLE_VARIABLES[6]}
-          />
+          <Suspense
+            fallback={
+              <CardFallback
+                className="bento-chart"
+                style={CARD_STYLE_VARIABLES[6]}
+                title="Loading hourly outlook..."
+              />
+            }
+          >
+            <HourlyCard
+              weather={weather}
+              unit={unit}
+              convertTemp={convertTemp}
+              chartTopColor={weatherInfo?.gradient?.[0]}
+              chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
+              style={CARD_STYLE_VARIABLES[6]}
+            />
+          </Suspense>
           <p className="bento-group-label" style={GROUP_LABEL_STYLE_VARIABLES[2]}>
             Risk Signals
           </p>
-          <StormWatch
-            weather={weather}
-            unit={unit}
-            weatherDataUnit={weatherDataUnit}
-            convertTemp={convertTemp}
-            style={CARD_STYLE_VARIABLES[7]}
-          />
+          <Suspense
+            fallback={
+              <CardFallback
+                className="bento-storm"
+                style={CARD_STYLE_VARIABLES[7]}
+                title="Loading risk signals..."
+              />
+            }
+          >
+            <StormWatch
+              weather={weather}
+              unit={unit}
+              weatherDataUnit={weatherDataUnit}
+              convertTemp={convertTemp}
+              style={CARD_STYLE_VARIABLES[7]}
+            />
+          </Suspense>
           <p className="bento-group-label" style={GROUP_LABEL_STYLE_VARIABLES[3]}>
             Week Ahead
           </p>
@@ -604,6 +635,7 @@ function App() {
 }
 
 export default App;
+
 
 
 
