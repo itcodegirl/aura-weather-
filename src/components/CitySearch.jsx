@@ -9,10 +9,20 @@ import {
 } from "react";
 import { Search, MapPin, X, Loader2 } from "lucide-react";
 import { geocodeCity } from "../services/weatherApi";
+import { parseCoordinates } from "../utils/weatherUnits";
 import "./CitySearch.css";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const MIN_SEARCH_QUERY_LENGTH = 2;
+
+function getCityKey(city, index) {
+  const lat = Number(city?.latitude);
+  const lon = Number(city?.longitude);
+  const cityId = city?.id || city?.name || "unknown";
+  const safeLat = Number.isFinite(lat) ? lat : "na";
+  const safeLon = Number.isFinite(lon) ? lon : "na";
+  return `${safeLat}:${safeLon}:${cityId}:${index}`;
+}
 
 function CitySearch({ onSelect }, ref) {
   const [query, setQuery] = useState("");
@@ -84,7 +94,7 @@ function CitySearch({ onSelect }, ref) {
         isMountedRef.current &&
         currentRequest === requestIdRef.current
       ) {
-        setResults(cities);
+        setResults(Array.isArray(cities) ? cities : []);
         setError(null);
       }
     } catch (error) {
@@ -133,11 +143,21 @@ function CitySearch({ onSelect }, ref) {
   };
 
   const handleSelect = (city) => {
+    if (typeof onSelect !== "function") {
+      return;
+    }
+
+    const coordinates = parseCoordinates(city?.latitude, city?.longitude);
+    if (!coordinates) {
+      setError("Unable to select this city");
+      return;
+    }
+
     onSelect({
-      lat: city.latitude,
-      lon: city.longitude,
-      name: city.name,
-      country: city.country || "",
+      lat: coordinates.latitude,
+      lon: coordinates.longitude,
+      name: typeof city?.name === "string" ? city.name.trim() : "",
+      country: typeof city?.country === "string" ? city.country.trim() : "",
     });
     setQuery("");
     setResults([]);
@@ -287,7 +307,7 @@ function CitySearch({ onSelect }, ref) {
           {!loading &&
             results.map((city, index) => (
               <li
-                key={`${city.latitude}-${city.longitude}-${city.id || city.name}`}
+                key={getCityKey(city, index)}
                 id={`city-search-option-${index}`}
                 role="option"
                 aria-selected={index === activeIndexSafe}
