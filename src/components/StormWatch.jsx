@@ -15,9 +15,7 @@ import "./StormWatch.css";
 function StormRisk({ weather }) {
   const cape = weather.hourly.cape?.[0] || 0;
   const risk = classifyStormRisk(cape, weather.current.weather_code);
-  const stormRiskSummary = `Storm risk: ${risk.level}; level ${
-    risk.score + 1
-  } of 5 based on current conditions.`;
+  const stormRiskSummary = `Storm risk: ${risk.level}; level ${risk.score + 1} of 5 based on current conditions.`;
 
   return (
     <div className="storm-module">
@@ -149,12 +147,73 @@ function WindIntelligence({ weather, unit }) {
           <span className="wind-compass-label wind-compass-e">E</span>
           <span className="wind-compass-label wind-compass-s">S</span>
           <span className="wind-compass-label wind-compass-w">W</span>
-          <div
+          <svg
             className="wind-compass-arrow"
-            style={{ transform: `rotate(${(wind_direction_10m || 0) + 180}deg)` }}
+            viewBox="0 0 72 72"
+            aria-hidden="true"
+            style={{
+              transform: `translate(-50%, -50%) rotate(${(wind_direction_10m || 0) + 180}deg)`,
+            }}
           >
-            ▲
-          </div>
+            <g transform="translate(36 36)">
+              <path d="M0 -31 L6 -20 L0 -10 L-6 -20 Z" fill="#ffffff" />
+              <path
+                d="M0 -10 L13 4 L0 14 L-13 4 Z"
+                fill="rgba(255,255,255,0.46)"
+              />
+              <path
+                d="M0 -20 L0 14"
+                stroke="rgba(255,255,255,0.72)"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />
+              <line
+                x1="-1"
+                y1="16"
+                x2="1"
+                y2="32"
+                stroke="rgba(255,255,255,0.18)"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <line
+                x1="-4"
+                y1="20"
+                x2="0"
+                y2="32"
+                stroke="rgba(255,255,255,0.12)"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+              <line
+                x1="4"
+                y1="20"
+                x2="0"
+                y2="32"
+                stroke="rgba(255,255,255,0.12)"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+              <line
+                x1="-2"
+                y1="32"
+                x2="2"
+                y2="32"
+                stroke="rgba(255,255,255,0.2)"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <line
+                x1="-2"
+                y1="29"
+                x2="2"
+                y2="29"
+                stroke="rgba(255,255,255,0.13)"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </g>
+          </svg>
         </div>
       </div>
 
@@ -171,8 +230,8 @@ function WindIntelligence({ weather, unit }) {
 function ComfortIndex({ weather, unit, convertTemp }) {
   const dewpoint = weather.current.dew_point_2m;
   const dewpointDisplay = convertTemp(dewpoint);
-  const tempUnit = unit === "F" ? "°F" : "°C";
-  const comfort = classifyComfort(dewpoint); // thresholds always in °F
+  const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
+  const comfort = classifyComfort(dewpoint); // thresholds always in \u00B0F
 
   return (
     <div className="storm-module">
@@ -217,10 +276,7 @@ function StormWatch({ weather, unit, convertTemp, style }) {
       <div className="storm-grid">
         <MemoizedStormRisk weather={weather} />
         <MemoizedPressureTrend weather={weather} />
-        <MemoizedWindIntelligence
-          weather={weather}
-          unit={unit}
-        />
+        <MemoizedWindIntelligence weather={weather} unit={unit} />
         <MemoizedComfortIndex
           weather={weather}
           unit={unit}
