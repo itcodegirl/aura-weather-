@@ -85,6 +85,15 @@
   gap: 8px;
 }
 
+.rain-history-heading {
+  margin-top: 4px;
+  color: var(--text-dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
 .rain-stat {
   display: flex;
   align-items: center;

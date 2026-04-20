@@ -29,7 +29,7 @@ export async function fetchWeather(lat, lon, unit = "F") {
     precipitation_unit: "inch",
     timezone: "auto",
     forecast_days: "7",
-    past_hours: "6",
+    past_hours: "48",
   });
 
   const res = await fetch(`${ENDPOINTS.weather}?${params}`, {

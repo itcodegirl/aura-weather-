@@ -14,6 +14,9 @@ function analyzeRain(hourly) {
       total: 0,
       soFarToday: 0,
       peakAmount: 0,
+      past12h: 0,
+      past24h: 0,
+      past48h: 0,
     };
   }
 
@@ -34,7 +37,6 @@ function analyzeRain(hourly) {
   );
   const total = hours.reduce((sum, h) => sum + h.amount, 0);
 
-  // How much has already fallen today (midnight → now)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStartIdx = hourly.time.findIndex((t) => new Date(t) >= today);
@@ -47,7 +49,30 @@ function analyzeRain(hourly) {
 
   const peakAmount = Math.max(...hours.map((h) => h.amount));
 
-  return { hours, nextRain, peak, total, soFarToday, peakAmount };
+  const sumPastHours = (hoursBack) => {
+    const start = Math.max(0, idx - hoursBack);
+    let sum = 0;
+    for (let i = start; i < idx; i++) {
+      sum += hourly.precipitation[i] || 0;
+    }
+    return sum;
+  };
+
+  const past12h = sumPastHours(12);
+  const past24h = sumPastHours(24);
+  const past48h = sumPastHours(48);
+
+  return {
+    hours,
+    nextRain,
+    peak,
+    total,
+    soFarToday,
+    peakAmount,
+    past12h,
+    past24h,
+    past48h,
+  };
 }
 
 function formatHour(date) {
@@ -57,7 +82,17 @@ function formatHour(date) {
 function RainCard({ weather, style }) {
   const [mode, setMode] = useState("chance");
   const rainAnalysis = useMemo(() => analyzeRain(weather?.hourly), [weather?.hourly]);
-  const { hours, nextRain, peak, total, soFarToday, peakAmount } = rainAnalysis;
+  const {
+    hours,
+    nextRain,
+    peak,
+    total,
+    soFarToday,
+    peakAmount,
+    past12h,
+    past24h,
+    past48h,
+  } = rainAnalysis;
 
   const isDry = peak.probability < 20 && total < 0.01;
 
@@ -113,14 +148,14 @@ function RainCard({ weather, style }) {
             <div className="rain-stat">
               <Droplets size={14} />
               <div>
-                <div className="rain-stat-value">{soFarToday.toFixed(2)}″</div>
+                <div className="rain-stat-value">{soFarToday.toFixed(2)} in</div>
                 <div className="rain-stat-label">So far today</div>
               </div>
             </div>
             <div className="rain-stat">
               <CloudRain size={14} />
               <div>
-                <div className="rain-stat-value">{total.toFixed(2)}″</div>
+                <div className="rain-stat-value">{total.toFixed(2)} in</div>
                 <div className="rain-stat-label">Next 24h total</div>
               </div>
             </div>
@@ -129,6 +164,31 @@ function RainCard({ weather, style }) {
               <div>
                 <div className="rain-stat-value">{peak.probability}%</div>
                 <div className="rain-stat-label">Peak {formatHour(peak.time)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rain-history-heading">Precipitation history</div>
+          <div className="rain-stats rain-history-grid">
+            <div className="rain-stat">
+              <Droplets size={14} />
+              <div>
+                <div className="rain-stat-value">{past12h.toFixed(2)} in</div>
+                <div className="rain-stat-label">Past 12h</div>
+              </div>
+            </div>
+            <div className="rain-stat">
+              <Droplets size={14} />
+              <div>
+                <div className="rain-stat-value">{past24h.toFixed(2)} in</div>
+                <div className="rain-stat-label">Past 24h</div>
+              </div>
+            </div>
+            <div className="rain-stat">
+              <Droplets size={14} />
+              <div>
+                <div className="rain-stat-value">{past48h.toFixed(2)} in</div>
+                <div className="rain-stat-label">Past 48h</div>
               </div>
             </div>
           </div>
@@ -162,7 +222,7 @@ function RainCard({ weather, style }) {
           const tooltip =
             mode === "chance"
               ? `${formatHour(h.time)} — ${h.probability}%`
-              : `${formatHour(h.time)} — ${h.amount.toFixed(2)}″`;
+              : `${formatHour(h.time)} — ${h.amount.toFixed(2)} in`;
 
           return (
             <div
