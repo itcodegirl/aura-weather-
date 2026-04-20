@@ -65,10 +65,14 @@ const iconColors = {
 };
 
 export default function WeatherIcon({ code, size = 24, className = "", animated = false }) {
-  const Icon = iconMap[code] || Sun;
-  const color = iconColors[code] || "#fbbf24";
-  const isSunny = code === 0 || code === 1;
-  const isCloudy = [2, 3, 45, 48].includes(code);
+  const weatherCode = Number(code);
+  const normalizedCode = Number.isFinite(weatherCode) ? weatherCode : 0;
+  const iconKey = normalizedCode.toString();
+
+  const Icon = iconMap[iconKey] || iconMap[0];
+  const color = iconColors[iconKey] || iconColors[0];
+  const isSunny = normalizedCode === 0 || normalizedCode === 1;
+  const isCloudy = [2, 3, 45, 48].includes(normalizedCode);
   const animatedVariant = isSunny
     ? "weather-icon--sun"
     : isCloudy
