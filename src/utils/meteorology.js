@@ -1,34 +1,44 @@
-// src/utils/meteorology.js
+﻿// src/utils/meteorology.js
 
-import { toFahrenheit, WIND_SPEED_CONVERSION } from "./weatherUnits";
+import { toFahrenheit, WIND_SPEED_CONVERSION } from "./weatherUnits.js";
 
 /**
  * Classify storm risk using CAPE (Convective Available Potential Energy).
- * CAPE is the key metric meteorologists use to assess atmospheric instability.
+ * CAPE is a key metric used to assess atmospheric instability.
  *
- *   <100   Minimal — stable air
- *   100-500   Low
- *   500-1500  Moderate — thunderstorms possible
- *   1500-2500 High — strong storms likely
- *   >2500   Severe — tornado-favorable conditions
+ *   <100       Minimal - stable air
+ *   100-500    Low
+ *   500-1500   Moderate - thunderstorms possible
+ *   1500-2500  High - strong storms likely
+ *   >2500      Severe - tornado-favorable conditions
  */
 export function classifyStormRisk(cape, weatherCode) {
   const capeValue = Number(cape);
   const normalizedCape = Number.isFinite(capeValue) ? capeValue : 0;
   const codeValue = Number(weatherCode);
-  const normalizedCode = Number.isFinite(codeValue) ? Math.trunc(codeValue) : Number.NaN;
+  const normalizedCode = Number.isFinite(codeValue)
+    ? Math.trunc(codeValue)
+    : Number.NaN;
   const isStormCode = [95, 96, 99].includes(normalizedCode);
 
-  if (isStormCode || normalizedCape >= 2500) return { level: "Severe", color: "#dc2626", score: 4 };
-  if (normalizedCape >= 1500) return { level: "High", color: "#f97316", score: 3 };
-  if (normalizedCape >= 500) return { level: "Moderate", color: "#eab308", score: 2 };
-  if (normalizedCape >= 100) return { level: "Low", color: "#22c55e", score: 1 };
+  if (isStormCode || normalizedCape >= 2500) {
+    return { level: "Severe", color: "#dc2626", score: 4 };
+  }
+  if (normalizedCape >= 1500) {
+    return { level: "High", color: "#f97316", score: 3 };
+  }
+  if (normalizedCape >= 500) {
+    return { level: "Moderate", color: "#eab308", score: 2 };
+  }
+  if (normalizedCape >= 100) {
+    return { level: "Low", color: "#22c55e", score: 1 };
+  }
   return { level: "Minimal", color: "#38bdf8", score: 0 };
 }
 
 /**
  * Calculate barometric pressure trend over the last 6 hours.
- * Falling pressure = storm approaching. Rising = clearing.
+ * Falling pressure suggests storm approach; rising pressure suggests clearing.
  */
 export function calculatePressureTrend(hourlyPressure, hourlyTime) {
   if (
@@ -75,7 +85,8 @@ export function calculatePressureTrend(hourlyPressure, hourlyTime) {
   const current = paired[currentIdx]?.value ?? paired[paired.length - 1]?.value;
   const delta = current - sixHoursAgo;
 
-  let direction, interpretation;
+  let direction;
+  let interpretation;
   if (delta > 1.5) {
     direction = "rising";
     interpretation = "Clearing";
@@ -99,14 +110,15 @@ export function calculatePressureTrend(hourlyPressure, hourlyTime) {
 }
 
 /**
- * Classify comfort using dewpoint (a better humidity metric than relative humidity).
- *   <50°F   Dry / crisp
- *   50-55  Comfortable
- *   55-60  Pleasant
- *   60-65  Sticky
- *   65-70  Humid
- *   70-75  Oppressive
- *   >75  Miserable (tropical)
+ * Classify comfort using dewpoint (a stronger humidity signal than RH).
+ *
+ *   <50 degF  Dry / crisp
+ *   50-55     Comfortable
+ *   55-60     Pleasant
+ *   60-65     Sticky
+ *   65-70     Humid
+ *   70-75     Oppressive
+ *   >75       Miserable (tropical)
  */
 export function classifyComfort(dewpoint, unit = "F") {
   const thresholdValue = toFahrenheit(dewpoint, unit);
@@ -115,11 +127,15 @@ export function classifyComfort(dewpoint, unit = "F") {
   }
 
   if (thresholdValue < 50) return { level: "Dry", color: "#38bdf8", position: 10 };
-  if (thresholdValue < 55) return { level: "Comfortable", color: "#22c55e", position: 30 };
+  if (thresholdValue < 55) {
+    return { level: "Comfortable", color: "#22c55e", position: 30 };
+  }
   if (thresholdValue < 60) return { level: "Pleasant", color: "#84cc16", position: 45 };
   if (thresholdValue < 65) return { level: "Sticky", color: "#eab308", position: 60 };
   if (thresholdValue < 70) return { level: "Humid", color: "#f97316", position: 75 };
-  if (thresholdValue < 75) return { level: "Oppressive", color: "#dc2626", position: 88 };
+  if (thresholdValue < 75) {
+    return { level: "Oppressive", color: "#dc2626", position: 88 };
+  }
   return { level: "Miserable", color: "#991b1b", position: 98 };
 }
 
