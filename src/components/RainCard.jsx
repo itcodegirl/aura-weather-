@@ -6,7 +6,7 @@ import WeatherIcon from "./WeatherIcon";
 import "./RainCard.css";
 
 function analyzeRain(hourly) {
-  if (!hourly?.time?.length || !hourly?.precipitation_probability?.length) {
+  if (!Array.isArray(hourly?.time) || !hourly.time.length) {
     return {
       hours: [],
       nextRain: null,
@@ -20,15 +20,45 @@ function analyzeRain(hourly) {
     };
   }
 
+  const hourlyTimes = hourly.time;
+  const hourlyProbabilities = Array.isArray(hourly.precipitation_probability)
+    ? hourly.precipitation_probability
+    : [];
+  const hourlyAmounts = Array.isArray(hourly.precipitation)
+    ? hourly.precipitation
+    : [];
+
   const now = new Date();
-  const startIdx = hourly.time.findIndex((t) => new Date(t) >= now);
+  const startIdx = hourlyTimes.findIndex((t) => new Date(t) >= now);
   const idx = startIdx === -1 ? 0 : startIdx;
 
-  const hours = hourly.time.slice(idx, idx + 24).map((t, i) => ({
-    time: new Date(t),
-    probability: hourly.precipitation_probability[idx + i] || 0,
-    amount: hourly.precipitation[idx + i] || 0,
-  }));
+  const hours = hourlyTimes
+    .slice(idx, idx + 24)
+    .map((timeString, i) => {
+      const probability = Number(hourlyProbabilities[idx + i] || 0);
+      const amount = Number(hourlyAmounts[idx + i] || 0);
+
+      return {
+        time: new Date(timeString),
+        probability: Number.isFinite(probability) ? probability : 0,
+        amount: Number.isFinite(amount) ? amount : 0,
+      };
+    })
+    .filter((entry) => Number.isFinite(entry.time.getTime()));
+
+  if (!hours.length) {
+    return {
+      hours,
+      nextRain: null,
+      peak: { probability: 0, time: new Date(), amount: 0 },
+      total: 0,
+      soFarToday: 0,
+      peakAmount: 0,
+      past12h: 0,
+      past24h: 0,
+      past48h: 0,
+    };
+  }
 
   const nextRain = hours.find((h) => h.probability >= 40);
   const peak = hours.reduce(
@@ -42,8 +72,9 @@ function analyzeRain(hourly) {
   const todayStartIdx = hourly.time.findIndex((t) => new Date(t) >= today);
   let soFarToday = 0;
   if (todayStartIdx !== -1) {
-    for (let i = todayStartIdx; i < idx; i++) {
-      soFarToday += hourly.precipitation[i] || 0;
+    for (let i = todayStartIdx; i < idx; i += 1) {
+      const amount = Number(hourlyAmounts[i] || 0);
+      soFarToday += Number.isFinite(amount) ? amount : 0;
     }
   }
 
@@ -52,8 +83,11 @@ function analyzeRain(hourly) {
   const sumPastHours = (hoursBack) => {
     const start = Math.max(0, idx - hoursBack);
     let sum = 0;
-    for (let i = start; i < idx; i++) {
-      sum += hourly.precipitation[i] || 0;
+    for (let i = start; i < idx; i += 1) {
+      const amount = Number(hourlyAmounts[i] || 0);
+      if (Number.isFinite(amount)) {
+        sum += amount;
+      }
     }
     return sum;
   };
@@ -221,8 +255,8 @@ function RainCard({ weather, style }) {
 
           const tooltip =
             mode === "chance"
-              ? `${formatHour(h.time)} — ${h.probability}%`
-              : `${formatHour(h.time)} — ${h.amount.toFixed(2)} in`;
+              ? `${formatHour(h.time)} \u2014 ${h.probability}%`
+              : `${formatHour(h.time)} \u2014 ${h.amount.toFixed(2)} in`;
 
           return (
             <div

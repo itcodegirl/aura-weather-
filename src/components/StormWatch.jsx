@@ -21,8 +21,10 @@ import { formatWindSpeed } from "../utils/windUnits";
 import "./StormWatch.css";
 
 function StormRisk({ weather }) {
-  const cape = weather.hourly.cape?.[0] || 0;
-  const risk = classifyStormRisk(cape, weather.current.weather_code);
+  const cape = Number(weather?.hourly?.cape?.[0]);
+  const safeCape = Number.isFinite(cape) ? cape : 0;
+  const currentCode = weather?.current?.weather_code ?? 0;
+  const risk = classifyStormRisk(safeCape, currentCode);
   const stormRiskSummary = `Storm risk: ${risk.level}; level ${risk.score + 1} of 5 based on current conditions.`;
 
   return (
@@ -55,7 +57,7 @@ function StormRisk({ weather }) {
       </div>
       <div className="storm-detail">
         <span className="storm-detail-label">CAPE</span>
-        <span className="storm-detail-value">{Math.round(cape)} J/kg</span>
+        <span className="storm-detail-value">{Math.round(safeCape)} J/kg</span>
       </div>
     </div>
   );
@@ -63,12 +65,15 @@ function StormRisk({ weather }) {
 
 function PressureTrend({ weather }) {
   const trend = calculatePressureTrend(
-    weather.hourly.surface_pressure,
-    weather.hourly.time
+    weather?.hourly?.surface_pressure,
+    weather?.hourly?.time
   );
-  const trendLabel = `Pressure trend chart: ${trend.interpretation}, current value ${Math.round(
-    trend.current
-  )} hPa, ${trend.delta >= 0 ? "+" : ""}${trend.delta.toFixed(1)} hPa over 6 hours.`;
+  const hasCurrent = Number.isFinite(trend.current);
+  const trendLabel = hasCurrent
+    ? `Pressure trend chart: ${trend.interpretation}, current value ${Math.round(
+        trend.current
+      )} hPa, ${trend.delta >= 0 ? "+" : ""}${trend.delta.toFixed(1)} hPa over 6 hours.`
+    : "Pressure trend unavailable.";
 
   const Icon =
     trend.direction === "rising"
@@ -84,12 +89,16 @@ function PressureTrend({ weather }) {
         ? "#f97316"
         : "#94a3b8";
 
-  const max = Math.max(...trend.sparkline);
-  const min = Math.min(...trend.sparkline);
+  const safeSparkline = Array.isArray(trend.sparkline) && trend.sparkline.length
+    ? trend.sparkline
+    : [trend.current ?? 0];
+  const max = Math.max(...safeSparkline);
+  const min = Math.min(...safeSparkline);
   const range = max - min || 1;
-  const points = trend.sparkline
+  const points = safeSparkline
     .map((val, i) => {
-      const x = (i / (trend.sparkline.length - 1)) * 100;
+      const divisor = safeSparkline.length - 1 || 1;
+      const x = (i / divisor) * 100;
       const y = 100 - ((val - min) / range) * 100;
       return `${x},${y}`;
     })
@@ -122,10 +131,13 @@ function PressureTrend({ weather }) {
         />
       </svg>
       <div className="storm-detail">
-        <span className="storm-detail-label">{Math.round(trend.current)} hPa</span>
+        <span className="storm-detail-label">
+          {hasCurrent ? `${Math.round(trend.current)} hPa` : "No data"}
+        </span>
         <span className="storm-detail-value" style={{ color: trendColor }}>
-          {trend.delta > 0 ? "+" : ""}
-          {trend.delta.toFixed(1)} / 6h
+          {hasCurrent
+            ? `${trend.delta > 0 ? "+" : ""}${trend.delta.toFixed(1)} / 6h`
+            : "Unavailable"}
         </span>
       </div>
     </div>
@@ -133,12 +145,21 @@ function PressureTrend({ weather }) {
 }
 
 function WindIntelligence({ weather, unit }) {
-  const { wind_speed_10m, wind_gusts_10m, wind_direction_10m } = weather.current;
-  const sustained = Math.round(wind_speed_10m);
+  const current = weather?.current || {};
+  const wind_speed_10m = current.wind_speed_10m;
+  const wind_gusts_10m = current.wind_gusts_10m;
+  const wind_direction_10m = current.wind_direction_10m;
+  const safeWindSpeed = Number(wind_speed_10m);
+  const safeWindGusts = Number(wind_gusts_10m);
+  const safeDirection = Number(wind_direction_10m);
+  const sustained = Number.isFinite(safeWindSpeed) ? Math.round(safeWindSpeed) : 0;
 
-  const sustainedDisplay = formatWindSpeed(wind_speed_10m, unit);
-  const gustsDisplay = formatWindSpeed(wind_gusts_10m || wind_speed_10m, unit);
-  const direction = windDirectionName(wind_direction_10m || 0);
+  const sustainedDisplay = formatWindSpeed(safeWindSpeed, unit);
+  const gustsDisplay = formatWindSpeed(
+    Number.isFinite(safeWindGusts) ? safeWindGusts : safeWindSpeed,
+    unit
+  );
+  const direction = windDirectionName(Number.isFinite(safeDirection) ? safeDirection : 0);
   const strength = classifyWind(sustained, unit);
 
   return (
@@ -159,7 +180,7 @@ function WindIntelligence({ weather, unit }) {
             className="wind-compass-arrow"
             aria-hidden="true"
             style={{
-              transform: `translate(-50%, -50%) rotate(${(wind_direction_10m || 0) + 180}deg)`,
+              transform: `translate(-50%, -50%) rotate(${(safeDirection || 0) + 180}deg)`,
             }}
           >
             <ArrowUp size={16} strokeWidth={2.3} />
@@ -178,10 +199,13 @@ function WindIntelligence({ weather, unit }) {
 }
 
 function ComfortIndex({ weather, unit, convertTemp }) {
-  const dewpoint = weather.current.dew_point_2m;
-  const dewpointDisplay = convertTemp(dewpoint);
+  const dewpoint = weather?.current?.dew_point_2m;
+  const safeDewpoint = Number(dewpoint);
+  const dewpointDisplay = Number.isFinite(safeDewpoint)
+    ? convertTemp(safeDewpoint)
+    : "\u2014";
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
-  const comfort = classifyComfort(dewpoint); // thresholds always in \u00B0F
+  const comfort = classifyComfort(Number.isFinite(safeDewpoint) ? safeDewpoint : 50); // thresholds always in \u00B0F
 
   return (
     <div className="storm-module">

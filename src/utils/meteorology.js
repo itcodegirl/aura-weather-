@@ -25,12 +25,48 @@ export function classifyStormRisk(cape, weatherCode) {
  * Falling pressure = storm approaching. Rising = clearing.
  */
 export function calculatePressureTrend(hourlyPressure, hourlyTime) {
-  const now = new Date();
-  const nowIdx = hourlyTime.findIndex((t) => new Date(t) >= now);
-  const currentIdx = nowIdx === -1 ? hourlyPressure.length - 1 : nowIdx;
+  if (
+    !Array.isArray(hourlyPressure) ||
+    !Array.isArray(hourlyTime) ||
+    hourlyPressure.length === 0 ||
+    hourlyTime.length === 0
+  ) {
+    return {
+      current: null,
+      delta: 0,
+      direction: "steady",
+      interpretation: "No data",
+      sparkline: [],
+    };
+  }
 
-  const sixHoursAgo = hourlyPressure[Math.max(0, currentIdx - 6)];
-  const current = hourlyPressure[currentIdx] || hourlyPressure[hourlyPressure.length - 1];
+  const now = new Date();
+  const paired = [];
+  const maxIndex = Math.min(hourlyPressure.length, hourlyTime.length);
+
+  for (let i = 0; i < maxIndex; i += 1) {
+    const value = Number(hourlyPressure[i]);
+    const time = new Date(hourlyTime[i]).getTime();
+    if (Number.isFinite(value) && Number.isFinite(time)) {
+      paired.push({ value, time });
+    }
+  }
+
+  if (!paired.length) {
+    return {
+      current: null,
+      delta: 0,
+      direction: "steady",
+      interpretation: "No data",
+      sparkline: [],
+    };
+  }
+
+  const nowIdx = paired.findIndex((entry) => entry.time >= now.getTime());
+  const currentIdx = nowIdx === -1 ? paired.length - 1 : nowIdx;
+
+  const sixHoursAgo = paired[Math.max(0, currentIdx - 6)]?.value ?? paired[0]?.value;
+  const current = paired[currentIdx]?.value ?? paired[paired.length - 1]?.value;
   const delta = current - sixHoursAgo;
 
   let direction, interpretation;
@@ -46,8 +82,11 @@ export function calculatePressureTrend(hourlyPressure, hourlyTime) {
   }
 
   const sparkline = [];
-  for (let i = Math.max(0, currentIdx - 6); i <= currentIdx; i++) {
-    sparkline.push(hourlyPressure[i]);
+  for (let i = Math.max(0, currentIdx - 6); i <= currentIdx; i += 1) {
+    const value = paired[i]?.value;
+    if (Number.isFinite(value)) {
+      sparkline.push(value);
+    }
   }
 
   return { current, delta, direction, interpretation, sparkline };

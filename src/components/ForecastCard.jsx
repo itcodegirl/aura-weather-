@@ -7,6 +7,10 @@ import { formatDayLabel } from "../utils/dates";
 import WeatherIcon from "./WeatherIcon";
 import "./ForecastCard.css";
 
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
 function parseForecastDate(isoDate) {
   return new Date(`${isoDate}T00:00:00`);
 }
@@ -14,13 +18,17 @@ function parseForecastDate(isoDate) {
 function DayRow({ day, weekMin, weekMax, convertTemp, rangeGradient }) {
   const info = getWeather(day.weather_code);
   const label = formatDayLabel(day.date);
-  const high = convertTemp(day.temp_max);
-  const low = convertTemp(day.temp_min);
-  const tempUnit = "°";
+  const high = Number.isFinite(day.temp_max) ? convertTemp(day.temp_max) : "\u2014";
+  const low = Number.isFinite(day.temp_min) ? convertTemp(day.temp_min) : "\u2014";
+  const tempUnit = "\u00B0";
 
   const weekRange = weekMax - weekMin || 1;
-  const startPct = ((day.temp_min - weekMin) / weekRange) * 100;
-  const endPct = ((day.temp_max - weekMin) / weekRange) * 100;
+  const startPct = Number.isFinite(day.temp_min)
+    ? clamp(((day.temp_min - weekMin) / weekRange) * 100, 0, 100)
+    : 0;
+  const endPct = Number.isFinite(day.temp_max)
+    ? clamp(((day.temp_max - weekMin) / weekRange) * 100, 0, 100)
+    : 0;
 
   return (
     <li className="forecast-row" role="listitem">
@@ -37,7 +45,7 @@ function DayRow({ day, weekMin, weekMax, convertTemp, rangeGradient }) {
             <span>{day.precipitation_probability_max}%</span>
           </>
         ) : (
-          <span className="forecast-precip-empty">—</span>
+          <span className="forecast-precip-empty">{`\u2014`}</span>
         )}
       </div>
 
@@ -66,32 +74,38 @@ function DayRow({ day, weekMin, weekMax, convertTemp, rangeGradient }) {
 }
 
 function ForecastCard({ weather, convertTemp, style }) {
-  const daily = weather.daily;
+  const daily = weather?.daily || {};
+  const times = Array.isArray(daily.time) ? daily.time : [];
+  const weatherCodes = Array.isArray(daily.weather_code) ? daily.weather_code : [];
+  const maxTemps = Array.isArray(daily.temperature_2m_max)
+    ? daily.temperature_2m_max
+    : [];
+  const minTemps = Array.isArray(daily.temperature_2m_min)
+    ? daily.temperature_2m_min
+    : [];
+  const precipProbabilities = Array.isArray(daily.precipitation_probability_max)
+    ? daily.precipitation_probability_max
+    : [];
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const days = daily.time
-    .map((date, i) => ({
+  const days = times
+    .map((date, index) => ({
       date,
-      weather_code: daily.weather_code[i],
-      temp_max: daily.temperature_2m_max[i],
-      temp_min: daily.temperature_2m_min[i],
-      precipitation_probability_max: daily.precipitation_probability_max[i] || 0,
-      precipitation_sum: daily.precipitation_sum?.[i] || 0,
+      weather_code: Number(weatherCodes[index] || 0),
+      temp_max: Number(maxTemps[index]),
+      temp_min: Number(minTemps[index]),
+      precipitation_probability_max: Number(precipProbabilities[index] || 0),
     }))
+    .filter((day) => Number.isFinite(day.temp_max) || Number.isFinite(day.temp_min))
     .filter((day) => {
       const dayDate = parseForecastDate(day.date);
+      if (Number.isNaN(dayDate.getTime())) return false;
       dayDate.setHours(0, 0, 0, 0);
       return dayDate >= today;
     })
     .slice(0, 7);
-
-  const weekMin = Math.min(...days.map((d) => d.temp_min));
-  const weekMax = Math.max(...days.map((d) => d.temp_max));
-  const rangeGradientStart = weekMin <= 40 ? "#60a5fa" : "#f59e0b";
-  const rangeGradientEnd =
-    weekMax >= 95 ? "#ef4444" : weekMax >= 82 ? "#f97316" : "#fbbf24";
-  const rangeGradient = `linear-gradient(to right, ${rangeGradientStart}, ${rangeGradientEnd})`;
 
   if (!days.length) {
     return (
@@ -109,6 +123,15 @@ function ForecastCard({ weather, convertTemp, style }) {
       </section>
     );
   }
+
+  const validWeekMins = days.map((day) => day.temp_min).filter((value) => Number.isFinite(value));
+  const validWeekMaxs = days.map((day) => day.temp_max).filter((value) => Number.isFinite(value));
+  const weekMin = validWeekMins.length ? Math.min(...validWeekMins) : 0;
+  const weekMax = validWeekMaxs.length ? Math.max(...validWeekMaxs) : weekMin;
+  const rangeGradientStart = weekMin <= 40 ? "#60a5fa" : "#f59e0b";
+  const rangeGradientEnd =
+    weekMax >= 95 ? "#ef4444" : weekMax >= 82 ? "#f97316" : "#fbbf24";
+  const rangeGradient = `linear-gradient(to right, ${rangeGradientStart}, ${rangeGradientEnd})`;
 
   return (
     <section className="bento-forecast forecast-card" style={style}>
