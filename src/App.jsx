@@ -8,6 +8,7 @@ import ForecastCard from "./components/ForecastCard";
 import StormWatch from "./components/StormWatch";
 import HourlyCard from "./components/HourlyCard";
 import CitySearch from "./components/CitySearch";
+import WeatherIcon from "./components/WeatherIcon";
 
 function App() {
   const [unit, setUnit] = useState("F");
@@ -67,7 +68,11 @@ function App() {
           aria-live="polite"
           aria-label="Loading weather data"
         >
-          <div className="loader-spinner" />
+          <WeatherIcon
+            code={0}
+            size={80}
+            className="loader-weather-icon"
+          />
           <p className="loader-text">Fetching atmosphere{"\u2026"}</p>
         </div>
       </div>
