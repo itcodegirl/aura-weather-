@@ -109,7 +109,7 @@ function ForecastCard({ weather, convertTemp, style }) {
     .filter((day) => Number.isFinite(day.temp_max) || Number.isFinite(day.temp_min))
     .filter((day) => {
       const dayDate = parseLocalDate(day.date);
-      if (Number.isNaN(dayDate.getTime())) return false;
+      if (!dayDate || Number.isNaN(dayDate.getTime())) return false;
       dayDate.setHours(0, 0, 0, 0);
       return dayDate >= today;
     })
