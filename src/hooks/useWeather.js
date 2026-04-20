@@ -47,6 +47,7 @@ function getPersistedLocation() {
     const parsed = JSON.parse(saved);
     const coordinates = parseCoordinates(parsed?.lat, parsed?.lon);
     if (!coordinates) {
+      window.localStorage.removeItem(LAST_LOCATION_KEY);
       return null;
     }
 
@@ -57,6 +58,11 @@ function getPersistedLocation() {
       country: typeof parsed?.country === "string" ? parsed.country : "",
     };
   } catch {
+    try {
+      window.localStorage.removeItem(LAST_LOCATION_KEY);
+    } catch {
+      // localStorage may be unavailable or inaccessible in restricted contexts.
+    }
     return null;
   }
 }
