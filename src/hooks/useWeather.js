@@ -1,6 +1,6 @@
 // src/hooks/useWeather.js
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   fetchWeather,
   fetchAirQuality,
@@ -61,7 +61,10 @@ function getFallbackLocationName(weatherData, lat, lon) {
     ?.split("/")
     .at(-1)
     ?.replace(/_/g, " ");
-  return timezoneCity || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+  return (
+    timezoneCity ||
+    `${Number(lat).toFixed(2)}\u00b0, ${Number(lon).toFixed(2)}\u00b0`
+  );
 }
 
 export function useWeather(unit = "F", options = {}) {
@@ -75,10 +78,24 @@ export function useWeather(unit = "F", options = {}) {
   const [locationNotice, setLocationNotice] = useState(null);
   const [climateComparison, setClimateComparison] = useState(null);
   const [isLocatingCurrent, setIsLocatingCurrent] = useState(false);
+  const requestIdRef = useRef(0);
+  const inFlightRequestRef = useRef(null);
+
+  const abortInFlightRequest = useCallback(() => {
+    if (!inFlightRequestRef.current) return;
+    inFlightRequestRef.current.abort();
+    inFlightRequestRef.current = null;
+  }, []);
 
   const loadWeather = useCallback(
     async (lat, lon, name, country, requestUnit = unit, options = {}) => {
       const { fallbackNotice } = options;
+      const requestId = requestIdRef.current + 1;
+
+      requestIdRef.current = requestId;
+      abortInFlightRequest();
+      const controller = new AbortController();
+      inFlightRequestRef.current = controller;
 
       setLoading(true);
       setError(null);
@@ -88,19 +105,25 @@ export function useWeather(unit = "F", options = {}) {
 
       try {
         const [weatherData, aqi] = await Promise.all([
-          fetchWeather(lat, lon, requestUnit),
-          fetchAirQuality(lat, lon),
+          fetchWeather(lat, lon, requestUnit, { signal: controller.signal }),
+          fetchAirQuality(lat, lon, { signal: controller.signal }),
         ]);
 
-        const resolvedName =
-          name || getFallbackLocationName(weatherData, lat, lon);
         const historicalAverage = climateEnabled
           ? await fetchHistoricalTemperatureAverage(
               lat,
               lon,
-              weatherData?.timezone
+              weatherData?.timezone,
+              { signal: controller.signal }
             )
           : null;
+
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        const resolvedName =
+          name || getFallbackLocationName(weatherData, lat, lon);
         const currentTemperature = Number(weatherData?.current?.temperature_2m);
         const climateDelta =
           Number.isFinite(currentTemperature) &&
@@ -122,20 +145,28 @@ export function useWeather(unit = "F", options = {}) {
             ? { ...historicalAverage, differenceF: climateDelta }
             : null
         );
-      } catch (err) {
-        setError(err.message || "Could not load weather");
+      } catch (error) {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        if (error?.name === "AbortError") return;
+        setError(error.message || "Could not load weather");
       } finally {
-        setLoading(false);
+        if (requestId === requestIdRef.current) {
+          setLoading(false);
+          if (inFlightRequestRef.current === controller) {
+            inFlightRequestRef.current = null;
+          }
+        }
       }
     },
-    [unit, climateEnabled]
+    [unit, climateEnabled, abortInFlightRequest]
   );
 
   const scheduleWeatherLoad = useCallback(
     (lat, lon, name, country, requestUnit = unit, options = {}) => {
-      queueMicrotask(() => {
-        loadWeather(lat, lon, name, country, requestUnit, options);
-      });
+      loadWeather(lat, lon, name, country, requestUnit, options);
     },
     [loadWeather, unit]
   );
@@ -189,7 +220,7 @@ export function useWeather(unit = "F", options = {}) {
   );
 
   const retryWeather = useCallback(() => {
-    const fallbackRequest = lastRequest ? lastRequest : DEFAULT_LOCATION;
+    const fallbackRequest = lastRequest || DEFAULT_LOCATION;
 
     loadWeather(
       fallbackRequest.lat,
@@ -287,6 +318,12 @@ export function useWeather(unit = "F", options = {}) {
     locationCountry,
     scheduleWeatherLoad,
   ]);
+
+  useEffect(() => {
+    return () => {
+      abortInFlightRequest();
+    };
+  }, [abortInFlightRequest]);
 
   return {
     weather,

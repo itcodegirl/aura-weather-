@@ -9,12 +9,34 @@ const ENDPOINTS = {
 
 const TIMEOUT_MS = 10_000;
 
+function getSignal(signal) {
+  if (signal) return signal;
+  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    return AbortSignal.timeout(TIMEOUT_MS);
+  }
+  return undefined;
+}
+
+async function fetchJson(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    signal: getSignal(options.signal),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status})`);
+  }
+
+  return response.json();
+}
+
 function getDateInTimeZone(timeZone) {
   const now = new Date();
   const zone = timeZone || "UTC";
   let year;
   let month;
   let day;
+  let monthDay;
   let monthLabel;
 
   try {
@@ -24,7 +46,7 @@ function getDateInTimeZone(timeZone) {
       month: "2-digit",
       day: "2-digit",
     });
-    const monthDay = formatDate.format(now);
+    monthDay = formatDate.format(now);
     const parts = monthDay.split("-");
 
     year = Number(parts[0]);
@@ -54,6 +76,7 @@ function getDateInTimeZone(timeZone) {
     month = fallbackParts[1];
     day = fallbackParts[2];
     monthLabel = fallbackLabel.replace(/,?\s\d{4}$/, "");
+    monthDay = fallback;
   }
 
   return {
@@ -74,7 +97,7 @@ function toF(value) {
  * Fetches current weather, hourly forecast, and 7-day daily forecast
  * from Open-Meteo. No API key required.
  */
-export async function fetchWeather(lat, lon, unit = "F") {
+export async function fetchWeather(lat, lon, unit = "F", options = {}) {
   const params = new URLSearchParams({
     latitude: lat,
     longitude: lon,
@@ -94,20 +117,21 @@ export async function fetchWeather(lat, lon, unit = "F") {
     past_hours: "48",
   });
 
-  const res = await fetch(`${ENDPOINTS.weather}?${params}`, {
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+  return fetchJson(`${ENDPOINTS.weather}?${params}`, {
+    signal: options.signal,
   });
-  if (!res.ok) {
-    throw new Error(`Weather data unavailable (${res.status})`);
-  }
-  return res.json();
 }
 
 /**
  * Fetches today's temperature average for the same calendar day over
  * the last 30 years using Open-Meteo historical archive API.
  */
-export async function fetchHistoricalTemperatureAverage(lat, lon, timezone) {
+export async function fetchHistoricalTemperatureAverage(
+  lat,
+  lon,
+  timezone,
+  options = {}
+) {
   const { year, month, day, monthDayLabel } = getDateInTimeZone(timezone);
   const startYear = year - 30;
   const endYear = year - 1;
@@ -129,14 +153,9 @@ export async function fetchHistoricalTemperatureAverage(lat, lon, timezone) {
     timezone: timezone || "UTC",
   });
 
-  const res = await fetch(`${ENDPOINTS.archive}?${params}`, {
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+  const data = await fetchJson(`${ENDPOINTS.archive}?${params}`, {
+    signal: options.signal,
   });
-  if (!res.ok) {
-    return null;
-  }
-
-  const data = await res.json();
   const times = data?.daily?.time;
   if (!Array.isArray(times) || !times.length) {
     return null;
@@ -179,14 +198,12 @@ export async function fetchHistoricalTemperatureAverage(lat, lon, timezone) {
  * Fetches air quality data (European AQI scale).
  * Non-critical — returns null on failure instead of throwing.
  */
-export async function fetchAirQuality(lat, lon) {
+export async function fetchAirQuality(lat, lon, options = {}) {
   try {
-    const res = await fetch(
+    const data = await fetchJson(
       `${ENDPOINTS.aqi}?latitude=${lat}&longitude=${lon}&current=european_aqi`,
-      { signal: AbortSignal.timeout(TIMEOUT_MS) }
+      { signal: options.signal }
     );
-    if (!res.ok) return null;
-    const data = await res.json();
     return data.current?.european_aqi ?? null;
   } catch {
     return null;
@@ -196,15 +213,11 @@ export async function fetchAirQuality(lat, lon) {
 /**
  * Converts a city name into coordinates (used for search).
  */
-export async function geocodeCity(name) {
-  const res = await fetch(
+export async function geocodeCity(name, options = {}) {
+  const data = await fetchJson(
     `${ENDPOINTS.geocode}?name=${encodeURIComponent(name)}&count=5`,
-    { signal: AbortSignal.timeout(TIMEOUT_MS) }
+    { signal: options.signal }
   );
-  if (!res.ok) {
-    throw new Error(`Search failed (${res.status})`);
-  }
-  const data = await res.json();
   return data.results || [];
 }
 
