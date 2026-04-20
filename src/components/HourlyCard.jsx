@@ -57,7 +57,7 @@ function ChartTooltip({ active, payload, unit }) {
   );
 }
 
-function HourlyCard({ weather, unit, convertTemp }) {
+function HourlyCard({ weather, unit, convertTemp, style }) {
   const hourlyData = useMemo(() => buildHourlyData(weather?.hourly, convertTemp), [
     weather?.hourly,
     convertTemp,
@@ -66,7 +66,7 @@ function HourlyCard({ weather, unit, convertTemp }) {
 
   if (!data.length) {
     return (
-      <section className="bento-chart hourly-chart">
+      <section className="bento-chart hourly-chart" style={style}>
         <header className="chart-header">
           <div className="chart-title">
             <LineIcon size={16} />
@@ -91,7 +91,7 @@ function HourlyCard({ weather, unit, convertTemp }) {
   const nowLabel = data[0]?.label;
 
   return (
-    <section className="bento-chart hourly-chart">
+    <section className="bento-chart hourly-chart" style={style}>
       <header className="chart-header">
         <div className="chart-title">
           <LineIcon size={16} />

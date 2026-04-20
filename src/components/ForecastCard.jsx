@@ -64,7 +64,7 @@ function DayRow({ day, weekMin, weekMax, convertTemp }) {
   );
 }
 
-function ForecastCard({ weather, convertTemp }) {
+function ForecastCard({ weather, convertTemp, style }) {
   const daily = weather.daily;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -90,7 +90,7 @@ function ForecastCard({ weather, convertTemp }) {
 
   if (!days.length) {
     return (
-      <section className="bento-forecast forecast-card">
+      <section className="bento-forecast forecast-card" style={style}>
         <header className="forecast-header">
           <div className="forecast-title">
             <CalendarDays size={16} />
@@ -106,7 +106,7 @@ function ForecastCard({ weather, convertTemp }) {
   }
 
   return (
-    <section className="bento-forecast forecast-card">
+    <section className="bento-forecast forecast-card" style={style}>
       <header className="forecast-header">
         <div className="forecast-title">
           <CalendarDays size={16} />

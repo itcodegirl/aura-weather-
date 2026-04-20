@@ -157,9 +157,10 @@ function App() {
             location={location}
             unit={unit}
             convertTemp={convertTemp}
+            style={{ "--i": 0 }}
           />
 
-          <section className="bento-aqi metric-card">
+          <section className="bento-aqi metric-card" style={{ "--i": 1 }}>
             <span className="metric-label">Air Quality</span>
             <span className="metric-value">
               {weather.aqi != null ? weather.aqi : "\u2014"}
@@ -172,7 +173,7 @@ function App() {
             )}
           </section>
 
-          <section className="bento-uv metric-card">
+          <section className="bento-uv metric-card" style={{ "--i": 2 }}>
             <span className="metric-label">UV Index</span>
             <span className="metric-value">
               {uvToday != null ? uvToday.toFixed(1) : "\u2014"}
@@ -185,17 +186,24 @@ function App() {
             )}
           </section>
 
-          <RainCard weather={weather} />
-          <HourlyCard weather={weather} unit={unit} convertTemp={convertTemp} />
+          <RainCard weather={weather} style={{ "--i": 3 }} />
+          <HourlyCard
+            weather={weather}
+            unit={unit}
+            convertTemp={convertTemp}
+            style={{ "--i": 4 }}
+          />
           <StormWatch
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
+            style={{ "--i": 5 }}
           />
           <ForecastCard
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
+            style={{ "--i": 6 }}
           />
         </main>
       </div>

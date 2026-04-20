@@ -19,7 +19,7 @@ function Stat({ icon, label, value }) {
   );
 }
 
-function HeroCard({ weather, location, unit, convertTemp }) {
+function HeroCard({ weather, location, unit, convertTemp, style }) {
   const current = weather.current;
   const info = getWeather(current.weather_code);
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
@@ -33,7 +33,7 @@ function HeroCard({ weather, location, unit, convertTemp }) {
   });
 
   return (
-    <section className="bento-hero hero-card">
+    <section className="bento-hero hero-card" style={style}>
       <header className="hero-meta">
         <div className="hero-location">
           <MapPin size={14} />

@@ -203,9 +203,9 @@ const MemoizedPressureTrend = memo(PressureTrend);
 const MemoizedWindIntelligence = memo(WindIntelligence);
 const MemoizedComfortIndex = memo(ComfortIndex);
 
-function StormWatch({ weather, unit, convertTemp }) {
+function StormWatch({ weather, unit, convertTemp, style }) {
   return (
-    <section className="bento-storm storm-watch">
+    <section className="bento-storm storm-watch" style={style}>
       <header className="storm-header">
         <div className="storm-title">
           <Zap size={16} />

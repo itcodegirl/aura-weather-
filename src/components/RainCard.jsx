@@ -54,7 +54,7 @@ function formatHour(date) {
   return date.toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
 }
 
-function RainCard({ weather }) {
+function RainCard({ weather, style }) {
   const [mode, setMode] = useState("chance");
   const rainAnalysis = useMemo(() => analyzeRain(weather?.hourly), [weather?.hourly]);
   const { hours, nextRain, peak, total, soFarToday, peakAmount } = rainAnalysis;
@@ -62,7 +62,7 @@ function RainCard({ weather }) {
   const isDry = peak.probability < 20 && total < 0.01;
 
   return (
-    <section className="bento-rain rain-card">
+    <section className="bento-rain rain-card" style={style}>
       <header className="rain-header">
         <div className="rain-title">
           <CloudRain size={16} />

@@ -197,6 +197,12 @@ a:focus-visible,
     transition: none;
   }
 
+  .bento > section {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   .loader-weather-icon {
     animation: none;
   }
@@ -209,6 +215,28 @@ a:focus-visible,
   }
   50% {
     transform: translate(30px, -20px) scale(1.1);
+  }
+}
+
+@keyframes card-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-landing {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -298,6 +326,10 @@ a:focus-visible,
   grid-column: span 3;
   grid-row: auto;
   min-height: clamp(210px, 24vw, 300px);
+  animation-name: hero-landing;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation-duration: 500ms;
+  animation-fill-mode: forwards;
 }
 
 .bento-aqi {
@@ -360,6 +392,10 @@ a:focus-visible,
   min-width: 0;
   min-height: 180px;
   padding: 24px;
+  opacity: 0;
+  animation:
+    card-slide-up 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 90ms);
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.2) 0%,
