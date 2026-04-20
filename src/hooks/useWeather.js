@@ -267,47 +267,78 @@ export function useWeather(unit = "F", options = {}) {
     [scheduleWeatherLoad, unit]
   );
 
+  const requestCurrentPositionWithFallback = useCallback(
+    ({
+      requestUnit = unit,
+      fallbackNotice = LOCATION_FALLBACK_NOTICE,
+      onSuccess,
+      onFallback,
+      trackCurrentLookup = false,
+    }) => {
+      const normalizedRequestUnit = normalizeTemperatureUnit(requestUnit);
+      const finishLookup = () => {
+        if (trackCurrentLookup) {
+          setIsLocatingCurrent(false);
+        }
+      };
+
+      if (!hasGeolocationSupport()) {
+        onFallback?.(normalizedRequestUnit, fallbackNotice);
+        finishLookup();
+        return;
+      }
+
+      if (trackCurrentLookup) {
+        setIsLocatingCurrent(true);
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (!isMountedRef.current) {
+            finishLookup();
+            return;
+          }
+          onSuccess?.(position, normalizedRequestUnit);
+          finishLookup();
+        },
+        () => {
+          if (!isMountedRef.current) {
+            finishLookup();
+            return;
+          }
+          onFallback?.(normalizedRequestUnit, fallbackNotice);
+          finishLookup();
+        },
+        { timeout: GEOLOCATION_TIMEOUT_MS }
+      );
+    },
+    [unit]
+  );
+
   const loadCurrentLocation = useCallback(
     (options = {}) => {
       const requestUnit = normalizeTemperatureUnit(options.unit || unit);
       const fallbackNotice = options.fallbackNotice || LOCATION_FALLBACK_NOTICE;
 
-      if (!hasGeolocationSupport()) {
-        setIsLocatingCurrent(false);
-        loadDefaultLocation(requestUnit, fallbackNotice);
-        return;
-      }
-
-      setIsLocatingCurrent(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          if (!isMountedRef.current) return;
-          const { latitude, longitude } = pos.coords;
+      requestCurrentPositionWithFallback({
+        requestUnit,
+        fallbackNotice,
+        trackCurrentLookup: true,
+        onSuccess: ({ coords }, normalizedRequestUnit) => {
           scheduleWeatherLoad(
-            latitude,
-            longitude,
+            coords.latitude,
+            coords.longitude,
             undefined,
             undefined,
-            requestUnit
-          );
-          setIsLocatingCurrent(false);
-        },
-        () => {
-          if (!isMountedRef.current) return;
-          setIsLocatingCurrent(false);
-          scheduleWeatherLoad(
-            DEFAULT_LOCATION.lat,
-            DEFAULT_LOCATION.lon,
-            DEFAULT_LOCATION.name,
-            DEFAULT_LOCATION.country,
-            requestUnit,
-            { fallbackNotice }
+            normalizedRequestUnit
           );
         },
-        { timeout: GEOLOCATION_TIMEOUT_MS }
-      );
+        onFallback: (normalizedRequestUnit, fallbackNoticeMessage) => {
+          loadDefaultLocation(normalizedRequestUnit, fallbackNoticeMessage);
+        },
+      });
     },
-    [scheduleWeatherLoad, unit]
+    [scheduleWeatherLoad, loadDefaultLocation, requestCurrentPositionWithFallback, unit]
   );
 
   const retryWeather = useCallback(() => {
@@ -342,38 +373,35 @@ export function useWeather(unit = "F", options = {}) {
           DEFAULT_LOCATION.name,
           DEFAULT_LOCATION.country,
           unit,
-          { fallbackNotice: LOCATION_FALLBACK_NOTICE }
-        );
+        { fallbackNotice: LOCATION_FALLBACK_NOTICE }
+      );
       }, LOCATION_FALLBACK_DELAY_MS);
 
-      if (!hasGeolocationSupport()) {
-        clearTimeout(fallbackTimer);
-        loadDefaultLocation(unit, LOCATION_FALLBACK_NOTICE);
-        return () => {
+      requestCurrentPositionWithFallback({
+        requestUnit: unit,
+        fallbackNotice: LOCATION_FALLBACK_NOTICE,
+        onSuccess: ({ coords }) => {
           clearTimeout(fallbackTimer);
-          abortInFlightRequest();
-        };
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          clearTimeout(fallbackTimer);
-          const { latitude, longitude } = pos.coords;
-          scheduleWeatherLoadAsync(latitude, longitude, undefined, undefined, unit);
+          scheduleWeatherLoadAsync(coords.latitude, coords.longitude);
         },
-        () => {
+        onFallback: () => {
           clearTimeout(fallbackTimer);
           loadDefaultLocation(unit, LOCATION_FALLBACK_NOTICE);
         },
-        { timeout: GEOLOCATION_TIMEOUT_MS }
-      );
+      });
 
       return () => {
         clearTimeout(fallbackTimer);
         abortInFlightRequest();
       };
     }
-  }, [unit, scheduleWeatherLoadAsync, abortInFlightRequest]);
+  }, [
+    unit,
+    scheduleWeatherLoadAsync,
+    abortInFlightRequest,
+    requestCurrentPositionWithFallback,
+    loadDefaultLocation,
+  ]);
 
   const hasLocation = location !== null;
   const locationLat = location?.lat;
