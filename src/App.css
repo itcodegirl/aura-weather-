@@ -111,7 +111,7 @@ a:focus-visible,
 
 @media (prefers-reduced-motion: reduce) {
   .app::after {
-    opacity: 0.03;
+    opacity: 0.04;
   }
 }
 
@@ -171,7 +171,7 @@ a:focus-visible,
   }
 
   .app::after {
-    opacity: 0.12;
+    opacity: 0.05;
   }
 }
 
