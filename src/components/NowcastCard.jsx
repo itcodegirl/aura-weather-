@@ -33,8 +33,15 @@ function analyzeNowcast(minutely15) {
     minutely15;
 
   const now = new Date();
-  const startIdx = time.findIndex((t) => new Date(t) >= now);
-  const normalizedStartIdx = startIdx === -1 ? 0 : startIdx;
+  const nowMs = now.getTime();
+  let normalizedStartIdx = 0;
+  for (let i = 0; i < time.length; i += 1) {
+    const timestamp = new Date(time[i]).getTime();
+    if (Number.isFinite(timestamp) && timestamp >= nowMs) {
+      normalizedStartIdx = i;
+      break;
+    }
+  }
 
   const rows = time
     .slice(normalizedStartIdx, normalizedStartIdx + NOWCAST_WINDOW_SIZE)
@@ -68,12 +75,15 @@ function analyzeNowcast(minutely15) {
 
   const firstWetIndex = rows.findIndex((row) => row.isWet);
   if (firstWetIndex === -1) {
+    const peakProbability = rows.length
+      ? rows.reduce((max, row) => Math.max(max, row.probability), 0)
+      : 0;
     return {
       hasData: true,
       hasRain: false,
       startInMinutes: 0,
       durationMinutes: 0,
-      peakProbability: rows.reduce((max, row) => Math.max(max, row.probability), 0),
+      peakProbability,
       summary: "No rain expected in the next 2 hours.",
       details: "Clear windows across the next 120 minutes.",
     };
@@ -103,7 +113,9 @@ function analyzeNowcast(minutely15) {
     startInMinutes === 0 ? "starting now" : `starting in ${startMinutesText}`;
   const summary = `${intensity} rain ${startPhrase}, lasting ~${durationMinutes} minutes`;
   const averageProbability = Math.round(
-    windowRows.reduce((sum, row) => sum + row.probability, 0) / windowRows.length
+    windowRows.length
+      ? windowRows.reduce((sum, row) => sum + row.probability, 0) / windowRows.length
+      : 0
   );
 
   return {
