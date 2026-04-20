@@ -129,7 +129,13 @@ export function windDirectionName(degrees) {
     "S", "SSW", "SW", "WSW",
     "W", "WNW", "NW", "NNW",
   ];
-  const index = Math.round(degrees / 22.5) % 16;
+  const numeric = Number(degrees);
+  if (!Number.isFinite(numeric)) {
+    return "Variable";
+  }
+
+  const normalizedDegrees = ((numeric % 360) + 360) % 360;
+  const index = Math.round(normalizedDegrees / 22.5) % 16;
   return directions[index];
 }
 
