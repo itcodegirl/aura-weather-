@@ -213,6 +213,11 @@ a:focus-visible,
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.02em;
+  background: linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 .tagline {
