@@ -74,28 +74,6 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.hero-stat-solar .hero-stat-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.hero-sun-times,
-.hero-sun-length {
-  color: var(--text-dim);
-  font-size: 11px;
-  line-height: 1.3;
-}
-
-.hero-sun-times {
-  font-weight: 500;
-}
-
-.hero-sun-length {
-  text-transform: none;
-  letter-spacing: 0;
-}
-
 .stat {
   display: flex;
   align-items: center;

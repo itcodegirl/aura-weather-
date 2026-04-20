@@ -69,6 +69,38 @@ function ArcGauge({
   );
 }
 
+function formatClock(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function getDayLengthMinutes(sunrise, sunset) {
+  if (!sunrise || !sunset) return null;
+  const sunriseDate = new Date(sunrise);
+  const sunsetDate = new Date(sunset);
+  if (Number.isNaN(sunriseDate.getTime()) || Number.isNaN(sunsetDate.getTime())) {
+    return null;
+  }
+  let diffMs = sunsetDate.getTime() - sunriseDate.getTime();
+  if (diffMs <= 0) {
+    diffMs += 24 * 60 * 60 * 1000;
+  }
+  return Math.max(0, Math.round(diffMs / 60000));
+}
+
+function formatDayLength(totalMinutes) {
+  if (!Number.isFinite(totalMinutes)) return null;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+}
+
 function App() {
   const [unit, setUnit] = useState("F");
   const {
@@ -163,6 +195,12 @@ function App() {
   const uvToday = weather.daily?.uv_index_max?.[0];
   const aqiStatus = getAqiStatus(weather.aqi);
   const uvStatus = getUvStatus(uvToday);
+  const sunrise = weather.daily?.sunrise?.[0];
+  const sunset = weather.daily?.sunset?.[0];
+  const sunriseLabel = formatClock(sunrise);
+  const sunsetLabel = formatClock(sunset);
+  const dayLengthMinutes = getDayLengthMinutes(sunrise, sunset);
+  const dayLengthLabel = formatDayLength(dayLengthMinutes);
 
   return (
     <div className="app" style={{ background }}>
@@ -263,27 +301,35 @@ function App() {
             )}
           </section>
 
-          <RainCard weather={weather} style={{ "--i": 3 }} />
-          <NowcastCard weather={weather} style={{ "--i": 4 }} />
+          <section className="bento-sunlight metric-card" style={{ "--i": 3 }}>
+            <span className="metric-label">Sunlight</span>
+            <div className="metric-sunline">{`Sunrise ${sunriseLabel} → Sunset ${sunsetLabel}`}</div>
+            {dayLengthLabel ? (
+              <div className="metric-sun-length">Daylight {dayLengthLabel}</div>
+            ) : null}
+          </section>
+
+          <RainCard weather={weather} style={{ "--i": 4 }} />
+          <NowcastCard weather={weather} style={{ "--i": 5 }} />
           <HourlyCard
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
             chartTopColor={weatherInfo?.gradient?.[0]}
             chartBottomColor={weatherInfo?.gradient?.[1]}
-            style={{ "--i": 5 }}
+            style={{ "--i": 6 }}
           />
           <StormWatch
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
-            style={{ "--i": 6 }}
+            style={{ "--i": 7 }}
           />
           <ForecastCard
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
-            style={{ "--i": 7 }}
+            style={{ "--i": 8 }}
           />
         </main>
       </div>
