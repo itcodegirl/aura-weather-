@@ -390,31 +390,39 @@ export function useWeather(unit = "F", options = {}) {
         setIsLocatingCurrent(true);
       }
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          if (!isMountedRef.current) {
-            return;
-          }
+      try {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            if (!isMountedRef.current) {
+              return;
+            }
 
-          const coordinates = parseCoordinates(
-            position?.coords?.latitude,
-            position?.coords?.longitude
-          );
-          if (!coordinates) {
+            const coordinates = parseCoordinates(
+              position?.coords?.latitude,
+              position?.coords?.longitude
+            );
+            if (!coordinates) {
+              finalizeLookup(onFallback, normalizedRequestUnit, fallbackNotice);
+              return;
+            }
+
+            finalizeLookup(onSuccess, coordinates, normalizedRequestUnit);
+          },
+          () => {
+            if (!isMountedRef.current) {
+              return;
+            }
             finalizeLookup(onFallback, normalizedRequestUnit, fallbackNotice);
-            return;
-          }
-
-          finalizeLookup(onSuccess, coordinates, normalizedRequestUnit);
-        },
-        () => {
-          if (!isMountedRef.current) {
-            return;
-          }
-          finalizeLookup(onFallback, normalizedRequestUnit, fallbackNotice);
-        },
-        { timeout: GEOLOCATION_TIMEOUT_MS }
-      );
+          },
+          { timeout: GEOLOCATION_TIMEOUT_MS }
+        );
+      } catch {
+        if (!isMountedRef.current) {
+          finishLookup();
+          return;
+        }
+        finalizeLookup(onFallback, normalizedRequestUnit, fallbackNotice);
+      }
     },
     [unit]
   );

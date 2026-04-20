@@ -70,12 +70,13 @@ function CitySearch({ onSelect }, ref) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const normalizedQuery = query.trim();
   const showDropdown =
     open &&
     (loading ||
       results.length > 0 ||
       error ||
-      query.length >= MIN_SEARCH_QUERY_LENGTH);
+      normalizedQuery.length >= MIN_SEARCH_QUERY_LENGTH);
 
   const activeIndexSafe =
     showDropdown && activeIndex >= 0 && results.length > 0
@@ -135,8 +136,8 @@ function CitySearch({ onSelect }, ref) {
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    const trimmed = nextQuery.trim();
-    if (trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
+    const trimmedQuery = nextQuery.trim();
+    if (trimmedQuery.length < MIN_SEARCH_QUERY_LENGTH) {
       requestIdRef.current++;
       abortGeocodeRequest();
       setResults([]);
@@ -146,7 +147,7 @@ function CitySearch({ onSelect }, ref) {
     }
 
     debounceRef.current = setTimeout(() => {
-      runSearch(trimmed);
+      runSearch(trimmedQuery);
     }, SEARCH_DEBOUNCE_MS);
   };
 
@@ -306,7 +307,10 @@ function CitySearch({ onSelect }, ref) {
             </li>
           )}
 
-          {!loading && !error && results.length === 0 && query.length >= 2 && (
+          {!loading &&
+            !error &&
+            results.length === 0 &&
+            normalizedQuery.length >= MIN_SEARCH_QUERY_LENGTH && (
             <li className="city-search-state" role="status" aria-live="polite">
               No cities found
             </li>
