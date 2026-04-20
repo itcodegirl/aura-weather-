@@ -9,10 +9,14 @@ const DEFAULT_LOCATION = {
   name: "Chicago",
   country: "United States",
 };
-const LOCATION_FALLBACK_NOTICE = "Location not available \u2014 showing Chicago";
+const LOCATION_FALLBACK_NOTICE =
+  "Location not available \u2014 showing Chicago";
 
 function getFallbackLocationName(weatherData, lat, lon) {
-  const timezoneCity = weatherData?.timezone?.split("/").at(-1)?.replace(/_/g, " ");
+  const timezoneCity = weatherData?.timezone
+    ?.split("/")
+    .at(-1)
+    ?.replace(/_/g, " ");
   return timezoneCity || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
 }
 
@@ -25,14 +29,7 @@ export function useWeather(unit = "F") {
   const [locationNotice, setLocationNotice] = useState(null);
 
   const loadWeather = useCallback(
-    async (
-      lat,
-      lon,
-      name,
-      country,
-      requestUnit = unit,
-      options = {}
-    ) => {
+    async (lat, lon, name, country, requestUnit = unit, options = {}) => {
       const { fallbackNotice } = options;
 
       setLoading(true);
@@ -46,7 +43,8 @@ export function useWeather(unit = "F") {
           fetchAirQuality(lat, lon),
         ]);
 
-        const resolvedName = name || getFallbackLocationName(weatherData, lat, lon);
+        const resolvedName =
+          name || getFallbackLocationName(weatherData, lat, lon);
 
         setWeather({ ...weatherData, aqi });
         setLocation({
@@ -74,9 +72,7 @@ export function useWeather(unit = "F") {
   );
 
   const retryWeather = useCallback(() => {
-    const fallbackRequest = lastRequest
-      ? lastRequest
-      : DEFAULT_LOCATION;
+    const fallbackRequest = lastRequest ? lastRequest : DEFAULT_LOCATION;
 
     loadWeather(
       fallbackRequest.lat,
