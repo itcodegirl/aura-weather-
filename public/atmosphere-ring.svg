@@ -1,0 +1,10 @@
+﻿<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Atmospheric ring icon">
+  <circle cx="14" cy="14" r="11" stroke="url(#ringGradient)" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
+  <path d="M7 15C8.5 11.5 12 8.5 14 8.5C16 8.5 19.5 11.5 21 15" stroke="url(#ringGradient)" stroke-width="2" stroke-linecap="round" opacity="0.95" />
+  <defs>
+    <linearGradient id="ringGradient" x1="3" y1="3" x2="25" y2="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0.65)" />
+    </linearGradient>
+  </defs>
+</svg>

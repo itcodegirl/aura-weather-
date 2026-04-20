@@ -255,13 +255,30 @@ a:focus-visible,
 .brand {
   font-size: 28px;
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  background: linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  background: linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0.72) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
+}
+
+.brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-wrap .brand {
+  margin: 0;
+}
+
+.brand-mark {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  opacity: 0.92;
 }
 
 .tagline {
