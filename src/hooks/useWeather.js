@@ -307,7 +307,17 @@ export function useWeather(unit = "F", options = {}) {
           if (!isMountedRef.current) {
             return;
           }
-          finalizeLookup(onSuccess, position, normalizedRequestUnit);
+
+          const coordinates = parseCoordinates(
+            position?.coords?.latitude,
+            position?.coords?.longitude
+          );
+          if (!coordinates) {
+            finalizeLookup(onFallback, normalizedRequestUnit, fallbackNotice);
+            return;
+          }
+
+          finalizeLookup(onSuccess, coordinates, normalizedRequestUnit);
         },
         () => {
           if (!isMountedRef.current) {
@@ -330,10 +340,10 @@ export function useWeather(unit = "F", options = {}) {
         requestUnit,
         fallbackNotice,
         trackCurrentLookup: true,
-        onSuccess: ({ coords }, normalizedRequestUnit) => {
+        onSuccess: ({ latitude, longitude }, normalizedRequestUnit) => {
           scheduleWeatherLoad(
-            coords.latitude,
-            coords.longitude,
+            latitude,
+            longitude,
             undefined,
             undefined,
             normalizedRequestUnit
@@ -386,9 +396,9 @@ export function useWeather(unit = "F", options = {}) {
       requestCurrentPositionWithFallback({
         requestUnit: unit,
         fallbackNotice: LOCATION_FALLBACK_NOTICE,
-        onSuccess: ({ coords }) => {
+        onSuccess: ({ latitude, longitude }) => {
           clearTimeout(fallbackTimer);
-          scheduleWeatherLoadAsync(coords.latitude, coords.longitude);
+          scheduleWeatherLoadAsync(latitude, longitude);
         },
         onFallback: () => {
           clearTimeout(fallbackTimer);
