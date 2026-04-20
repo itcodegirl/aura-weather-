@@ -133,24 +133,31 @@ export function useWeather(unit = "F") {
     );
 
     return () => clearTimeout(fallbackTimer);
-  }, [loadWeather, unit]);
+  }, [loadWeather, unit, scheduleWeatherLoad]);
+
+  const hasLocation = location !== null;
+  const locationLat = location?.lat;
+  const locationLon = location?.lon;
+  const locationName = location?.name;
+  const locationCountry = location?.country;
 
   useEffect(() => {
-    if (!location) return;
+    if (!hasLocation) return;
 
     scheduleWeatherLoad(
-      location.lat,
-      location.lon,
-      location.name,
-      location.country,
+      locationLat,
+      locationLon,
+      locationName,
+      locationCountry,
       unit
     );
   }, [
     unit,
-    location?.lat,
-    location?.lon,
-    location?.name,
-    location?.country,
+    hasLocation,
+    locationLat,
+    locationLon,
+    locationName,
+    locationCountry,
     scheduleWeatherLoad,
   ]);
 
