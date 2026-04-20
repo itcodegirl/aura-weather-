@@ -69,6 +69,18 @@ function ArcGauge({
   );
 }
 
+const CARD_STYLE_VARIABLES = [
+  { "--i": 0 },
+  { "--i": 1 },
+  { "--i": 2 },
+  { "--i": 3 },
+  { "--i": 4 },
+  { "--i": 5 },
+  { "--i": 6 },
+  { "--i": 7 },
+  { "--i": 8 },
+];
+
 function formatClock(value) {
   if (!value) return "—";
   const date = new Date(value);
@@ -399,12 +411,12 @@ function App() {
             unit={unit}
             convertTemp={convertTemp}
             climateComparison={showClimateContext ? climateComparison : null}
-            style={{ "--i": 0 }}
+            style={CARD_STYLE_VARIABLES[0]}
           />
 
           <section
             className="bento-aqi metric-card metric-card--meter"
-            style={{ "--i": 1 }}
+            style={CARD_STYLE_VARIABLES[1]}
           >
             <span className="metric-label">Air Quality</span>
             <ArcGauge
@@ -429,7 +441,7 @@ function App() {
 
           <section
             className="bento-uv metric-card metric-card--meter"
-            style={{ "--i": 2 }}
+            style={CARD_STYLE_VARIABLES[2]}
           >
             <span className="metric-label">UV Index</span>
             <ArcGauge
@@ -452,7 +464,7 @@ function App() {
             />
           </section>
 
-          <section className="bento-sunlight metric-card" style={{ "--i": 3 }}>
+          <section className="bento-sunlight metric-card" style={CARD_STYLE_VARIABLES[3]}>
             <span className="metric-label">Sunlight</span>
             <div className="metric-sunline">{`Sunrise ${sunriseLabel} → Sunset ${sunsetLabel}`}</div>
             {dayLengthLabel ? (
@@ -460,27 +472,27 @@ function App() {
             ) : null}
           </section>
 
-          <RainCard weather={weather} style={{ "--i": 4 }} />
-          <NowcastCard weather={weather} style={{ "--i": 5 }} />
+          <RainCard weather={weather} style={CARD_STYLE_VARIABLES[4]} />
+          <NowcastCard weather={weather} style={CARD_STYLE_VARIABLES[5]} />
           <HourlyCard
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
             chartTopColor={weatherInfo?.gradient?.[0]}
             chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
-            style={{ "--i": 6 }}
+            style={CARD_STYLE_VARIABLES[6]}
           />
           <StormWatch
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
-            style={{ "--i": 7 }}
+            style={CARD_STYLE_VARIABLES[7]}
           />
           <ForecastCard
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
-            style={{ "--i": 8 }}
+            style={CARD_STYLE_VARIABLES[8]}
           />
         </main>
       </div>

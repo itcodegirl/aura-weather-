@@ -212,7 +212,7 @@ export function useWeather(unit = "F", options = {}) {
         { timeout: 5000 }
       );
     },
-    [scheduleWeatherLoad, unit]
+    [loadWeather, unit]
   );
 
   const retryWeather = useCallback(() => {
@@ -242,7 +242,7 @@ export function useWeather(unit = "F", options = {}) {
     }
 
     const fallbackTimer = setTimeout(() => {
-      scheduleWeatherLoad(
+      loadWeather(
         DEFAULT_LOCATION.lat,
         DEFAULT_LOCATION.lon,
         DEFAULT_LOCATION.name,

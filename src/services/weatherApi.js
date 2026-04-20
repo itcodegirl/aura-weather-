@@ -196,7 +196,7 @@ export async function fetchHistoricalTemperatureAverage(
 
 /**
  * Fetches air quality data (European AQI scale).
- * Non-critical — returns null on failure instead of throwing.
+ * Non-critical: returns null on failure instead of throwing.
  */
 export async function fetchAirQuality(lat, lon, options = {}) {
   try {
