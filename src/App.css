@@ -348,6 +348,47 @@ a:focus-visible,
   padding: 24px;
 }
 
+.metric-gauge {
+  position: relative;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  margin: 4px 0 8px;
+}
+
+.metric-gauge-svg {
+  width: 100%;
+  max-width: 150px;
+  height: 90px;
+}
+
+.metric-gauge-track,
+.metric-gauge-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.metric-gauge-track {
+  stroke: rgba(255, 255, 255, 0.22);
+}
+
+.metric-gauge-fill {
+  transition: stroke-dashoffset 250ms ease;
+}
+
+.metric-gauge-value {
+  position: absolute;
+  top: 48%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+
 .metric-label {
   color: var(--text-dim);
   font-size: 11px;
@@ -578,5 +619,14 @@ a:focus-visible,
 
   .bento-hero {
     min-height: clamp(170px, 46vw, 220px);
+  }
+
+  .metric-gauge-svg {
+    max-width: 132px;
+    height: 80px;
+  }
+
+  .metric-gauge-value {
+    font-size: 30px;
   }
 }
