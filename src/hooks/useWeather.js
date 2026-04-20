@@ -84,7 +84,15 @@ export function useWeather(unit = "F", options = {}) {
   const requestIdRef = useRef(0);
   const inFlightRequestRef = useRef(null);
   const lastRequestedSignatureRef = useRef("");
-  const isMountedRef = useRef(true);
+  const isMountedRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const abortInFlightRequest = useCallback(() => {
     if (!inFlightRequestRef.current) return;
@@ -314,14 +322,6 @@ export function useWeather(unit = "F", options = {}) {
       abortInFlightRequest();
     };
   }, [unit, scheduleWeatherLoad, abortInFlightRequest]);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
 
   const hasLocation = location !== null;
   const locationLat = location?.lat;
