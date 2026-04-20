@@ -394,6 +394,7 @@ export function useWeather(unit = "F", options = {}) {
     (options = {}) => {
       const requestUnit = normalizeTemperatureUnit(options.unit || unit);
       const fallbackNotice = options.fallbackNotice || LOCATION_FALLBACK_NOTICE;
+      const applyFallback = () => loadDefaultLocation(requestUnit, fallbackNotice);
 
       requestCurrentPositionWithFallback({
         requestUnit,
@@ -403,7 +404,7 @@ export function useWeather(unit = "F", options = {}) {
           const latitude = Number(position?.latitude);
           const longitude = Number(position?.longitude);
           if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-            loadDefaultLocation(normalizedRequestUnit, fallbackNotice);
+            applyFallback();
             return;
           }
 
@@ -415,8 +416,8 @@ export function useWeather(unit = "F", options = {}) {
             normalizedRequestUnit
           );
         },
-        onFallback: (normalizedRequestUnit, fallbackNoticeMessage) => {
-          loadDefaultLocation(normalizedRequestUnit, fallbackNoticeMessage);
+        onFallback: () => {
+          applyFallback();
         },
       });
     },
