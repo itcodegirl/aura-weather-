@@ -270,9 +270,34 @@ a:focus-visible,
   gap: 10px;
 }
 
+.app-header-primary,
+.app-header-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-toggle {
+  display: none;
+  min-height: 42px;
+  min-width: 86px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(198, 218, 255, 0.24);
+  background: rgba(8, 17, 38, 0.56);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+  backdrop-filter: blur(var(--card-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
+}
+
 .unit-toggle,
 .toggle-pill,
 .current-location-btn,
+.settings-toggle,
 .city-search-input-wrap {
   background: rgba(8, 17, 38, 0.56);
   border: 1px solid rgba(198, 218, 255, 0.24);
@@ -334,7 +359,8 @@ a:focus-visible,
 
 .current-location-btn:hover,
 .unit-btn:hover,
-.toggle-pill-btn:hover {
+.toggle-pill-btn:hover,
+.settings-toggle:hover {
   color: #f8fbff;
   transform: translateY(-1px);
 }
@@ -758,6 +784,10 @@ a:focus-visible,
     padding-top: 18px;
   }
 
+  .ambient-blob {
+    display: none;
+  }
+
   .city-search {
     order: -1;
     width: 100%;
@@ -766,6 +796,44 @@ a:focus-visible,
 
   .app-header {
     padding: 10px;
+  }
+
+  .app-header-actions {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .app-header-primary {
+    width: 100%;
+  }
+
+  .app-header-secondary {
+    display: none;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .app-header-secondary.is-open {
+    display: flex;
+  }
+
+  .settings-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    margin-left: auto;
+  }
+
+  .app-header-secondary .toggle-pill,
+  .app-header-secondary .unit-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-header-secondary .toggle-pill-btn,
+  .app-header-secondary .unit-btn {
+    flex: 1 1 0;
   }
 }
 
@@ -800,6 +868,7 @@ a:focus-visible,
 
   .current-location-btn,
   .toggle-pill-btn,
+  .settings-toggle,
   .unit-btn {
     min-height: 40px;
   }
@@ -853,7 +922,8 @@ a:focus-visible,
 
   .current-location-btn:hover,
   .unit-btn:hover,
-  .toggle-pill-btn:hover {
+  .toggle-pill-btn:hover,
+  .settings-toggle:hover {
     transform: none;
   }
 }

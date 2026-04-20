@@ -1,4 +1,4 @@
-﻿import { useCallback, useRef, useEffect } from "react";
+﻿import { useCallback, useRef, useEffect, useState } from "react";
 import { CloudOff } from "lucide-react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
@@ -209,6 +209,7 @@ const CLIMATE_CONTEXT_KEY = "aura-weather-climate-context";
 const UNIT_PREFERENCE_KEY = "aura-weather-unit-preference";
 
 function App() {
+  const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [unit, setUnit] = useLocalStorageState(
     UNIT_PREFERENCE_KEY,
     DEFAULT_UNIT,
@@ -279,6 +280,27 @@ function App() {
     window.addEventListener("keydown", handleShortcut);
 
     return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
+
+    const desktopQuery = window.matchMedia("(min-width: 701px)");
+    const handleDesktopChange = (event) => {
+      if (event.matches) {
+        setShowMobileSettings(false);
+      }
+    };
+
+    if (typeof desktopQuery.addEventListener === "function") {
+      desktopQuery.addEventListener("change", handleDesktopChange);
+      return () => desktopQuery.removeEventListener("change", handleDesktopChange);
+    }
+
+    desktopQuery.addListener(handleDesktopChange);
+    return () => desktopQuery.removeListener(handleDesktopChange);
   }, []);
 
   if (showGlobalLoading) {
@@ -358,66 +380,87 @@ function App() {
           </div>
 
           <div className="app-header-actions">
-            <CitySearch
-              ref={citySearchRef}
-              onSelect={(city) => {
-                const lat = Number(city?.lat);
-                const lon = Number(city?.lon);
-                if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-                  return;
-                }
-                loadWeather(lat, lon, city.name, city.country);
-              }}
-            />
-            <button
-              type="button"
-              className="current-location-btn"
-              onClick={() => loadCurrentLocation()}
-              disabled={isLocatingCurrent}
-              aria-label="Use my location"
-            >
-              {isLocatingCurrent ? "Finding..." : "My location"}
-            </button>
-            <div
-              className="toggle-pill"
-              role="group"
-              aria-label="Climate context settings"
-            >
+            <div className="app-header-primary">
+              <CitySearch
+                ref={citySearchRef}
+                onSelect={(city) => {
+                  const lat = Number(city?.lat);
+                  const lon = Number(city?.lon);
+                  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+                    return;
+                  }
+                  loadWeather(lat, lon, city.name, city.country);
+                  setShowMobileSettings(false);
+                }}
+              />
               <button
                 type="button"
-                className={`toggle-pill-btn ${showClimateContext ? "is-active" : ""}`}
-                onClick={() => setShowClimateContext(true)}
-                aria-pressed={showClimateContext}
-                aria-label="Enable climate context"
+                className="current-location-btn"
+                onClick={() => {
+                  loadCurrentLocation();
+                  setShowMobileSettings(false);
+                }}
+                disabled={isLocatingCurrent}
+                aria-label="Use my location"
               >
-                On
+                {isLocatingCurrent ? "Finding..." : "My location"}
               </button>
               <button
                 type="button"
-                className={`toggle-pill-btn ${!showClimateContext ? "is-active" : ""}`}
-                onClick={() => setShowClimateContext(false)}
-                aria-pressed={!showClimateContext}
-                aria-label="Disable climate context"
+                className="settings-toggle"
+                aria-expanded={showMobileSettings}
+                aria-controls="mobile-settings-panel"
+                onClick={() => setShowMobileSettings((current) => !current)}
               >
-                Off
+                Display
               </button>
             </div>
 
-            <div className="unit-toggle" role="group" aria-label="Temperature unit">
-              <button
-                onClick={() => setUnit("F")}
-                className={`unit-btn ${unit === "F" ? "is-active" : ""}`}
-                aria-pressed={unit === "F"}
+            <div
+              id="mobile-settings-panel"
+              className={`app-header-secondary ${showMobileSettings ? "is-open" : ""}`}
+            >
+              <div
+                className="toggle-pill"
+                role="group"
+                aria-label="Climate context settings"
               >
-                {"\u00B0F"}
-              </button>
-              <button
-                onClick={() => setUnit("C")}
-                className={`unit-btn ${unit === "C" ? "is-active" : ""}`}
-                aria-pressed={unit === "C"}
-              >
-                {"\u00B0C"}
-              </button>
+                <button
+                  type="button"
+                  className={`toggle-pill-btn ${showClimateContext ? "is-active" : ""}`}
+                  onClick={() => setShowClimateContext(true)}
+                  aria-pressed={showClimateContext}
+                  aria-label="Enable climate context"
+                >
+                  On
+                </button>
+                <button
+                  type="button"
+                  className={`toggle-pill-btn ${!showClimateContext ? "is-active" : ""}`}
+                  onClick={() => setShowClimateContext(false)}
+                  aria-pressed={!showClimateContext}
+                  aria-label="Disable climate context"
+                >
+                  Off
+                </button>
+              </div>
+
+              <div className="unit-toggle" role="group" aria-label="Temperature unit">
+                <button
+                  onClick={() => setUnit("F")}
+                  className={`unit-btn ${unit === "F" ? "is-active" : ""}`}
+                  aria-pressed={unit === "F"}
+                >
+                  {"\u00B0F"}
+                </button>
+                <button
+                  onClick={() => setUnit("C")}
+                  className={`unit-btn ${unit === "C" ? "is-active" : ""}`}
+                  aria-pressed={unit === "C"}
+                >
+                  {"\u00B0C"}
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -561,5 +604,6 @@ function App() {
 }
 
 export default App;
+
 
 
