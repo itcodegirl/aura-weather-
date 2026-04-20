@@ -413,8 +413,8 @@ export function useWeather(unit = "F", options = {}) {
 
   const loadCurrentLocation = useCallback(
     (options = {}) => {
-      const requestUnit = normalizeTemperatureUnit(options.unit || unit);
-      const fallbackNotice = options.fallbackNotice || LOCATION_FALLBACK_NOTICE;
+      const requestUnit = normalizeTemperatureUnit(options.unit ?? unit);
+      const fallbackNotice = options.fallbackNotice ?? LOCATION_FALLBACK_NOTICE;
       const applyFallback = () => loadDefaultLocation(requestUnit, fallbackNotice);
 
       requestCurrentPositionWithFallback({
@@ -446,8 +446,8 @@ export function useWeather(unit = "F", options = {}) {
   );
 
   const retryWeather = useCallback(() => {
-    const fallbackRequest = lastRequest || DEFAULT_LOCATION;
-    const retryUnit = normalizeTemperatureUnit(fallbackRequest.unit || unit);
+    const fallbackRequest = lastRequest ?? DEFAULT_LOCATION;
+    const retryUnit = normalizeTemperatureUnit(fallbackRequest.unit ?? unit);
 
     scheduleWeatherLoad(
       fallbackRequest.lat,

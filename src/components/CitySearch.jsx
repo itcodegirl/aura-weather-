@@ -18,7 +18,11 @@ const MIN_SEARCH_QUERY_LENGTH = 2;
 function getCityKey(city, index) {
   const lat = Number(city?.latitude);
   const lon = Number(city?.longitude);
-  const cityId = city?.id || city?.name || "unknown";
+  const rawId = city?.id ?? city?.name ?? "unknown";
+  const cityId =
+    typeof rawId === "string"
+      ? rawId.trim() || "unknown"
+      : String(rawId);
   const safeLat = Number.isFinite(lat) ? lat : "na";
   const safeLon = Number.isFinite(lon) ? lon : "na";
   return `${safeLat}:${safeLon}:${cityId}:${index}`;
@@ -230,7 +234,7 @@ function CitySearch({ onSelect }, ref) {
   const activeDescendant =
     showDropdown && activeIndexSafe >= 0
       ? `city-search-option-${activeIndexSafe}`
-      : "";
+      : undefined;
   const resultsId = "city-search-results";
 
   useImperativeHandle(ref, () => ({
