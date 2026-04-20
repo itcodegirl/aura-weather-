@@ -403,7 +403,7 @@ export function useWeather(unit = "F", options = {}) {
           const latitude = Number(position?.latitude);
           const longitude = Number(position?.longitude);
           if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-            onFallback(normalizedRequestUnit, fallbackNotice);
+            loadDefaultLocation(normalizedRequestUnit, fallbackNotice);
             return;
           }
 
@@ -459,17 +459,19 @@ export function useWeather(unit = "F", options = {}) {
         );
       }, LOCATION_FALLBACK_DELAY_MS);
 
-      requestCurrentPositionWithFallback({
-        requestUnit: unit,
-        fallbackNotice: LOCATION_FALLBACK_NOTICE,
-        onSuccess: ({ latitude, longitude }) => {
-          clearTimeout(fallbackTimer);
-          scheduleWeatherLoadAsync(latitude, longitude);
-        },
-        onFallback: () => {
-          clearTimeout(fallbackTimer);
-          loadDefaultLocation(unit, LOCATION_FALLBACK_NOTICE);
-        },
+      queueMicrotask(() => {
+        requestCurrentPositionWithFallback({
+          requestUnit: unit,
+          fallbackNotice: LOCATION_FALLBACK_NOTICE,
+          onSuccess: ({ latitude, longitude }) => {
+            clearTimeout(fallbackTimer);
+            scheduleWeatherLoadAsync(latitude, longitude);
+          },
+          onFallback: () => {
+            clearTimeout(fallbackTimer);
+            loadDefaultLocation(unit, LOCATION_FALLBACK_NOTICE);
+          },
+        });
       });
 
       return () => {
