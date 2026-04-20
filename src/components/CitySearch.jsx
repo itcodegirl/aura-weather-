@@ -27,7 +27,7 @@ function CitySearch({ onSelect }, ref) {
   const debounceRef = useRef(null);
   const requestIdRef = useRef(0);
   const geocodeRequestRef = useRef(null);
-  const isMountedRef = useRef(true);
+  const isMountedRef = useRef(false);
 
   const abortGeocodeRequest = () => {
     if (!geocodeRequestRef.current) return;
@@ -36,6 +36,8 @@ function CitySearch({ onSelect }, ref) {
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     return () => {
       isMountedRef.current = false;
       abortGeocodeRequest();
