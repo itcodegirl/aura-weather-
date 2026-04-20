@@ -295,9 +295,9 @@ a:focus-visible,
 }
 
 .bento-hero {
-  grid-column: span 4;
-  grid-row: span 2;
-  min-height: clamp(250px, 32vw, 380px);
+  grid-column: span 3;
+  grid-row: auto;
+  min-height: clamp(210px, 24vw, 300px);
 }
 
 .bento-aqi {
@@ -485,7 +485,7 @@ a:focus-visible,
   .bento-hero {
     grid-column: span 3;
     grid-row: auto;
-    min-height: clamp(180px, 44vw, 240px);
+    min-height: clamp(160px, 44vw, 220px);
   }
 
   .bento-aqi,
@@ -535,6 +535,6 @@ a:focus-visible,
   }
 
   .bento-hero {
-    min-height: clamp(190px, 50vw, 250px);
+    min-height: clamp(170px, 46vw, 220px);
   }
 }
