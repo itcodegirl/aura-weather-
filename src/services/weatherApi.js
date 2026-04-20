@@ -33,7 +33,11 @@ async function fetchJson(url, options = {}) {
     throw new Error(`Request failed (${response.status})`);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("Invalid JSON response from weather service");
+  }
 }
 
 function getDateInTimeZone(timeZone) {
@@ -229,8 +233,13 @@ export async function fetchAirQuality(lat, lon, options = {}) {
  * Converts a city name into coordinates (used for search).
  */
 export async function geocodeCity(name, options = {}) {
+  const query = typeof name === "string" ? name.trim() : "";
+  if (!query) {
+    return [];
+  }
+
   const data = await fetchJson(
-    `${ENDPOINTS.geocode}?name=${encodeURIComponent(name)}&count=${GEOCODE_RESULTS_LIMIT}`,
+    `${ENDPOINTS.geocode}?name=${encodeURIComponent(query)}&count=${GEOCODE_RESULTS_LIMIT}`,
     { signal: options.signal }
   );
   return data.results || [];
