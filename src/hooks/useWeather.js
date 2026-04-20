@@ -64,6 +64,15 @@ export function useWeather(unit = "F") {
     [unit]
   );
 
+  const scheduleWeatherLoad = useCallback(
+    (lat, lon, name, country, requestUnit = unit, options = {}) => {
+      queueMicrotask(() => {
+        loadWeather(lat, lon, name, country, requestUnit, options);
+      });
+    },
+    [loadWeather, unit]
+  );
+
   const retryWeather = useCallback(() => {
     const fallbackRequest = lastRequest
       ? lastRequest
@@ -80,7 +89,7 @@ export function useWeather(unit = "F") {
 
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
-      loadWeather(
+      scheduleWeatherLoad(
         DEFAULT_LOCATION.lat,
         DEFAULT_LOCATION.lon,
         DEFAULT_LOCATION.name,
@@ -92,7 +101,7 @@ export function useWeather(unit = "F") {
 
     if (!navigator.geolocation) {
       clearTimeout(fallbackTimer);
-      loadWeather(
+      scheduleWeatherLoad(
         DEFAULT_LOCATION.lat,
         DEFAULT_LOCATION.lon,
         DEFAULT_LOCATION.name,
@@ -107,11 +116,11 @@ export function useWeather(unit = "F") {
       (pos) => {
         clearTimeout(fallbackTimer);
         const { latitude, longitude } = pos.coords;
-        loadWeather(latitude, longitude, undefined, undefined, unit);
+        scheduleWeatherLoad(latitude, longitude, undefined, undefined, unit);
       },
       () => {
         clearTimeout(fallbackTimer);
-        loadWeather(
+        scheduleWeatherLoad(
           DEFAULT_LOCATION.lat,
           DEFAULT_LOCATION.lon,
           DEFAULT_LOCATION.name,
@@ -129,7 +138,7 @@ export function useWeather(unit = "F") {
   useEffect(() => {
     if (!location) return;
 
-    loadWeather(
+    scheduleWeatherLoad(
       location.lat,
       location.lon,
       location.name,
@@ -142,7 +151,7 @@ export function useWeather(unit = "F") {
     location?.lon,
     location?.name,
     location?.country,
-    loadWeather,
+    scheduleWeatherLoad,
   ]);
 
   return {
