@@ -3,7 +3,7 @@ import {
   fetchWeather,
   fetchAirQuality,
   fetchHistoricalTemperatureAverage,
-} from "../services/weatherApi";
+} from "../api/openMeteo";
 import {
   getApiTemperatureUnit,
   getApiWindSpeedUnit,
@@ -311,4 +311,3 @@ export function useWeatherData(unit = "F", options = {}) {
     abortInFlightRequest,
   };
 }
-

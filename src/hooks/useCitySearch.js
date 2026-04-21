@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { geocodeCity } from "../services/weatherApi";
+import { geocodeCity } from "../api/openMeteo";
 import { parseCoordinates } from "../utils/weatherUnits";
 
 const SEARCH_DEBOUNCE_MS = 300;
