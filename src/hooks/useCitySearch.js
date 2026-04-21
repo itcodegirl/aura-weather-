@@ -41,6 +41,10 @@ export function useCitySearch({ onSelect } = {}) {
       return undefined;
     }
 
+    if (!open) {
+      return undefined;
+    }
+
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setOpen(false);
@@ -49,7 +53,7 @@ export function useCitySearch({ onSelect } = {}) {
 
     document.addEventListener("pointerdown", handleClickOutside);
     return () => document.removeEventListener("pointerdown", handleClickOutside);
-  }, []);
+  }, [open]);
 
   const normalizedQuery = query.trim();
   const showDropdown =
