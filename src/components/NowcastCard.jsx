@@ -1,5 +1,6 @@
 import { memo, useMemo } from "react";
 import { CloudRain } from "lucide-react";
+import { findWindowStartIndex } from "../utils/timeSeries";
 import "./NowcastCard.css";
 
 const RAIN_WEATHER_CODES = new Set([51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99]);
@@ -43,15 +44,20 @@ function analyzeNowcast(nowcast) {
     ? nowcast.conditionCode
     : [];
 
-  const now = new Date();
-  const nowMs = now.getTime();
-  let normalizedStartIdx = 0;
-  for (let i = 0; i < time.length; i += 1) {
-    const timestamp = new Date(time[i]).getTime();
-    if (Number.isFinite(timestamp) && timestamp >= nowMs) {
-      normalizedStartIdx = i;
-      break;
-    }
+  const normalizedStartIdx = findWindowStartIndex(time, {
+    windowSize: NOWCAST_WINDOW_SIZE,
+  });
+
+  if (normalizedStartIdx < 0) {
+    return {
+      hasData: false,
+      hasRain: false,
+      startInMinutes: null,
+      durationMinutes: 0,
+      peakProbability: 0,
+      summary: "No minute-by-minute points are available.",
+      details: "The next 2-hour nowcast window returned no valid data points.",
+    };
   }
 
   const rows = time

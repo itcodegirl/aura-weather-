@@ -14,6 +14,7 @@ import {
 import { LineChart as LineIcon } from "lucide-react";
 import { getWeather } from "../domain/weatherCodes";
 import { convertTemp } from "../utils/temperature";
+import { findWindowStartIndex } from "../utils/timeSeries";
 import { CardHeader } from "./ui";
 import "./HourlyCard.css";
 
@@ -32,13 +33,10 @@ function buildHourlyData(hourly, unit) {
     return [];
   }
 
-  const now = new Date();
-  const nowMs = now.getTime();
-  const startIdx = hourly.time.findIndex((t) => {
-    const timestamp = new Date(t).getTime();
-    return Number.isFinite(timestamp) && timestamp >= nowMs;
-  });
-  const idx = startIdx === -1 ? 0 : startIdx;
+  const idx = findWindowStartIndex(hourly.time, { windowSize: 24 });
+  if (idx < 0) {
+    return [];
+  }
 
   return hourly.time
     .slice(idx, idx + 24)

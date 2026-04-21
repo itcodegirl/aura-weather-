@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { findWindowStartIndex } from "../utils/timeSeries";
 
 function getEmptyRainAnalysis() {
   return {
@@ -30,13 +31,10 @@ function analyzeRain(hourly) {
     : [];
   const hourlyAmounts = Array.isArray(hourly.rainAmount) ? hourly.rainAmount : [];
 
-  const now = new Date();
-  const nowMs = now.getTime();
-  const startIdx = hourlyTimes.findIndex((t) => {
-    const timestamp = new Date(t).getTime();
-    return Number.isFinite(timestamp) && timestamp >= nowMs;
-  });
-  const idx = startIdx === -1 ? 0 : startIdx;
+  const idx = findWindowStartIndex(hourlyTimes, { windowSize: 24 });
+  if (idx < 0) {
+    return getEmptyRainAnalysis();
+  }
 
   const hours = hourlyTimes
     .slice(idx, idx + 24)
