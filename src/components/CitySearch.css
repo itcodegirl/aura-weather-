@@ -1,4 +1,4 @@
-.city-search {
+﻿.city-search {
   position: relative;
   flex: 1 1 460px;
   width: min(100%, 620px);
@@ -204,7 +204,7 @@
 }
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
-@media (max-width: 760px) {
+@media (max-width: var(--bp-tablet-small)) {
   .city-search {
     flex: 1 1 100%;
     width: 100%;
@@ -212,7 +212,7 @@
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: var(--bp-compact)) {
   .city-search-input-wrap {
     min-height: 42px;
     padding: 0 11px;
@@ -261,5 +261,6 @@
     transform: none;
   }
 }
+
 
 
