@@ -198,6 +198,7 @@ function HeaderControls({
             onClick={handleSetUnitF}
             className={`unit-btn ${unit === "F" ? "is-active" : ""}`}
             aria-pressed={unit === "F"}
+            aria-label="Show temperatures in Fahrenheit"
           >
             {"\u00B0F"}
           </button>
@@ -205,6 +206,7 @@ function HeaderControls({
             onClick={handleSetUnitC}
             className={`unit-btn ${unit === "C" ? "is-active" : ""}`}
             aria-pressed={unit === "C"}
+            aria-label="Show temperatures in Celsius"
           >
             {"\u00B0C"}
           </button>

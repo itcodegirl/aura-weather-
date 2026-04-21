@@ -87,6 +87,7 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
             onClick={() => setMode("chance")}
             className={`rain-mode-btn ${mode === "chance" ? "is-active" : ""}`}
             aria-pressed={mode === "chance"}
+            aria-label="Show hourly rain chance"
           >
             %
           </button>
@@ -94,6 +95,7 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
             onClick={() => setMode("inches")}
             className={`rain-mode-btn ${mode === "inches" ? "is-active" : ""}`}
             aria-pressed={mode === "inches"}
+            aria-label="Show hourly rain accumulation"
           >
             {unit === "C" ? "mm" : "in"}
           </button>
