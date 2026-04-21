@@ -1066,18 +1066,6 @@ a:focus-visible,
     grid-column: span 1;
     min-height: 160px;
   }
-
-  .hero-temp {
-    font-size: 68px;
-  }
-
-  .hero-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .storm-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 860px) {
@@ -1244,12 +1232,6 @@ a:focus-visible,
   .settings-toggle,
   .unit-btn {
     min-height: 40px;
-  }
-
-  .hero-main {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
   }
 
   .metric-gauge-svg {
