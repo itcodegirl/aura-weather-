@@ -26,13 +26,17 @@ export function useWeather(unit = "F", options = {}) {
   const [location, setLocation] = useState(null);
   const [locationNotice, setLocationNotice] = useState(null);
 
-  const handleLocationResolved = useCallback(
-    (lat, lon, name, country, notice = null) => {
-      const nextLocation = toLocationPayload(lat, lon, name, country);
-      if (!nextLocation) {
-        return;
-      }
+  const persistLocationPayload = useCallback((nextLocation) => {
+    persistLocation(
+      nextLocation.lat,
+      nextLocation.lon,
+      nextLocation.name,
+      nextLocation.country
+    );
+  }, []);
 
+  const applyLocation = useCallback(
+    (nextLocation, notice = null) => {
       setLocation((current) => {
         const hasSameLocation =
           current &&
@@ -41,22 +45,33 @@ export function useWeather(unit = "F", options = {}) {
           current.name === nextLocation.name &&
           current.country === nextLocation.country;
 
-        return hasSameLocation ? current : nextLocation;
+        if (hasSameLocation) {
+          return current;
+        }
+
+        return nextLocation;
       });
 
       setLocationNotice(notice);
-      persistLocation(
-        nextLocation.lat,
-        nextLocation.lon,
-        nextLocation.name,
-        nextLocation.country
-      );
+      persistLocationPayload(nextLocation);
     },
-    []
+    [persistLocationPayload]
   );
 
-  const { isLocatingCurrent, loadCurrentLocation: resolveCurrentLocation } =
-    useLocation(handleLocationResolved);
+  const handleLocationResolved = useCallback(
+    (lat, lon, name, country, notice = null) => {
+      const nextLocation = toLocationPayload(lat, lon, name, country);
+      if (!nextLocation) {
+        return;
+      }
+      applyLocation(nextLocation, notice);
+    },
+    [applyLocation]
+  );
+
+  const { isLocatingCurrent, loadCurrentLocation } = useLocation(
+    handleLocationResolved
+  );
 
   const {
     weather,
@@ -75,22 +90,10 @@ export function useWeather(unit = "F", options = {}) {
       if (!nextLocation) {
         return;
       }
-
-      setLocation(nextLocation);
-      setLocationNotice(null);
-      persistLocation(
-        nextLocation.lat,
-        nextLocation.lon,
-        nextLocation.name,
-        nextLocation.country
-      );
+      applyLocation(nextLocation, null);
     },
-    []
+    [applyLocation]
   );
-
-  const loadCurrentLocation = useCallback(() => {
-    resolveCurrentLocation();
-  }, [resolveCurrentLocation]);
 
   return {
     weather,

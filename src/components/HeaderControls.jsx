@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CitySearch from "./CitySearch";
 
 export default function HeaderControls({
@@ -14,26 +14,78 @@ export default function HeaderControls({
   const [showMobileSettings, setShowMobileSettings] = useState(false);
   const controlsRef = useRef(null);
 
-  useEffect(() => {
-    if (!showMobileSettings) {
-      return undefined;
-    }
+  const closeMobileSettings = useCallback(() => {
+    setShowMobileSettings(false);
+  }, []);
 
-    const handleDocumentPointerDown = (event) => {
+  const handleCitySelect = useCallback(
+    (city) => {
+      const lat = Number(city?.lat);
+      const lon = Number(city?.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        return;
+      }
+      loadWeather(lat, lon, city.name, city.country);
+      closeMobileSettings();
+    },
+    [closeMobileSettings, loadWeather]
+  );
+
+  const handleLoadCurrentLocation = useCallback(() => {
+    loadCurrentLocation();
+    closeMobileSettings();
+  }, [closeMobileSettings, loadCurrentLocation]);
+
+  const handleToggleSettings = useCallback(() => {
+    setShowMobileSettings((current) => !current);
+  }, []);
+
+  const handleSetClimateContext = useCallback(
+    (nextValue) => {
+      setShowClimateContext(nextValue);
+    },
+    [setShowClimateContext]
+  );
+
+  const handleSetUnit = useCallback(
+    (nextUnit) => {
+      setUnit(nextUnit);
+    },
+    [setUnit]
+  );
+
+  const handleDesktopChange = useCallback((event) => {
+    if (event.matches) {
+      closeMobileSettings();
+    }
+  }, [closeMobileSettings]);
+
+  const handleDocumentPointerDown = useCallback(
+    (event) => {
       if (
         controlsRef.current &&
         event.target instanceof Node &&
         !controlsRef.current.contains(event.target)
       ) {
-        setShowMobileSettings(false);
+        closeMobileSettings();
       }
-    };
+    },
+    [closeMobileSettings]
+  );
 
-    const handleEscape = (event) => {
+  const handleEscape = useCallback(
+    (event) => {
       if (event.key === "Escape") {
-        setShowMobileSettings(false);
+        closeMobileSettings();
       }
-    };
+    },
+    [closeMobileSettings]
+  );
+
+  useEffect(() => {
+    if (!showMobileSettings) {
+      return undefined;
+    }
 
     document.addEventListener("pointerdown", handleDocumentPointerDown);
     document.addEventListener("keydown", handleEscape);
@@ -42,7 +94,7 @@ export default function HeaderControls({
       document.removeEventListener("pointerdown", handleDocumentPointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [showMobileSettings]);
+  }, [showMobileSettings, handleDocumentPointerDown, handleEscape]);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -50,11 +102,6 @@ export default function HeaderControls({
     }
 
     const desktopQuery = window.matchMedia("(min-width: 701px)");
-    const handleDesktopChange = (event) => {
-      if (event.matches) {
-        setShowMobileSettings(false);
-      }
-    };
 
     if (typeof desktopQuery.addEventListener === "function") {
       desktopQuery.addEventListener("change", handleDesktopChange);
@@ -63,30 +110,16 @@ export default function HeaderControls({
 
     desktopQuery.addListener(handleDesktopChange);
     return () => desktopQuery.removeListener(handleDesktopChange);
-  }, []);
+  }, [handleDesktopChange]);
 
   return (
     <div className="app-header-actions" ref={controlsRef}>
       <div className="app-header-primary">
-        <CitySearch
-          ref={citySearchRef}
-          onSelect={(city) => {
-            const lat = Number(city?.lat);
-            const lon = Number(city?.lon);
-            if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-              return;
-            }
-            loadWeather(lat, lon, city.name, city.country);
-            setShowMobileSettings(false);
-          }}
-        />
+        <CitySearch ref={citySearchRef} onSelect={handleCitySelect} />
         <button
           type="button"
           className="current-location-btn glass"
-          onClick={() => {
-            loadCurrentLocation();
-            setShowMobileSettings(false);
-          }}
+          onClick={handleLoadCurrentLocation}
           disabled={isLocatingCurrent}
           aria-label="Use my location"
         >
@@ -99,7 +132,7 @@ export default function HeaderControls({
           aria-expanded={showMobileSettings}
           aria-controls="mobile-settings-panel"
           aria-haspopup="true"
-          onClick={() => setShowMobileSettings((current) => !current)}
+          onClick={handleToggleSettings}
         >
           Display
         </button>
@@ -119,7 +152,7 @@ export default function HeaderControls({
           <button
             type="button"
             className={`toggle-pill-btn ${showClimateContext ? "is-active" : ""}`}
-            onClick={() => setShowClimateContext(true)}
+            onClick={() => handleSetClimateContext(true)}
             aria-pressed={showClimateContext}
             aria-label="Enable climate context"
           >
@@ -128,7 +161,7 @@ export default function HeaderControls({
           <button
             type="button"
             className={`toggle-pill-btn ${!showClimateContext ? "is-active" : ""}`}
-            onClick={() => setShowClimateContext(false)}
+            onClick={() => handleSetClimateContext(false)}
             aria-pressed={!showClimateContext}
             aria-label="Disable climate context"
           >
@@ -138,14 +171,14 @@ export default function HeaderControls({
 
         <div className="unit-toggle glass" role="group" aria-label="Temperature unit">
           <button
-            onClick={() => setUnit("F")}
+            onClick={() => handleSetUnit("F")}
             className={`unit-btn ${unit === "F" ? "is-active" : ""}`}
             aria-pressed={unit === "F"}
           >
             {"\u00B0F"}
           </button>
           <button
-            onClick={() => setUnit("C")}
+            onClick={() => handleSetUnit("C")}
             className={`unit-btn ${unit === "C" ? "is-active" : ""}`}
             aria-pressed={unit === "C"}
           >
