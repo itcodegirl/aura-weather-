@@ -336,3 +336,56 @@
   }
 }
 
+@media (max-width: 420px) {
+  .storm-title {
+    font-size: 17px;
+  }
+
+  .storm-lede {
+    font-size: 12px;
+  }
+
+  .storm-subtitle {
+    padding: 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+
+  .storm-snapshot-chip {
+    padding: 9px 10px;
+  }
+
+  .storm-snapshot-label {
+    font-size: 10px;
+  }
+
+  .storm-snapshot-value {
+    font-size: 15px;
+  }
+
+  .storm-module {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .storm-module .storm-module-header {
+    font-size: 11px;
+    letter-spacing: 0.09em;
+  }
+
+  .storm-module-kicker {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+
+  .storm-level {
+    font-size: 23px;
+  }
+
+  .storm-module-summary,
+  .storm-detail-label,
+  .storm-detail-value {
+    font-size: 12px;
+  }
+}
+

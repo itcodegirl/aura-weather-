@@ -212,6 +212,42 @@
   }
 }
 
+@media (max-width: 420px) {
+  .city-search-input-wrap {
+    min-height: 42px;
+    padding: 0 11px;
+  }
+
+  .city-search-input {
+    font-size: 14px;
+    padding: 8px 8px;
+  }
+
+  .city-search-clear {
+    width: 26px;
+    height: 26px;
+  }
+
+  .city-search-dropdown {
+    inset: calc(100% + 8px) 0 auto;
+    max-height: 280px;
+  }
+
+  .city-search-result {
+    padding: 10px 12px;
+    gap: 9px;
+  }
+
+  .city-search-result-name {
+    font-size: 14px;
+  }
+
+  .city-search-result-meta,
+  .city-search-state {
+    font-size: 12px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .city-search-dropdown {
     animation: none;

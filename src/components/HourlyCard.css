@@ -158,6 +158,46 @@
   }
 }
 
+@media (max-width: 420px) {
+  .chart-title {
+    font-size: 16px;
+  }
+
+  .hourly-chart .chart-subtitle {
+    padding: 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+
+  .chart-lede {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .chart-body {
+    height: min(68vw, 228px);
+    min-height: clamp(158px, 24vh, 190px);
+    padding: 8px 3px 4px;
+  }
+
+  .chart-tooltip {
+    min-width: 104px;
+    padding: 8px 9px;
+  }
+
+  .chart-tooltip-time {
+    font-size: 10px;
+  }
+
+  .chart-tooltip-temp {
+    font-size: 18px;
+  }
+
+  .chart-tooltip-condition {
+    font-size: 11px;
+  }
+}
+
 
 
 
