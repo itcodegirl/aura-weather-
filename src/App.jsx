@@ -1,9 +1,14 @@
-import { useRef, lazy } from "react";
+import { useRef } from "react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
 import { usePanelPreload, useSearchShortcut } from "./hooks/useAppShellEffects";
 import { useDisplayPreferences } from "./hooks/useDisplayPreferences";
 import { deriveWeatherScene } from "./domain/weatherScene";
+import {
+  HourlyPanel,
+  PRELOAD_HEAVY_PANELS,
+  StormWatchPanel,
+} from "./components/lazyPanels";
 import {
   AppShell,
   AppLoadingState,
@@ -12,11 +17,6 @@ import {
   StatusStack,
   WeatherDashboard,
 } from "./components/layout";
-
-const loadStormWatch = () => import("./components/StormWatch");
-const loadHourlyCard = () => import("./components/HourlyCard");
-const StormWatch = lazy(loadStormWatch);
-const HourlyCard = lazy(loadHourlyCard);
 
 function App() {
   const { unit, setUnit, showClimateContext, setShowClimateContext } =
@@ -47,7 +47,7 @@ function App() {
   } = deriveWeatherScene({ weather, loading, error });
 
   useSearchShortcut(citySearchRef);
-  usePanelPreload([loadHourlyCard, loadStormWatch]);
+  usePanelPreload(PRELOAD_HEAVY_PANELS);
 
   if (showGlobalLoading) {
     return <AppLoadingState />;
@@ -87,8 +87,8 @@ function App() {
         showClimateContext={showClimateContext}
         isBackgroundLoading={isBackgroundLoading}
         weatherInfo={weatherInfo}
-        HourlyCardComponent={HourlyCard}
-        StormWatchComponent={StormWatch}
+        HourlyCardComponent={HourlyPanel}
+        StormWatchComponent={StormWatchPanel}
       />
     </AppShell>
   );
