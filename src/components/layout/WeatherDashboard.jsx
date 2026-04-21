@@ -5,6 +5,7 @@ import ForecastCard from "../ForecastCard";
 import NowcastCard from "../NowcastCard";
 import ExposureSection from "../ExposureSection";
 import SunlightSection from "../SunlightSection";
+import { HourlyPanel, StormWatchPanel } from "../lazyPanels";
 
 const CARD_STYLE_VARIABLES = [
   { "--i": 0 },
@@ -51,12 +52,7 @@ export default function WeatherDashboard({
   showClimateContext,
   isBackgroundLoading,
   weatherInfo,
-  HourlyCardComponent,
-  StormWatchComponent,
 }) {
-  const HourlyPanel = HourlyCardComponent;
-  const StormWatchPanel = StormWatchComponent;
-
   return (
     <main
       className="bento"

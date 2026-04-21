@@ -1,6 +1,5 @@
 import "./App.css";
 import { useWeatherDashboardViewModel } from "./hooks/useWeatherDashboardViewModel";
-import { HourlyPanel, StormWatchPanel } from "./components/lazyPanels";
 import {
   AppShell,
   AppLoadingState,
@@ -74,8 +73,6 @@ function App() {
         showClimateContext={showClimateContext}
         isBackgroundLoading={isBackgroundLoading}
         weatherInfo={weatherInfo}
-        HourlyCardComponent={HourlyPanel}
-        StormWatchComponent={StormWatchPanel}
       />
     </AppShell>
   );
