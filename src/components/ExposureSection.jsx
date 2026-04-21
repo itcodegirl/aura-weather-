@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { MetricCard } from "./ui";
 import { getAqiStatus, getUvStatus } from "../utils/meteorology";
 import "./MetricPanels.css";
@@ -8,7 +9,7 @@ const METRIC_LABEL_IDS = {
   uvIndex: "metric-uv-index",
 };
 
-export default function ExposureSection({ aqi, uvIndex, style }) {
+function ExposureSection({ aqi, uvIndex, style }) {
   const aqiStatus = getAqiStatus(aqi);
   const uvStatus = getUvStatus(uvIndex);
   const aqiSupportText = Number.isFinite(Number(aqi))
@@ -57,3 +58,5 @@ export default function ExposureSection({ aqi, uvIndex, style }) {
     </section>
   );
 }
+
+export default memo(ExposureSection);

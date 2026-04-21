@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { CloudRain } from "lucide-react";
 import "./NowcastCard.css";
 
@@ -216,4 +216,4 @@ function NowcastCard({ weather, style }) {
   );
 }
 
-export default NowcastCard;
+export default memo(NowcastCard);

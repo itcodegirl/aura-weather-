@@ -1,3 +1,4 @@
+import { memo } from "react";
 import "./MetricPanels.css";
 
 const SUNLIGHT_LABEL_ID = "metric-sunlight";
@@ -36,7 +37,7 @@ function getDayLengthLabel(sunrise, sunset) {
   return `${hours} hr ${String(minutes).padStart(2, "0")} min`;
 }
 
-export default function SunlightSection({ sunrise, sunset, style }) {
+function SunlightSection({ sunrise, sunset, style }) {
   const sunriseLabel = formatClock(sunrise);
   const sunsetLabel = formatClock(sunset);
   const dayLengthLabel = getDayLengthLabel(sunrise, sunset);
@@ -71,3 +72,5 @@ export default function SunlightSection({ sunrise, sunset, style }) {
     </section>
   );
 }
+
+export default memo(SunlightSection);
