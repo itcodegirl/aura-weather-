@@ -24,6 +24,14 @@ It combines live weather data, adaptive visual treatment, and a portfolio-ready 
 - Hero conditions card with climate comparison context.
 - Hourly temperature chart, nowcast, rain intelligence, storm watch, and 7-day forecast.
 
+## Architecture At A Glance
+
+- `src/api`: raw Open-Meteo fetch adapters and response shaping.
+- `src/domain`: weather classification and scene derivation logic (`meteorology`, `weatherScene`, `wind`, `weatherCodes`).
+- `src/hooks`: orchestration hooks for location, weather fetch lifecycle, display preferences, and dashboard view model composition.
+- `src/components/layout`: app shell, header, status stack, and dashboard composition boundaries.
+- `src/components/ui`: reusable presentational primitives such as card headers, metric cards, and stats.
+
 ## Design Upgrade Summary
 
 ### Phase 1 - Foundation
@@ -45,6 +53,26 @@ It combines live weather data, adaptive visual treatment, and a portfolio-ready 
 - Added high-contrast support tuning.
 - Improved metadata and sharing polish in `index.html`.
 
+## Engineering Hardening Phases
+
+### Phase A - Render Efficiency
+
+- Added memoized boundaries in high-cost views (`WeatherDashboard`, `ForecastCard`, `HeroCard`, `RainCard`, `NowcastCard`).
+- Reduced duplicate derived computations in intelligence panels (for example `StormWatch` and weather-scene derivation).
+- Stabilized list rendering in timeline-heavy UI (rain bars now use stable timestamp keys).
+
+### Phase B - Interaction + Accessibility
+
+- City search now follows combobox/listbox semantics more closely, with direct `role="option"` entries.
+- Preserved keyboard-first interaction while preventing focus loss on pointer selection.
+- Scoped global outside-click listeners to active/open states only.
+
+### Phase C - State + Data Hygiene
+
+- Prevented redundant location state updates and duplicate persistence writes in weather orchestration hooks.
+- Removed obsolete compatibility shims and dead utility exports.
+- Added defensive DOM guards around global event registration for broader rendering safety.
+
 ## Tech Stack
 
 - React 19
@@ -58,10 +86,12 @@ It combines live weather data, adaptive visual treatment, and a portfolio-ready 
 
 ```text
 src/
-  components/      # Visual cards and UI controls
-  hooks/           # Custom hooks for state and data orchestration
-  services/        # API access layer
-  utils/           # Weather/domain utility logic
+  api/             # API adapters + weather model normalization
+  domain/          # Classification and weather-scene logic
+  hooks/           # Data orchestration and app lifecycle hooks
+  components/      # Layout, weather modules, and UI primitives
+  services/        # Shared service helpers
+  utils/           # Date/unit/format utilities
   App.jsx          # Dashboard composition
   App.css          # Global design system and layout
 ```
