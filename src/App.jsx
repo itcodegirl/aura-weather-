@@ -1,14 +1,6 @@
-import { useRef } from "react";
 import "./App.css";
-import { useWeather } from "./hooks/useWeather";
-import { usePanelPreload, useSearchShortcut } from "./hooks/useAppShellEffects";
-import { useDisplayPreferences } from "./hooks/useDisplayPreferences";
-import { deriveWeatherScene } from "./domain/weatherScene";
-import {
-  HourlyPanel,
-  PRELOAD_HEAVY_PANELS,
-  StormWatchPanel,
-} from "./components/lazyPanels";
+import { useWeatherDashboardViewModel } from "./hooks/useWeatherDashboardViewModel";
+import { HourlyPanel, StormWatchPanel } from "./components/lazyPanels";
 import {
   AppShell,
   AppLoadingState,
@@ -19,15 +11,11 @@ import {
 } from "./components/layout";
 
 function App() {
-  const { unit, setUnit, showClimateContext, setShowClimateContext } =
-    useDisplayPreferences();
-  const citySearchRef = useRef(null);
   const {
     weather,
     weatherDataUnit,
     weatherWindSpeedUnit,
     location,
-    loading,
     error,
     locationNotice,
     loadWeather,
@@ -35,19 +23,18 @@ function App() {
     retryWeather,
     climateComparison,
     isLocatingCurrent,
-  } = useWeather(unit, { climateEnabled: showClimateContext });
-
-  const {
     showGlobalLoading,
     isBackgroundLoading,
     showGlobalError,
     showRefreshError,
     weatherInfo,
     background,
-  } = deriveWeatherScene({ weather, loading, error });
-
-  useSearchShortcut(citySearchRef);
-  usePanelPreload(PRELOAD_HEAVY_PANELS);
+    citySearchRef,
+    unit,
+    setUnit,
+    showClimateContext,
+    setShowClimateContext,
+  } = useWeatherDashboardViewModel();
 
   if (showGlobalLoading) {
     return <AppLoadingState />;
