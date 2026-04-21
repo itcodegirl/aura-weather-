@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { LineChart as LineIcon } from "lucide-react";
-import { getWeather } from "../utils/weatherCodes";
+import { getWeather } from "../domain/weatherCodes";
 import { convertTemperature } from "../utils/weatherUnits";
 import "./HourlyCard.css";
 

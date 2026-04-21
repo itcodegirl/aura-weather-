@@ -3,7 +3,7 @@ import { CloudOff } from "lucide-react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
-import { getWeather, gradientCss } from "./utils/weatherCodes";
+import { getWeather, gradientCss } from "./domain/weatherCodes";
 import HeroCard from "./components/HeroCard";
 import RainCard from "./components/RainCard";
 import ForecastCard from "./components/ForecastCard";

@@ -16,9 +16,9 @@ import {
   classifyComfort,
   windDirectionName,
   classifyWind,
-} from "../utils/meteorology";
+} from "../domain";
 import { convertTemperature } from "../utils/weatherUnits";
-import { formatWindSpeed } from "../utils/windUnits";
+import { formatWindSpeed } from "../domain/wind";
 import { DetailMetricStat } from "./ui";
 import "./StormWatch.css";
 

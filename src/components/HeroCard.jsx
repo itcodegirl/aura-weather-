@@ -11,9 +11,9 @@ import {
   Sunset,
   Sun,
 } from "lucide-react";
-import { getWeather } from "../utils/weatherCodes";
+import { getWeather } from "../domain/weatherCodes";
 import { convertTemperature } from "../utils/weatherUnits";
-import { formatWindSpeed } from "../utils/windUnits";
+import { formatWindSpeed } from "../domain/wind";
 import WeatherIcon from "./WeatherIcon";
 import { IconMetricStat } from "./ui";
 import "./HeroCard.css";

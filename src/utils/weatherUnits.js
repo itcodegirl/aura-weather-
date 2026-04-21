@@ -1,4 +1,8 @@
-export const WIND_SPEED_CONVERSION = 1.60934;
+import { normalizeTemperatureUnit as normalizeDomainTemperatureUnit } from "../domain/temperature.js";
+
+export { toFahrenheit, toCelsius, convertTemperature } from "../domain/temperature.js";
+export { WIND_SPEED_CONVERSION, formatWindSpeed } from "../domain/wind.js";
+
 export const MM_PER_INCH = 25.4;
 export const MIN_LATITUDE = -90;
 export const MAX_LATITUDE = 90;
@@ -9,22 +13,6 @@ const PRECIP_LABEL_BY_UNIT = {
   F: "in",
   C: "mm",
 };
-
-function normalizeBool(value) {
-  if (typeof value !== "string") {
-    return "F";
-  }
-
-  const normalized = value.trim().toUpperCase();
-  if (normalized === "C" || normalized === "CELSIUS") {
-    return "C";
-  }
-  if (normalized === "F" || normalized === "FAHRENHEIT") {
-    return "F";
-  }
-
-  return "F";
-}
 
 function normalizeCoordinate(value, min, max) {
   const numeric = Number(value);
@@ -38,23 +26,23 @@ function normalizeCoordinate(value, min, max) {
 }
 
 export function normalizeTemperatureUnit(value) {
-  return normalizeBool(value);
+  return normalizeDomainTemperatureUnit(value);
 }
 
 export function getApiTemperatureUnit(unit) {
-  return normalizeBool(unit) === "C" ? "celsius" : "fahrenheit";
+  return normalizeDomainTemperatureUnit(unit) === "C" ? "celsius" : "fahrenheit";
 }
 
 export function getApiWindSpeedUnit(unit) {
-  return normalizeBool(unit) === "C" ? "kmh" : "mph";
+  return normalizeDomainTemperatureUnit(unit) === "C" ? "kmh" : "mph";
 }
 
 export function getApiPrecipUnit(unit) {
-  return normalizeBool(unit) === "C" ? "mm" : "inch";
+  return normalizeDomainTemperatureUnit(unit) === "C" ? "mm" : "inch";
 }
 
 export function getPrecipUnitLabel(unit) {
-  return PRECIP_LABEL_BY_UNIT[normalizeBool(unit)];
+  return PRECIP_LABEL_BY_UNIT[normalizeDomainTemperatureUnit(unit)];
 }
 
 export function normalizeLatitude(value) {
@@ -84,80 +72,6 @@ export function validateCoordinates(lat, lon) {
   return parsed;
 }
 
-export function toFahrenheit(value, sourceUnit = "F") {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return Number.NaN;
-  const normalizedSource = normalizeBool(sourceUnit);
-  return normalizedSource === "C" ? (numeric * 9) / 5 + 32 : numeric;
-}
-
-export function toCelsius(value, sourceUnit = "F") {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return Number.NaN;
-  const normalizedSource = normalizeBool(sourceUnit);
-  return normalizedSource === "F" ? ((numeric - 32) * 5) / 9 : numeric;
-}
-
-export function convertTemperature(value, targetUnit = "F", sourceUnit = "F") {
-  const normalizedTarget = normalizeBool(targetUnit);
-  return normalizedTarget === "C"
-    ? toCelsius(value, sourceUnit)
-    : toFahrenheit(value, sourceUnit);
-}
-
-function normalizeWindSpeedSourceUnit(value, fallback = "mph") {
-  if (typeof value !== "string") {
-    return fallback;
-  }
-
-  const normalized = value.trim().toLowerCase().replace(/[\s/_-]/g, "");
-
-  if (
-    normalized === "c" ||
-    normalized === "celsius" ||
-    normalized === "kmh" ||
-    normalized === "kmph" ||
-    normalized === "kmhour" ||
-    normalized === "kilometersperhour" ||
-    normalized === "kilometresperhour"
-  ) {
-    return "kmh";
-  }
-
-  if (
-    normalized === "f" ||
-    normalized === "fahrenheit" ||
-    normalized === "mph" ||
-    normalized === "mileperhour" ||
-    normalized === "milesperhour"
-  ) {
-    return "mph";
-  }
-
-  return fallback;
-}
-
-export function formatWindSpeed(speed, targetUnit, sourceUnit = "F") {
-  const numeric = Number(speed);
-  if (!Number.isFinite(numeric)) {
-    return "\u2014";
-  }
-  const nonNegativeSpeed = Math.max(numeric, 0);
-
-  const sourceNormalized = normalizeWindSpeedSourceUnit(sourceUnit);
-  const targetNormalized = normalizeBool(targetUnit);
-  const speedInMph =
-    sourceNormalized === "mph"
-      ? nonNegativeSpeed
-      : nonNegativeSpeed / WIND_SPEED_CONVERSION;
-  const converted =
-    targetNormalized === "C"
-      ? Math.round(speedInMph * WIND_SPEED_CONVERSION)
-      : Math.round(speedInMph);
-
-  return `${converted} ${targetNormalized === "C" ? "km/h" : "mph"}`;
-}
-
 export function formatPrecipitation(value, targetUnit, sourceUnit = "F") {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) {
@@ -165,8 +79,8 @@ export function formatPrecipitation(value, targetUnit, sourceUnit = "F") {
   }
   const nonNegativeValue = Math.max(numeric, 0);
 
-  const sourceNormalized = normalizeBool(sourceUnit);
-  const targetNormalized = normalizeBool(targetUnit);
+  const sourceNormalized = normalizeDomainTemperatureUnit(sourceUnit);
+  const targetNormalized = normalizeDomainTemperatureUnit(targetUnit);
   const valueInInches =
     sourceNormalized === "C"
       ? nonNegativeValue / MM_PER_INCH
@@ -176,3 +90,4 @@ export function formatPrecipitation(value, targetUnit, sourceUnit = "F") {
 
   return `${displayValue.toFixed(2)} ${getPrecipUnitLabel(targetNormalized)}`;
 }
+

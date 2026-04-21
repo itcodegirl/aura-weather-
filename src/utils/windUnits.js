@@ -1,1 +1,2 @@
-export { WIND_SPEED_CONVERSION, formatWindSpeed } from "./weatherUnits";
+export { WIND_SPEED_CONVERSION, formatWindSpeed } from "../domain/wind.js";
+

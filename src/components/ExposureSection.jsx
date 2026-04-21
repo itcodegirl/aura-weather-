@@ -1,5 +1,5 @@
 import { MetricCard } from "./ui";
-import { getAqiStatus, getUvStatus } from "../utils/weatherSignals";
+import { getAqiStatus, getUvStatus } from "../domain/aqi";
 import "./MetricPanels.css";
 
 const METRIC_LABEL_IDS = {

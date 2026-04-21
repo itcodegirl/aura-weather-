@@ -1,7 +1,7 @@
 // src/components/ForecastCard.jsx
 
 import { CalendarDays, Droplets } from "lucide-react";
-import { getWeather } from "../utils/weatherCodes";
+import { getWeather } from "../domain/weatherCodes";
 import { formatDayLabel, parseLocalDate } from "../utils/dates";
 import { convertTemperature } from "../utils/weatherUnits";
 import WeatherIcon from "./WeatherIcon";
