@@ -122,6 +122,14 @@ function HeaderControls({
     }
 
     const desktopBreakpoint = (() => {
+      if (
+        typeof document === "undefined" ||
+        !document.documentElement ||
+        typeof window.getComputedStyle !== "function"
+      ) {
+        return 761;
+      }
+
       const value = getComputedStyle(document.documentElement)
         .getPropertyValue("--bp-tablet-small")
         .trim();
