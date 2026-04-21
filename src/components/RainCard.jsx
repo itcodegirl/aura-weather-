@@ -45,27 +45,105 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
     () => getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit),
     [hours, nextRain, peak, total, unit, dataUnit]
   );
-  const peakProbability = Number.isFinite(Number(peak?.probability))
-    ? Math.round(Number(peak.probability))
-    : 0;
-  const rainRiskTone =
-    peakProbability >= 70
-      ? "high"
-      : peakProbability >= 40
-        ? "moderate"
-        : peakProbability >= 20
-          ? "low"
-          : "minimal";
-  const rainRiskLabel =
-    rainRiskTone === "high"
-      ? "High rain risk"
-      : rainRiskTone === "moderate"
-        ? "Moderate rain risk"
-        : rainRiskTone === "low"
-          ? "Low rain risk"
-          : "Minimal rain risk";
+  const {
+    isDry,
+    peakProbability,
+    peakTimeLabel,
+    nextRainTimeLabel,
+    rainRiskTone,
+    rainRiskLabel,
+    observedTodayLabel,
+    projectedTotalLabel,
+    past12hLabel,
+    past24hLabel,
+    past48hLabel,
+    timelineBars,
+  } = useMemo(() => {
+    const safePeakProbability = Number.isFinite(Number(peak?.probability))
+      ? Math.round(Number(peak.probability))
+      : 0;
 
-  const isDry = peak.probability < 20 && total < 0.01;
+    const safeRiskTone =
+      safePeakProbability >= 70
+        ? "high"
+        : safePeakProbability >= 40
+          ? "moderate"
+          : safePeakProbability >= 20
+            ? "low"
+            : "minimal";
+
+    const safeRiskLabel =
+      safeRiskTone === "high"
+        ? "High rain risk"
+        : safeRiskTone === "moderate"
+          ? "Moderate rain risk"
+          : safeRiskTone === "low"
+            ? "Low rain risk"
+            : "Minimal rain risk";
+
+    const safePeakTimeLabel = formatHour(peak?.time);
+    const safeNextRainTimeLabel = nextRain ? formatHour(nextRain.time) : "";
+    const safePeakAmount = Number.isFinite(Number(peakAmount))
+      ? Number(peakAmount)
+      : 0;
+    const bars = hours.map((hour) => {
+      const heightPct =
+        mode === "chance"
+          ? Math.max(hour.probability, 3)
+          : safePeakAmount > 0
+            ? Math.max((hour.amount / safePeakAmount) * 100, 3)
+            : 3;
+
+      const opacity =
+        mode === "chance"
+          ? 0.25 + (hour.probability / 100) * 0.75
+          : safePeakAmount > 0
+            ? 0.25 + (hour.amount / safePeakAmount) * 0.75
+            : 0.25;
+
+      const tooltip =
+        mode === "chance"
+          ? `${formatHour(hour.time)} \u2014 ${hour.probability}%`
+          : `${formatHour(hour.time)} \u2014 ${formatPrecipitation(hour.amount, unit, dataUnit)}`;
+
+      return {
+        key: Number.isFinite(hour.time?.getTime?.())
+          ? String(hour.time.getTime())
+          : tooltip,
+        heightPct,
+        opacity,
+        tooltip,
+      };
+    });
+
+    return {
+      isDry: safePeakProbability < 20 && total < 0.01,
+      peakProbability: safePeakProbability,
+      peakTimeLabel: safePeakTimeLabel,
+      nextRainTimeLabel: safeNextRainTimeLabel,
+      rainRiskTone: safeRiskTone,
+      rainRiskLabel: safeRiskLabel,
+      observedTodayLabel: formatPrecipitation(soFarToday, unit, dataUnit),
+      projectedTotalLabel: formatPrecipitation(total, unit, dataUnit),
+      past12hLabel: formatPrecipitation(past12h, unit, dataUnit),
+      past24hLabel: formatPrecipitation(past24h, unit, dataUnit),
+      past48hLabel: formatPrecipitation(past48h, unit, dataUnit),
+      timelineBars: bars,
+    };
+  }, [
+    peak,
+    nextRain,
+    peakAmount,
+    hours,
+    mode,
+    total,
+    soFarToday,
+    past12h,
+    past24h,
+    past48h,
+    unit,
+    dataUnit,
+  ]);
 
   return (
     <section className="bento-rain rain-card glass" style={style}>
@@ -106,21 +184,21 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
           <div className="rain-empty-icon">
             <WeatherIcon code={0} size={44} />
           </div>
-          <div className="rain-empty-title">No meaningful rain expected</div>
-          <div className="rain-empty-sub">
-            Highest chance is {peak.probability}% around {formatHour(peak.time)}
-          </div>
+        <div className="rain-empty-title">No meaningful rain expected</div>
+        <div className="rain-empty-sub">
+            Highest chance is {peakProbability}% around {peakTimeLabel}
         </div>
+      </div>
       ) : (
         <div className="rain-details">
           <div className="rain-primary">
             <div className="rain-primary-value">
-              {nextRain ? formatHour(nextRain.time) : "Later today"}
+              {nextRain ? nextRainTimeLabel : "Later today"}
             </div>
             <div className="rain-primary-label">
               {nextRain
                 ? `Rain likely (${nextRain.probability}% chance)`
-                : `Highest chance ${peak.probability}% around ${formatHour(peak.time)}`}
+                : `Highest chance ${peakProbability}% around ${peakTimeLabel}`}
             </div>
           </div>
 
@@ -129,7 +207,7 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
               <Droplets size={14} />
               <div>
                 <div className="rain-stat-value">
-                  {formatPrecipitation(soFarToday, unit, dataUnit)}
+                  {observedTodayLabel}
                 </div>
                 <div className="rain-stat-label">Observed today</div>
               </div>
@@ -138,7 +216,7 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
               <CloudRain size={14} />
               <div>
                 <div className="rain-stat-value">
-                  {formatPrecipitation(total, unit, dataUnit)}
+                  {projectedTotalLabel}
                 </div>
                 <div className="rain-stat-label">Projected 24h total</div>
               </div>
@@ -146,8 +224,8 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
             <div className="rain-stat">
               <Clock size={14} />
               <div>
-                <div className="rain-stat-value">{peak.probability}%</div>
-                <div className="rain-stat-label">Peak near {formatHour(peak.time)}</div>
+                <div className="rain-stat-value">{peakProbability}%</div>
+                <div className="rain-stat-label">Peak near {peakTimeLabel}</div>
               </div>
             </div>
           </div>
@@ -157,19 +235,19 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
             <div className="rain-history-pill" role="listitem">
               <span className="rain-history-pill-label">12h</span>
               <span className="rain-history-pill-value">
-                {formatPrecipitation(past12h, unit, dataUnit)}
+                {past12hLabel}
               </span>
             </div>
             <div className="rain-history-pill" role="listitem">
               <span className="rain-history-pill-label">24h</span>
               <span className="rain-history-pill-value">
-                {formatPrecipitation(past24h, unit, dataUnit)}
+                {past24hLabel}
               </span>
             </div>
             <div className="rain-history-pill" role="listitem">
               <span className="rain-history-pill-label">48h</span>
               <span className="rain-history-pill-value">
-                {formatPrecipitation(past48h, unit, dataUnit)}
+                {past48hLabel}
               </span>
             </div>
           </div>
@@ -186,35 +264,14 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
               : `Hourly precipitation amount in ${getPrecipUnitLabel(unit)} over the next 24 hours`
           }
         >
-          {hours.map((h, i) => {
-            const heightPct =
-              mode === "chance"
-                ? Math.max(h.probability, 3)
-                : peakAmount > 0
-                  ? Math.max((h.amount / peakAmount) * 100, 3)
-                  : 3;
-
-            const opacity =
-              mode === "chance"
-                ? 0.25 + (h.probability / 100) * 0.75
-                : peakAmount > 0
-                  ? 0.25 + (h.amount / peakAmount) * 0.75
-                  : 0.25;
-
-            const tooltip =
-              mode === "chance"
-                ? `${formatHour(h.time)} \u2014 ${h.probability}%`
-              : `${formatHour(h.time)} \u2014 ${formatPrecipitation(h.amount, unit, dataUnit)}`;
-
-            return (
-              <div
-                key={i}
-                className="rain-bar"
-                style={{ height: `${heightPct}%`, opacity }}
-                title={tooltip}
-              />
-            );
-          })}
+          {timelineBars.map((bar) => (
+            <div
+              key={bar.key}
+              className="rain-bar"
+              style={{ height: `${bar.heightPct}%`, opacity: bar.opacity }}
+              title={bar.tooltip}
+            />
+          ))}
         </div>
         <p className="rain-timeline-summary">{timelineSummary}</p>
 
