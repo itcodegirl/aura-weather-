@@ -15,7 +15,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          recharts: ["recharts"],
           lucide: ["lucide-react"],
         },
       },
