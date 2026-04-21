@@ -269,6 +269,9 @@ function App() {
   const isBackgroundLoading = loading && hasWeatherData;
   const showGlobalError = Boolean(error) && !hasWeatherData;
   const showRefreshError = Boolean(error) && hasWeatherData;
+  const hasStatusStack = Boolean(
+    locationNotice || isBackgroundLoading || showRefreshError
+  );
 
   const convertTemp = useCallback(
     (value, sourceUnit = weatherDataUnit || "F") => {
@@ -425,28 +428,32 @@ function App() {
           />
         </header>
 
-        {locationNotice && (
-          <p className="location-notice" role="status" aria-live="polite">
-            {locationNotice}
-          </p>
-        )}
-        {isBackgroundLoading && (
-          <p className="app-status app-status--loading" role="status" aria-live="polite">
-            Updating weather for your current settings...
-          </p>
-        )}
-        {showRefreshError && (
-          <p className="app-status app-status--error" role="alert">
-            Could not refresh weather right now. Showing last known data.
-            <button
-              type="button"
-              className="app-status-retry"
-              onClick={retryWeather}
-            >
-              Retry
-            </button>
-          </p>
-        )}
+        {hasStatusStack ? (
+          <div className="status-stack">
+            {locationNotice && (
+              <p className="location-notice" role="status" aria-live="polite">
+                {locationNotice}
+              </p>
+            )}
+            {isBackgroundLoading && (
+              <p className="app-status app-status--loading" role="status" aria-live="polite">
+                Updating weather for your current settings...
+              </p>
+            )}
+            {showRefreshError && (
+              <p className="app-status app-status--error" role="alert">
+                Could not refresh weather right now. Showing last known data.
+                <button
+                  type="button"
+                  className="app-status-retry"
+                  onClick={retryWeather}
+                >
+                  Retry
+                </button>
+              </p>
+            )}
+          </div>
+        ) : null}
 
         <main
           className="bento"
