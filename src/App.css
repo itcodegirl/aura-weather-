@@ -1064,7 +1064,6 @@ a:focus-visible,
 
   .bento-nowcast {
     grid-column: span 1;
-    min-height: 160px;
   }
 }
 
@@ -1093,9 +1092,6 @@ a:focus-visible,
     grid-column: span 1;
   }
 
-  .bento-nowcast {
-    min-height: 0;
-  }
 }
 
 @media (max-width: 700px) {
