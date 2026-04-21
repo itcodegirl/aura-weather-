@@ -118,9 +118,11 @@ function HourlyCard({
   ]);
   const data = hourlyData;
   const palette = useMemo(() => {
-    const hourlyCodes = data.map((entry) => entry.code).filter((value) => Number.isFinite(value));
-    const primaryCode = hourlyCodes[0] ?? currentWeatherCode ?? 0;
-    return getWeather(primaryCode).gradient || ["#fbbf24", "#f59e0b", "#fbbf24"];
+    const hourlyCodes = data
+      .map((entry) => entry.code)
+      .filter((value) => Number.isFinite(value));
+    const primaryCode = currentWeatherCode ?? hourlyCodes[0] ?? 0;
+    return getWeather(primaryCode).gradient || getWeather(0).gradient;
   }, [data, currentWeatherCode]);
 
   const topColor = chartTopColor || palette[0];
