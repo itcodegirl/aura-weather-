@@ -283,6 +283,7 @@
   line-height: 1.4;
 }
 
+/* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
 @media (max-width: 760px) {
   .rain-header {
     flex-direction: column;
@@ -300,7 +301,7 @@
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 640px) {
   .rain-stats,
   .rain-history-pills {
     grid-template-columns: 1fr;
@@ -319,7 +320,7 @@
   }
 }
 
-@media (max-width: 440px) {
+@media (max-width: 420px) {
   .rain-title {
     font-size: 16px;
   }

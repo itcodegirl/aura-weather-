@@ -233,7 +233,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 1100px) {
+/* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
+@media (max-width: 1200px) {
   .hero-sunlight {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
