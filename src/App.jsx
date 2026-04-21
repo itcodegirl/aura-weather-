@@ -82,7 +82,6 @@ const CARD_STYLE_VARIABLES = [
   { "--i": 5 },
   { "--i": 6 },
   { "--i": 7 },
-  { "--i": 8 },
 ];
 
 const GROUP_LABEL_STYLE_VARIABLES = [
@@ -228,6 +227,7 @@ const GROUP_LABEL_IDS = {
 };
 
 const METRIC_LABEL_IDS = {
+  exposure: "metric-exposure",
   airQuality: "metric-air-quality",
   uvIndex: "metric-uv-index",
   sunlight: "metric-sunlight",
@@ -481,80 +481,93 @@ function App() {
           />
 
           <section
-            className="bento-aqi metric-card metric-card--meter"
+            className="bento-exposure exposure-card metric-card"
             style={CARD_STYLE_VARIABLES[1]}
-            aria-labelledby={METRIC_LABEL_IDS.airQuality}
+            aria-labelledby={METRIC_LABEL_IDS.exposure}
           >
             <div className="metric-head">
-              <h2 id={METRIC_LABEL_IDS.airQuality} className="metric-label">
-                Air Quality
+              <h2 id={METRIC_LABEL_IDS.exposure} className="metric-label">
+                Environmental Exposure
               </h2>
               <span className="metric-context">Live</span>
             </div>
-            <ArcGauge
-              value={weather.aqi}
-              max={300}
-              statusColor={aqiStatus.color}
-              decimals={0}
-              label="Air quality index"
-            />
-            {aqiStatus.label && (
-              <span className="metric-pill" style={{ "--status-color": aqiStatus.color }}>
-                <span className="metric-dot" />
-                <span>{aqiStatus.label}</span>
-              </span>
-            )}
-            <MetricDensityBar
-              value={weather.aqi}
-              max={300}
-              statusColor={aqiStatus.color}
-            />
-            <p className="metric-support">
-              {Number.isFinite(Number(weather.aqi))
-                ? `Current AQI is ${Math.round(Number(weather.aqi))} out of 300.`
-                : "Air quality data is temporarily unavailable."}
-            </p>
-          </section>
 
-          <section
-            className="bento-uv metric-card metric-card--meter"
-            style={CARD_STYLE_VARIABLES[2]}
-            aria-labelledby={METRIC_LABEL_IDS.uvIndex}
-          >
-            <div className="metric-head">
-              <h2 id={METRIC_LABEL_IDS.uvIndex} className="metric-label">
-                UV Index
-              </h2>
-              <span className="metric-context">Today</span>
+            <div className="exposure-grid">
+              <article
+                className="exposure-panel metric-card metric-card--meter"
+                aria-labelledby={METRIC_LABEL_IDS.airQuality}
+              >
+                <div className="metric-head exposure-panel-head">
+                  <h3 id={METRIC_LABEL_IDS.airQuality} className="metric-label">
+                    Air Quality
+                  </h3>
+                  <span className="metric-context">AQI</span>
+                </div>
+                <ArcGauge
+                  value={weather.aqi}
+                  max={300}
+                  statusColor={aqiStatus.color}
+                  decimals={0}
+                  label="Air quality index"
+                />
+                {aqiStatus.label && (
+                  <span className="metric-pill" style={{ "--status-color": aqiStatus.color }}>
+                    <span className="metric-dot" />
+                    <span>{aqiStatus.label}</span>
+                  </span>
+                )}
+                <MetricDensityBar
+                  value={weather.aqi}
+                  max={300}
+                  statusColor={aqiStatus.color}
+                />
+                <p className="metric-support">
+                  {Number.isFinite(Number(weather.aqi))
+                    ? `Current AQI is ${Math.round(Number(weather.aqi))} out of 300.`
+                    : "Air quality data is temporarily unavailable."}
+                </p>
+              </article>
+
+              <article
+                className="exposure-panel metric-card metric-card--meter"
+                aria-labelledby={METRIC_LABEL_IDS.uvIndex}
+              >
+                <div className="metric-head exposure-panel-head">
+                  <h3 id={METRIC_LABEL_IDS.uvIndex} className="metric-label">
+                    UV Index
+                  </h3>
+                  <span className="metric-context">Today</span>
+                </div>
+                <ArcGauge
+                  value={uvToday}
+                  max={11}
+                  statusColor={uvStatus.color}
+                  decimals={1}
+                  label="UV index"
+                />
+                {uvStatus.label && (
+                  <span className="metric-pill" style={{ "--status-color": uvStatus.color }}>
+                    <span className="metric-dot" />
+                    <span>{uvStatus.label}</span>
+                  </span>
+                )}
+                <MetricDensityBar
+                  value={uvToday}
+                  max={11}
+                  statusColor={uvStatus.color}
+                />
+                <p className="metric-support">
+                  {Number.isFinite(Number(uvToday))
+                    ? `Peak UV is ${Number(uvToday).toFixed(1)} on an 11+ scale.`
+                    : "UV data is temporarily unavailable."}
+                </p>
+              </article>
             </div>
-            <ArcGauge
-              value={uvToday}
-              max={11}
-              statusColor={uvStatus.color}
-              decimals={1}
-              label="UV index"
-            />
-            {uvStatus.label && (
-              <span className="metric-pill" style={{ "--status-color": uvStatus.color }}>
-                <span className="metric-dot" />
-                <span>{uvStatus.label}</span>
-              </span>
-            )}
-            <MetricDensityBar
-              value={uvToday}
-              max={11}
-              statusColor={uvStatus.color}
-            />
-            <p className="metric-support">
-              {Number.isFinite(Number(uvToday))
-                ? `Peak UV is ${Number(uvToday).toFixed(1)} on an 11+ scale.`
-                : "UV data is temporarily unavailable."}
-            </p>
           </section>
 
           <section
             className="bento-sunlight metric-card"
-            style={CARD_STYLE_VARIABLES[3]}
+            style={CARD_STYLE_VARIABLES[2]}
             aria-labelledby={METRIC_LABEL_IDS.sunlight}
           >
             <div className="metric-head">
@@ -591,14 +604,14 @@ function App() {
             weather={weather}
             unit={unit}
             dataUnit={weatherDataUnit}
-            style={CARD_STYLE_VARIABLES[4]}
+            style={CARD_STYLE_VARIABLES[3]}
           />
-          <NowcastCard weather={weather} style={CARD_STYLE_VARIABLES[5]} />
+          <NowcastCard weather={weather} style={CARD_STYLE_VARIABLES[4]} />
           <Suspense
             fallback={
               <CardFallback
                 className="bento-chart"
-                style={CARD_STYLE_VARIABLES[6]}
+                style={CARD_STYLE_VARIABLES[5]}
                 title="Loading hourly outlook..."
               />
             }
@@ -609,7 +622,7 @@ function App() {
               convertTemp={convertTemp}
               chartTopColor={weatherInfo?.gradient?.[0]}
               chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
-              style={CARD_STYLE_VARIABLES[6]}
+              style={CARD_STYLE_VARIABLES[5]}
             />
           </Suspense>
           <p
@@ -623,7 +636,7 @@ function App() {
             fallback={
               <CardFallback
                 className="bento-storm"
-                style={CARD_STYLE_VARIABLES[7]}
+                style={CARD_STYLE_VARIABLES[6]}
                 title="Loading risk signals..."
               />
             }
@@ -634,7 +647,7 @@ function App() {
               weatherDataUnit={weatherDataUnit}
               weatherWindSpeedUnit={weatherWindSpeedUnit}
               convertTemp={convertTemp}
-              style={CARD_STYLE_VARIABLES[7]}
+              style={CARD_STYLE_VARIABLES[6]}
             />
           </Suspense>
           <p
@@ -648,7 +661,7 @@ function App() {
             weather={weather}
             unit={unit}
             convertTemp={convertTemp}
-            style={CARD_STYLE_VARIABLES[8]}
+            style={CARD_STYLE_VARIABLES[7]}
           />
         </main>
       </div>

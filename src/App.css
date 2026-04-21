@@ -650,8 +650,10 @@ a:focus-visible,
   animation-delay: calc(var(--i, 0) * 80ms);
 }
 
-.bento-aqi,
-.bento-uv,
+.bento-exposure {
+  grid-column: span 4;
+}
+
 .bento-sunlight {
   grid-column: span 2;
 }
@@ -662,6 +664,48 @@ a:focus-visible,
   gap: 12px;
   justify-content: flex-start;
   min-height: 100%;
+}
+
+.exposure-card {
+  gap: 12px;
+}
+
+.exposure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-height: 0;
+}
+
+.exposure-panel {
+  min-height: 100%;
+  padding: 12px;
+  border-radius: calc(var(--radius-sm) + 2px);
+  border: var(--subcard-border);
+  background: var(--subcard-bg);
+  box-shadow: var(--subcard-shadow);
+}
+
+.exposure-panel .metric-gauge {
+  margin-top: 0;
+}
+
+.exposure-panel .metric-gauge-svg {
+  max-width: 142px;
+  height: 88px;
+}
+
+.exposure-panel .metric-gauge-value {
+  font-size: 31px;
+}
+
+.exposure-panel .metric-pill {
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
+.exposure-panel .metric-support {
+  font-size: 12px;
 }
 
 .metric-card--meter {
@@ -1168,8 +1212,10 @@ a:focus-visible,
     min-height: clamp(170px, 44vw, 236px);
   }
 
-  .bento-aqi,
-  .bento-uv,
+  .bento-exposure {
+    grid-column: span 2;
+  }
+
   .bento-sunlight {
     grid-column: span 1;
   }
@@ -1203,6 +1249,8 @@ a:focus-visible,
   }
 
   .bento-hero,
+  .bento-exposure,
+  .bento-sunlight,
   .bento-rain,
   .bento-nowcast,
   .bento-chart,
@@ -1210,13 +1258,6 @@ a:focus-visible,
   .bento-forecast {
     grid-column: span 2;
   }
-
-  .bento-aqi,
-  .bento-uv,
-  .bento-sunlight {
-    grid-column: span 1;
-  }
-
 }
 
 @media (max-width: 700px) {
@@ -1309,8 +1350,7 @@ a:focus-visible,
 
   .bento > section,
   .bento-hero,
-  .bento-aqi,
-  .bento-uv,
+  .bento-exposure,
   .bento-sunlight,
   .bento-chart,
   .bento-rain,
@@ -1376,6 +1416,11 @@ a:focus-visible,
   }
 
   .sun-times {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .exposure-grid {
     grid-template-columns: 1fr;
     gap: 8px;
   }
