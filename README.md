@@ -5,7 +5,8 @@ It combines live weather data, adaptive visual treatment, and a portfolio-ready 
 
 ## Live
 
-- Demo: `https://your-deploy-url-here.com`
+- Demo: add your deployed URL before portfolio sharing (for example Netlify or Vercel)
+- Local demo: run `npm run dev` and open `http://127.0.0.1:5173`
 - Social preview image: [`public/og-image.png`](./public/og-image.png)
 
 ## What Makes It Portfolio-Ready
@@ -72,12 +73,17 @@ It combines live weather data, adaptive visual treatment, and a portfolio-ready 
 - Prevented redundant location state updates and duplicate persistence writes in weather orchestration hooks.
 - Removed obsolete compatibility shims and dead utility exports.
 - Added defensive DOM guards around global event registration for broader rendering safety.
+- Added a user-facing control to clear persisted location preference for privacy-conscious usage.
+
+### Phase D - Bundle + Runtime Efficiency
+
+- Replaced the hourly chart dependency with a native SVG renderer.
+- Removed `recharts` from runtime dependencies and cleaned stale build chunk config.
 
 ## Tech Stack
 
 - React 19
 - Vite 6
-- Recharts
 - Lucide React
 - Plain CSS (token-driven)
 - Open-Meteo APIs
