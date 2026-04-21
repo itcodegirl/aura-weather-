@@ -613,19 +613,6 @@ a:focus-visible,
   transition: opacity var(--motion-medium) var(--ease-standard);
 }
 
-.bento > section:hover {
-  transform: translateY(var(--card-hover-shift));
-  border-color: rgba(182, 220, 255, 0.44);
-  background:
-    linear-gradient(165deg, rgba(16, 31, 63, 0.76), rgba(8, 16, 34, 0.6)),
-    linear-gradient(130deg, rgba(191, 175, 255, 0.1), rgba(120, 198, 255, 0.06) 60%, transparent 86%);
-  box-shadow:
-    0 32px 80px rgba(3, 9, 24, 0.46),
-    0 14px 34px rgba(129, 160, 240, 0.16),
-    inset 0 1px 0 rgba(243, 248, 255, 0.18);
-}
-
-.bento > section:hover::before,
 .bento > section:focus-within::before {
   opacity: 1;
 }
@@ -636,6 +623,24 @@ a:focus-visible,
     0 28px 62px rgba(3, 9, 24, 0.42),
     0 0 0 2px rgba(133, 230, 255, 0.45),
     inset 0 1px 0 rgba(243, 248, 255, 0.18);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bento > section:hover {
+    transform: translateY(var(--card-hover-shift));
+    border-color: rgba(182, 220, 255, 0.44);
+    background:
+      linear-gradient(165deg, rgba(16, 31, 63, 0.76), rgba(8, 16, 34, 0.6)),
+      linear-gradient(130deg, rgba(191, 175, 255, 0.1), rgba(120, 198, 255, 0.06) 60%, transparent 86%);
+    box-shadow:
+      0 32px 80px rgba(3, 9, 24, 0.46),
+      0 14px 34px rgba(129, 160, 240, 0.16),
+      inset 0 1px 0 rgba(243, 248, 255, 0.18);
+  }
+
+  .bento > section:hover::before {
+    opacity: 1;
+  }
 }
 
 .bento-hero {
@@ -1457,15 +1462,6 @@ a:focus-visible,
 }
 
 @media (hover: none) {
-  .bento > section:hover {
-    transform: none;
-    border-color: rgba(196, 220, 255, 0.24);
-    background:
-      linear-gradient(168deg, rgba(13, 24, 49, 0.68), rgba(8, 15, 33, 0.56)),
-      linear-gradient(132deg, rgba(184, 167, 255, 0.08), rgba(111, 188, 255, 0.05) 58%, transparent 84%);
-    box-shadow: var(--card-shadow);
-  }
-
   .current-location-btn:hover,
   .unit-btn:hover,
   .toggle-pill-btn:hover,
