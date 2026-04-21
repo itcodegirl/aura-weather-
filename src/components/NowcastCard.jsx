@@ -148,34 +148,48 @@ function analyzeNowcast(nowcast) {
 
 function NowcastCard({ weather, style }) {
   const nowcast = useMemo(() => analyzeNowcast(weather?.nowcast), [weather?.nowcast]);
-  const peakProbability = Number.isFinite(Number(nowcast.peakProbability))
-    ? Math.round(Number(nowcast.peakProbability))
-    : 0;
-  const nowcastRiskTone = !nowcast.hasRain
-    ? "minimal"
-    : peakProbability >= 70
-      ? "high"
-      : peakProbability >= 40
-        ? "moderate"
-        : "low";
-  const nowcastRiskLabel = !nowcast.hasRain
-    ? "Dry window"
-    : nowcastRiskTone === "high"
-      ? "High immediate risk"
-      : nowcastRiskTone === "moderate"
-        ? "Moderate immediate risk"
-        : "Low immediate risk";
-  const startValue = nowcast.hasRain
-    ? nowcast.startInMinutes === 0
-      ? "Now"
-      : `${nowcast.startInMinutes} min`
-    : "\u2014";
-  const durationValue = nowcast.hasRain
-    ? `${Math.max(0, Math.round(nowcast.durationMinutes))} min`
-    : "Dry 2h";
-  const peakValue = nowcast.hasData
-    ? `${peakProbability}%`
-    : "\u2014";
+  const {
+    nowcastRiskTone,
+    nowcastRiskLabel,
+    startValue,
+    durationValue,
+    peakValue,
+  } = useMemo(() => {
+    const peakProbability = Number.isFinite(Number(nowcast.peakProbability))
+      ? Math.round(Number(nowcast.peakProbability))
+      : 0;
+    const riskTone = !nowcast.hasRain
+      ? "minimal"
+      : peakProbability >= 70
+        ? "high"
+        : peakProbability >= 40
+          ? "moderate"
+          : "low";
+    const riskLabel = !nowcast.hasRain
+      ? "Dry window"
+      : riskTone === "high"
+        ? "High immediate risk"
+        : riskTone === "moderate"
+          ? "Moderate immediate risk"
+          : "Low immediate risk";
+    const start = nowcast.hasRain
+      ? nowcast.startInMinutes === 0
+        ? "Now"
+        : `${nowcast.startInMinutes} min`
+      : "\u2014";
+    const duration = nowcast.hasRain
+      ? `${Math.max(0, Math.round(nowcast.durationMinutes))} min`
+      : "Dry 2h";
+    const peak = nowcast.hasData ? `${peakProbability}%` : "\u2014";
+
+    return {
+      nowcastRiskTone: riskTone,
+      nowcastRiskLabel: riskLabel,
+      startValue: start,
+      durationValue: duration,
+      peakValue: peak,
+    };
+  }, [nowcast]);
 
   return (
     <section className="bento-nowcast nowcast-card glass" style={style}>
