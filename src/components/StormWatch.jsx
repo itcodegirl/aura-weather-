@@ -1,6 +1,6 @@
 // src/components/StormWatch.jsx
 
-import { memo, useId } from "react";
+import { memo, useId, useMemo } from "react";
 import {
   Zap,
   TrendingUp,
@@ -22,11 +22,8 @@ import { formatWindSpeed } from "../domain/wind";
 import { Stat, CardHeader } from "./ui";
 import "./StormWatch.css";
 
-function StormRisk({ weather, summaryId }) {
-  const cape = Number(weather?.hourly?.cape?.[0]);
+function StormRisk({ risk, cape, summaryId }) {
   const safeCape = Number.isFinite(cape) ? cape : 0;
-  const currentCode = weather?.current?.conditionCode ?? 0;
-  const risk = classifyStormRisk(safeCape, currentCode);
   const stormRiskSummary = `Storm risk: ${risk.level}; level ${risk.score + 1} of 5 based on current conditions.`;
 
   return (
@@ -74,11 +71,7 @@ function StormRisk({ weather, summaryId }) {
   );
 }
 
-function PressureTrend({ weather }) {
-  const trend = calculatePressureTrend(
-    weather?.hourly?.pressure,
-    weather?.hourly?.time
-  );
+function PressureTrend({ trend }) {
   const hasCurrent = Number.isFinite(trend.current);
   const trendLabel = hasCurrent
     ? `Pressure trend chart: ${trend.interpretation}, current value ${Math.round(
@@ -283,13 +276,14 @@ function StormWatch({
   const stormRiskSummaryId = useId();
   const overviewCape = Number(weather?.hourly?.cape?.[0]);
   const safeOverviewCape = Number.isFinite(overviewCape) ? overviewCape : 0;
-  const overviewRisk = classifyStormRisk(
-    safeOverviewCape,
-    weather?.current?.conditionCode ?? 0
+  const currentConditionCode = weather?.current?.conditionCode ?? 0;
+  const overviewRisk = useMemo(
+    () => classifyStormRisk(safeOverviewCape, currentConditionCode),
+    [safeOverviewCape, currentConditionCode]
   );
-  const overviewPressure = calculatePressureTrend(
-    weather?.hourly?.pressure,
-    weather?.hourly?.time
+  const overviewPressure = useMemo(
+    () => calculatePressureTrend(weather?.hourly?.pressure, weather?.hourly?.time),
+    [weather?.hourly?.pressure, weather?.hourly?.time]
   );
   const overviewWindSpeed = Number(weather?.current?.windSpeed);
   const overviewWind = classifyWind(
@@ -332,8 +326,12 @@ function StormWatch({
       </div>
 
       <div className="storm-grid">
-        <MemoizedStormRisk weather={weather} summaryId={stormRiskSummaryId} />
-        <MemoizedPressureTrend weather={weather} />
+        <MemoizedStormRisk
+          risk={overviewRisk}
+          cape={safeOverviewCape}
+          summaryId={stormRiskSummaryId}
+        />
+        <MemoizedPressureTrend trend={overviewPressure} />
         <MemoizedWindIntelligence
           weather={weather}
           unit={unit}
