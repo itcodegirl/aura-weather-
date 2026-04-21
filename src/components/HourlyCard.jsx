@@ -14,6 +14,7 @@ import {
 import { LineChart as LineIcon } from "lucide-react";
 import { getWeather } from "../domain/weatherCodes";
 import { convertTemp } from "../utils/temperature";
+import { CardHeader } from "./ui";
 import "./HourlyCard.css";
 
 function toDisplayTemperature(value, unit, sourceUnit) {
@@ -143,13 +144,16 @@ function HourlyCard({
         aria-labelledby={chartTitleId}
         aria-describedby={chartSummaryId}
       >
-        <header className="chart-header">
-          <h2 id={chartTitleId} className="chart-title">
-            <LineIcon size={16} />
-            <span>Hourly Temperature</span>
-          </h2>
-          <span className="chart-subtitle">Next 24h</span>
-        </header>
+        <CardHeader
+          headerClassName="chart-header"
+          title="Hourly Temperature"
+          titleId={chartTitleId}
+          titleTag="h2"
+          titleClassName="chart-title"
+          icon={<LineIcon size={16} />}
+          subtitle="Next 24h"
+          subtitleClassName="chart-subtitle"
+        />
 
         <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
           <p className="loader-text" role="status" aria-live="polite">
@@ -189,13 +193,16 @@ function HourlyCard({
       aria-labelledby={chartTitleId}
       aria-describedby={chartSummaryId}
     >
-      <header className="chart-header">
-        <h2 id={chartTitleId} className="chart-title">
-          <LineIcon size={16} />
-          <span>Hourly Temperature</span>
-        </h2>
-        <span className="chart-subtitle">Next 24h</span>
-      </header>
+      <CardHeader
+        headerClassName="chart-header"
+        title="Hourly Temperature"
+        titleId={chartTitleId}
+        titleTag="h2"
+        titleClassName="chart-title"
+        icon={<LineIcon size={16} />}
+        subtitle="Next 24h"
+        subtitleClassName="chart-subtitle"
+      />
       <p className="chart-lede">{chartLede}</p>
 
       <div className="chart-body">

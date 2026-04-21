@@ -19,7 +19,7 @@ import {
 } from "../domain";
 import { convertTemp } from "../utils/temperature";
 import { formatWindSpeed } from "../domain/wind";
-import { DetailMetricStat } from "./ui";
+import { Stat, CardHeader } from "./ui";
 import "./StormWatch.css";
 
 function StormRisk({ weather, summaryId }) {
@@ -31,13 +31,15 @@ function StormRisk({ weather, summaryId }) {
 
   return (
     <div className="storm-module">
-      <div className="storm-module-top">
-        <h3 className="storm-module-header">
-          <Zap size={14} />
-          <span>Storm Risk</span>
-        </h3>
-        <span className="storm-module-kicker">Convection</span>
-      </div>
+      <CardHeader
+        headerClassName="storm-module-top"
+        title="Storm Risk"
+        titleTag="h3"
+        titleClassName="storm-module-header"
+        icon={<Zap size={14} />}
+        subtitle="Convection"
+        subtitleClassName="storm-module-kicker"
+      />
       <div
         className="storm-level"
         style={{ color: risk.color }}
@@ -61,7 +63,13 @@ function StormRisk({ weather, summaryId }) {
           />
         ))}
       </div>
-      <DetailMetricStat label="CAPE" value={`${Math.round(safeCape)} J/kg`} />
+      <Stat
+        className="storm-detail"
+        labelClassName="storm-detail-label"
+        valueClassName="storm-detail-value"
+        label="CAPE"
+        value={`${Math.round(safeCape)} J/kg`}
+      />
     </div>
   );
 }
@@ -109,13 +117,15 @@ function PressureTrend({ weather }) {
 
   return (
     <div className="storm-module">
-      <div className="storm-module-top">
-        <h3 className="storm-module-header">
-          <Icon size={14} style={{ color: trendColor }} />
-          <span>Pressure</span>
-        </h3>
-        <span className="storm-module-kicker">6h trend</span>
-      </div>
+      <CardHeader
+        headerClassName="storm-module-top"
+        title="Pressure"
+        titleTag="h3"
+        titleClassName="storm-module-header"
+        icon={<Icon size={14} style={{ color: trendColor }} />}
+        subtitle="6h trend"
+        subtitleClassName="storm-module-kicker"
+      />
       <div className="storm-level" style={{ color: trendColor }}>
         {trend.interpretation}
       </div>
@@ -139,7 +149,10 @@ function PressureTrend({ weather }) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <DetailMetricStat
+      <Stat
+        className="storm-detail"
+        labelClassName="storm-detail-label"
+        valueClassName="storm-detail-value"
         label={hasCurrent ? `${Math.round(trend.current)} hPa` : "Data unavailable"}
         value={
           hasCurrent
@@ -180,13 +193,15 @@ function WindIntelligence({
 
   return (
     <div className="storm-module">
-      <div className="storm-module-top">
-        <h3 className="storm-module-header">
-          <Wind size={14} />
-          <span>Wind</span>
-        </h3>
-        <span className="storm-module-kicker">Surface flow</span>
-      </div>
+      <CardHeader
+        headerClassName="storm-module-top"
+        title="Wind"
+        titleTag="h3"
+        titleClassName="storm-module-header"
+        icon={<Wind size={14} />}
+        subtitle="Surface flow"
+        subtitleClassName="storm-module-kicker"
+      />
       <div className="storm-level">{strength}</div>
       <p className="storm-module-summary">Flow from {direction}</p>
 
@@ -208,7 +223,10 @@ function WindIntelligence({
         </div>
       </div>
 
-      <DetailMetricStat
+      <Stat
+        className="storm-detail"
+        labelClassName="storm-detail-label"
+        valueClassName="storm-detail-value"
         label={`${sustainedDisplay} ${direction}`}
         value={`Gusts ${gustsDisplay}`}
       />
@@ -231,13 +249,15 @@ function ComfortIndex({ weather, unit, weatherDataUnit = unit }) {
 
   return (
     <div className="storm-module">
-      <div className="storm-module-top">
-        <h3 className="storm-module-header">
-          <Droplets size={14} />
-          <span>Comfort</span>
-        </h3>
-        <span className="storm-module-kicker">Moisture</span>
-      </div>
+      <CardHeader
+        headerClassName="storm-module-top"
+        title="Comfort"
+        titleTag="h3"
+        titleClassName="storm-module-header"
+        icon={<Droplets size={14} />}
+        subtitle="Moisture"
+        subtitleClassName="storm-module-kicker"
+      />
       <div className="storm-level" style={{ color: comfort.color }}>
         {comfort.level}
       </div>
@@ -246,7 +266,10 @@ function ComfortIndex({ weather, unit, weatherDataUnit = unit }) {
         <div className="comfort-gradient" />
         <div className="comfort-marker" style={{ left: `${comfort.position}%` }} />
       </div>
-      <DetailMetricStat
+      <Stat
+        className="storm-detail"
+        labelClassName="storm-detail-label"
+        valueClassName="storm-detail-value"
         label="Dewpoint"
         value={`${dewpointDisplay}${tempUnit}`}
       />

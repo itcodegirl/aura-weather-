@@ -5,6 +5,7 @@ import { CloudRain, Droplets, Clock } from "lucide-react";
 import WeatherIcon from "./WeatherIcon";
 import { useRainAnalysis } from "../hooks/useRainAnalysis";
 import { formatPrecipitation, getPrecipUnitLabel } from "../utils/weatherUnits";
+import { CardHeader } from "./ui";
 import "./RainCard.css";
 
 function formatHour(date) {
@@ -71,17 +72,20 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
 
   return (
     <section className="bento-rain rain-card" style={style}>
-      <header className="rain-header">
-        <div className="rain-title-wrap">
-          <h2 className="rain-title">
-            <CloudRain size={16} />
-            <span>Rain Outlook</span>
-          </h2>
+      <CardHeader
+        headerClassName="rain-header"
+        title="Rain Outlook"
+        titleTag="h2"
+        titleClassName="rain-title"
+        icon={<CloudRain size={16} />}
+        leftClassName="rain-title-wrap"
+        subtitle={
           <span className={`rain-risk-badge rain-risk-badge--${rainRiskTone}`}>
             {rainRiskLabel}
           </span>
-        </div>
-        <div className="rain-mode-toggle" role="group" aria-label="Chart mode">
+        }
+      />
+      <div className="rain-mode-toggle" role="group" aria-label="Chart mode">
           <button
             onClick={() => setMode("chance")}
             className={`rain-mode-btn ${mode === "chance" ? "is-active" : ""}`}
@@ -97,7 +101,6 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
             {unit === "C" ? "mm" : "in"}
           </button>
         </div>
-      </header>
 
       {isDry ? (
         <div className="rain-empty">

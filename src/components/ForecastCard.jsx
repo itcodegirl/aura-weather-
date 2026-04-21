@@ -4,6 +4,7 @@ import { CalendarDays, Droplets } from "lucide-react";
 import { getWeather } from "../domain/weatherCodes";
 import { formatDayLabel, parseLocalDate } from "../utils/dates";
 import { convertTemp } from "../utils/temperature";
+import { CardHeader } from "./ui";
 import WeatherIcon from "./WeatherIcon";
 import "./ForecastCard.css";
 
@@ -184,13 +185,16 @@ function ForecastCard({ weather, unit, weatherDataUnit = unit, style }) {
   if (!days.length) {
     return (
       <section className="bento-forecast forecast-card" style={style}>
-        <header className="forecast-header">
-          <h2 className="forecast-title">
-            <CalendarDays size={16} />
-            <span>7-Day Forecast</span>
-          </h2>
-          <span className="forecast-subtitle">Upcoming week</span>
-        </header>
+        <CardHeader
+          headerClassName="forecast-header"
+          title="7-Day Forecast"
+          titleTag="h2"
+          titleClassName="forecast-title"
+          icon={<CalendarDays size={16} />}
+          leftClassName="forecast-heading"
+          subtitle="Upcoming week"
+          subtitleClassName="forecast-subtitle"
+        />
         <p className="loader-text" role="status" aria-live="polite">
           7-day forecast is temporarily unavailable.
         </p>
@@ -214,16 +218,18 @@ function ForecastCard({ weather, unit, weatherDataUnit = unit, style }) {
 
   return (
     <section className="bento-forecast forecast-card" style={style}>
-      <header className="forecast-header">
-        <div className="forecast-heading">
-          <h2 className="forecast-title">
-            <CalendarDays size={16} />
-            <span>7-Day Forecast</span>
-          </h2>
-          <p className="forecast-summary">{weekSummary}</p>
-        </div>
-        <span className="forecast-subtitle">Upcoming week</span>
-      </header>
+      <CardHeader
+        headerClassName="forecast-header"
+        title="7-Day Forecast"
+        titleTag="h2"
+        titleClassName="forecast-title"
+        icon={<CalendarDays size={16} />}
+        leftClassName="forecast-heading"
+        summary={weekSummary}
+        summaryClassName="forecast-summary"
+        subtitle="Upcoming week"
+        subtitleClassName="forecast-subtitle"
+      />
 
       <ul className="forecast-list" role="list">
         {days.map((day) => (
