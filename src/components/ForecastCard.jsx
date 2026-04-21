@@ -21,6 +21,41 @@ function clampPercent(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+function getDaySignal(day, weekMin, weekMax) {
+  const rainChance = day.precipitation_probability_max;
+  if (rainChance >= 60) {
+    return { label: "Rain Watch", tone: "wet" };
+  }
+  if (Number.isFinite(day.temp_max) && day.temp_max >= weekMax - 1) {
+    return { label: "Warm Peak", tone: "warm" };
+  }
+  if (Number.isFinite(day.temp_min) && day.temp_min <= weekMin + 1) {
+    return { label: "Cool Dip", tone: "cool" };
+  }
+  return { label: "Steady", tone: "steady" };
+}
+
+function buildWeekSummary(days, weekMin, weekMax, convertTemp) {
+  const firstMax = days[0]?.temp_max;
+  const lastMax = days[days.length - 1]?.temp_max;
+  const delta =
+    Number.isFinite(firstMax) && Number.isFinite(lastMax) ? lastMax - firstMax : 0;
+  const trendText =
+    delta >= 3 ? "Warming trend" : delta <= -3 ? "Cooling trend" : "Stable week";
+  const wettestDay = days.reduce((highest, day) =>
+    day.precipitation_probability_max > highest.precipitation_probability_max
+      ? day
+      : highest
+  );
+  const wettestLabel =
+    wettestDay.precipitation_probability_max >= 25
+      ? `${formatDayLabel(wettestDay.date)} peaks at ${wettestDay.precipitation_probability_max}% rain chance`
+      : "Rain chances stay mostly low";
+  const weekRangeText = `${convertTemp(weekMin)}\u00B0 to ${convertTemp(weekMax)}\u00B0`;
+
+  return `${trendText} \u00b7 ${weekRangeText} \u00b7 ${wettestLabel}`;
+}
+
 function DayRow({ day, weekMin, weekMax, convertTemp, rangeGradient }) {
   const info = getWeather(day.weather_code);
   const label = formatDayLabel(day.date);
@@ -29,6 +64,7 @@ function DayRow({ day, weekMin, weekMax, convertTemp, rangeGradient }) {
   const tempUnit = "\u00B0";
   const rainChance = day.precipitation_probability_max;
   const hasNotableRainChance = rainChance >= 20;
+  const daySignal = getDaySignal(day, weekMin, weekMax);
 
   const weekRange = weekMax - weekMin || 1;
   const startPct = Number.isFinite(day.temp_min)
@@ -42,7 +78,12 @@ function DayRow({ day, weekMin, weekMax, convertTemp, rangeGradient }) {
     <li className="forecast-row" role="listitem">
       <div className="forecast-day-wrap">
         <div className="forecast-day">{label}</div>
-        <div className="forecast-condition">{info.label}</div>
+        <div className="forecast-day-meta">
+          <div className="forecast-condition">{info.label}</div>
+          <span className={`forecast-signal-chip forecast-signal-chip--${daySignal.tone}`}>
+            {daySignal.label}
+          </span>
+        </div>
       </div>
 
       <div className="forecast-icon" aria-label={info.label}>
@@ -156,14 +197,18 @@ function ForecastCard({ weather, convertTemp, style }) {
   const rangeGradientEnd =
     weekMax >= 95 ? "#ef4444" : weekMax >= 82 ? "#f97316" : "#fbbf24";
   const rangeGradient = `linear-gradient(to right, ${rangeGradientStart}, ${rangeGradientEnd})`;
+  const weekSummary = buildWeekSummary(days, weekMin, weekMax, convertTemp);
 
   return (
     <section className="bento-forecast forecast-card" style={style}>
       <header className="forecast-header">
-        <h2 className="forecast-title">
-          <CalendarDays size={16} />
-          <span>7-Day Forecast</span>
-        </h2>
+        <div className="forecast-heading">
+          <h2 className="forecast-title">
+            <CalendarDays size={16} />
+            <span>7-Day Forecast</span>
+          </h2>
+          <p className="forecast-summary">{weekSummary}</p>
+        </div>
         <span className="forecast-subtitle">Upcoming week</span>
       </header>
 
