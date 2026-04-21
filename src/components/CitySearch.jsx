@@ -204,7 +204,6 @@ function CitySearch({ onSelect }, ref) {
                     role="option"
                     tabIndex={index === activeIndexSafe ? 0 : -1}
                     onMouseEnter={handleRowMouseEnter}
-                    onMouseDown={handleRowSelect}
                     onClick={handleRowSelect}
                     onKeyDown={handleRowKeyDown}
                   >
@@ -226,3 +225,4 @@ function CitySearch({ onSelect }, ref) {
 }
 
 export default memo(forwardRef(CitySearch));
+
