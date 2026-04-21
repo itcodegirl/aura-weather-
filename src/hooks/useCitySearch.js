@@ -6,7 +6,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 const MIN_SEARCH_QUERY_LENGTH = 2;
 
 export function useCitySearch({ onSelect } = {}) {
-  const [query, setQuery] = useState("");
+  const [query, setQueryState] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -74,10 +74,7 @@ export function useCitySearch({ onSelect } = {}) {
 
       try {
         const cities = await geocodeCity(term, { signal: controller.signal });
-        if (
-          isMountedRef.current &&
-          currentRequest === requestIdRef.current
-        ) {
+        if (isMountedRef.current && currentRequest === requestIdRef.current) {
           setResults(
             Array.isArray(cities)
               ? cities.filter((city) => city && typeof city === "object")
@@ -109,10 +106,12 @@ export function useCitySearch({ onSelect } = {}) {
     [abortGeocodeRequest]
   );
 
-  const handleChange = useCallback(
-    (event) => {
-      const nextQuery = event.target.value;
-      setQuery(nextQuery);
+  const setQuery = useCallback(
+    (nextValue) => {
+      const nextQuery =
+        typeof nextValue === "string" ? nextValue : "";
+
+      setQueryState(nextQuery);
       setOpen(true);
       setActiveIndex(-1);
 
@@ -135,6 +134,13 @@ export function useCitySearch({ onSelect } = {}) {
     [abortGeocodeRequest, runSearch]
   );
 
+  const handleChange = useCallback(
+    (event) => {
+      setQuery(event.target.value);
+    },
+    [setQuery]
+  );
+
   const handleSelect = useCallback(
     (city) => {
       if (typeof onSelect !== "function") {
@@ -153,7 +159,7 @@ export function useCitySearch({ onSelect } = {}) {
         name: typeof city?.name === "string" ? city.name.trim() : "",
         country: typeof city?.country === "string" ? city.country.trim() : "",
       });
-      setQuery("");
+      setQueryState("");
       setResults([]);
       setOpen(false);
       setActiveIndex(-1);
@@ -209,12 +215,12 @@ export function useCitySearch({ onSelect } = {}) {
     [results, showDropdown, activeIndexSafe, handleSelect]
   );
 
-  const handleClear = useCallback(() => {
+  const clear = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     abortGeocodeRequest();
     requestIdRef.current += 1;
 
-    setQuery("");
+    setQueryState("");
     setResults([]);
     setError(null);
     setLoading(false);
@@ -224,10 +230,12 @@ export function useCitySearch({ onSelect } = {}) {
 
   return {
     query,
+    setQuery,
     results,
     loading,
-    open,
     error,
+    clear,
+    open,
     activeIndex,
     normalizedQuery,
     canShowNoResults,
@@ -240,6 +248,6 @@ export function useCitySearch({ onSelect } = {}) {
     handleChange,
     handleSelect,
     handleKeyDown,
-    handleClear,
+    handleClear: clear,
   };
 }
