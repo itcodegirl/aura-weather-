@@ -167,16 +167,40 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
     () => getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit),
     [hours, nextRain, peak, total, unit, dataUnit]
   );
+  const peakProbability = Number.isFinite(Number(peak?.probability))
+    ? Math.round(Number(peak.probability))
+    : 0;
+  const rainRiskTone =
+    peakProbability >= 70
+      ? "high"
+      : peakProbability >= 40
+        ? "moderate"
+        : peakProbability >= 20
+          ? "low"
+          : "minimal";
+  const rainRiskLabel =
+    rainRiskTone === "high"
+      ? "High rain risk"
+      : rainRiskTone === "moderate"
+        ? "Moderate rain risk"
+        : rainRiskTone === "low"
+          ? "Low rain risk"
+          : "Minimal rain risk";
 
   const isDry = peak.probability < 20 && total < 0.01;
 
   return (
     <section className="bento-rain rain-card" style={style}>
       <header className="rain-header">
-        <h2 className="rain-title">
-          <CloudRain size={16} />
-          <span>Rain Outlook</span>
-        </h2>
+        <div className="rain-title-wrap">
+          <h2 className="rain-title">
+            <CloudRain size={16} />
+            <span>Rain Outlook</span>
+          </h2>
+          <span className={`rain-risk-badge rain-risk-badge--${rainRiskTone}`}>
+            {rainRiskLabel}
+          </span>
+        </div>
         <div className="rain-mode-toggle" role="group" aria-label="Chart mode">
           <button
             onClick={() => setMode("chance")}
@@ -206,7 +230,7 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
           </div>
         </div>
       ) : (
-        <>
+        <div className="rain-details">
           <div className="rain-primary">
             <div className="rain-primary-value">
               {nextRain ? formatHour(nextRain.time) : "Later today"}
@@ -267,54 +291,56 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
               </span>
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      <div
-        className="rain-timeline"
-        role="img"
-        aria-label={
-          mode === "chance"
-        ? "Hourly precipitation chance over the next 24 hours"
-            : `Hourly precipitation amount in ${getPrecipUnitLabel(unit)} over the next 24 hours`
-        }
-      >
-        {hours.map((h, i) => {
-          const heightPct =
+      <div className="rain-timeline-wrap">
+        <div
+          className="rain-timeline"
+          role="img"
+          aria-label={
             mode === "chance"
-              ? Math.max(h.probability, 3)
-              : peakAmount > 0
-                ? Math.max((h.amount / peakAmount) * 100, 3)
-                : 3;
+          ? "Hourly precipitation chance over the next 24 hours"
+              : `Hourly precipitation amount in ${getPrecipUnitLabel(unit)} over the next 24 hours`
+          }
+        >
+          {hours.map((h, i) => {
+            const heightPct =
+              mode === "chance"
+                ? Math.max(h.probability, 3)
+                : peakAmount > 0
+                  ? Math.max((h.amount / peakAmount) * 100, 3)
+                  : 3;
 
-          const opacity =
-            mode === "chance"
-              ? 0.25 + (h.probability / 100) * 0.75
-              : peakAmount > 0
-                ? 0.25 + (h.amount / peakAmount) * 0.75
-                : 0.25;
+            const opacity =
+              mode === "chance"
+                ? 0.25 + (h.probability / 100) * 0.75
+                : peakAmount > 0
+                  ? 0.25 + (h.amount / peakAmount) * 0.75
+                  : 0.25;
 
-          const tooltip =
-            mode === "chance"
-              ? `${formatHour(h.time)} \u2014 ${h.probability}%`
-            : `${formatHour(h.time)} \u2014 ${formatPrecipitation(h.amount, unit, dataUnit)}`;
+            const tooltip =
+              mode === "chance"
+                ? `${formatHour(h.time)} \u2014 ${h.probability}%`
+              : `${formatHour(h.time)} \u2014 ${formatPrecipitation(h.amount, unit, dataUnit)}`;
 
-          return (
-            <div
-              key={i}
-              className="rain-bar"
-              style={{ height: `${heightPct}%`, opacity }}
-              title={tooltip}
-            />
-          );
-        })}
-      </div>
-      <p className="rain-timeline-summary">{timelineSummary}</p>
+            return (
+              <div
+                key={i}
+                className="rain-bar"
+                style={{ height: `${heightPct}%`, opacity }}
+                title={tooltip}
+              />
+            );
+          })}
+        </div>
+        <p className="rain-timeline-summary">{timelineSummary}</p>
 
-      <div className="rain-timeline-labels">
-        <span>Now</span>
-        <span>+12h</span>
-        <span>+24h</span>
+        <div className="rain-timeline-labels">
+          <span>Now</span>
+          <span>+12h</span>
+          <span>+24h</span>
+        </div>
       </div>
     </section>
   );

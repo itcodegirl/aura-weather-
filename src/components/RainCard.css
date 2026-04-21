@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   grid-column: span 4;
-  gap: 14px;
+  gap: 12px;
   min-height: 272px;
 }
 
@@ -10,6 +10,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.rain-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
 .rain-title {
@@ -21,6 +28,41 @@
   font-weight: 650;
   letter-spacing: -0.01em;
   margin: 0;
+}
+
+.rain-risk-badge {
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rain-risk-badge--high {
+  color: #fee2e2;
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(127, 29, 29, 0.32);
+}
+
+.rain-risk-badge--moderate {
+  color: #ffedd5;
+  border-color: rgba(249, 115, 22, 0.45);
+  background: rgba(124, 45, 18, 0.26);
+}
+
+.rain-risk-badge--low {
+  color: #fef3c7;
+  border-color: rgba(234, 179, 8, 0.4);
+  background: rgba(113, 63, 18, 0.24);
+}
+
+.rain-risk-badge--minimal {
+  color: #dcfce7;
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(20, 83, 45, 0.24);
 }
 
 .rain-mode-toggle {
@@ -51,7 +93,17 @@
 .rain-primary {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(181, 207, 252, 0.16);
+  background: rgba(7, 15, 32, 0.44);
+}
+
+.rain-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .rain-primary-value {
@@ -66,19 +118,20 @@
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .rain-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .rain-stat {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px;
+  padding: 10px 11px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(181, 207, 252, 0.14);
   background: rgba(7, 15, 32, 0.48);
@@ -99,13 +152,13 @@
 }
 
 .rain-history-heading {
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .rain-history-pills {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .rain-history-pill {
@@ -113,7 +166,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 8px 11px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(181, 207, 252, 0.14);
   background: rgba(7, 15, 32, 0.44);
@@ -164,13 +217,28 @@
   align-items: flex-end;
   gap: 2px;
   height: 50px;
+}
+
+.rain-timeline-wrap {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(178, 202, 244, 0.2);
 }
 
 .rain-timeline-summary {
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .rain-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .rain-bar {

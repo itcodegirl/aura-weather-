@@ -148,24 +148,70 @@ function analyzeNowcast(minutely15) {
 
 function NowcastCard({ weather, style }) {
   const nowcast = useMemo(() => analyzeNowcast(weather?.minutely_15), [weather?.minutely_15]);
+  const peakProbability = Number.isFinite(Number(nowcast.peakProbability))
+    ? Math.round(Number(nowcast.peakProbability))
+    : 0;
+  const nowcastRiskTone = !nowcast.hasRain
+    ? "minimal"
+    : peakProbability >= 70
+      ? "high"
+      : peakProbability >= 40
+        ? "moderate"
+        : "low";
+  const nowcastRiskLabel = !nowcast.hasRain
+    ? "Dry window"
+    : nowcastRiskTone === "high"
+      ? "High immediate risk"
+      : nowcastRiskTone === "moderate"
+        ? "Moderate immediate risk"
+        : "Low immediate risk";
+  const startValue = nowcast.hasRain
+    ? nowcast.startInMinutes === 0
+      ? "Now"
+      : `${nowcast.startInMinutes} min`
+    : "\u2014";
+  const durationValue = nowcast.hasRain
+    ? `${Math.max(0, Math.round(nowcast.durationMinutes))} min`
+    : "Dry 2h";
+  const peakValue = nowcast.hasData
+    ? `${peakProbability}%`
+    : "\u2014";
 
   return (
     <section className="bento-nowcast nowcast-card" style={style}>
       <header className="nowcast-header">
-        <h2 className="nowcast-title">
-          <CloudRain size={16} />
-          <span>Nowcast</span>
-        </h2>
+        <div className="nowcast-title-wrap">
+          <h2 className="nowcast-title">
+            <CloudRain size={16} />
+            <span>Nowcast</span>
+          </h2>
+          <span className={`nowcast-risk-badge nowcast-risk-badge--${nowcastRiskTone}`}>
+            {nowcastRiskLabel}
+          </span>
+        </div>
       </header>
 
-      <p className="nowcast-summary" role="status" aria-live="polite">
-        {nowcast.summary}
-      </p>
-
-      <div className="nowcast-meta">
-        <span>{nowcast.hasData ? "15-minute outlook" : "Nowcast offline"}</span>
-        <span>{nowcast.details}</span>
+      <div className="nowcast-primary" role="status" aria-live="polite">
+        <p className="nowcast-summary">{nowcast.summary}</p>
+        <p className="nowcast-details">{nowcast.details}</p>
       </div>
+
+      <div className="nowcast-chips" role="list" aria-label="Immediate precipitation details">
+        <div className="nowcast-chip" role="listitem">
+          <span className="nowcast-chip-label">Start</span>
+          <span className="nowcast-chip-value">{startValue}</span>
+        </div>
+        <div className="nowcast-chip" role="listitem">
+          <span className="nowcast-chip-label">Duration</span>
+          <span className="nowcast-chip-value">{durationValue}</span>
+        </div>
+        <div className="nowcast-chip" role="listitem">
+          <span className="nowcast-chip-label">Peak chance</span>
+          <span className="nowcast-chip-value">{peakValue}</span>
+        </div>
+      </div>
+
+      <p className="nowcast-meta">{nowcast.hasData ? "15-minute outlook" : "Nowcast offline"}</p>
     </section>
   );
 }

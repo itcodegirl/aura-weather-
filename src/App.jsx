@@ -476,9 +476,12 @@ function App() {
             style={CARD_STYLE_VARIABLES[1]}
             aria-labelledby={METRIC_LABEL_IDS.airQuality}
           >
-            <h2 id={METRIC_LABEL_IDS.airQuality} className="metric-label">
-              Air Quality
-            </h2>
+            <div className="metric-head">
+              <h2 id={METRIC_LABEL_IDS.airQuality} className="metric-label">
+                Air Quality
+              </h2>
+              <span className="metric-context">Live</span>
+            </div>
             <ArcGauge
               value={weather.aqi}
               max={300}
@@ -497,6 +500,11 @@ function App() {
               max={300}
               statusColor={aqiStatus.color}
             />
+            <p className="metric-support">
+              {Number.isFinite(Number(weather.aqi))
+                ? `Current AQI is ${Math.round(Number(weather.aqi))} out of 300.`
+                : "Air quality data is temporarily unavailable."}
+            </p>
           </section>
 
           <section
@@ -504,9 +512,12 @@ function App() {
             style={CARD_STYLE_VARIABLES[2]}
             aria-labelledby={METRIC_LABEL_IDS.uvIndex}
           >
-            <h2 id={METRIC_LABEL_IDS.uvIndex} className="metric-label">
-              UV Index
-            </h2>
+            <div className="metric-head">
+              <h2 id={METRIC_LABEL_IDS.uvIndex} className="metric-label">
+                UV Index
+              </h2>
+              <span className="metric-context">Today</span>
+            </div>
             <ArcGauge
               value={uvToday}
               max={11}
@@ -525,6 +536,11 @@ function App() {
               max={11}
               statusColor={uvStatus.color}
             />
+            <p className="metric-support">
+              {Number.isFinite(Number(uvToday))
+                ? `Peak UV is ${Number(uvToday).toFixed(1)} on an 11+ scale.`
+                : "UV data is temporarily unavailable."}
+            </p>
           </section>
 
           <section
@@ -532,13 +548,27 @@ function App() {
             style={CARD_STYLE_VARIABLES[3]}
             aria-labelledby={METRIC_LABEL_IDS.sunlight}
           >
-            <h2 id={METRIC_LABEL_IDS.sunlight} className="metric-label">
-              Sunlight
-            </h2>
-            <div className="metric-sunline">{`Sunrise ${sunriseLabel} \u2192 Sunset ${sunsetLabel}`}</div>
+            <div className="metric-head">
+              <h2 id={METRIC_LABEL_IDS.sunlight} className="metric-label">
+                Sunlight
+              </h2>
+              <span className="metric-context">Local</span>
+            </div>
+            <div className="sun-times" aria-label="Sunrise and sunset times">
+              <div className="sun-time-chip">
+                <span className="sun-time-label">Sunrise</span>
+                <span className="sun-time-value">{sunriseLabel}</span>
+              </div>
+              <div className="sun-time-chip">
+                <span className="sun-time-label">Sunset</span>
+                <span className="sun-time-value">{sunsetLabel}</span>
+              </div>
+            </div>
             {dayLengthLabel ? (
               <div className="metric-sun-length">Daylight {dayLengthLabel}</div>
-            ) : null}
+            ) : (
+              <p className="metric-support">Daylight duration is unavailable.</p>
+            )}
           </section>
 
           <p
