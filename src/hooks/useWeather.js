@@ -177,14 +177,15 @@ export function useWeather(unit = "F", options = {}) {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [lastRequest, setLastRequest] = useState(null);
   const [locationNotice, setLocationNotice] = useState(null);
   const [climateComparison, setClimateComparison] = useState(null);
   const [isLocatingCurrent, setIsLocatingCurrent] = useState(false);
+  const lastRequestRef = useRef(null);
   const requestIdRef = useRef(0);
   const inFlightRequestRef = useRef(null);
   const lastRequestedSignatureRef = useRef("");
   const isMountedRef = useRef(false);
+  const activeUnitRef = useRef(normalizeTemperatureUnit(unit));
   const previousUnitRef = useRef(unit);
   const previousClimateEnabledRef = useRef(climateEnabled);
   const activeLocationRef = useRef(null);
@@ -197,6 +198,10 @@ export function useWeather(unit = "F", options = {}) {
     };
   }, []);
 
+  useEffect(() => {
+    activeUnitRef.current = normalizeTemperatureUnit(unit);
+  }, [unit]);
+
   const abortInFlightRequest = useCallback(() => {
     if (!inFlightRequestRef.current) return;
     inFlightRequestRef.current.abort();
@@ -204,7 +209,7 @@ export function useWeather(unit = "F", options = {}) {
   }, []);
 
   const loadWeather = useCallback(
-    async (lat, lon, name, country, requestUnit = unit, loadOptions = {}) => {
+    async (lat, lon, name, country, requestUnit, loadOptions = {}) => {
       if (!isMountedRef.current) return;
 
       const coordinates = parseCoordinates(lat, lon);
@@ -219,7 +224,9 @@ export function useWeather(unit = "F", options = {}) {
       }
       const { latitude: safeLat, longitude: safeLon } = coordinates;
 
-      const requestDataUnit = normalizeTemperatureUnit(requestUnit);
+      const requestDataUnit = normalizeTemperatureUnit(
+        requestUnit ?? activeUnitRef.current
+      );
       const apiTemperatureUnit = getApiTemperatureUnit(requestDataUnit);
       const requestWindSpeedUnit = getApiWindSpeedUnit(requestDataUnit);
       const requestName = normalizeLocationName(name);
@@ -243,13 +250,13 @@ export function useWeather(unit = "F", options = {}) {
       setLoading(true);
       setError(null);
       setLocationNotice(fallbackNotice ?? null);
-      setLastRequest({
+      lastRequestRef.current = {
         lat: safeLat,
         lon: safeLon,
         name: requestName,
         country: requestCountry,
         unit: requestDataUnit,
-      });
+      };
       setClimateComparison(null);
 
       try {
@@ -290,13 +297,13 @@ export function useWeather(unit = "F", options = {}) {
           DEFAULT_LOCATION.country
         );
         if (!isMountedRef.current) return;
-        setLastRequest({
+        lastRequestRef.current = {
           lat: safeLat,
           lon: safeLon,
           name: normalizedName,
           country: normalizedCountry,
           unit: requestDataUnit,
-        });
+        };
         const currentTemperature = Number(weatherData?.current?.temperature);
         const historicalTemperature = Number(
           historicalAverage?.averageTemperature
@@ -351,38 +358,54 @@ export function useWeather(unit = "F", options = {}) {
         }
       }
     },
-    [unit, climateEnabled, abortInFlightRequest]
+    [climateEnabled, abortInFlightRequest]
   );
 
   const scheduleWeatherLoad = useCallback(
-    (lat, lon, name, country, requestUnit = unit, options = {}) => {
+    (lat, lon, name, country, requestUnit, options = {}) => {
       if (!isMountedRef.current) return;
-      loadWeather(lat, lon, name, country, requestUnit, options);
+      const normalizedRequestUnit = normalizeTemperatureUnit(
+        requestUnit ?? activeUnitRef.current
+      );
+      loadWeather(lat, lon, name, country, normalizedRequestUnit, options);
     },
-    [loadWeather, unit]
+    [loadWeather]
   );
 
   const loadDefaultLocation = useCallback(
-    (requestUnit = unit, fallbackNotice = LOCATION_FALLBACK_NOTICE) => {
+    (requestUnit, fallbackNotice = LOCATION_FALLBACK_NOTICE) => {
+      const normalizedRequestUnit = normalizeTemperatureUnit(
+        requestUnit ?? activeUnitRef.current
+      );
       scheduleWeatherLoad(
         DEFAULT_LOCATION.lat,
         DEFAULT_LOCATION.lon,
         DEFAULT_LOCATION.name,
         DEFAULT_LOCATION.country,
-        requestUnit,
+        normalizedRequestUnit,
         { fallbackNotice }
       );
     },
-    [scheduleWeatherLoad, unit]
+    [scheduleWeatherLoad]
   );
 
   const scheduleWeatherLoadAsync = useCallback(
-    (lat, lon, name, country, requestUnit = unit, options = {}) => {
+    (lat, lon, name, country, requestUnit, options = {}) => {
+      const normalizedRequestUnit = normalizeTemperatureUnit(
+        requestUnit ?? activeUnitRef.current
+      );
       scheduleTask(() => {
-        scheduleWeatherLoad(lat, lon, name, country, requestUnit, options);
+        scheduleWeatherLoad(
+          lat,
+          lon,
+          name,
+          country,
+          normalizedRequestUnit,
+          options
+        );
       });
     },
-    [scheduleWeatherLoad, unit]
+    [scheduleWeatherLoad]
   );
 
   const requestCurrentPositionWithFallback = useCallback(
@@ -496,7 +519,7 @@ export function useWeather(unit = "F", options = {}) {
   );
 
   const retryWeather = useCallback(() => {
-    const fallbackRequest = lastRequest ?? DEFAULT_LOCATION;
+    const fallbackRequest = lastRequestRef.current ?? DEFAULT_LOCATION;
     const retryUnit = normalizeTemperatureUnit(fallbackRequest.unit ?? unit);
 
     scheduleWeatherLoad(
@@ -506,7 +529,7 @@ export function useWeather(unit = "F", options = {}) {
       normalizeLocationName(fallbackRequest.country, DEFAULT_LOCATION.country),
       retryUnit
     );
-  }, [lastRequest, scheduleWeatherLoad, unit]);
+  }, [scheduleWeatherLoad, unit]);
 
   useEffect(() => {
     if (location !== null) {
