@@ -1,7 +1,16 @@
 // src/components/HeroCard.jsx
 
 import { memo } from "react";
-import { MapPin, Wind, Droplets, Gauge, Thermometer } from "lucide-react";
+import {
+  MapPin,
+  Wind,
+  Droplets,
+  Gauge,
+  Thermometer,
+  Sunrise,
+  Sunset,
+  Sun,
+} from "lucide-react";
 import { getWeather } from "../utils/weatherCodes";
 import { formatWindSpeed } from "../utils/windUnits";
 import WeatherIcon from "./WeatherIcon";
@@ -17,6 +26,36 @@ function Stat({ icon, label, value }) {
       </div>
     </div>
   );
+}
+
+function formatClock(value) {
+  if (!value) return "\u2014";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "\u2014";
+
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function formatDaylightLength(sunrise, sunset) {
+  if (!sunrise || !sunset) return "\u2014";
+  const sunriseDate = new Date(sunrise);
+  const sunsetDate = new Date(sunset);
+  if (Number.isNaN(sunriseDate.getTime()) || Number.isNaN(sunsetDate.getTime())) {
+    return "\u2014";
+  }
+
+  let diffMs = sunsetDate.getTime() - sunriseDate.getTime();
+  if (diffMs <= 0) {
+    diffMs += 24 * 60 * 60 * 1000;
+  }
+  const totalMinutes = Math.max(0, Math.round(diffMs / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours} hr ${String(minutes).padStart(2, "0")} min`;
 }
 
 function HeroCard({
@@ -58,6 +97,12 @@ function HeroCard({
   const todayLow = toDisplayTemp(weather?.daily?.temperature_2m_min?.[0]);
   const windDisplay = formatWindSpeed(current.wind_speed_10m, unit, weatherDataUnit);
   const dewPoint = toDisplayTemp(current.dew_point_2m);
+  const sunriseLabel = formatClock(weather?.daily?.sunrise?.[0]);
+  const sunsetLabel = formatClock(weather?.daily?.sunset?.[0]);
+  const daylightLabel = formatDaylightLength(
+    weather?.daily?.sunrise?.[0],
+    weather?.daily?.sunset?.[0]
+  );
   const safeClimateComparison =
     climateComparison && typeof climateComparison === "object"
       ? climateComparison
@@ -154,6 +199,30 @@ function HeroCard({
           {hasClimateComparison && (
             <p className="hero-insight">{climateMessage}</p>
           )}
+        </div>
+      </div>
+
+      <div className="hero-sunlight" aria-label="Sunlight details">
+        <div className="hero-sun-chip">
+          <div className="hero-sun-label">
+            <Sunrise size={14} />
+            <span>Sunrise</span>
+          </div>
+          <div className="hero-sun-value">{sunriseLabel}</div>
+        </div>
+        <div className="hero-sun-chip">
+          <div className="hero-sun-label">
+            <Sunset size={14} />
+            <span>Sunset</span>
+          </div>
+          <div className="hero-sun-value">{sunsetLabel}</div>
+        </div>
+        <div className="hero-sun-chip hero-sun-chip--daylight">
+          <div className="hero-sun-label">
+            <Sun size={14} />
+            <span>Daylight</span>
+          </div>
+          <div className="hero-sun-value">{daylightLabel}</div>
         </div>
       </div>
 
