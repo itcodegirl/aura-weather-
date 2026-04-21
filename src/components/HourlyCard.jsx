@@ -171,7 +171,7 @@ function HourlyCard({
   const maxTemp = Math.ceil(safeMaxTemp + 2);
   const nowLabel = data[0]?.label;
   const chartLede = Number.isFinite(currentTemp)
-    ? `Now ${currentTemp}\u00B0${unit} · Low ${Math.round(safeMinTemp)}\u00B0 · High ${Math.round(safeMaxTemp)}\u00B0`
+    ? `Now ${currentTemp}\u00B0${unit} \u00B7 Low ${Math.round(safeMinTemp)}\u00B0 \u00B7 High ${Math.round(safeMaxTemp)}\u00B0`
     : `Range ${Math.round(safeMinTemp)}\u00B0 to ${Math.round(safeMaxTemp)}\u00B0`;
 
   return (

@@ -190,6 +190,7 @@
   font-weight: 650;
   letter-spacing: -0.02em;
   color: #f4f8ff;
+  font-variant-numeric: tabular-nums;
 }
 
 .forecast-temp--low .forecast-temp-value {
@@ -224,6 +225,7 @@
 
 .forecast-precip-value {
   color: #b8f4ff;
+  font-variant-numeric: tabular-nums;
 }
 
 .forecast-precip-empty {
