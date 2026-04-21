@@ -4,14 +4,14 @@ import "./App.css";
 import { useWeather } from "./hooks/useWeather";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
 import { getWeather, gradientCss } from "./utils/weatherCodes";
-import { getAqiStatus, getUvStatus } from "./utils/weatherSignals";
 import HeroCard from "./components/HeroCard";
 import RainCard from "./components/RainCard";
 import ForecastCard from "./components/ForecastCard";
 import NowcastCard from "./components/NowcastCard";
+import ExposureSection from "./components/ExposureSection";
+import SunlightSection from "./components/SunlightSection";
 import HeaderControls from "./components/HeaderControls";
 import WeatherIcon from "./components/WeatherIcon";
-import MetricCard from "./components/ui/MetricCard";
 
 const loadStormWatch = () => import("./components/StormWatch");
 const loadHourlyCard = () => import("./components/HourlyCard");
@@ -63,44 +63,6 @@ function serializeClimatePreference(showClimateContext) {
   return showClimateContext ? "on" : "off";
 }
 
-function formatClock(value) {
-  if (!value) return "\u2014";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "\u2014";
-
-  const now = Date.now();
-  if (date.getTime() > now + 24 * 60 * 60 * 1000 * 10) {
-    return "\u2014";
-  }
-
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
-function getDayLengthMinutes(sunrise, sunset) {
-  if (!sunrise || !sunset) return null;
-  const sunriseDate = new Date(sunrise);
-  const sunsetDate = new Date(sunset);
-  if (Number.isNaN(sunriseDate.getTime()) || Number.isNaN(sunsetDate.getTime())) {
-    return null;
-  }
-  let diffMs = sunsetDate.getTime() - sunriseDate.getTime();
-  if (diffMs <= 0) {
-    diffMs += 24 * 60 * 60 * 1000;
-  }
-  return Math.max(0, Math.round(diffMs / 60000));
-}
-
-function formatDayLength(totalMinutes) {
-  if (!Number.isFinite(totalMinutes)) return null;
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `${hours} hr ${String(minutes).padStart(2, "0")} min`;
-}
-
 const CLIMATE_CONTEXT_KEY = "aura-weather-climate-context";
 const UNIT_PREFERENCE_KEY = "aura-weather-unit-preference";
 const GROUP_LABEL_IDS = {
@@ -108,13 +70,6 @@ const GROUP_LABEL_IDS = {
   nearTermOutlook: "group-near-term-outlook",
   riskSignals: "group-risk-signals",
   weekAhead: "group-week-ahead",
-};
-
-const METRIC_LABEL_IDS = {
-  exposure: "metric-exposure",
-  airQuality: "metric-air-quality",
-  uvIndex: "metric-uv-index",
-  sunlight: "metric-sunlight",
 };
 
 function App() {
@@ -256,21 +211,6 @@ function App() {
 
   const weatherInfo = getWeather(weather.current.conditionCode);
   const background = gradientCss(weatherInfo.gradient);
-  const uvToday = weather.daily?.uvIndexMax?.[0];
-  const aqiStatus = getAqiStatus(weather.aqi);
-  const uvStatus = getUvStatus(uvToday);
-  const sunrise = weather.daily?.sunrise?.[0];
-  const sunset = weather.daily?.sunset?.[0];
-  const sunriseLabel = formatClock(sunrise);
-  const sunsetLabel = formatClock(sunset);
-  const dayLengthMinutes = getDayLengthMinutes(sunrise, sunset);
-  const dayLengthLabel = formatDayLength(dayLengthMinutes);
-  const aqiSupportText = Number.isFinite(Number(weather.aqi))
-    ? `Current AQI is ${Math.round(Number(weather.aqi))} out of 300.`
-    : "Air quality data is temporarily unavailable.";
-  const uvSupportText = Number.isFinite(Number(uvToday))
-    ? `Peak UV is ${Number(uvToday).toFixed(1)} on an 11+ scale.`
-    : "UV data is temporarily unavailable.";
 
   return (
     <div className="app" style={{ background }}>
@@ -357,70 +297,17 @@ function App() {
             style={CARD_STYLE_VARIABLES[0]}
           />
 
-          <section
-            className="bento-exposure exposure-card metric-card"
+          <ExposureSection
+            aqi={weather.aqi}
+            uvIndex={weather.daily?.uvIndexMax?.[0]}
             style={CARD_STYLE_VARIABLES[1]}
-            aria-labelledby={METRIC_LABEL_IDS.exposure}
-          >
-            <div className="metric-head">
-              <h2 id={METRIC_LABEL_IDS.exposure} className="metric-label">
-                Environmental Exposure
-              </h2>
-              <span className="metric-context">Live</span>
-            </div>
+          />
 
-            <div className="exposure-grid">
-              <MetricCard
-                id={METRIC_LABEL_IDS.airQuality}
-                title="Air Quality"
-                context="AQI"
-                value={weather.aqi}
-                max={300}
-                status={aqiStatus}
-                gaugeLabel="Air quality index"
-                supportText={aqiSupportText}
-              />
-              <MetricCard
-                id={METRIC_LABEL_IDS.uvIndex}
-                title="UV Index"
-                context="Today"
-                value={uvToday}
-                max={11}
-                status={uvStatus}
-                gaugeLabel="UV index"
-                decimals={1}
-                supportText={uvSupportText}
-              />
-            </div>
-          </section>
-
-          <section
-            className="bento-sunlight metric-card"
+          <SunlightSection
+            sunrise={weather.daily?.sunrise?.[0]}
+            sunset={weather.daily?.sunset?.[0]}
             style={CARD_STYLE_VARIABLES[2]}
-            aria-labelledby={METRIC_LABEL_IDS.sunlight}
-          >
-            <div className="metric-head">
-              <h2 id={METRIC_LABEL_IDS.sunlight} className="metric-label">
-                Sunlight
-              </h2>
-              <span className="metric-context">Local</span>
-            </div>
-            <div className="sun-times" aria-label="Sunrise and sunset times">
-              <div className="sun-time-chip">
-                <span className="sun-time-label">Sunrise</span>
-                <span className="sun-time-value">{sunriseLabel}</span>
-              </div>
-              <div className="sun-time-chip">
-                <span className="sun-time-label">Sunset</span>
-                <span className="sun-time-value">{sunsetLabel}</span>
-              </div>
-            </div>
-            {dayLengthLabel ? (
-              <div className="metric-sun-length">Daylight {dayLengthLabel}</div>
-            ) : (
-              <p className="metric-support">Daylight duration is unavailable.</p>
-            )}
-          </section>
+          />
 
           <p
             id={GROUP_LABEL_IDS.nearTermOutlook}

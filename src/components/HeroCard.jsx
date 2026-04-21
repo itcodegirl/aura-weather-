@@ -15,7 +15,7 @@ import { getWeather } from "../utils/weatherCodes";
 import { convertTemperature } from "../utils/weatherUnits";
 import { formatWindSpeed } from "../utils/windUnits";
 import WeatherIcon from "./WeatherIcon";
-import { IconMetricStat } from "./ui/MetricStat";
+import { IconMetricStat } from "./ui";
 import "./HeroCard.css";
 
 function formatClock(value) {

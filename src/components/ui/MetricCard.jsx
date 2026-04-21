@@ -1,4 +1,5 @@
 import { memo } from "react";
+import "../MetricPanels.css";
 
 function clamp(value, min, max) {
   const numeric = Number(value);

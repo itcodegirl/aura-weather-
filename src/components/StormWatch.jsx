@@ -19,7 +19,7 @@ import {
 } from "../utils/meteorology";
 import { convertTemperature } from "../utils/weatherUnits";
 import { formatWindSpeed } from "../utils/windUnits";
-import { DetailMetricStat } from "./ui/MetricStat";
+import { DetailMetricStat } from "./ui";
 import "./StormWatch.css";
 
 function StormRisk({ weather, summaryId }) {
