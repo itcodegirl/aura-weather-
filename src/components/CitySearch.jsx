@@ -66,48 +66,48 @@ function CitySearch({ onSelect }, ref) {
     [setActiveIndex]
   );
 
-  const getCityByIndex = useCallback(
-    (nextIndex) => {
-      if (!Number.isInteger(nextIndex) || nextIndex < 0 || nextIndex >= results.length) {
-        return undefined;
-      }
-      return results[nextIndex];
-    },
-    [results]
-  );
-
   const handleRowSelect = useCallback(
     (event) => {
-      event.preventDefault();
       const selectedIndex = Number(event.currentTarget?.dataset?.index);
       if (!Number.isFinite(selectedIndex) || selectedIndex < 0) {
         return;
       }
 
-      const city = getCityByIndex(selectedIndex);
+      const city = results[selectedIndex];
       if (!city) return;
 
       handleSelect(city);
     },
-    [handleSelect, getCityByIndex]
+    [handleSelect, results]
   );
 
-  const handleRowKeyDown = useCallback(
-    (event) => {
-      if (event.key !== "Enter" && event.key !== " ") {
-        return;
-      }
-
-      handleRowSelect(event);
-    },
-    [handleRowSelect]
-  );
+  const handleRowMouseDown = useCallback((event) => {
+    // Keep focus on the input so combobox keyboard navigation remains active.
+    event.preventDefault();
+  }, []);
 
   useImperativeHandle(ref, () => ({
     focus: () => {
       inputRef.current?.focus();
     },
-  }));
+  }), [inputRef]);
+
+  const handleResultListMouseDown = useCallback(
+    (event) => {
+      if (!(event.target instanceof HTMLElement)) {
+        return;
+      }
+
+      const optionElement = event.target.closest('[role="option"]');
+      if (!optionElement) {
+        return;
+      }
+
+      // Prevent focus from leaving the combobox input on pointer selection.
+      event.preventDefault();
+    },
+    []
+  );
 
   return (
     <div className="city-search" ref={containerRef}>
@@ -149,6 +149,8 @@ function CitySearch({ onSelect }, ref) {
           className="city-search-dropdown glass"
           role="listbox"
           aria-label="City suggestions"
+          aria-busy={loading}
+          onMouseDown={handleResultListMouseDown}
         >
           {loading && (
             <li
@@ -192,29 +194,23 @@ function CitySearch({ onSelect }, ref) {
               return (
                 <li
                   key={getCityKey(city, index)}
-                  role="presentation"
+                  id={`${optionIdPrefix}-${index}`}
+                  className={`city-search-result${index === activeIndexSafe ? " is-active" : ""}`}
+                  data-index={index}
+                  aria-label={optionLabel}
+                  aria-selected={index === activeIndexSafe}
+                  role="option"
+                  onMouseEnter={handleRowMouseEnter}
+                  onMouseDown={handleRowMouseDown}
+                  onClick={handleRowSelect}
                 >
-                  <button
-                    type="button"
-                    id={`${optionIdPrefix}-${index}`}
-                    className={`city-search-result${index === activeIndexSafe ? " is-active" : ""}`}
-                    data-index={index}
-                    aria-label={optionLabel}
-                    aria-selected={index === activeIndexSafe}
-                    role="option"
-                    tabIndex={index === activeIndexSafe ? 0 : -1}
-                    onMouseEnter={handleRowMouseEnter}
-                    onClick={handleRowSelect}
-                    onKeyDown={handleRowKeyDown}
-                  >
-                    <MapPin size={14} className="city-search-result-icon" />
-                    <div className="city-search-result-text">
-                      <div className="city-search-result-name">{name}</div>
-                      <div className="city-search-result-meta">
-                        {meta && <span>{meta}</span>}
-                      </div>
+                  <MapPin size={14} className="city-search-result-icon" />
+                  <div className="city-search-result-text">
+                    <div className="city-search-result-name">{name}</div>
+                    <div className="city-search-result-meta">
+                      {meta && <span>{meta}</span>}
                     </div>
-                  </button>
+                  </div>
                 </li>
               );
             })}
