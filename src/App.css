@@ -891,6 +891,11 @@ a:focus-visible,
     0 8px 18px rgba(3, 10, 24, 0.2);
 }
 
+.app-status-message {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .app-status::before {
   content: "";
   width: 7px;

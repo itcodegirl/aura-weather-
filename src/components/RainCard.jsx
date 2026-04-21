@@ -231,26 +231,26 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
           </div>
 
           <div className="rain-history-heading">Recent totals</div>
-          <div className="rain-history-pills" role="list" aria-label="Recent precipitation totals">
-            <div className="rain-history-pill" role="listitem">
+          <ul className="rain-history-pills" aria-label="Recent precipitation totals">
+            <li className="rain-history-pill">
               <span className="rain-history-pill-label">12h</span>
               <span className="rain-history-pill-value">
                 {past12hLabel}
               </span>
-            </div>
-            <div className="rain-history-pill" role="listitem">
+            </li>
+            <li className="rain-history-pill">
               <span className="rain-history-pill-label">24h</span>
               <span className="rain-history-pill-value">
                 {past24hLabel}
               </span>
-            </div>
-            <div className="rain-history-pill" role="listitem">
+            </li>
+            <li className="rain-history-pill">
               <span className="rain-history-pill-label">48h</span>
               <span className="rain-history-pill-value">
                 {past48hLabel}
               </span>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       )}
 

@@ -210,20 +210,20 @@ function NowcastCard({ weather, style }) {
         <p className="nowcast-details">{nowcast.details}</p>
       </div>
 
-      <div className="nowcast-chips" role="list" aria-label="Immediate precipitation details">
-        <div className="nowcast-chip" role="listitem">
+      <ul className="nowcast-chips" aria-label="Immediate precipitation details">
+        <li className="nowcast-chip">
           <span className="nowcast-chip-label">Start</span>
           <span className="nowcast-chip-value">{startValue}</span>
-        </div>
-        <div className="nowcast-chip" role="listitem">
+        </li>
+        <li className="nowcast-chip">
           <span className="nowcast-chip-label">Duration</span>
           <span className="nowcast-chip-value">{durationValue}</span>
-        </div>
-        <div className="nowcast-chip" role="listitem">
+        </li>
+        <li className="nowcast-chip">
           <span className="nowcast-chip-label">Peak chance</span>
           <span className="nowcast-chip-value">{peakValue}</span>
-        </div>
-      </div>
+        </li>
+      </ul>
 
       <p className="nowcast-meta">{nowcast.hasData ? "15-minute outlook" : "Nowcast offline"}</p>
     </section>

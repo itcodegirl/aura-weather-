@@ -27,8 +27,10 @@ function StatusStack({
         </p>
       )}
       {showRefreshError && (
-        <p className="app-status app-status--error" role="alert">
-          Could not refresh weather right now. Showing last known data.
+        <div className="app-status app-status--error" role="alert">
+          <span className="app-status-message">
+            Could not refresh weather right now. Showing last known data.
+          </span>
           <button
             type="button"
             className="app-status-retry"
@@ -36,7 +38,7 @@ function StatusStack({
           >
             Retry
           </button>
-        </p>
+        </div>
       )}
     </div>
   );

@@ -20,7 +20,6 @@ function AppHeader({
           className="brand-mark"
           width="28"
           height="28"
-          loading="lazy"
         />
         <h1 className="brand">Aura</h1>
         <p className="tagline">Atmospheric Intelligence</p>

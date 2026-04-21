@@ -167,7 +167,6 @@ function HeaderControls({
           aria-label={showMobileSettings ? "Hide display settings" : "Show display settings"}
           aria-expanded={showMobileSettings}
           aria-controls="mobile-settings-panel"
-          aria-haspopup="true"
           onClick={handleToggleSettings}
         >
           Display
