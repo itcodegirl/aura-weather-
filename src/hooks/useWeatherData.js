@@ -50,7 +50,6 @@ export function useWeatherData(location, unit = "F", options = {}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [climateComparison, setClimateComparison] = useState(null);
-  const [refreshIndex, setRefreshIndex] = useState(0);
 
   const requestIdRef = useRef(0);
   const inFlightRequestRef = useRef(null);
@@ -72,16 +71,13 @@ export function useWeatherData(location, unit = "F", options = {}) {
     inFlightRequestRef.current = null;
   }, []);
 
-  useEffect(() => {
+  const requestWeatherData = useCallback(async () => {
     const coordinates = parseCoordinates(locationLat, locationLon);
-    const requestUnit = normalizeTemperatureUnit(unit);
 
     if (!coordinates) {
       if (typeof locationLat === "number" || typeof locationLon === "number") {
-        Promise.resolve().then(() => {
-          setError("Invalid location coordinates");
-          setLoading(false);
-        });
+        setError("Invalid location coordinates");
+        setLoading(false);
       }
       return;
     }
@@ -97,99 +93,89 @@ export function useWeatherData(location, unit = "F", options = {}) {
     const controller = new AbortController();
     inFlightRequestRef.current = controller;
 
-    const runRequest = async () => {
-      setLoading(true);
-      setError(null);
-      setClimateComparison(null);
+    setLoading(true);
+    setError(null);
+    setClimateComparison(null);
 
-      try {
-        const [weatherData, aqi] = await Promise.all([
-          fetchWeather(coordinates.latitude, coordinates.longitude, {
-            signal: controller.signal,
-            temperatureUnit: apiTemperatureUnit,
-            windSpeedUnit: requestWindSpeedUnit,
-            precipitationUnit: getApiPrecipUnit(requestUnit),
-          }),
-          fetchAirQuality(coordinates.latitude, coordinates.longitude, {
-            signal: controller.signal,
-          }),
-        ]);
+    try {
+      const [weatherData, aqi] = await Promise.all([
+        fetchWeather(coordinates.latitude, coordinates.longitude, {
+          signal: controller.signal,
+          temperatureUnit: apiTemperatureUnit,
+          windSpeedUnit: requestWindSpeedUnit,
+          precipitationUnit: getApiPrecipUnit(weatherDataUnit),
+        }),
+        fetchAirQuality(coordinates.latitude, coordinates.longitude, {
+          signal: controller.signal,
+        }),
+      ]);
 
-        const historicalAverage = climateEnabled
-          ? await fetchHistoricalTemperatureAverage(
-              coordinates.latitude,
-              coordinates.longitude,
-              weatherData?.meta?.timezone,
-              {
-                signal: controller.signal,
-                temperatureUnit: apiTemperatureUnit,
-              }
-            )
-          : null;
+      const historicalAverage = climateEnabled
+        ? await fetchHistoricalTemperatureAverage(
+            coordinates.latitude,
+            coordinates.longitude,
+            weatherData?.meta?.timezone,
+            {
+              signal: controller.signal,
+              temperatureUnit: apiTemperatureUnit,
+            }
+          )
+        : null;
 
-        if (requestId !== requestIdRef.current || !isMountedRef.current) {
-          return;
-        }
+      if (requestId !== requestIdRef.current || !isMountedRef.current) {
+        return;
+      }
 
-        const currentTemperature = Number(weatherData?.current?.temperature);
-        const historicalTemperature = Number(historicalAverage?.averageTemperature);
-        const climateDelta = getDifference(
-          currentTemperature,
-          historicalTemperature
-        );
+      const currentTemperature = Number(weatherData?.current?.temperature);
+      const historicalTemperature = Number(historicalAverage?.averageTemperature);
+      const climateDelta = getDifference(currentTemperature, historicalTemperature);
 
-        setWeather({ ...weatherData, aqi });
+      setWeather({ ...weatherData, aqi });
 
-        setClimateComparison(
-          historicalAverage && Number.isFinite(climateDelta)
-            ? {
-                ...historicalAverage,
-                difference: climateDelta,
-                differenceUnit: requestUnit,
-              }
-            : null
-        );
-      } catch (requestError) {
-        if (
-          requestId === requestIdRef.current &&
-          requestError?.name !== "AbortError" &&
-          isMountedRef.current
-        ) {
-          setError(getErrorMessage(requestError, "Could not load weather"));
-        }
-      } finally {
-        if (requestId === requestIdRef.current && isMountedRef.current) {
-          setLoading(false);
-          if (inFlightRequestRef.current === controller) {
-            inFlightRequestRef.current = null;
-          }
+      setClimateComparison(
+        historicalAverage && Number.isFinite(climateDelta)
+          ? {
+              ...historicalAverage,
+              difference: climateDelta,
+              differenceUnit: weatherDataUnit,
+            }
+          : null
+      );
+    } catch (requestError) {
+      if (
+        requestId === requestIdRef.current &&
+        requestError?.name !== "AbortError" &&
+        isMountedRef.current
+      ) {
+        setError(getErrorMessage(requestError, "Could not load weather"));
+      }
+    } finally {
+      if (requestId === requestIdRef.current && isMountedRef.current) {
+        setLoading(false);
+        if (inFlightRequestRef.current === controller) {
+          inFlightRequestRef.current = null;
         }
       }
-    };
-
-    queueMicrotask(() => {
-      runRequest();
-    });
-  }, [
-    locationLat,
-    locationLon,
-    unit,
-    climateEnabled,
-    refreshIndex,
-    abortInFlightRequest,
-  ]);
+    }
+  }, [abortInFlightRequest, climateEnabled, locationLat, locationLon, weatherDataUnit]);
 
   useEffect(() => {
+    Promise.resolve().then(() => {
+      void requestWeatherData();
+    });
+
     return () => {
       abortInFlightRequest();
     };
-  }, [abortInFlightRequest]);
+  }, [abortInFlightRequest, requestWeatherData]);
 
   const retryWeather = useCallback(() => {
-    setRefreshIndex((previous) => previous + 1);
-    setLoading(true);
-    setError(null);
-  }, []);
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    void requestWeatherData();
+  }, [requestWeatherData]);
 
   return {
     weather,

@@ -260,7 +260,7 @@ export function useLocation(onResolved) {
       return undefined;
     }
 
-    queueMicrotask(() => {
+    Promise.resolve().then(() => {
       requestCurrentPositionWithFallback({
         fallbackNotice: LOCATION_FALLBACK_NOTICE,
         trackCurrentLookup: false,
