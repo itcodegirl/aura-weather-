@@ -254,9 +254,9 @@ function App() {
     );
   }
 
-  const weatherInfo = getWeather(weather.current.weather_code);
+  const weatherInfo = getWeather(weather.current.conditionCode);
   const background = gradientCss(weatherInfo.gradient);
-  const uvToday = weather.daily?.uv_index_max?.[0];
+  const uvToday = weather.daily?.uvIndexMax?.[0];
   const aqiStatus = getAqiStatus(weather.aqi);
   const uvStatus = getUvStatus(uvToday);
   const sunrise = weather.daily?.sunrise?.[0];

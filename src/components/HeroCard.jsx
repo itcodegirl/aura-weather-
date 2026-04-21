@@ -90,20 +90,20 @@ function HeroCard({
   const safeLocationCountry = typeof safeLocation.country === "string" && safeLocation.country.trim()
     ? safeLocation.country.trim()
     : "";
-  const info = getWeather(current.weather_code);
+  const info = getWeather(current.conditionCode);
   const toDisplayTemp = (value, sourceUnit = weatherDataUnit) => {
     const converted = convertTemperature(value, unit, sourceUnit);
     return Number.isFinite(converted) ? Math.round(converted) : "\u2014";
   };
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
-  const todayHigh = toDisplayTemp(weather?.daily?.temperature_2m_max?.[0]);
-  const todayLow = toDisplayTemp(weather?.daily?.temperature_2m_min?.[0]);
+  const todayHigh = toDisplayTemp(weather?.daily?.temperatureMax?.[0]);
+  const todayLow = toDisplayTemp(weather?.daily?.temperatureMin?.[0]);
   const windDisplay = formatWindSpeed(
-    current.wind_speed_10m,
+    current.windSpeed,
     unit,
     weatherWindSpeedUnit
   );
-  const dewPoint = toDisplayTemp(current.dew_point_2m);
+  const dewPoint = toDisplayTemp(current.dewPoint);
   const sunriseValue = weather?.daily?.sunrise?.[0] ?? "";
   const sunsetValue = weather?.daily?.sunset?.[0] ?? "";
   const sunriseLabel = formatClock(sunriseValue);
@@ -190,16 +190,16 @@ function HeroCard({
         <div className="hero-temp-block">
           <div className="hero-temp-row">
             <div className="hero-temp">
-              {toDisplayTemp(current.temperature_2m)}
+              {toDisplayTemp(current.temperature)}
               <span className="hero-temp-unit">{tempUnit}</span>
             </div>
             <div className="hero-icon">
-              <WeatherIcon code={current.weather_code} size={124} animated />
+              <WeatherIcon code={current.conditionCode} size={124} animated />
             </div>
           </div>
           <div className="hero-condition">{info.label}</div>
           <div className="hero-feels">
-            Feels like {toDisplayTemp(current.apparent_temperature)}
+            Feels like {toDisplayTemp(current.feelsLike)}
             {tempUnit}
           </div>
           {hasClimateComparison && (
@@ -246,8 +246,8 @@ function HeroCard({
           icon={<Droplets size={18} />}
           label="Humidity"
           value={
-            Number.isFinite(Number(current.relative_humidity_2m))
-              ? `${Math.round(current.relative_humidity_2m)}%`
+            Number.isFinite(Number(current.humidity))
+              ? `${Math.round(current.humidity)}%`
               : "\u2014"
           }
         />
@@ -255,8 +255,8 @@ function HeroCard({
           icon={<Gauge size={18} />}
           label="Pressure"
           value={
-            Number.isFinite(Number(current.surface_pressure))
-              ? `${Math.round(current.surface_pressure)} hPa`
+            Number.isFinite(Number(current.pressure))
+              ? `${Math.round(current.pressure)} hPa`
               : "\u2014"
           }
         />

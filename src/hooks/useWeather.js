@@ -156,7 +156,7 @@ function persistLocation(lat, lon, name, country) {
 }
 
 function getFallbackLocationName(weatherData, lat, lon) {
-  const timezoneCity = weatherData?.timezone
+  const timezoneCity = weatherData?.meta?.timezone
     ?.split("/")
     .at(-1)
     ?.replace(/_/g, " ");
@@ -266,7 +266,7 @@ export function useWeather(unit = "F", options = {}) {
           ? await fetchHistoricalTemperatureAverage(
               safeLat,
               safeLon,
-              weatherData?.timezone,
+              weatherData?.meta?.timezone,
               {
                 signal: controller.signal,
                 temperatureUnit: apiTemperatureUnit,
@@ -296,7 +296,7 @@ export function useWeather(unit = "F", options = {}) {
           country: normalizedCountry,
           unit: requestDataUnit,
         });
-        const currentTemperature = Number(weatherData?.current?.temperature_2m);
+        const currentTemperature = Number(weatherData?.current?.temperature);
         const historicalTemperature = Number(
           historicalAverage?.averageTemperature
         );

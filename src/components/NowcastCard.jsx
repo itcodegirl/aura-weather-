@@ -16,10 +16,10 @@ function clampProbability(value) {
   return Number.isFinite(clamped) ? clamped : 0;
 }
 
-function analyzeNowcast(minutely15) {
+function analyzeNowcast(nowcast) {
   if (
-    !Array.isArray(minutely15?.time) ||
-    minutely15.time.length === 0
+    !Array.isArray(nowcast?.time) ||
+    nowcast.time.length === 0
   ) {
     return {
       hasData: false,
@@ -32,15 +32,15 @@ function analyzeNowcast(minutely15) {
     };
   }
 
-  const { time } = minutely15;
-  const precipitationProbabilitySeries = Array.isArray(minutely15?.precipitation_probability)
-    ? minutely15.precipitation_probability
+  const { time } = nowcast;
+  const precipitationProbabilitySeries = Array.isArray(nowcast?.rainChance)
+    ? nowcast.rainChance
     : [];
-  const precipitationSeries = Array.isArray(minutely15?.precipitation)
-    ? minutely15.precipitation
+  const precipitationSeries = Array.isArray(nowcast?.rainAmount)
+    ? nowcast.rainAmount
     : [];
-  const weatherCodeSeries = Array.isArray(minutely15?.weather_code)
-    ? minutely15.weather_code
+  const weatherCodeSeries = Array.isArray(nowcast?.conditionCode)
+    ? nowcast.conditionCode
     : [];
 
   const now = new Date();
@@ -147,7 +147,7 @@ function analyzeNowcast(minutely15) {
 }
 
 function NowcastCard({ weather, style }) {
-  const nowcast = useMemo(() => analyzeNowcast(weather?.minutely_15), [weather?.minutely_15]);
+  const nowcast = useMemo(() => analyzeNowcast(weather?.nowcast), [weather?.nowcast]);
   const peakProbability = Number.isFinite(Number(nowcast.peakProbability))
     ? Math.round(Number(nowcast.peakProbability))
     : 0;

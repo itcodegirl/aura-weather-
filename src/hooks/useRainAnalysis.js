@@ -17,18 +17,18 @@ function getEmptyRainAnalysis() {
 function analyzeRain(hourly) {
   if (
     !Array.isArray(hourly?.time) ||
-    !Array.isArray(hourly?.precipitation_probability) ||
-    !Array.isArray(hourly?.precipitation) ||
+    !Array.isArray(hourly?.rainChance) ||
+    !Array.isArray(hourly?.rainAmount) ||
     hourly.time.length === 0
   ) {
     return getEmptyRainAnalysis();
   }
 
   const hourlyTimes = hourly.time;
-  const hourlyProbabilities = Array.isArray(hourly.precipitation_probability)
-    ? hourly.precipitation_probability
+  const hourlyProbabilities = Array.isArray(hourly.rainChance)
+    ? hourly.rainChance
     : [];
-  const hourlyAmounts = Array.isArray(hourly.precipitation) ? hourly.precipitation : [];
+  const hourlyAmounts = Array.isArray(hourly.rainAmount) ? hourly.rainAmount : [];
 
   const now = new Date();
   const nowMs = now.getTime();
@@ -116,4 +116,3 @@ function analyzeRain(hourly) {
 export function useRainAnalysis(hourly) {
   return useMemo(() => analyzeRain(hourly), [hourly]);
 }
-

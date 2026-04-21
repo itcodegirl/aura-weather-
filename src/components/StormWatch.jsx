@@ -24,7 +24,7 @@ import "./StormWatch.css";
 function StormRisk({ weather, summaryId }) {
   const cape = Number(weather?.hourly?.cape?.[0]);
   const safeCape = Number.isFinite(cape) ? cape : 0;
-  const currentCode = weather?.current?.weather_code ?? 0;
+  const currentCode = weather?.current?.conditionCode ?? 0;
   const risk = classifyStormRisk(safeCape, currentCode);
   const stormRiskSummary = `Storm risk: ${risk.level}; level ${risk.score + 1} of 5 based on current conditions.`;
 
@@ -70,7 +70,7 @@ function StormRisk({ weather, summaryId }) {
 
 function PressureTrend({ weather }) {
   const trend = calculatePressureTrend(
-    weather?.hourly?.surface_pressure,
+    weather?.hourly?.pressure,
     weather?.hourly?.time
   );
   const hasCurrent = Number.isFinite(trend.current);
@@ -162,12 +162,9 @@ function WindIntelligence({
   weatherWindSpeedUnit = weatherDataUnit === "C" ? "kmh" : "mph",
 }) {
   const current = weather?.current && typeof weather.current === "object" ? weather.current : {};
-  const wind_speed_10m = current.wind_speed_10m;
-  const wind_gusts_10m = current.wind_gusts_10m;
-  const wind_direction_10m = current.wind_direction_10m;
-  const safeWindSpeed = Number(wind_speed_10m);
-  const safeWindGusts = Number(wind_gusts_10m);
-  const safeDirection = Number(wind_direction_10m);
+  const safeWindSpeed = Number(current.windSpeed);
+  const safeWindGusts = Number(current.windGust);
+  const safeDirection = Number(current.windDirection);
   const sustained = Number.isFinite(safeWindSpeed) ? safeWindSpeed : 0;
   const directionDegrees = Number.isFinite(safeDirection) ? safeDirection : 0;
 
@@ -225,7 +222,7 @@ function WindIntelligence({
 }
 
 function ComfortIndex({ weather, unit, weatherDataUnit = unit }) {
-  const dewpoint = weather?.current?.dew_point_2m;
+  const dewpoint = weather?.current?.dewPoint;
   const safeDewpoint = Number(dewpoint);
   const dewpointConverted = convertTemperature(safeDewpoint, unit, weatherDataUnit);
   const dewpointDisplay = Number.isFinite(dewpointConverted)
@@ -282,13 +279,13 @@ function StormWatch({
   const safeOverviewCape = Number.isFinite(overviewCape) ? overviewCape : 0;
   const overviewRisk = classifyStormRisk(
     safeOverviewCape,
-    weather?.current?.weather_code ?? 0
+    weather?.current?.conditionCode ?? 0
   );
   const overviewPressure = calculatePressureTrend(
-    weather?.hourly?.surface_pressure,
+    weather?.hourly?.pressure,
     weather?.hourly?.time
   );
-  const overviewWindSpeed = Number(weather?.current?.wind_speed_10m);
+  const overviewWindSpeed = Number(weather?.current?.windSpeed);
   const overviewWind = classifyWind(
     Number.isFinite(overviewWindSpeed) ? overviewWindSpeed : 0,
     weatherDataUnit || unit

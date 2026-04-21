@@ -24,9 +24,9 @@ function toDisplayTemperature(value, unit, sourceUnit) {
 function buildHourlyData(hourly, unit, sourceUnit) {
   if (
     !Array.isArray(hourly?.time) ||
-    !Array.isArray(hourly.temperature_2m) ||
+    !Array.isArray(hourly.temperature) ||
     hourly.time.length === 0 ||
-    hourly.temperature_2m.length === 0
+    hourly.temperature.length === 0
   ) {
     return [];
   }
@@ -45,7 +45,7 @@ function buildHourlyData(hourly, unit, sourceUnit) {
       const timestamp = new Date(t);
       if (!Number.isFinite(timestamp.getTime())) return null;
 
-      const rawTemp = hourly.temperature_2m[idx + i];
+      const rawTemp = hourly.temperature[idx + i];
       const baseTemp = Number(rawTemp);
       const convertedTemp = Number.isFinite(baseTemp)
         ? toDisplayTemperature(baseTemp, unit, sourceUnit)
@@ -58,7 +58,7 @@ function buildHourlyData(hourly, unit, sourceUnit) {
           hour12: true,
         }),
         temp: Number.isFinite(convertedTemp) ? convertedTemp : null,
-        code: hourly.weather_code?.[idx + i] ?? 0,
+        code: hourly.conditionCode?.[idx + i] ?? 0,
       };
     })
     .filter(Boolean);
@@ -113,7 +113,7 @@ function HourlyCard({
   chartBottomColor,
   style,
 }) {
-  const currentWeatherCode = weather?.current?.weather_code;
+  const currentWeatherCode = weather?.current?.conditionCode;
   const chartId = useId();
   const chartTitleId = `${chartId}-title`;
   const chartSummaryId = `${chartId}-summary`;
@@ -162,8 +162,8 @@ function HourlyCard({
 
   const xTicks = data.filter((_, i) => i % 3 === 0).map((d) => d.label);
   const temps = data.map((d) => d.temp).filter((value) => Number.isFinite(value));
-  const currentTemp = Number.isFinite(Number(weather?.current?.temperature_2m))
-    ? toDisplayTemperature(weather.current.temperature_2m, unit, weatherDataUnit)
+  const currentTemp = Number.isFinite(Number(weather?.current?.temperature))
+    ? toDisplayTemperature(weather.current.temperature, unit, weatherDataUnit)
     : Number.NaN;
   const safeMinTemp = temps.length
     ? Math.min(...temps)

@@ -23,14 +23,14 @@ function clampPercent(value) {
 }
 
 function getDaySignal(day, weekMin, weekMax) {
-  const rainChance = day.precipitation_probability_max;
+  const rainChance = day.rainChanceMax;
   if (rainChance >= 60) {
     return { label: "Rain Watch", tone: "wet" };
   }
-  if (Number.isFinite(day.temp_max) && day.temp_max >= weekMax - 1) {
+  if (Number.isFinite(day.temperatureMax) && day.temperatureMax >= weekMax - 1) {
     return { label: "Warm Peak", tone: "warm" };
   }
-  if (Number.isFinite(day.temp_min) && day.temp_min <= weekMin + 1) {
+  if (Number.isFinite(day.temperatureMin) && day.temperatureMin <= weekMin + 1) {
     return { label: "Cool Dip", tone: "cool" };
   }
   return { label: "Steady", tone: "steady" };
@@ -42,20 +42,20 @@ function toDisplayTemp(value, unit, weatherDataUnit) {
 }
 
 function buildWeekSummary(days, weekMin, weekMax, unit, weatherDataUnit) {
-  const firstMax = days[0]?.temp_max;
-  const lastMax = days[days.length - 1]?.temp_max;
+  const firstMax = days[0]?.temperatureMax;
+  const lastMax = days[days.length - 1]?.temperatureMax;
   const delta =
     Number.isFinite(firstMax) && Number.isFinite(lastMax) ? lastMax - firstMax : 0;
   const trendText =
     delta >= 3 ? "Warming trend" : delta <= -3 ? "Cooling trend" : "Stable week";
   const wettestDay = days.reduce((highest, day) =>
-    day.precipitation_probability_max > highest.precipitation_probability_max
+    day.rainChanceMax > highest.rainChanceMax
       ? day
       : highest
   );
   const wettestLabel =
-    wettestDay.precipitation_probability_max >= 25
-      ? `${formatDayLabel(wettestDay.date)} peaks at ${wettestDay.precipitation_probability_max}% rain chance`
+    wettestDay.rainChanceMax >= 25
+      ? `${formatDayLabel(wettestDay.date)} peaks at ${wettestDay.rainChanceMax}% rain chance`
       : "Rain chances stay mostly low";
   const weekRangeText = `${toDisplayTemp(weekMin, unit, weatherDataUnit)}\u00B0 to ${toDisplayTemp(weekMax, unit, weatherDataUnit)}\u00B0`;
 
@@ -63,25 +63,25 @@ function buildWeekSummary(days, weekMin, weekMax, unit, weatherDataUnit) {
 }
 
 function DayRow({ day, weekMin, weekMax, unit, weatherDataUnit, rangeGradient }) {
-  const info = getWeather(day.weather_code);
+  const info = getWeather(day.conditionCode);
   const label = formatDayLabel(day.date);
-  const high = Number.isFinite(day.temp_max)
-    ? toDisplayTemp(day.temp_max, unit, weatherDataUnit)
+  const high = Number.isFinite(day.temperatureMax)
+    ? toDisplayTemp(day.temperatureMax, unit, weatherDataUnit)
     : "\u2014";
-  const low = Number.isFinite(day.temp_min)
-    ? toDisplayTemp(day.temp_min, unit, weatherDataUnit)
+  const low = Number.isFinite(day.temperatureMin)
+    ? toDisplayTemp(day.temperatureMin, unit, weatherDataUnit)
     : "\u2014";
   const tempUnit = "\u00B0";
-  const rainChance = day.precipitation_probability_max;
+  const rainChance = day.rainChanceMax;
   const hasNotableRainChance = rainChance >= 20;
   const daySignal = getDaySignal(day, weekMin, weekMax);
 
   const weekRange = weekMax - weekMin || 1;
-  const startPct = Number.isFinite(day.temp_min)
-    ? clamp(((day.temp_min - weekMin) / weekRange) * 100, 0, 100)
+  const startPct = Number.isFinite(day.temperatureMin)
+    ? clamp(((day.temperatureMin - weekMin) / weekRange) * 100, 0, 100)
     : 0;
-  const endPct = Number.isFinite(day.temp_max)
-    ? clamp(((day.temp_max - weekMin) / weekRange) * 100, 0, 100)
+  const endPct = Number.isFinite(day.temperatureMax)
+    ? clamp(((day.temperatureMax - weekMin) / weekRange) * 100, 0, 100)
     : 0;
 
   return (
@@ -97,7 +97,7 @@ function DayRow({ day, weekMin, weekMax, unit, weatherDataUnit, rangeGradient })
       </div>
 
       <div className="forecast-icon" aria-label={info.label}>
-        <WeatherIcon code={day.weather_code} size={22} />
+        <WeatherIcon code={day.conditionCode} size={22} />
       </div>
 
       <div
@@ -149,15 +149,15 @@ function DayRow({ day, weekMin, weekMax, unit, weatherDataUnit, rangeGradient })
 function ForecastCard({ weather, unit, weatherDataUnit = unit, style }) {
   const daily = weather?.daily && typeof weather.daily === "object" ? weather.daily : null;
   const times = Array.isArray(daily?.time) ? daily.time : [];
-  const weatherCodes = Array.isArray(daily?.weather_code) ? daily.weather_code : [];
-  const maxTemps = Array.isArray(daily?.temperature_2m_max)
-    ? daily.temperature_2m_max
+  const weatherCodes = Array.isArray(daily?.conditionCode) ? daily.conditionCode : [];
+  const maxTemps = Array.isArray(daily?.temperatureMax)
+    ? daily.temperatureMax
     : [];
-  const minTemps = Array.isArray(daily?.temperature_2m_min)
-    ? daily.temperature_2m_min
+  const minTemps = Array.isArray(daily?.temperatureMin)
+    ? daily.temperatureMin
     : [];
-  const precipProbabilities = Array.isArray(daily?.precipitation_probability_max)
-    ? daily.precipitation_probability_max
+  const precipProbabilities = Array.isArray(daily?.rainChanceMax)
+    ? daily.rainChanceMax
     : [];
 
   const today = new Date();
@@ -166,14 +166,14 @@ function ForecastCard({ weather, unit, weatherDataUnit = unit, style }) {
   const days = times
     .map((date, index) => ({
       date,
-      weather_code: toFiniteNumber(weatherCodes[index], 0),
-      temp_max: toFiniteNumber(maxTemps[index]),
-      temp_min: toFiniteNumber(minTemps[index]),
-      precipitation_probability_max: clampPercent(
+      conditionCode: toFiniteNumber(weatherCodes[index], 0),
+      temperatureMax: toFiniteNumber(maxTemps[index]),
+      temperatureMin: toFiniteNumber(minTemps[index]),
+      rainChanceMax: clampPercent(
         toFiniteNumber(precipProbabilities[index], 0)
       ),
     }))
-    .filter((day) => Number.isFinite(day.temp_max) || Number.isFinite(day.temp_min))
+    .filter((day) => Number.isFinite(day.temperatureMax) || Number.isFinite(day.temperatureMin))
     .filter((day) => {
       const dayDate = parseLocalDate(day.date);
       if (!dayDate || Number.isNaN(dayDate.getTime())) return false;
@@ -199,8 +199,12 @@ function ForecastCard({ weather, unit, weatherDataUnit = unit, style }) {
     );
   }
 
-  const validWeekMins = days.map((day) => day.temp_min).filter((value) => Number.isFinite(value));
-  const validWeekMaxs = days.map((day) => day.temp_max).filter((value) => Number.isFinite(value));
+  const validWeekMins = days
+    .map((day) => day.temperatureMin)
+    .filter((value) => Number.isFinite(value));
+  const validWeekMaxs = days
+    .map((day) => day.temperatureMax)
+    .filter((value) => Number.isFinite(value));
   const weekMin = validWeekMins.length ? Math.min(...validWeekMins) : 0;
   const weekMax = validWeekMaxs.length ? Math.max(...validWeekMaxs) : weekMin;
   const rangeGradientStart = weekMin <= 40 ? "#60a5fa" : "#f59e0b";
