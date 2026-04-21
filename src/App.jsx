@@ -1,7 +1,8 @@
-import { useRef, useEffect, lazy } from "react";
+import { useRef, lazy } from "react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
+import { usePanelPreload, useSearchShortcut } from "./hooks/useAppShellEffects";
 import { getWeather, gradientCss } from "./domain/weatherCodes";
 import {
   AppShell,
@@ -74,61 +75,8 @@ function App() {
   const showGlobalError = Boolean(error) && !hasWeatherData;
   const showRefreshError = Boolean(error) && hasWeatherData;
 
-  useEffect(() => {
-    const handleShortcut = (event) => {
-      const isMetaOrCtrl = event.metaKey || event.ctrlKey;
-      if (!isMetaOrCtrl || event.key.toLowerCase() !== "k") return;
-
-      const activeElement = event.target;
-      const isTypingTarget =
-        activeElement instanceof HTMLElement &&
-        (activeElement.tagName === "INPUT" ||
-          activeElement.tagName === "TEXTAREA" ||
-          activeElement.isContentEditable ||
-          activeElement.tagName === "SELECT");
-
-      if (isTypingTarget) return;
-
-      event.preventDefault();
-      citySearchRef.current?.focus();
-    };
-
-    window.addEventListener("keydown", handleShortcut);
-
-    return () => window.removeEventListener("keydown", handleShortcut);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return undefined;
-    }
-
-    let cancelled = false;
-    let idleId;
-    let timeoutId;
-
-    const preloadHeavyPanels = () => {
-      if (cancelled) return;
-      void loadHourlyCard();
-      void loadStormWatch();
-    };
-
-    if (typeof window.requestIdleCallback === "function") {
-      idleId = window.requestIdleCallback(preloadHeavyPanels, { timeout: 2000 });
-    } else {
-      timeoutId = window.setTimeout(preloadHeavyPanels, 1200);
-    }
-
-    return () => {
-      cancelled = true;
-      if (typeof window.cancelIdleCallback === "function" && idleId !== undefined) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId !== undefined) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, []);
+  useSearchShortcut(citySearchRef);
+  usePanelPreload([loadHourlyCard, loadStormWatch]);
 
   if (showGlobalLoading) {
     return <AppLoadingState />;
