@@ -1,8 +1,8 @@
 import { useRef, lazy } from "react";
 import "./App.css";
 import { useWeather } from "./hooks/useWeather";
-import { useLocalStorageState } from "./hooks/useLocalStorageState";
 import { usePanelPreload, useSearchShortcut } from "./hooks/useAppShellEffects";
+import { useDisplayPreferences } from "./hooks/useDisplayPreferences";
 import { getWeather, gradientCss } from "./domain/weatherCodes";
 import {
   AppShell,
@@ -18,41 +18,9 @@ const loadHourlyCard = () => import("./components/HourlyCard");
 const StormWatch = lazy(loadStormWatch);
 const HourlyCard = lazy(loadHourlyCard);
 
-const DEFAULT_UNIT = "F";
-const CLIMATE_CONTEXT_DEFAULT = true;
-
-function deserializeUnitPreference(storedUnit) {
-  return storedUnit === "F" || storedUnit === "C" ? storedUnit : DEFAULT_UNIT;
-}
-
-function deserializeClimatePreference(storedValue) {
-  if (storedValue === "off") return false;
-  if (storedValue === "on") return true;
-  return CLIMATE_CONTEXT_DEFAULT;
-}
-
-function serializeClimatePreference(showClimateContext) {
-  return showClimateContext ? "on" : "off";
-}
-
-const CLIMATE_CONTEXT_KEY = "aura-weather-climate-context";
-const UNIT_PREFERENCE_KEY = "aura-weather-unit-preference";
 function App() {
-  const [unit, setUnit] = useLocalStorageState(
-    UNIT_PREFERENCE_KEY,
-    DEFAULT_UNIT,
-    {
-      deserialize: deserializeUnitPreference,
-    }
-  );
-  const [showClimateContext, setShowClimateContext] = useLocalStorageState(
-    CLIMATE_CONTEXT_KEY,
-    CLIMATE_CONTEXT_DEFAULT,
-    {
-      deserialize: deserializeClimatePreference,
-      serialize: serializeClimatePreference,
-    }
-  );
+  const { unit, setUnit, showClimateContext, setShowClimateContext } =
+    useDisplayPreferences();
   const citySearchRef = useRef(null);
   const {
     weather,
