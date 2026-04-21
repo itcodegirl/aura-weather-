@@ -33,8 +33,8 @@ export function getApiTemperatureUnit(unit) {
   return normalizeDomainTemperatureUnit(unit) === "C" ? "celsius" : "fahrenheit";
 }
 
-export function getApiWindSpeedUnit(unit) {
-  return normalizeDomainTemperatureUnit(unit) === "C" ? "kmh" : "mph";
+export function getApiWindSpeedUnit() {
+  return "mph";
 }
 
 export function getApiPrecipUnit(unit) {
@@ -90,4 +90,3 @@ export function formatPrecipitation(value, targetUnit, sourceUnit = "F") {
 
   return `${displayValue.toFixed(2)} ${getPrecipUnitLabel(targetNormalized)}`;
 }
-

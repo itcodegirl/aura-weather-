@@ -156,7 +156,7 @@ function WindIntelligence({
   weather,
   unit,
   weatherDataUnit = unit,
-  weatherWindSpeedUnit = weatherDataUnit === "C" ? "kmh" : "mph",
+  weatherWindSpeedUnit = "mph",
 }) {
   const current = weather?.current && typeof weather.current === "object" ? weather.current : {};
   const safeWindSpeed = Number(current.windSpeed);

@@ -53,7 +53,7 @@ function HeroCard({
   location,
   unit,
   weatherDataUnit = unit,
-  weatherWindSpeedUnit = weatherDataUnit === "C" ? "kmh" : "mph",
+  weatherWindSpeedUnit = "mph",
   climateComparison,
   style,
 }) {

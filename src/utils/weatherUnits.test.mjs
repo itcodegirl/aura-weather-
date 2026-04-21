@@ -19,7 +19,7 @@ describe("weatherUnits", () => {
   test("converts display units to API units", () => {
     assert.equal(getApiTemperatureUnit("C"), "celsius");
     assert.equal(getApiTemperatureUnit("F"), "fahrenheit");
-    assert.equal(getApiWindSpeedUnit("C"), "kmh");
+    assert.equal(getApiWindSpeedUnit("C"), "mph");
     assert.equal(getApiWindSpeedUnit("F"), "mph");
     assert.equal(getApiPrecipUnit("C"), "mm");
     assert.equal(getApiPrecipUnit("F"), "inch");
