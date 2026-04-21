@@ -82,6 +82,16 @@ function HeroCard({
     const converted = convertTemp(value, unit);
     return Number.isFinite(converted) ? Math.round(converted) : "\u2014";
   };
+
+  const toDisplayTempDelta = (deltaValue) => {
+    const numericDelta = Number(deltaValue);
+    if (!Number.isFinite(numericDelta)) {
+      return "\u2014";
+    }
+    const safeDelta = Math.abs(numericDelta);
+    const convertedDelta = unit === "C" ? (safeDelta * 5) / 9 : safeDelta;
+    return Math.round(convertedDelta);
+  };
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
   const todayHigh = toDisplayTemp(weather?.daily?.temperatureMax?.[0]);
   const todayLow = toDisplayTemp(weather?.daily?.temperatureMin?.[0]);
@@ -101,7 +111,7 @@ function HeroCard({
   const climateDeltaRaw = hasClimateComparison
     ? climateDifference
     : null;
-  const climateDelta = hasClimateComparison ? toDisplayTemp(Math.abs(climateDeltaRaw)) : 0;
+  const climateDelta = hasClimateComparison ? toDisplayTempDelta(climateDeltaRaw) : "\u2014";
   let climateDirection = "";
   if (hasClimateComparison) {
     if (climateDeltaRaw > 0) climateDirection = "warmer";
@@ -247,3 +257,5 @@ function HeroCard({
 }
 
 export default memo(HeroCard);
+
+
