@@ -168,6 +168,7 @@ export function useLocation(onResolved) {
       };
 
       const fallback = () => {
+        clearFallbackTimer();
         if (requestId !== activeRequestRef.current || !isMountedRef.current) {
           return;
         }
