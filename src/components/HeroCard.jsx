@@ -1,6 +1,6 @@
 // src/components/HeroCard.jsx
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import {
   MapPin,
   Wind,
@@ -55,7 +55,106 @@ function HeroCard({
   climateComparison,
   style,
 }) {
-  if (!weather?.current || !location) {
+  const heroData = useMemo(() => {
+    if (!weather?.current || !location) {
+      return null;
+    }
+
+    const current = weather.current;
+    const safeLocation = location && typeof location === "object" ? location : {};
+    const safeLocationName = typeof safeLocation.name === "string" && safeLocation.name.trim()
+      ? safeLocation.name.trim()
+      : "Current location";
+    const safeLocationCountry = typeof safeLocation.country === "string" && safeLocation.country.trim()
+      ? safeLocation.country.trim()
+      : "";
+    const info = getWeather(current.conditionCode);
+    const toDisplayTemp = (value) => {
+      const converted = convertTemp(value, unit);
+      return Number.isFinite(converted) ? Math.round(converted) : "\u2014";
+    };
+
+    const toDisplayTempDelta = (deltaValue) => {
+      const numericDelta = Number(deltaValue);
+      if (!Number.isFinite(numericDelta)) {
+        return "\u2014";
+      }
+      const safeDelta = Math.abs(numericDelta);
+      const convertedDelta = unit === "C" ? (safeDelta * 5) / 9 : safeDelta;
+      return Math.round(convertedDelta);
+    };
+    const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
+    const todayHigh = toDisplayTemp(weather?.daily?.temperatureMax?.[0]);
+    const todayLow = toDisplayTemp(weather?.daily?.temperatureMin?.[0]);
+    const windDisplay = formatWindSpeed(current.windSpeed, unit);
+    const dewPoint = toDisplayTemp(current.dewPoint);
+    const sunriseValue = weather?.daily?.sunrise?.[0] ?? "";
+    const sunsetValue = weather?.daily?.sunset?.[0] ?? "";
+    const sunriseLabel = formatClock(sunriseValue);
+    const sunsetLabel = formatClock(sunsetValue);
+    const daylightLabel = formatDaylightLength(sunriseValue, sunsetValue);
+    const safeClimateComparison =
+      climateComparison && typeof climateComparison === "object"
+        ? climateComparison
+        : null;
+    const climateDifference = Number(safeClimateComparison?.difference);
+    const hasClimateComparison = Number.isFinite(climateDifference);
+    const climateDeltaRaw = hasClimateComparison
+      ? climateDifference
+      : null;
+    const climateDelta = hasClimateComparison ? toDisplayTempDelta(climateDeltaRaw) : "\u2014";
+    let climateDirection = "";
+    if (hasClimateComparison) {
+      if (climateDeltaRaw > 0) climateDirection = "warmer";
+      else if (climateDeltaRaw < 0) climateDirection = "colder";
+      else climateDirection = "about the same";
+    }
+    const climateSource = hasClimateComparison
+      ? `${Number.isFinite(Number(safeClimateComparison?.sampleYears))
+          ? Number(safeClimateComparison.sampleYears)
+          : 30}-year`
+      : "";
+    const climateDate =
+      typeof safeClimateComparison?.referenceDateLabel === "string" &&
+      safeClimateComparison.referenceDateLabel.trim()
+        ? safeClimateComparison.referenceDateLabel.trim()
+        : "today";
+    const climateLocation = safeLocationName || "this location";
+    const climateMessage = hasClimateComparison
+      ? climateDirection === "about the same"
+        ? `Today is about the same as the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`
+        : `Today is ${climateDelta}${tempUnit} ${climateDirection} than the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`
+      : "";
+
+    const today = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+
+    return {
+      current,
+      info,
+      safeLocationName,
+      safeLocationCountry,
+      toDisplayTemp,
+      tempUnit,
+      todayHigh,
+      todayLow,
+      windDisplay,
+      dewPoint,
+      sunriseValue,
+      sunsetValue,
+      sunriseLabel,
+      sunsetLabel,
+      daylightLabel,
+      hasClimateComparison,
+      climateMessage,
+      today,
+    };
+  }, [weather, location, unit, climateComparison]);
+
+  if (!heroData) {
     return (
       <section className="bento-hero hero-card glass" style={style}>
         <header className="hero-meta">
@@ -69,77 +168,26 @@ function HeroCard({
     );
   }
 
-  const current = weather.current;
-  const safeLocation = location && typeof location === "object" ? location : {};
-  const safeLocationName = typeof safeLocation.name === "string" && safeLocation.name.trim()
-    ? safeLocation.name.trim()
-    : "Current location";
-  const safeLocationCountry = typeof safeLocation.country === "string" && safeLocation.country.trim()
-    ? safeLocation.country.trim()
-    : "";
-  const info = getWeather(current.conditionCode);
-  const toDisplayTemp = (value) => {
-    const converted = convertTemp(value, unit);
-    return Number.isFinite(converted) ? Math.round(converted) : "\u2014";
-  };
-
-  const toDisplayTempDelta = (deltaValue) => {
-    const numericDelta = Number(deltaValue);
-    if (!Number.isFinite(numericDelta)) {
-      return "\u2014";
-    }
-    const safeDelta = Math.abs(numericDelta);
-    const convertedDelta = unit === "C" ? (safeDelta * 5) / 9 : safeDelta;
-    return Math.round(convertedDelta);
-  };
-  const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
-  const todayHigh = toDisplayTemp(weather?.daily?.temperatureMax?.[0]);
-  const todayLow = toDisplayTemp(weather?.daily?.temperatureMin?.[0]);
-  const windDisplay = formatWindSpeed(current.windSpeed, unit);
-  const dewPoint = toDisplayTemp(current.dewPoint);
-  const sunriseValue = weather?.daily?.sunrise?.[0] ?? "";
-  const sunsetValue = weather?.daily?.sunset?.[0] ?? "";
-  const sunriseLabel = formatClock(sunriseValue);
-  const sunsetLabel = formatClock(sunsetValue);
-  const daylightLabel = formatDaylightLength(sunriseValue, sunsetValue);
-  const safeClimateComparison =
-    climateComparison && typeof climateComparison === "object"
-      ? climateComparison
-      : null;
-  const climateDifference = Number(safeClimateComparison?.difference);
-  const hasClimateComparison = Number.isFinite(climateDifference);
-  const climateDeltaRaw = hasClimateComparison
-    ? climateDifference
-    : null;
-  const climateDelta = hasClimateComparison ? toDisplayTempDelta(climateDeltaRaw) : "\u2014";
-  let climateDirection = "";
-  if (hasClimateComparison) {
-    if (climateDeltaRaw > 0) climateDirection = "warmer";
-    else if (climateDeltaRaw < 0) climateDirection = "colder";
-    else climateDirection = "about the same";
-  }
-  const climateSource = hasClimateComparison
-    ? `${Number.isFinite(Number(safeClimateComparison?.sampleYears))
-        ? Number(safeClimateComparison.sampleYears)
-        : 30}-year`
-    : "";
-  const climateDate =
-    typeof safeClimateComparison?.referenceDateLabel === "string" &&
-    safeClimateComparison.referenceDateLabel.trim()
-      ? safeClimateComparison.referenceDateLabel.trim()
-      : "today";
-  const climateLocation = safeLocationName || "this location";
-  const climateMessage = hasClimateComparison
-    ? climateDirection === "about the same"
-      ? `Today is about the same as the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`
-      : `Today is ${climateDelta}${tempUnit} ${climateDirection} than the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`
-    : "";
-
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const {
+    current,
+    info,
+    safeLocationName,
+    safeLocationCountry,
+    toDisplayTemp,
+    tempUnit,
+    todayHigh,
+    todayLow,
+    windDisplay,
+    dewPoint,
+    sunriseValue,
+    sunsetValue,
+    sunriseLabel,
+    sunsetLabel,
+    daylightLabel,
+    hasClimateComparison,
+    climateMessage,
+    today,
+  } = heroData;
 
   return (
     <section className="bento-hero hero-card glass" style={style}>
