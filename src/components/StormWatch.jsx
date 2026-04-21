@@ -29,10 +29,13 @@ function StormRisk({ weather, summaryId }) {
 
   return (
     <div className="storm-module">
-      <h3 className="storm-module-header">
-        <Zap size={14} />
-        <span>Storm Risk</span>
-      </h3>
+      <div className="storm-module-top">
+        <h3 className="storm-module-header">
+          <Zap size={14} />
+          <span>Storm Risk</span>
+        </h3>
+        <span className="storm-module-kicker">Convection</span>
+      </div>
       <div
         className="storm-level"
         style={{ color: risk.color }}
@@ -41,6 +44,7 @@ function StormRisk({ weather, summaryId }) {
       >
         {risk.level}
       </div>
+      <p className="storm-module-summary">Risk index {risk.score + 1} of 5</p>
       <div id={summaryId} className="storm-risk-accessibility">
         {stormRiskSummary}
       </div>
@@ -106,13 +110,19 @@ function PressureTrend({ weather }) {
 
   return (
     <div className="storm-module">
-      <h3 className="storm-module-header">
-        <Icon size={14} style={{ color: trendColor }} />
-        <span>Pressure</span>
-      </h3>
+      <div className="storm-module-top">
+        <h3 className="storm-module-header">
+          <Icon size={14} style={{ color: trendColor }} />
+          <span>Pressure</span>
+        </h3>
+        <span className="storm-module-kicker">6h trend</span>
+      </div>
       <div className="storm-level" style={{ color: trendColor }}>
         {trend.interpretation}
       </div>
+      <p className="storm-module-summary">
+        {hasCurrent ? `${Math.round(trend.current)} hPa current` : "Pressure data unavailable"}
+      </p>
       <svg
         className="pressure-sparkline"
         viewBox="0 0 100 100"
@@ -166,11 +176,15 @@ function WindIntelligence({ weather, unit, weatherDataUnit = unit }) {
 
   return (
     <div className="storm-module">
-      <h3 className="storm-module-header">
-        <Wind size={14} />
-        <span>Wind</span>
-      </h3>
+      <div className="storm-module-top">
+        <h3 className="storm-module-header">
+          <Wind size={14} />
+          <span>Wind</span>
+        </h3>
+        <span className="storm-module-kicker">Surface flow</span>
+      </div>
       <div className="storm-level">{strength}</div>
+      <p className="storm-module-summary">Flow from {direction}</p>
 
       <div className="wind-compass" aria-label={`Wind from ${direction}`}>
         <div className="wind-compass-ring">
@@ -214,13 +228,17 @@ function ComfortIndex({ weather, unit, weatherDataUnit = unit, convertTemp }) {
 
   return (
     <div className="storm-module">
-      <h3 className="storm-module-header">
-        <Droplets size={14} />
-        <span>Comfort</span>
-      </h3>
+      <div className="storm-module-top">
+        <h3 className="storm-module-header">
+          <Droplets size={14} />
+          <span>Comfort</span>
+        </h3>
+        <span className="storm-module-kicker">Moisture</span>
+      </div>
       <div className="storm-level" style={{ color: comfort.color }}>
         {comfort.level}
       </div>
+      <p className="storm-module-summary">Dew point driven comfort signal</p>
       <div className="comfort-scale" aria-hidden="true">
         <div className="comfort-gradient" />
         <div className="comfort-marker" style={{ left: `${comfort.position}%` }} />
@@ -262,11 +280,16 @@ function StormWatch({ weather, unit, weatherDataUnit, convertTemp, style }) {
   return (
     <section className="bento-storm storm-watch" style={style}>
       <header className="storm-header">
-        <h2 className="storm-title">
-          <Zap size={16} />
-          <span>Storm Watch</span>
-        </h2>
-        <span className="storm-subtitle">Atmospheric signals</span>
+        <div className="storm-header-main">
+          <h2 className="storm-title">
+            <Zap size={16} />
+            <span>Atmospheric Signals</span>
+          </h2>
+          <p className="storm-lede">
+            Curated risk and behavior indicators for near-term weather awareness.
+          </p>
+        </div>
+        <span className="storm-subtitle">Intelligence panel</span>
       </header>
 
       <div className="storm-snapshot" role="list" aria-label="Storm snapshot">
@@ -275,13 +298,16 @@ function StormWatch({ weather, unit, weatherDataUnit, convertTemp, style }) {
           role="listitem"
           style={{ "--chip-accent": overviewRisk.color }}
         >
-          Storm risk: {overviewRisk.level}
+          <span className="storm-snapshot-label">Storm risk</span>
+          <span className="storm-snapshot-value">{overviewRisk.level}</span>
         </span>
         <span className="storm-snapshot-chip" role="listitem">
-          Pressure trend: {overviewPressure.interpretation}
+          <span className="storm-snapshot-label">Pressure trend</span>
+          <span className="storm-snapshot-value">{overviewPressure.interpretation}</span>
         </span>
         <span className="storm-snapshot-chip" role="listitem">
-          Wind profile: {overviewWind}
+          <span className="storm-snapshot-label">Wind profile</span>
+          <span className="storm-snapshot-value">{overviewWind}</span>
         </span>
       </div>
 
