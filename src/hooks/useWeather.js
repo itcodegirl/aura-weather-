@@ -187,6 +187,7 @@ export function useWeather(unit = "F", options = {}) {
   const isMountedRef = useRef(false);
   const previousUnitRef = useRef(unit);
   const previousClimateEnabledRef = useRef(climateEnabled);
+  const activeLocationRef = useRef(null);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -508,6 +509,10 @@ export function useWeather(unit = "F", options = {}) {
   }, [lastRequest, scheduleWeatherLoad, unit]);
 
   useEffect(() => {
+    if (location !== null) {
+      return;
+    }
+
     const persisted = getPersistedLocation();
     if (persisted) {
       scheduleWeatherLoadAsync(
@@ -564,6 +569,7 @@ export function useWeather(unit = "F", options = {}) {
       };
     }
   }, [
+    location,
     unit,
     scheduleWeatherLoadAsync,
     abortInFlightRequest,
@@ -578,6 +584,20 @@ export function useWeather(unit = "F", options = {}) {
   const locationCountry = location?.country;
 
   useEffect(() => {
+    if (!hasLocation) {
+      activeLocationRef.current = null;
+      return;
+    }
+
+    activeLocationRef.current = {
+      lat: locationLat,
+      lon: locationLon,
+      name: locationName,
+      country: locationCountry,
+    };
+  }, [hasLocation, locationLat, locationLon, locationName, locationCountry]);
+
+  useEffect(() => {
     const unitChanged = previousUnitRef.current !== unit;
     const climateChanged = previousClimateEnabledRef.current !== climateEnabled;
 
@@ -588,11 +608,16 @@ export function useWeather(unit = "F", options = {}) {
       return;
     }
 
+    const activeLocation = activeLocationRef.current;
+    if (!activeLocation) {
+      return;
+    }
+
     scheduleWeatherLoadAsync(
-      locationLat,
-      locationLon,
-      locationName,
-      locationCountry,
+      activeLocation.lat,
+      activeLocation.lon,
+      activeLocation.name,
+      activeLocation.country,
       unit,
       { skipIfSignatureMatches: true }
     );
@@ -600,10 +625,6 @@ export function useWeather(unit = "F", options = {}) {
     unit,
     climateEnabled,
     hasLocation,
-    locationLat,
-    locationLon,
-    locationName,
-    locationCountry,
     scheduleWeatherLoadAsync,
   ]);
 
