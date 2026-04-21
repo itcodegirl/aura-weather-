@@ -35,7 +35,7 @@ const GROUP_LABEL_IDS = {
 function CardFallback({ className, style, title }) {
   return (
     <section className={`${className} loading-card glass`} style={style}>
-      <p className="loading-card-title" role="status" aria-live="polite">
+      <p className="loading-card-title">
         {title}
       </p>
     </section>

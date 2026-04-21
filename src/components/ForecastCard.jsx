@@ -228,7 +228,7 @@ function ForecastCard({ weather, unit, style }) {
         <CardHeader
           headerClassName="forecast-header"
           title="7-Day Forecast"
-          titleTag="h2"
+          titleTag="h3"
           titleClassName="forecast-title"
           icon={<CalendarDays size={16} />}
           leftClassName="forecast-heading"
@@ -247,7 +247,7 @@ function ForecastCard({ weather, unit, style }) {
       <CardHeader
         headerClassName="forecast-header"
         title="7-Day Forecast"
-        titleTag="h2"
+        titleTag="h3"
         titleClassName="forecast-title"
         icon={<CalendarDays size={16} />}
         leftClassName="forecast-heading"

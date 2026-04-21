@@ -26,9 +26,9 @@ function ExposureSection({ aqi, uvIndex, style }) {
       aria-labelledby={METRIC_LABEL_IDS.exposure}
     >
       <div className="metric-head">
-        <h2 id={METRIC_LABEL_IDS.exposure} className="metric-label">
+        <h3 id={METRIC_LABEL_IDS.exposure} className="metric-label">
           Environmental Exposure
-        </h2>
+        </h3>
         <span className="metric-context">Live</span>
       </div>
 

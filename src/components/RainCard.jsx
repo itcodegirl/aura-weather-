@@ -150,7 +150,7 @@ function RainCard({ weather, unit = "F", dataUnit = unit, style }) {
       <CardHeader
         headerClassName="rain-header"
         title="Rain Outlook"
-        titleTag="h2"
+        titleTag="h3"
         titleClassName="rain-title"
         icon={<CloudRain size={16} />}
         leftClassName="rain-title-wrap"

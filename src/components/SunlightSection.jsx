@@ -16,9 +16,9 @@ function SunlightSection({ sunrise, sunset, style }) {
       aria-labelledby={SUNLIGHT_LABEL_ID}
     >
       <div className="metric-head">
-        <h2 id={SUNLIGHT_LABEL_ID} className="metric-label">
+        <h3 id={SUNLIGHT_LABEL_ID} className="metric-label">
           Sunlight
-        </h2>
+        </h3>
         <span className="metric-context">Local</span>
       </div>
       <div className="sun-times" aria-label="Sunrise and sunset times">

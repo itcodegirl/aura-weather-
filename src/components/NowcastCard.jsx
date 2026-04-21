@@ -201,17 +201,17 @@ function NowcastCard({ weather, style }) {
     <section className="bento-nowcast nowcast-card glass" style={style}>
       <header className="nowcast-header">
         <div className="nowcast-title-wrap">
-          <h2 className="nowcast-title">
+          <h3 className="nowcast-title">
             <CloudRain size={16} />
             <span>Nowcast</span>
-          </h2>
+          </h3>
           <span className={`nowcast-risk-badge nowcast-risk-badge--${nowcastRiskTone}`}>
             {nowcastRiskLabel}
           </span>
         </div>
       </header>
 
-      <div className="nowcast-primary" role="status" aria-live="polite">
+      <div className="nowcast-primary">
         <p className="nowcast-summary">{nowcast.summary}</p>
         <p className="nowcast-details">{nowcast.details}</p>
       </div>

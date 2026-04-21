@@ -17,12 +17,12 @@ function StatusStack({
   return (
     <div className="status-stack">
       {locationNotice && (
-        <p className="location-notice" role="status" aria-live="polite">
+        <p className="location-notice">
           {locationNotice}
         </p>
       )}
       {isBackgroundLoading && (
-        <p className="app-status app-status--loading" role="status" aria-live="polite">
+        <p className="app-status app-status--loading">
           Updating weather for your current settings...
         </p>
       )}

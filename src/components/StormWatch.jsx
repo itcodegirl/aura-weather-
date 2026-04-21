@@ -295,10 +295,10 @@ function StormWatch({
     <section className="bento-storm storm-watch glass" style={style}>
       <header className="storm-header">
         <div className="storm-header-main">
-          <h2 className="storm-title">
+          <h3 className="storm-title">
             <Zap size={16} />
             <span>Atmospheric Signals</span>
-          </h2>
+          </h3>
           <p className="storm-lede">
             Curated risk and behavior indicators for near-term weather awareness.
           </p>

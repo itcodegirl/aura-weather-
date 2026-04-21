@@ -172,7 +172,7 @@ function HourlyCard({
           headerClassName="chart-header"
           title="Hourly Temperature"
           titleId={chartTitleId}
-          titleTag="h2"
+          titleTag="h3"
           titleClassName="chart-title"
           icon={<LineIcon size={16} />}
           subtitle="Next 24h"
@@ -203,7 +203,7 @@ function HourlyCard({
         headerClassName="chart-header"
         title="Hourly Temperature"
         titleId={chartTitleId}
-        titleTag="h2"
+        titleTag="h3"
         titleClassName="chart-title"
         icon={<LineIcon size={16} />}
         subtitle="Next 24h"
