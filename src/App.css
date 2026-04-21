@@ -42,6 +42,8 @@
   --hero-temp-size: 92px;
   --hero-unit-size: 28px;
   --header-control-height: 48px;
+  --section-title-size: clamp(18px, 1.2vw, 20px);
+  --section-title-lg-size: clamp(19px, 1.3vw, 21px);
 
   --card-enter-duration: 520ms;
   --card-enter-stagger: 70ms;

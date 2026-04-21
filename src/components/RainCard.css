@@ -24,7 +24,7 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-display);
-  font-size: clamp(18px, 1.2vw, 20px);
+  font-size: var(--section-title-size);
   font-weight: 650;
   letter-spacing: -0.01em;
   margin: 0;
@@ -322,5 +322,6 @@
     transform: none;
   }
 }
+
 
 

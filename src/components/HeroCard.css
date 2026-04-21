@@ -275,11 +275,6 @@
 }
 
 @media (max-width: 560px) {
-  .hero-temp-row {
-    flex-direction: column-reverse;
-    align-items: flex-start;
-  }
-
   .hero-icon {
     width: 102px;
   }
