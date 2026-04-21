@@ -187,7 +187,7 @@
   flex: 1;
   height: 6px;
   border-radius: 3px;
-  transition: background 0.4s ease;
+  transition: background var(--motion-medium) var(--ease-standard);
 }
 
 .storm-risk-accessibility {
@@ -270,7 +270,7 @@
   align-items: center;
   justify-content: center;
   transform-origin: center;
-  transition: transform 0.6s ease;
+  transition: transform var(--motion-slow) var(--ease-emphasis);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.32));
   pointer-events: none;
   color: #f8fbff;
@@ -299,7 +299,7 @@
   background: #f8fbff;
   transform: translateX(-50%);
   box-shadow: 0 0 0 2px rgba(3, 8, 24, 0.45);
-  transition: left 0.4s ease;
+  transition: left var(--motion-medium) var(--ease-standard);
 }
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */

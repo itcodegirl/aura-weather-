@@ -61,6 +61,13 @@
   --motion-reveal: 460ms;
   --motion-label-reveal: 420ms;
   --motion-background-fade: 1.1s;
+  --motion-subtle: 200ms;
+  --motion-subtle-slow: 220ms;
+  --motion-spinner: 800ms;
+  --motion-weather-float: 7000ms;
+  --motion-weather-float-sun: 6000ms;
+  --motion-weather-pulse: 3500ms;
+  --motion-weather-cloud: 9000ms;
   --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
   --press-scale: 0.985;
@@ -1076,7 +1083,7 @@ a:focus-visible,
 
   .app-header-secondary.is-open {
     display: flex;
-    animation: settings-reveal 220ms var(--ease-standard) both;
+    animation: settings-reveal var(--motion-subtle-slow) var(--ease-standard) both;
   }
 
   .settings-toggle {

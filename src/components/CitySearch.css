@@ -20,10 +20,10 @@
     inset 0 1px 0 rgba(225, 240, 255, 0.16),
     0 8px 20px rgba(4, 10, 24, 0.22);
   transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+    border-color var(--motion-subtle) var(--ease-standard),
+    background var(--motion-subtle) var(--ease-standard),
+    box-shadow var(--motion-subtle) var(--ease-standard),
+    transform var(--motion-subtle) var(--ease-standard);
 }
 
 .city-search-input-wrap:hover {
@@ -72,7 +72,9 @@
   height: 28px;
   border-radius: 50%;
   color: var(--text-dim);
-  transition: color 0.2s ease, background 0.2s ease;
+  transition:
+    color var(--motion-subtle) var(--ease-standard),
+    background var(--motion-subtle) var(--ease-standard);
 }
 
 .city-search-clear:hover {
@@ -103,7 +105,7 @@
   background: linear-gradient(180deg, rgba(7, 14, 31, 0.94), rgba(6, 11, 26, 0.94));
   box-shadow: 0 26px 52px rgba(2, 6, 19, 0.6);
   transform-origin: top center;
-  animation: dropdown-reveal 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: dropdown-reveal var(--motion-subtle) var(--ease-standard);
 }
 
 .city-search-state {
@@ -121,7 +123,7 @@
 }
 
 .city-search-spinner {
-  animation: spin 0.8s linear infinite;
+  animation: spin var(--motion-spinner) linear infinite;
 }
 
 @keyframes spin {
@@ -150,10 +152,10 @@
   border-left: 1px solid transparent;
   border-bottom: 1px solid rgba(173, 198, 242, 0.12);
   transition:
-    background 0.16s ease,
-    border-color 0.16s ease,
-    transform 0.16s ease,
-    color 0.16s ease;
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
 }
 
 .city-search-result:last-child {
@@ -174,7 +176,9 @@
 .city-search-result-icon {
   flex-shrink: 0;
   color: #cce1ff;
-  transition: color 0.16s ease, transform 0.16s ease;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
 }
 
 .city-search-result:hover .city-search-result-icon,

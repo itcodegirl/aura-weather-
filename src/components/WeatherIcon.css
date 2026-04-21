@@ -5,17 +5,17 @@
 .weather-icon--animated {
   transform-origin: center;
   will-change: transform;
-  animation: weather-icon-float 7s ease-in-out infinite;
+  animation: weather-icon-float var(--motion-weather-float) ease-in-out infinite;
 }
 
 .weather-icon--animated.weather-icon--sun {
   animation:
-    weather-icon-float 6s ease-in-out infinite,
-    weather-icon-pulse 3.5s ease-in-out infinite;
+    weather-icon-float var(--motion-weather-float-sun) ease-in-out infinite,
+    weather-icon-pulse var(--motion-weather-pulse) ease-in-out infinite;
 }
 
 .weather-icon--animated.weather-icon--cloud {
-  animation: weather-icon-cloud-drift 9s ease-in-out infinite;
+  animation: weather-icon-cloud-drift var(--motion-weather-cloud) ease-in-out infinite;
 }
 
 @keyframes weather-icon-float {

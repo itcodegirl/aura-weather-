@@ -42,7 +42,9 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform var(--motion-subtle) var(--ease-standard),
+    box-shadow var(--motion-subtle) var(--ease-standard);
 }
 
 .rain-risk-badge--high {
@@ -76,7 +78,9 @@
   border-radius: var(--radius-pill);
   background: rgba(8, 17, 37, 0.62);
   border: 1px solid rgba(180, 206, 251, 0.18);
-  transition: border-color 0.16s ease, box-shadow 0.2s ease;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-subtle) var(--ease-standard);
 }
 
 .rain-mode-toggle:focus-within {
@@ -95,10 +99,10 @@
   display: grid;
   place-items: center;
   transition:
-    background 0.16s ease,
-    color 0.16s ease,
-    transform 0.16s ease,
-    box-shadow 0.22s ease;
+    background var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-subtle-slow) var(--ease-standard);
 }
 
 .rain-mode-btn.is-active {
@@ -373,7 +377,10 @@
   border-radius: 2px 2px 0 0;
   background: linear-gradient(to top, #38bdf8, #67e8f9);
   transform-origin: bottom center;
-  transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity var(--motion-subtle) var(--ease-standard),
+    background var(--motion-subtle) var(--ease-standard),
+    transform var(--motion-subtle) var(--ease-standard);
 }
 
 .rain-bar:hover {

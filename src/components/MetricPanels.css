@@ -114,7 +114,7 @@
 }
 
 .metric-gauge-fill {
-  transition: stroke-dashoffset 260ms ease;
+  transition: stroke-dashoffset var(--motion-medium) var(--ease-standard);
 }
 
 .metric-gauge-value {
@@ -172,7 +172,7 @@
   position: absolute;
   inset: 0 auto 0 0;
   border-radius: inherit;
-  transition: width 280ms ease;
+  transition: width var(--motion-slow) var(--ease-emphasis);
 }
 
 .metric-density-marker {
@@ -184,7 +184,7 @@
   background: #f8fbff;
   border: 2px solid;
   transform: translateY(-50%);
-  transition: left 280ms ease;
+  transition: left var(--motion-slow) var(--ease-emphasis);
 }
 
 .metric-density-scale {
