@@ -19,6 +19,7 @@ import {
 } from "../utils/meteorology";
 import { convertTemperature } from "../utils/weatherUnits";
 import { formatWindSpeed } from "../utils/windUnits";
+import { DetailMetricStat } from "./ui/MetricStat";
 import "./StormWatch.css";
 
 function StormRisk({ weather, summaryId }) {
@@ -60,10 +61,7 @@ function StormRisk({ weather, summaryId }) {
           />
         ))}
       </div>
-      <div className="storm-detail">
-        <span className="storm-detail-label">CAPE</span>
-        <span className="storm-detail-value">{Math.round(safeCape)} J/kg</span>
-      </div>
+      <DetailMetricStat label="CAPE" value={`${Math.round(safeCape)} J/kg`} />
     </div>
   );
 }
@@ -141,16 +139,15 @@ function PressureTrend({ weather }) {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <div className="storm-detail">
-        <span className="storm-detail-label">
-          {hasCurrent ? `${Math.round(trend.current)} hPa` : "Data unavailable"}
-        </span>
-        <span className="storm-detail-value" style={{ color: trendColor }}>
-          {hasCurrent
+      <DetailMetricStat
+        label={hasCurrent ? `${Math.round(trend.current)} hPa` : "Data unavailable"}
+        value={
+          hasCurrent
             ? `${trend.delta > 0 ? "+" : ""}${trend.delta.toFixed(1)} / 6h`
-            : "N/A"}
-        </span>
-      </div>
+            : "N/A"
+        }
+        valueStyle={{ color: trendColor }}
+      />
     </div>
   );
 }
@@ -211,12 +208,10 @@ function WindIntelligence({
         </div>
       </div>
 
-      <div className="storm-detail">
-        <span className="storm-detail-label">
-          {sustainedDisplay} {direction}
-        </span>
-        <span className="storm-detail-value">Gusts {gustsDisplay}</span>
-      </div>
+      <DetailMetricStat
+        label={`${sustainedDisplay} ${direction}`}
+        value={`Gusts ${gustsDisplay}`}
+      />
     </div>
   );
 }
@@ -251,13 +246,10 @@ function ComfortIndex({ weather, unit, weatherDataUnit = unit }) {
         <div className="comfort-gradient" />
         <div className="comfort-marker" style={{ left: `${comfort.position}%` }} />
       </div>
-      <div className="storm-detail">
-        <span className="storm-detail-label">Dewpoint</span>
-        <span className="storm-detail-value">
-          {dewpointDisplay}
-          {tempUnit}
-        </span>
-      </div>
+      <DetailMetricStat
+        label="Dewpoint"
+        value={`${dewpointDisplay}${tempUnit}`}
+      />
     </div>
   );
 }

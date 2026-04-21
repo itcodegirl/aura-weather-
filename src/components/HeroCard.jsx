@@ -15,19 +15,8 @@ import { getWeather } from "../utils/weatherCodes";
 import { convertTemperature } from "../utils/weatherUnits";
 import { formatWindSpeed } from "../utils/windUnits";
 import WeatherIcon from "./WeatherIcon";
+import { IconMetricStat } from "./ui/MetricStat";
 import "./HeroCard.css";
-
-function Stat({ icon, label, value }) {
-  return (
-    <div className="stat">
-      <div className="stat-icon">{icon}</div>
-      <div className="stat-body">
-        <div className="stat-label">{label}</div>
-        <div className="stat-value">{value}</div>
-      </div>
-    </div>
-  );
-}
 
 function formatClock(value) {
   if (!value) return "\u2014";
@@ -237,12 +226,12 @@ function HeroCard({
       </div>
 
       <div className="hero-stats">
-        <Stat
+        <IconMetricStat
           icon={<Wind size={18} />}
           label="Wind"
           value={windDisplay}
         />
-        <Stat
+        <IconMetricStat
           icon={<Droplets size={18} />}
           label="Humidity"
           value={
@@ -251,7 +240,7 @@ function HeroCard({
               : "\u2014"
           }
         />
-        <Stat
+        <IconMetricStat
           icon={<Gauge size={18} />}
           label="Pressure"
           value={
@@ -260,7 +249,7 @@ function HeroCard({
               : "\u2014"
           }
         />
-        <Stat
+        <IconMetricStat
           icon={<Thermometer size={18} />}
           label="Dew Point"
           value={`${dewPoint}${tempUnit}`}
