@@ -632,21 +632,43 @@ a:focus-visible,
 
 .bento-group-label {
   grid-column: 1 / -1;
-  display: inline-flex;
+  position: relative;
+  display: flex;
   align-items: center;
-  width: fit-content;
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(181, 207, 252, 0.22);
-  background: rgba(8, 17, 35, 0.52);
-  color: rgba(223, 235, 255, 0.92);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  width: 100%;
+  min-height: 24px;
+  margin: 2px 0 -4px;
+  padding-left: 14px;
+  color: rgba(226, 237, 255, 0.94);
+  font-size: 12px;
+  font-weight: 720;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   opacity: 0;
   animation: label-reveal var(--motion-label-reveal) var(--ease-standard) forwards;
   animation-delay: calc(var(--group-i, 0) * 120ms);
+}
+
+.bento-group-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, rgba(148, 228, 255, 0.95), rgba(123, 155, 255, 0.82));
+  box-shadow: 0 0 0 2px rgba(110, 231, 255, 0.16);
+}
+
+.bento-group-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  margin-left: 12px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, rgba(166, 209, 255, 0.56), rgba(166, 209, 255, 0.06));
 }
 
 .bento > section {
@@ -906,7 +928,7 @@ a:focus-visible,
   width: auto;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 8px 12px;
   min-height: 34px;
   border-radius: var(--radius-pill);
@@ -921,14 +943,23 @@ a:focus-visible,
     0 8px 18px rgba(3, 10, 24, 0.2);
 }
 
-.location-notice::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #bde7ff, #72d9ff);
-  box-shadow: 0 0 0 3px rgba(110, 231, 255, 0.12);
+.location-notice-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(168, 220, 255, 0.36);
+  background: rgba(110, 231, 255, 0.16);
+  color: #e3f6ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.location-notice-text {
+  min-width: 0;
 }
 
 .app-status {
@@ -1194,8 +1225,7 @@ a:focus-visible,
   }
 
   .bento-group-label {
-    width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .bento > [class*="bento-"] {
@@ -1297,9 +1327,13 @@ a:focus-visible,
   }
 
   .bento-group-label {
-    padding: 5px 10px;
+    padding-left: 13px;
     font-size: 10px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
+  }
+
+  .bento-group-label::after {
+    margin-left: 8px;
   }
 
   .status-stack {

@@ -18,7 +18,8 @@ function StatusStack({
     <div className="status-stack">
       {locationNotice && (
         <p className="location-notice">
-          {locationNotice}
+          <span className="location-notice-label">Location</span>
+          <span className="location-notice-text">{locationNotice}</span>
         </p>
       )}
       {isBackgroundLoading && (
