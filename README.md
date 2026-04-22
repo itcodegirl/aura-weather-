@@ -18,12 +18,15 @@ It combines live weather data, adaptive visual treatment, and a portfolio-ready 
 
 ## Recent UX Audit Upgrades
 
-- Added a visible `Climate Context` label above the on/off control so intent is clear for sighted users.
-- Re-styled `Forget Saved` as a low-emphasis destructive action instead of a peer toggle.
-- Removed the redundant Sunlight panel and rebalanced top-of-dashboard layout around hero + exposure signals.
-- Replaced chip-like bento section labels with divider-style headings for stronger structure scanning.
-- Upgraded status notice visuals from a decorative dot to an explicit location label treatment.
-- Refined exposure metric cards so gauge, status, and density bar read as one coherent meter stack.
+- Added a visible `Climate Context` label above the On/Off control so intent is clear for sighted users.
+- Renamed `Forget Saved` to `Clear saved location` and styled it as a low-emphasis destructive action.
+- Removed the mobile `Display` settings drawer so key controls are always visible.
+- Added an in-context `/ search` keyboard hint in the city search control.
+- Added first-session setup guidance when the app falls back to Chicago, including `Use my location` and `Search a city`.
+- Added retry button cooldown handling to prevent repeated rapid refresh attempts.
+- Renamed `Atmospheric Signals` to `Risk & Conditions` and added plain-language context for CAPE.
+- Refined exposure cards to clearly distinguish missing data (for example AQI/UV offline) from true low values.
+- Added per-card refresh indicators during background data updates so stale content is visibly marked as updating.
 
 ## Core Features
 
@@ -116,6 +119,14 @@ src/
 ```bash
 npm install
 npm run dev
+```
+
+Open `http://127.0.0.1:5173` after the dev server starts.
+
+### First-Time Test Setup
+
+```bash
+npx playwright install chromium
 ```
 
 ## Quality Checks
