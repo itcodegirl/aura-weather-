@@ -16,6 +16,15 @@ It combines live weather data, adaptive visual treatment, and a portfolio-ready 
 - Polished interactions: meaningful card transitions, grouped section reveals, keyboard-first controls, and reduced-motion fallbacks.
 - Accessibility attention: semantic regions, ARIA usage, skip link, visible focus states, and stronger high-contrast mode support.
 
+## Recent UX Audit Upgrades
+
+- Added a visible `Climate Context` label above the on/off control so intent is clear for sighted users.
+- Re-styled `Forget Saved` as a low-emphasis destructive action instead of a peer toggle.
+- Removed the redundant Sunlight panel and rebalanced top-of-dashboard layout around hero + exposure signals.
+- Replaced chip-like bento section labels with divider-style headings for stronger structure scanning.
+- Upgraded status notice visuals from a decorative dot to an explicit location label treatment.
+- Refined exposure metric cards so gauge, status, and density bar read as one coherent meter stack.
+
 ## Core Features
 
 - Real-time weather, air quality, and geocoding via Open-Meteo.
