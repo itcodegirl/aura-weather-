@@ -125,6 +125,7 @@ npm run lint
 npm run build
 npm test
 npm run test:e2e
+npm run test:lighthouse
 ```
 
 ## E2E Smoke Tests
@@ -136,6 +137,14 @@ npm run test:e2e
 ```bash
 npx playwright install chromium
 ```
+
+## Lighthouse Budgets
+
+- Budget command: `npm run test:lighthouse`
+- Budget config: `config/lighthouse-budgets.json`
+- Runner script: `scripts/run-lighthouse-budgets.mjs`
+- Enforced categories: performance, accessibility, best practices, and SEO.
+- PR automation: `.github/workflows/quality-gates.yml`
 
 ## Roadmap
 
