@@ -1,6 +1,8 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import CitySearch from "./CitySearch";
 
+const CLIMATE_CONTEXT_LABEL_ID = "climate-context-label";
+
 function HeaderControls({
   citySearchRef,
   loadWeather,
@@ -187,29 +189,34 @@ function HeaderControls({
         role="region"
         aria-label="Display settings"
       >
-        <div
-          className="toggle-pill glass"
-          role="group"
-          aria-label="Climate context settings"
-        >
-          <button
-            type="button"
-            className={`toggle-pill-btn ${showClimateContext ? "is-active" : ""}`}
-            onClick={handleEnableClimateContext}
-            aria-pressed={showClimateContext}
-            aria-label="Enable climate context"
+        <div className="header-control-stack">
+          <p id={CLIMATE_CONTEXT_LABEL_ID} className="header-control-label">
+            Climate Context
+          </p>
+          <div
+            className="toggle-pill glass"
+            role="group"
+            aria-labelledby={CLIMATE_CONTEXT_LABEL_ID}
           >
-            On
-          </button>
-          <button
-            type="button"
-            className={`toggle-pill-btn ${!showClimateContext ? "is-active" : ""}`}
-            onClick={handleDisableClimateContext}
-            aria-pressed={!showClimateContext}
-            aria-label="Disable climate context"
-          >
-            Off
-          </button>
+            <button
+              type="button"
+              className={`toggle-pill-btn ${showClimateContext ? "is-active" : ""}`}
+              onClick={handleEnableClimateContext}
+              aria-pressed={showClimateContext}
+              aria-label="Enable climate context"
+            >
+              On
+            </button>
+            <button
+              type="button"
+              className={`toggle-pill-btn ${!showClimateContext ? "is-active" : ""}`}
+              onClick={handleDisableClimateContext}
+              aria-pressed={!showClimateContext}
+              aria-label="Disable climate context"
+            >
+              Off
+            </button>
+          </div>
         </div>
 
         <div className="unit-toggle glass" role="group" aria-label="Temperature unit">
@@ -233,7 +240,7 @@ function HeaderControls({
 
         <button
           type="button"
-          className="header-secondary-action glass"
+          className="header-secondary-action header-secondary-action--danger"
           onClick={handleClearSavedLocation}
           aria-label="Clear saved location preference"
         >
