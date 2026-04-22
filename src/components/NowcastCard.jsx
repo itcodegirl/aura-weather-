@@ -106,8 +106,8 @@ function analyzeNowcast(nowcast) {
       startInMinutes: 0,
       durationMinutes: 0,
       peakProbability,
-      summary: "No rain expected in the next 2 hours.",
-      details: "Mostly dry across the next 120 minutes.",
+      summary: "Dry for the next 2 hours.",
+      details: `Peak rain chance stays below ${peakProbability}% in the near term.`,
     };
   }
 
@@ -205,6 +205,9 @@ function NowcastCard({ weather, style }) {
             <CloudRain size={16} />
             <span>Nowcast</span>
           </h3>
+          <p className="nowcast-explainer">
+            15-minute rain guidance over the next 2 hours.
+          </p>
           <span className={`nowcast-risk-badge nowcast-risk-badge--${nowcastRiskTone}`}>
             {nowcastRiskLabel}
           </span>
@@ -231,7 +234,9 @@ function NowcastCard({ weather, style }) {
         </li>
       </ul>
 
-      <p className="nowcast-meta">{nowcast.hasData ? "15-minute outlook" : "Nowcast offline"}</p>
+      <p className="nowcast-meta">
+        {nowcast.hasData ? "Short-range precipitation guidance" : "Nowcast offline"}
+      </p>
     </section>
   );
 }

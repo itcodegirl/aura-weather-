@@ -23,7 +23,8 @@ import { Stat, CardHeader } from "./ui";
 import "./StormWatch.css";
 
 function StormRisk({ risk, cape, summaryId }) {
-  const safeCape = Number.isFinite(cape) ? cape : 0;
+  const hasCape = Number.isFinite(cape);
+  const safeCape = hasCape ? Math.round(cape) : null;
   const stormRiskSummary = `Storm risk: ${risk.level}; level ${risk.score + 1} of 5 based on current conditions.`;
 
   return (
@@ -34,7 +35,7 @@ function StormRisk({ risk, cape, summaryId }) {
         titleTag="h3"
         titleClassName="storm-module-header"
         icon={<Zap size={14} />}
-        subtitle="Convection"
+        subtitle="Thunderstorm potential"
         subtitleClassName="storm-module-kicker"
       />
       <div
@@ -60,12 +61,19 @@ function StormRisk({ risk, cape, summaryId }) {
           />
         ))}
       </div>
+      <p className="storm-term-hint">
+        CAPE estimates atmospheric storm energy. Higher values can support stronger storms.
+      </p>
       <Stat
         className="storm-detail"
         labelClassName="storm-detail-label"
         valueClassName="storm-detail-value"
-        label="CAPE"
-        value={`${Math.round(safeCape)} J/kg`}
+        label={(
+          <abbr title="Convective available potential energy">
+            CAPE
+          </abbr>
+        )}
+        value={hasCape ? `${safeCape} J/kg` : "Data unavailable"}
       />
     </div>
   );
@@ -297,13 +305,13 @@ function StormWatch({
         <div className="storm-header-main">
           <h3 className="storm-title">
             <Zap size={16} />
-            <span>Atmospheric Signals</span>
+            <span>Risk & Conditions</span>
           </h3>
           <p className="storm-lede">
-            Curated risk and behavior indicators for near-term weather awareness.
+            Storm risk, pressure trend, wind, and comfort signals in one panel.
           </p>
         </div>
-        <span className="storm-subtitle">Intelligence panel</span>
+        <span className="storm-subtitle">Storm watch</span>
       </header>
 
       <div className="storm-snapshot" role="list" aria-label="Storm snapshot">

@@ -156,6 +156,13 @@
   line-height: 1.35;
 }
 
+.storm-term-hint {
+  margin: 0;
+  color: rgba(209, 224, 248, 0.86);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 .storm-detail {
   margin-top: auto;
   padding-top: 10px;
