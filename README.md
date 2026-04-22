@@ -124,6 +124,17 @@ npm run dev
 npm run lint
 npm run build
 npm test
+npm run test:e2e
+```
+
+## E2E Smoke Tests
+
+- Framework: Playwright + axe-core.
+- Coverage includes dashboard load, city-search location switch, and baseline accessibility assertions.
+- First-time setup for local machines:
+
+```bash
+npx playwright install chromium
 ```
 
 ## Roadmap
