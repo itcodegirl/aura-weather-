@@ -86,7 +86,9 @@ export function useWeatherData(location, unit = "F", options = {}) {
   const weatherDataUnit = normalizeTemperatureUnit(unit);
 
   const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() =>
+    Boolean(parseCoordinates(locationLat, locationLon))
+  );
   const [error, setError] = useState(null);
   const [climateComparison, setClimateComparison] = useState(null);
   const [trustMeta, setTrustMeta] = useState(DEFAULT_TRUST_META);
