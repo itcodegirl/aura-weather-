@@ -1087,6 +1087,11 @@ a:focus-visible,
   min-height: 180px;
 }
 
+.bento-supplemental-loading {
+  grid-column: 1 / -1;
+  min-height: 216px;
+}
+
 .loading-card-title {
   position: relative;
   overflow: hidden;
