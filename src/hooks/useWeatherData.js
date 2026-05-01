@@ -9,7 +9,6 @@ import {
 import {
   getApiWindSpeedUnit,
   getApiPrecipUnit,
-  normalizeTemperatureUnit,
   parseCoordinates,
 } from "../utils/weatherUnits";
 
@@ -21,6 +20,9 @@ const DEFAULT_TRUST_META = {
   alertsFetchedAt: null,
   alertsStatus: "idle",
 };
+
+const WEATHER_SOURCE_UNIT = "F";
+const WEATHER_PRECIPITATION_UNIT = getApiPrecipUnit(WEATHER_SOURCE_UNIT);
 
 function getErrorMessage(error, fallback) {
   if (typeof error === "string") {
@@ -54,7 +56,7 @@ function isAbortError(error) {
   return error?.name === "AbortError";
 }
 
-function buildClimateComparison(weatherData, historicalAverage, weatherDataUnit) {
+function buildClimateComparison(weatherData, historicalAverage) {
   const currentTemperature = Number(weatherData?.current?.temperature);
   const historicalTemperature = Number(historicalAverage?.averageTemperature);
   const climateDelta = getDifference(currentTemperature, historicalTemperature);
@@ -66,7 +68,7 @@ function buildClimateComparison(weatherData, historicalAverage, weatherDataUnit)
   return {
     ...historicalAverage,
     difference: climateDelta,
-    differenceUnit: weatherDataUnit,
+    differenceUnit: WEATHER_SOURCE_UNIT,
   };
 }
 
@@ -79,11 +81,11 @@ function buildBaseWeatherState(weatherData) {
   };
 }
 
-export function useWeatherData(location, unit = "F", options = {}) {
+export function useWeatherData(location, options = {}) {
   const { climateEnabled = true } = options;
   const locationLat = location?.lat;
   const locationLon = location?.lon;
-  const weatherDataUnit = normalizeTemperatureUnit(unit);
+  const weatherDataUnit = WEATHER_SOURCE_UNIT;
 
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(() =>
@@ -178,8 +180,7 @@ export function useWeatherData(location, unit = "F", options = {}) {
 
       const nextClimateComparison = buildClimateComparison(
         weatherData,
-        historicalAverage,
-        weatherDataUnit
+        historicalAverage
       );
 
       setClimateComparison(nextClimateComparison);
@@ -209,7 +210,7 @@ export function useWeatherData(location, unit = "F", options = {}) {
         climateRequestRef.current = null;
       }
     }
-  }, [abortClimateRequest, weatherDataUnit]);
+  }, [abortClimateRequest]);
 
   const applySupplementalData = useCallback(async ({
     requestId,
@@ -334,7 +335,7 @@ export function useWeatherData(location, unit = "F", options = {}) {
           signal: controller.signal,
           temperatureUnit: apiTemperatureUnit,
           windSpeedUnit: requestWindSpeedUnit,
-          precipitationUnit: getApiPrecipUnit(weatherDataUnit),
+          precipitationUnit: WEATHER_PRECIPITATION_UNIT,
         }
       );
 
@@ -391,7 +392,6 @@ export function useWeatherData(location, unit = "F", options = {}) {
     locationLat,
     locationLon,
     requestClimateComparison,
-    weatherDataUnit,
   ]);
 
   useEffect(() => {

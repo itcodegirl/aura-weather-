@@ -43,6 +43,7 @@ function App() {
     syncSavedCitiesNow,
     retryWeather,
     climateComparison,
+    weatherDataUnit,
     isLocatingCurrent,
     isGeolocationSupported,
     showGlobalLoading,
@@ -135,7 +136,7 @@ function App() {
         weather={weather}
         location={location}
         unit={unit}
-        weatherDataUnit={unit}
+        weatherDataUnit={weatherDataUnit}
         climateComparison={climateComparison}
         showClimateContext={showClimateContext}
         isBackgroundLoading={isBackgroundLoading}

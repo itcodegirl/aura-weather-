@@ -9,7 +9,7 @@ export function useWeatherDashboardViewModel() {
     useDisplayPreferences();
   const citySearchRef = useRef(null);
 
-  const weatherState = useWeather(unit, { climateEnabled: showClimateContext });
+  const weatherState = useWeather({ climateEnabled: showClimateContext });
   const scene = useMemo(
     () =>
       deriveWeatherScene({
