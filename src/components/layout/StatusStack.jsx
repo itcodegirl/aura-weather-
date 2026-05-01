@@ -8,9 +8,13 @@ function StatusStack({
   onFocusCitySearch,
   onDismissPermissionOnboarding,
   isLocatingCurrent,
+  isGeolocationSupported,
   isBackgroundLoading,
   showRefreshError,
   onRetry,
+  showRuntimeStatus = true,
+  showSetupPrompts = true,
+  className = "",
 }) {
   const [isRetryCoolingDown, setIsRetryCoolingDown] = useState(false);
   const retryTimerRef = useRef(null);
@@ -37,70 +41,87 @@ function StatusStack({
     }, 1400);
   }, [isRetryCoolingDown, onRetry]);
 
-  const hasStatusStack = Boolean(
+  const hasRuntimeStatus = showRuntimeStatus && Boolean(
     locationNotice ||
     isBackgroundLoading ||
-    showRefreshError ||
-    showLocationSetupPrompt ||
-    showPermissionOnboarding
+    showRefreshError
   );
+  const hasSetupPrompts = showSetupPrompts && Boolean(
+    showLocationSetupPrompt || showPermissionOnboarding
+  );
+  const hasStatusStack = hasRuntimeStatus || hasSetupPrompts;
 
   if (!hasStatusStack) {
     return null;
   }
 
   return (
-    <div className="status-stack">
-      {locationNotice && !showPermissionOnboarding && !showLocationSetupPrompt && (
-        <p className="location-notice">
+    <div className={`status-stack ${className}`.trim()}>
+      {showRuntimeStatus && locationNotice && !showPermissionOnboarding && !showLocationSetupPrompt && (
+        <p className="location-notice" role="status" aria-live="polite">
           <span className="location-notice-label">Location</span>
           <span className="location-notice-text">{locationNotice}</span>
         </p>
       )}
-      {showPermissionOnboarding && (
+      {showSetupPrompts && showPermissionOnboarding && (
         <section className="permission-onboarding" aria-label="Location onboarding">
           <p className="permission-onboarding-kicker">First-time setup</p>
-          <h2 className="permission-onboarding-title">Get forecasts for where you are</h2>
+          <h2 className="permission-onboarding-title">Set your forecast once, then keep moving</h2>
           <p className="permission-onboarding-copy">
-            Chicago is ready as a starting forecast. Share your browser location only if
-            you want live weather for where you are right now, or search any city manually.
+            {isGeolocationSupported
+              ? "Chicago is already loaded as a starting point. Use your browser location for local conditions right now, or search for any city when you want a different view."
+              : "Chicago is already loaded as a starting point. This browser cannot share live location here, so search for any city when you want a different forecast."}
           </p>
           <div className="permission-onboarding-actions">
-            <button
-              type="button"
-              className="location-setup-btn location-setup-btn--primary"
-              onClick={onUseCurrentLocation}
-              disabled={isLocatingCurrent}
-            >
-              {isLocatingCurrent ? "Requesting permission..." : "Allow location access"}
-            </button>
+            {isGeolocationSupported ? (
+              <button
+                type="button"
+                className="location-setup-btn location-setup-btn--primary"
+                onClick={onUseCurrentLocation}
+                disabled={isLocatingCurrent}
+              >
+                {isLocatingCurrent ? "Requesting permission..." : "Allow location access"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="location-setup-btn location-setup-btn--primary"
+                onClick={onFocusCitySearch}
+              >
+                Search a city
+              </button>
+            )}
             <button
               type="button"
               className="location-setup-btn"
               onClick={onDismissPermissionOnboarding}
             >
-              Continue without location
+              Keep Chicago for now
             </button>
           </div>
         </section>
       )}
-      {showLocationSetupPrompt && (
+      {showSetupPrompts && showLocationSetupPrompt && (
         <section className="location-setup-prompt" aria-label="Location setup">
           <p className="location-setup-title">
-            Personalize your forecast by using your location or searching for your city.
+            {isGeolocationSupported
+              ? "Want something more local? Use your current location or search for a city."
+              : "Want something more local? Search for a city. Live browser location is unavailable here."}
           </p>
           <div className="location-setup-actions">
+            {isGeolocationSupported ? (
+              <button
+                type="button"
+                className="location-setup-btn location-setup-btn--primary"
+                onClick={onUseCurrentLocation}
+                disabled={isLocatingCurrent}
+              >
+                {isLocatingCurrent ? "Finding your location..." : "Use my location"}
+              </button>
+            ) : null}
             <button
               type="button"
-              className="location-setup-btn location-setup-btn--primary"
-              onClick={onUseCurrentLocation}
-              disabled={isLocatingCurrent}
-            >
-              {isLocatingCurrent ? "Finding your location..." : "Use my location"}
-            </button>
-            <button
-              type="button"
-              className="location-setup-btn"
+              className={`location-setup-btn ${isGeolocationSupported ? "" : "location-setup-btn--primary"}`.trim()}
               onClick={onFocusCitySearch}
             >
               Search a city
@@ -108,12 +129,12 @@ function StatusStack({
           </div>
         </section>
       )}
-      {isBackgroundLoading && (
-        <p className="app-status app-status--loading">
+      {showRuntimeStatus && isBackgroundLoading && (
+        <p className="app-status app-status--loading" role="status" aria-live="polite">
           Updating weather for your current settings...
         </p>
       )}
-      {showRefreshError && (
+      {showRuntimeStatus && showRefreshError && (
         <div className="app-status app-status--error" role="alert">
           <span className="app-status-message">
             Could not refresh weather right now. Showing last known data.

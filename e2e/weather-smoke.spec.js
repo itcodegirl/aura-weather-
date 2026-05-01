@@ -24,7 +24,7 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(
     page.getByText(
-      "Chicago is ready as a starting forecast. Share your browser location only if you want live weather for where you are right now, or search any city manually."
+      "Chicago is already loaded as a starting point. Use your browser location for local conditions right now, or search for any city when you want a different view."
     )
   ).toBeVisible();
   await expect(
@@ -58,6 +58,42 @@ test("updates hero location when a city is selected from search", async ({ page 
   await expect(page.locator(".hero-location")).toContainText("Tokyo, Japan");
   await expect(searchInput).toHaveValue("");
   await expect(page.locator(".location-notice")).toHaveCount(0);
+});
+
+test("switches display units without refetching the forecast", async ({ page }) => {
+  let forecastRequests = 0;
+  let archiveRequests = 0;
+
+  page.on("request", (request) => {
+    const url = request.url();
+    if (url.startsWith("https://api.open-meteo.com/v1/forecast")) {
+      forecastRequests += 1;
+    }
+    if (url.startsWith("https://archive-api.open-meteo.com/v1/archive")) {
+      archiveRequests += 1;
+    }
+  });
+
+  await openDashboard(page);
+
+  await expect(page.locator(".hero-temp")).toContainText("67");
+  const baselineForecastRequests = forecastRequests;
+  const baselineArchiveRequests = archiveRequests;
+
+  expect(baselineForecastRequests).toBeGreaterThan(0);
+  expect(baselineArchiveRequests).toBeGreaterThan(0);
+
+  await page.getByRole("button", { name: "Show temperatures in Celsius" }).click();
+
+  await expect(page.locator(".hero-temp")).toContainText("20");
+  await expect(
+    page.getByRole("button", { name: "Show temperatures in Celsius" })
+  ).toHaveAttribute("aria-pressed", "true");
+
+  await page.waitForTimeout(500);
+
+  expect(forecastRequests).toBe(baselineForecastRequests);
+  expect(archiveRequests).toBe(baselineArchiveRequests);
 });
 
 test("shows regional alerts fallback for locations outside NWS coverage", async ({ page }) => {

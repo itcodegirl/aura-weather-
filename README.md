@@ -22,8 +22,9 @@ It is designed as a portfolio project with real frontend concerns in scope:
 - Open-Meteo powered weather, air quality, geocoding, and archive data
 - NOAA / NWS severe alerts with explicit unsupported-region fallback messaging
 - Saved cities, persisted location preference, and optional cloud sync for saved locations
+- Temperature-unit changes stay local to the UI instead of forcing fresh forecast/climate requests
 - Keyboard-friendly city search with async cancellation and combobox/listbox behavior
-- Reduced-motion-safe card rendering and refreshed mobile layouts
+- Reduced-motion-safe card rendering, refreshed mobile layouts, and deferred loading for lower-priority dashboard panels
 
 ## Tech Stack
 
@@ -91,6 +92,14 @@ npm run test:visual
 npm run test:lighthouse
 ```
 
+### Latest local QA snapshot
+
+- `npm run lint` passes
+- `npm test` passes (`45` tests)
+- `npm run build` passes
+- `npm run test:e2e` passes (`9` Playwright checks, including visual regression)
+- `npm run test:lighthouse` passes the local budget gate
+
 ### Current automated coverage
 
 - Node tests for:
@@ -102,6 +111,7 @@ npm run test:lighthouse
 - Playwright smoke coverage for:
   - dashboard boot
   - city search and location switching
+  - unit switching without refetching forecast/climate data
   - unsupported-region severe alert fallback
   - mobile overflow regression
   - accessibility scan using axe-core
@@ -130,7 +140,7 @@ npm run test:lighthouse
 
 - NOAA / NWS severe alerts are U.S.-region only; unsupported regions fall back to explanatory messaging instead of a false all-clear.
 - Saved-location cloud sync is intentionally lightweight and expects either a full sync URL or a configured `VITE_AURA_SYNC_API_BASE`.
-- `npm run test:lighthouse` still fails the performance budget at the time of writing. Accessibility, SEO, and best-practices budgets pass, but performance optimization remains unfinished.
+- The current Lighthouse budget now passes locally, but the app still carries a relatively large CSS surface and could be trimmed further for stronger real-world performance margins.
 
 ## Portfolio / Case Study Notes
 
@@ -141,7 +151,7 @@ If this project is presented in a portfolio, the strongest story is:
 - accessibility work that goes beyond color tweaks into keyboard flow, live status messaging, and baseline axe coverage
 - product decisions around trust cues, unsupported alert regions, and location permission onboarding
 
-The weakest current story is performance. This repo is better as a frontend architecture and QA sample than as a claim of production-grade performance optimization.
+The weakest current story is still long-term performance optimization at scale. This repo is better as a frontend architecture and QA sample than as a claim of fully production-grade performance tuning, and there is still room to reduce CSS and JS weight further.
 
 ## Screenshot Guidance
 
@@ -159,4 +169,4 @@ This project is strongest as a frontend implementation sample for:
 - CSS systems work without a component library
 - QA maturity beyond a basic tutorial app
 
-It is not pretending to be a full production weather platform. The main remaining gap is performance work: the UI is more stable and more trustworthy now, but the desktop Lighthouse performance budget still needs focused optimization.
+It is not pretending to be a full production weather platform. The strongest recruiter signal now is the combination of resilient client logic, accessible/mobile hardening, and a QA setup that includes smoke, visual, and Lighthouse gates. The remaining gap is headroom: the budget passes, but there is still room to slim the CSS/JS footprint further.

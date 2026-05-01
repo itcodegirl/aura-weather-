@@ -45,7 +45,7 @@ function getInitialLocationState() {
   };
 }
 
-export function useWeather(unit = "F", options = {}) {
+export function useWeather(options = {}) {
   const { climateEnabled = true } = options;
   const [initialLocationState] = useState(() => getInitialLocationState());
   const [location, setLocation] = useState(initialLocationState.location);
@@ -128,18 +128,19 @@ export function useWeather(unit = "F", options = {}) {
     [applyLocation]
   );
 
-  const { isLocatingCurrent, loadCurrentLocation } = useLocation(
+  const { isLocatingCurrent, isGeolocationSupported, loadCurrentLocation } = useLocation(
     handleLocationResolved
   );
 
   const {
     weather,
+    weatherDataUnit,
     loading,
     error,
     climateComparison,
     retryWeather,
     trustMeta,
-  } = useWeatherData(location, unit, {
+  } = useWeatherData(location, {
     climateEnabled,
   });
 
@@ -193,6 +194,7 @@ export function useWeather(unit = "F", options = {}) {
 
   return {
     weather,
+    weatherDataUnit,
     location,
     loading,
     error,
@@ -203,6 +205,7 @@ export function useWeather(unit = "F", options = {}) {
     climateComparison,
     trustMeta,
     isLocatingCurrent,
+    isGeolocationSupported,
     clearSavedLocation,
     savedCities,
     loadSavedCity,

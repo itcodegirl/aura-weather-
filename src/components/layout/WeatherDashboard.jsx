@@ -1,11 +1,8 @@
-import { memo, Suspense, useEffect, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useState } from "react";
 import HeroCard from "../HeroCard";
 import RainCard from "../RainCard";
-import ForecastCard from "../ForecastCard";
-import NowcastCard from "../NowcastCard";
-import AlertsCard from "../AlertsCard";
 import ExposureSection from "../ExposureSection";
-import { HourlyPanel, StormWatchPanel } from "../lazyPanels";
+const SupplementalWeatherPanels = lazy(() => import("./SupplementalWeatherPanels"));
 
 const CARD_STYLE_VARIABLES = [
   { "--i": 0 },
@@ -59,6 +56,7 @@ function WeatherDashboard({
   trustMeta,
 }) {
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [showSupplementalPanels, setShowSupplementalPanels] = useState(false);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -70,12 +68,47 @@ function WeatherDashboard({
     };
   }, []);
 
+  useEffect(() => {
+    if (!weather || showSupplementalPanels) {
+      return undefined;
+    }
+
+    let timeoutId = null;
+    let idleId = null;
+
+    const revealSupplementalPanels = () => {
+      setShowSupplementalPanels(true);
+    };
+
+    if (
+      typeof window !== "undefined" &&
+      typeof window.requestIdleCallback === "function"
+    ) {
+      idleId = window.requestIdleCallback(revealSupplementalPanels, {
+        timeout: 700,
+      });
+    } else {
+      timeoutId = window.setTimeout(revealSupplementalPanels, 180);
+    }
+
+    return () => {
+      if (
+        idleId !== null &&
+        typeof window !== "undefined" &&
+        typeof window.cancelIdleCallback === "function"
+      ) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [showSupplementalPanels, weather]);
+
   const weatherFetchedAt = trustMeta?.weatherFetchedAt ?? null;
   const aqiFetchedAt = trustMeta?.aqiFetchedAt ?? null;
   const climateFetchedAt = trustMeta?.climateFetchedAt ?? null;
   const climateStatus = trustMeta?.climateStatus ?? "idle";
-  const alertsFetchedAt = trustMeta?.alertsFetchedAt ?? null;
-  const alertsStatus = trustMeta?.alertsStatus ?? weather?.alertsStatus ?? "idle";
 
   return (
     <main
@@ -130,85 +163,37 @@ function WeatherDashboard({
         lastUpdatedAt={weatherFetchedAt}
         nowMs={nowMs}
       />
-      <NowcastCard
-        weather={weather}
-        style={CARD_STYLE_VARIABLES[3]}
-        isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
-        nowMs={nowMs}
-      />
-      <Suspense
-        fallback={(
-          <CardFallback
-            className="bento-chart"
-            style={CARD_STYLE_VARIABLES[4]}
-            title="Loading hourly outlook..."
-            isRefreshing={isBackgroundLoading}
+      {showSupplementalPanels ? (
+        <Suspense
+          fallback={(
+            <CardFallback
+              className="bento-supplemental-loading"
+              style={CARD_STYLE_VARIABLES[3]}
+              title="Loading extended weather details..."
+              isRefreshing={isBackgroundLoading}
+            />
+          )}
+        >
+          <SupplementalWeatherPanels
+            weather={weather}
+            unit={unit}
+            weatherInfo={weatherInfo}
+            trustMeta={trustMeta}
+            cardStyleVariables={CARD_STYLE_VARIABLES}
+            groupLabelStyleVariables={GROUP_LABEL_STYLE_VARIABLES}
+            groupLabelIds={GROUP_LABEL_IDS}
+            nowMs={nowMs}
+            isBackgroundLoading={isBackgroundLoading}
           />
-        )}
-      >
-        <HourlyPanel
-          weather={weather}
-          unit={unit}
-          chartTopColor={weatherInfo?.gradient?.[0]}
-          chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
-          style={CARD_STYLE_VARIABLES[4]}
+        </Suspense>
+      ) : (
+        <CardFallback
+          className="bento-supplemental-loading"
+          style={CARD_STYLE_VARIABLES[3]}
+          title="Loading extended weather details..."
           isRefreshing={isBackgroundLoading}
-          lastUpdatedAt={weatherFetchedAt}
-          nowMs={nowMs}
         />
-      </Suspense>
-
-      <h2
-        id={GROUP_LABEL_IDS.riskSignals}
-        className="bento-group-label"
-        style={GROUP_LABEL_STYLE_VARIABLES[2]}
-      >
-        Risk Signals
-      </h2>
-      <AlertsCard
-        alerts={weather?.alerts}
-        alertsStatus={alertsStatus}
-        style={CARD_STYLE_VARIABLES[5]}
-        isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={alertsFetchedAt}
-        nowMs={nowMs}
-      />
-      <Suspense
-        fallback={(
-          <CardFallback
-            className="bento-storm"
-            style={CARD_STYLE_VARIABLES[6]}
-            title="Loading risk signals..."
-            isRefreshing={isBackgroundLoading}
-          />
-        )}
-      >
-        <StormWatchPanel
-          weather={weather}
-          unit={unit}
-          style={CARD_STYLE_VARIABLES[6]}
-          isRefreshing={isBackgroundLoading}
-          lastUpdatedAt={weatherFetchedAt}
-          nowMs={nowMs}
-        />
-      </Suspense>
-
-      <h2
-        id={GROUP_LABEL_IDS.weekAhead}
-        className="bento-group-label"
-        style={GROUP_LABEL_STYLE_VARIABLES[3]}
-      >
-        Week Ahead
-      </h2>
-      <ForecastCard
-        weather={weather}
-        unit={unit}
-        style={CARD_STYLE_VARIABLES[7]}
-        isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
-        nowMs={nowMs}
-      />
+      )}
     </main>
   );
 }
