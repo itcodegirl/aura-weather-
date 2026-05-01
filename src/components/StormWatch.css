@@ -320,13 +320,13 @@
 }
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
-@media (max-width: var(--bp-laptop)) {
+@media (max-width: 980px) {
   .storm-snapshot {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: var(--bp-tablet-small)) {
+@media (max-width: 760px) {
   .storm-header {
     flex-direction: column;
     align-items: flex-start;
@@ -346,13 +346,13 @@
   }
 }
 
-@media (max-width: var(--bp-mobile-small)) {
+@media (max-width: 560px) {
   .storm-snapshot {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: var(--bp-compact)) {
+@media (max-width: 420px) {
   .storm-title {
     font-size: 17px;
   }
@@ -404,5 +404,6 @@
     font-size: 12px;
   }
 }
+
 
 

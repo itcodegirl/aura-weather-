@@ -51,7 +51,6 @@ function StormRisk({ risk, cape, summaryId }) {
       <div
         className="storm-level"
         style={{ color: risk.color }}
-        aria-label={risk.level}
         aria-describedby={summaryId}
       >
         {risk.level}
@@ -219,7 +218,7 @@ function WindIntelligence({
       <div className="storm-level">{strength}</div>
       <p className="storm-module-summary">Flow from {direction}</p>
 
-      <div className="wind-compass" aria-label={`Wind from ${direction}`}>
+      <div className="wind-compass" role="img" aria-label={`Wind from ${direction}`}>
         <div className="wind-compass-ring">
           <span className="wind-compass-label wind-compass-n">N</span>
           <span className="wind-compass-label wind-compass-e">E</span>

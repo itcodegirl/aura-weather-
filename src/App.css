@@ -455,7 +455,7 @@ a:focus-visible,
 }
 
 .saved-city-chip {
-  min-height: 28px;
+  min-height: 32px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
@@ -476,8 +476,8 @@ a:focus-visible,
 }
 
 .saved-city-remove {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   color: rgba(237, 201, 201, 0.9);
   font-size: 14px;
@@ -540,7 +540,7 @@ a:focus-visible,
 }
 
 .sync-account-btn {
-  min-height: 30px;
+  min-height: 36px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(186, 214, 252, 0.28);
@@ -580,7 +580,7 @@ a:focus-visible,
 
 .sync-account-input {
   flex: 1 1 220px;
-  min-height: 30px;
+  min-height: 36px;
   min-width: 0;
   padding: 0 10px;
   border-radius: var(--radius-pill);
@@ -849,7 +849,7 @@ a:focus-visible,
   font-weight: 720;
   letter-spacing: 0.11em;
   text-transform: uppercase;
-  opacity: 0;
+  opacity: 1;
   animation: label-reveal var(--motion-label-reveal) var(--ease-standard) forwards;
   animation-delay: calc(var(--group-i, 0) * 120ms);
 }
@@ -883,7 +883,7 @@ a:focus-visible,
   padding: var(--card-padding);
   border-radius: var(--card-radius);
   border: var(--card-border);
-  opacity: 0;
+  opacity: 1;
   animation: card-slide-up var(--card-enter-duration) cubic-bezier(0.25, 0.95, 0.3, 1) forwards;
   animation-delay: calc(var(--i, 0) * var(--card-enter-stagger));
   background:
@@ -1432,8 +1432,8 @@ a:focus-visible,
 }
 
 .info-drawer-trigger {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 1px solid rgba(174, 206, 248, 0.42);
   background: rgba(8, 18, 39, 0.62);
@@ -1486,7 +1486,7 @@ a:focus-visible,
 }
 
 /* Shared responsive tiers: 1200 (desktop), 980 (laptop), 860 (tablet), 760 (small tablet), 640 (mobile), 560 (narrow mobile), 420 (compact). */
-@media (max-width: var(--bp-desktop)) {
+@media (max-width: 1200px) {
   :root {
     --content-gutter: 2rem;
   }
@@ -1500,7 +1500,7 @@ a:focus-visible,
   }
 }
 
-@media (max-width: var(--bp-laptop)) {
+@media (max-width: 980px) {
   .app-header {
     grid-template-columns: 1fr;
     gap: 14px;
@@ -1552,7 +1552,7 @@ a:focus-visible,
   }
 }
 
-@media (max-width: var(--bp-tablet)) {
+@media (max-width: 860px) {
   .app-inner {
     padding: 20px 0 30px;
   }
@@ -1573,7 +1573,7 @@ a:focus-visible,
   }
 }
 
-@media (max-width: var(--bp-tablet-small)) {
+@media (max-width: 760px) {
   :root {
     --content-gutter: 1.2rem;
   }
@@ -1655,7 +1655,7 @@ a:focus-visible,
   }
 }
 
-@media (max-width: var(--bp-mobile)) {
+@media (max-width: 640px) {
   :root {
     --content-gutter: 1rem;
   }
@@ -1711,7 +1711,7 @@ a:focus-visible,
   }
 }
 
-@media (max-width: var(--bp-mobile-small)) {
+@media (max-width: 560px) {
   :root {
     --card-backdrop-blur: 10px;
     --hero-temp-size: 58px;
@@ -1737,7 +1737,7 @@ a:focus-visible,
 
 }
 
-@media (max-width: var(--bp-compact)) {
+@media (max-width: 420px) {
   :root {
     --content-gutter: 0.78rem;
     --card-padding: 18px;
@@ -1787,14 +1787,14 @@ a:focus-visible,
   }
 
   .saved-city-chip {
-    min-height: 24px;
+    min-height: 28px;
     padding: 0 8px;
     font-size: 10px;
   }
 
   .saved-city-remove {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     font-size: 12px;
   }
 
@@ -1808,7 +1808,7 @@ a:focus-visible,
   }
 
   .sync-account-btn {
-    min-height: 28px;
+    min-height: 36px;
     font-size: 10px;
   }
 
@@ -1864,8 +1864,8 @@ a:focus-visible,
   }
 
   .info-drawer-trigger {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     font-size: 11px;
   }
 
@@ -1948,4 +1948,5 @@ a:focus-visible,
     transform: none;
   }
 }
+
 
