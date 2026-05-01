@@ -412,7 +412,8 @@ export function useWeatherData(location, options = {}) {
         coordinates &&
         weather &&
         !climateComparison &&
-        trustMeta.climateStatus !== "loading"
+        (trustMeta.climateStatus === "idle" ||
+          trustMeta.climateStatus === "disabled")
       ) {
         Promise.resolve().then(() => {
           void requestClimateComparison({

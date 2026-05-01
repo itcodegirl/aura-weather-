@@ -56,6 +56,7 @@ function WeatherDashboard({
   trustMeta,
 }) {
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [showSupplementalPanels, setShowSupplementalPanels] = useState(false);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -66,6 +67,43 @@ function WeatherDashboard({
       clearInterval(intervalId);
     };
   }, []);
+
+  useEffect(() => {
+    if (!weather || showSupplementalPanels) {
+      return undefined;
+    }
+
+    let timeoutId = null;
+    let idleId = null;
+
+    const revealSupplementalPanels = () => {
+      setShowSupplementalPanels(true);
+    };
+
+    if (
+      typeof window !== "undefined" &&
+      typeof window.requestIdleCallback === "function"
+    ) {
+      idleId = window.requestIdleCallback(revealSupplementalPanels, {
+        timeout: 700,
+      });
+    } else {
+      timeoutId = window.setTimeout(revealSupplementalPanels, 180);
+    }
+
+    return () => {
+      if (
+        idleId !== null &&
+        typeof window !== "undefined" &&
+        typeof window.cancelIdleCallback === "function"
+      ) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [showSupplementalPanels, weather]);
 
   const weatherFetchedAt = trustMeta?.weatherFetchedAt ?? null;
   const aqiFetchedAt = trustMeta?.aqiFetchedAt ?? null;
@@ -125,28 +163,37 @@ function WeatherDashboard({
         lastUpdatedAt={weatherFetchedAt}
         nowMs={nowMs}
       />
-      <Suspense
-        fallback={(
-          <CardFallback
-            className="bento-supplemental-loading"
-            style={CARD_STYLE_VARIABLES[3]}
-            title="Loading extended weather details..."
-            isRefreshing={isBackgroundLoading}
+      {showSupplementalPanels ? (
+        <Suspense
+          fallback={(
+            <CardFallback
+              className="bento-supplemental-loading"
+              style={CARD_STYLE_VARIABLES[3]}
+              title="Loading extended weather details..."
+              isRefreshing={isBackgroundLoading}
+            />
+          )}
+        >
+          <SupplementalWeatherPanels
+            weather={weather}
+            unit={unit}
+            weatherInfo={weatherInfo}
+            trustMeta={trustMeta}
+            cardStyleVariables={CARD_STYLE_VARIABLES}
+            groupLabelStyleVariables={GROUP_LABEL_STYLE_VARIABLES}
+            groupLabelIds={GROUP_LABEL_IDS}
+            nowMs={nowMs}
+            isBackgroundLoading={isBackgroundLoading}
           />
-        )}
-      >
-        <SupplementalWeatherPanels
-          weather={weather}
-          unit={unit}
-          weatherInfo={weatherInfo}
-          trustMeta={trustMeta}
-          cardStyleVariables={CARD_STYLE_VARIABLES}
-          groupLabelStyleVariables={GROUP_LABEL_STYLE_VARIABLES}
-          groupLabelIds={GROUP_LABEL_IDS}
-          nowMs={nowMs}
-          isBackgroundLoading={isBackgroundLoading}
+        </Suspense>
+      ) : (
+        <CardFallback
+          className="bento-supplemental-loading"
+          style={CARD_STYLE_VARIABLES[3]}
+          title="Loading extended weather details..."
+          isRefreshing={isBackgroundLoading}
         />
-      </Suspense>
+      )}
     </main>
   );
 }

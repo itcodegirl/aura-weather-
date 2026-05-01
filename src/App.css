@@ -1090,6 +1090,8 @@ a:focus-visible,
 .bento-supplemental-loading {
   grid-column: 1 / -1;
   min-height: 216px;
+  content-visibility: auto;
+  contain-intrinsic-size: 216px;
 }
 
 .loading-card-title {
@@ -1238,6 +1240,8 @@ a:focus-visible,
 .status-stack--setup {
   margin-top: 18px;
   max-width: min(100%, 760px);
+  content-visibility: auto;
+  contain-intrinsic-size: 220px;
 }
 
 .location-notice {

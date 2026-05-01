@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   ALERTS_STATUS,
+  fetchWeather,
   fetchSevereWeatherAlerts,
 } from "./openMeteo.js";
 
@@ -24,6 +25,29 @@ afterEach(() => {
 });
 
 describe("Open-Meteo alert coverage helpers", () => {
+  test("requests canonical imperial units for the forecast payload by default", async () => {
+    let requestUrl = null;
+
+    globalThis.fetch = async (url) => {
+      requestUrl = new URL(String(url));
+      return createJsonResponse({
+        latitude: 41.8781,
+        longitude: -87.6298,
+        timezone: "America/Chicago",
+        current: {},
+        hourly: {},
+        daily: {},
+        minutely_15: {},
+      });
+    };
+
+    await fetchWeather(41.8781, -87.6298);
+
+    assert.equal(requestUrl?.searchParams.get("temperature_unit"), "fahrenheit");
+    assert.equal(requestUrl?.searchParams.get("wind_speed_unit"), "mph");
+    assert.equal(requestUrl?.searchParams.get("precipitation_unit"), "inch");
+  });
+
   test("returns sorted alerts with a ready status when NWS data is available", async () => {
     globalThis.fetch = async () =>
       createJsonResponse({
