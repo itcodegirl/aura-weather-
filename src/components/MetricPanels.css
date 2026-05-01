@@ -1,4 +1,4 @@
-.metric-card {
+﻿.metric-card {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -252,7 +252,7 @@
   font-size: 12px;
 }
 
-@media (max-width: var(--bp-mobile-small)) {
+@media (max-width: 560px) {
   .metric-gauge-svg {
     max-width: 130px;
     height: 80px;
@@ -275,3 +275,4 @@
     gap: 4px;
   }
 }
+

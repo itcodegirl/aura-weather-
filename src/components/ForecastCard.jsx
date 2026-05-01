@@ -123,12 +123,13 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
         </div>
       </div>
 
-      <div className="forecast-icon" aria-label={info.label}>
+      <div className="forecast-icon" role="img" aria-label={info.label}>
         <WeatherIcon code={day.conditionCode} size={22} />
       </div>
 
       <div
         className="forecast-temps"
+        role="group"
         aria-label={`High ${high}${tempUnit}, low ${low}${tempUnit}`}
       >
         <div className="forecast-temp forecast-temp--high">

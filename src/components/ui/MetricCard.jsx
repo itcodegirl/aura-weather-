@@ -44,8 +44,13 @@ function ArcGauge({
   const gaugeLabel = hasData ? `${label} ${safeValue}` : `${label} unavailable`;
 
   return (
-    <div className="metric-gauge" aria-label={gaugeLabel}>
-      <svg className="metric-gauge-svg" viewBox="0 0 116 120" role="img">
+    <div className="metric-gauge" role="img" aria-label={gaugeLabel}>
+      <svg
+        className="metric-gauge-svg"
+        viewBox="0 0 116 120"
+        aria-hidden="true"
+        focusable="false"
+      >
         <path className="metric-gauge-track" d={arcPath(cx, cy, r, start, end)} />
         {hasData && (
           <path
@@ -65,12 +70,11 @@ function MetricDensityBar({ value, max, statusColor, hasData }) {
     ? Math.max(0, Math.min(Number(value), max))
     : 0;
   const progress = max > 0 ? (safeValue / max) * 100 : 0;
-  const label = hasData ? `${safeValue} of ${max}` : "No live data";
 
   return (
     <div
       className={`metric-density ${hasData ? "" : "metric-density--missing"}`.trim()}
-      aria-label={label}
+      aria-hidden="true"
     >
       <div className="metric-density-track" aria-hidden="true">
         {hasData ? (

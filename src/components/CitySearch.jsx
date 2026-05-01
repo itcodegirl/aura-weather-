@@ -50,6 +50,8 @@ function CitySearch({ onSelect }, ref) {
     showDropdown && activeIndexSafe >= 0
       ? `${optionIdPrefix}-${activeIndexSafe}`
       : undefined;
+  const hasResultOptions = results.length > 0;
+  const shouldShowStatus = loading || Boolean(error) || canShowNoResults;
 
   const handleInputFocus = useCallback(() => {
     setOpen(true);
@@ -124,7 +126,7 @@ function CitySearch({ onSelect }, ref) {
           className="city-search-input"
           aria-label="Search for a city"
           aria-expanded={showDropdown}
-          aria-controls={showDropdown ? resultsId : undefined}
+          aria-controls={showDropdown && hasResultOptions ? resultsId : undefined}
           aria-autocomplete="list"
           aria-haspopup="listbox"
           role="combobox"
@@ -149,47 +151,40 @@ function CitySearch({ onSelect }, ref) {
       </div>
 
       {showDropdown && (
-        <ul
-          id={resultsId}
+        <div
           className="city-search-dropdown glass"
-          role="listbox"
-          aria-label="City suggestions"
-          aria-busy={loading}
-          onMouseDown={handleResultListMouseDown}
         >
-          {loading && (
-            <li
+          {shouldShowStatus && (
+            <div
               className="city-search-state"
               role="status"
               aria-live="polite"
               aria-atomic="true"
             >
-              <Loader2 size={14} className="city-search-spinner" />
-              <span>Searching locations...</span>
-            </li>
+              {loading ? (
+                <>
+                  <Loader2 size={14} className="city-search-spinner" />
+                  <span>Searching locations...</span>
+                </>
+              ) : error ? (
+                <span className="city-search-state city-search-state--error">
+                  {error}
+                </span>
+              ) : (
+                <span>No matching cities</span>
+              )}
+            </div>
           )}
 
-          {!loading && error && (
-            <li
-              className="city-search-state city-search-state--error"
-              role="status"
-              aria-live="polite"
+          {hasResultOptions && (
+            <ul
+              id={resultsId}
+              className="city-search-options"
+              role="listbox"
+              aria-label="City suggestions"
+              onMouseDown={handleResultListMouseDown}
             >
-              {error}
-            </li>
-          )}
-
-          {!loading &&
-            !error &&
-            results.length === 0 &&
-            canShowNoResults && (
-            <li className="city-search-state" role="status" aria-live="polite">
-              No matching cities
-            </li>
-          )}
-
-          {!loading &&
-            results.map((city, index) => {
+              {results.map((city, index) => {
               const name = typeof city?.name === "string" ? city.name : "Unnamed location";
               const admin1 = typeof city?.admin1 === "string" ? city.admin1 : "";
               const country = typeof city?.country === "string" ? city.country : "";
@@ -219,7 +214,9 @@ function CitySearch({ onSelect }, ref) {
                 </li>
               );
             })}
-        </ul>
+            </ul>
+          )}
+        </div>
       )}
     </div>
   );

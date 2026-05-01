@@ -189,7 +189,11 @@ function HeroCard({
           </div>
           <p className="hero-date">{today}</p>
         </div>
-        <div className="hero-high-low" aria-label="Today's high and low temperatures">
+        <div
+          className="hero-high-low"
+          role="group"
+          aria-label="Today's high and low temperatures"
+        >
           <div className="hero-high-low-item">
             <span className="hero-high-low-label">High</span>
             <span className="hero-high-low-value">
@@ -242,7 +246,7 @@ function HeroCard({
         </div>
       </div>
 
-      <div className="hero-sunlight" aria-label="Sunlight details">
+      <div className="hero-sunlight" role="group" aria-label="Sunlight details">
         <div className="hero-sun-chip">
           <div className="hero-sun-label">
             <Sunrise size={14} />

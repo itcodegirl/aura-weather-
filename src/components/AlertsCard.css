@@ -1,4 +1,4 @@
-.bento-alerts {
+﻿.bento-alerts {
   display: flex;
   flex-direction: column;
   grid-column: span 12;
@@ -166,7 +166,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: var(--bp-tablet-small)) {
+@media (max-width: 760px) {
   .alerts-item {
     flex-direction: column;
     align-items: flex-start;
@@ -177,7 +177,7 @@
   }
 }
 
-@media (max-width: var(--bp-compact)) {
+@media (max-width: 420px) {
   .alerts-empty-title {
     font-size: 14px;
   }
@@ -187,4 +187,5 @@
     font-size: 11px;
   }
 }
+
 

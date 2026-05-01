@@ -1,4 +1,4 @@
-.city-search {
+﻿.city-search {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -124,6 +124,12 @@
   animation: dropdown-reveal var(--motion-subtle) var(--ease-standard);
 }
 
+.city-search-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .city-search-state {
   display: flex;
   align-items: center;
@@ -230,7 +236,7 @@
 }
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
-@media (max-width: var(--bp-tablet-small)) {
+@media (max-width: 760px) {
   .city-search {
     flex: 1 1 100%;
     width: 100%;
@@ -238,7 +244,7 @@
   }
 }
 
-@media (max-width: var(--bp-compact)) {
+@media (max-width: 420px) {
   .city-search-input-wrap {
     min-height: 42px;
     padding: 0 11px;
@@ -287,6 +293,7 @@
     transform: none;
   }
 }
+
 
 
 
