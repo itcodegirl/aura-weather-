@@ -1,17 +1,16 @@
 import { ChevronDown, Cloud } from "lucide-react";
-import { memo, useId, useMemo, useState } from "react";
+import { memo, useCallback, useId, useMemo, useState } from "react";
 
 function SyncAccountPanel({
   syncConnected,
   syncAccount,
   syncState,
-  syncKeyInput,
-  setSyncKeyInput,
   onCreateSyncAccount,
   onConnectSyncAccount,
   onDisconnectSyncAccount,
   onSyncNow,
 }) {
+  const [syncKeyInput, setSyncKeyInput] = useState("");
   const syncStatusText =
     typeof syncState?.message === "string" && syncState.message.trim()
       ? syncState.message.trim()
@@ -35,6 +34,11 @@ function SyncAccountPanel({
     }
     return "Optional";
   }, [syncConnected, syncErrorText]);
+  const handleConnect = useCallback(() => {
+    if (typeof onConnectSyncAccount === "function") {
+      void onConnectSyncAccount(syncKeyInput);
+    }
+  }, [onConnectSyncAccount, syncKeyInput]);
 
   return (
     <div className="sync-account-shell">
@@ -107,7 +111,7 @@ function SyncAccountPanel({
                 <button
                   type="button"
                   className="sync-account-btn sync-account-btn--subtle"
-                  onClick={onConnectSyncAccount}
+                  onClick={handleConnect}
                   disabled={isSyncing || !syncKeyInput.trim()}
                 >
                   Connect

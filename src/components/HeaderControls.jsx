@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 import CitySearch from "./CitySearch";
 import DisplaySettingsControls from "./header/DisplaySettingsControls";
 import SavedCitiesStrip from "./header/SavedCitiesStrip";
@@ -27,8 +27,6 @@ function HeaderControls({
   unit,
   setUnit,
 }) {
-  const [syncKeyInput, setSyncKeyInput] = useState("");
-
   const handleCitySelect = useCallback(
     (city) => {
       const lat = Number(city?.lat);
@@ -87,11 +85,11 @@ function HeaderControls({
     }
   }, [createSyncAccount]);
 
-  const handleConnectSyncAccount = useCallback(() => {
+  const handleConnectSyncAccount = useCallback((nextSyncKey) => {
     if (typeof connectSyncAccount === "function") {
-      void connectSyncAccount(syncKeyInput);
+      void connectSyncAccount(nextSyncKey);
     }
-  }, [connectSyncAccount, syncKeyInput]);
+  }, [connectSyncAccount]);
 
   const handleDisconnectSyncAccount = useCallback(() => {
     if (typeof disconnectSyncAccount === "function") {
@@ -141,8 +139,6 @@ function HeaderControls({
           syncConnected={syncConnected}
           syncAccount={syncAccount}
           syncState={syncState}
-          syncKeyInput={syncKeyInput}
-          setSyncKeyInput={setSyncKeyInput}
           onCreateSyncAccount={handleCreateSyncAccount}
           onConnectSyncAccount={handleConnectSyncAccount}
           onDisconnectSyncAccount={handleDisconnectSyncAccount}
