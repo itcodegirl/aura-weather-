@@ -362,6 +362,16 @@ function HeroCard({
           value={dewPointDisplay}
         />
       </div>
+      {(humidityDisplay === "—" ||
+        pressureDisplay === "—" ||
+        dewPointDisplay === "—" ||
+        windDisplay === "—") && (
+        <p className="hero-stats-note" role="status">
+          Some readings are unavailable from the provider. Aura shows
+          “—” instead of a fallback value to keep the rest of the
+          forecast trustworthy.
+        </p>
+      )}
     </section>
   );
 }

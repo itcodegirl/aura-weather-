@@ -246,6 +246,18 @@
   font-weight: 600;
 }
 
+.hero-stats-note {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(186, 212, 252, 0.34);
+  background: rgba(8, 17, 36, 0.4);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
 @media (max-width: 1200px) {
   .hero-sunlight {
