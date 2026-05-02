@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import "./StatusStack.css";
 
 function StatusStack({
   locationNotice,
