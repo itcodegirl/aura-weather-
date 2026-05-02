@@ -183,6 +183,18 @@ test("keeps the mobile dashboard within the viewport width", async ({ page }) =>
   expect(hasHorizontalOverflow).toBe(false);
 });
 
+test("does not leak literal unicode escape sequences into rendered text", async ({ page }) => {
+  await openDashboard(page);
+
+  // Wait until supplemental panels (which include the hourly chart axis
+  // and AQI/UV cards) have mounted past the deferred-render gate.
+  await expect(page.getByRole("heading", { name: "Risk Signals" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Week Ahead" })).toBeVisible();
+
+  const documentText = await page.evaluate(() => document.body.innerText);
+  expect(documentText).not.toMatch(/\\u[0-9a-fA-F]{4}/);
+});
+
 test("passes baseline accessibility assertions for the main weather view", async ({ page }) => {
   await openDashboard(page);
 

@@ -97,9 +97,9 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`45` tests)
+- `npm test` passes (`47` tests)
 - `npm run build` passes
-- `npm run test:e2e` passes (`12` Playwright checks, including smoke and visual regression)
+- `npm run test:e2e` passes (`13` Playwright checks, including smoke, unicode-escape leak guard, and visual regression)
 - `npm run test:lighthouse` passes the local budget gate
 
 ### Current automated coverage
@@ -119,6 +119,7 @@ npm run test:lighthouse
   - removing the active saved city clearing persisted startup-location storage
   - unsupported-region severe alert fallback
   - mobile overflow regression
+  - regression guard ensuring no literal `\uXXXX` escape sequences leak into rendered text
   - accessibility scan using axe-core
 - Playwright visual baselines for:
   - desktop dashboard
@@ -143,6 +144,13 @@ npm run test:lighthouse
 - Live status messaging for loading and refresh states
 - Reduced-motion-safe card visibility and transitions
 - Updated mobile touch targets for smaller utility controls
+
+## Recent Hardening
+
+- **Unicode-escape rendering bug** — JSX text leaking literal `°` on the hourly chart Y axis and `—` in the AQI/UV empty state was fixed and now gated by an automated regression test.
+- **Hourly chart "Now" alignment** — the active-hour indicator now snaps to the current hour band instead of skipping ahead to the next future timestamp, with a new `currentSlotToleranceMs` option in `findWindowStartIndex` and unit coverage to lock the behavior in.
+- **Architecture trim** — extracted a shared `CardFallback` UI primitive and a `useDeferredMount` hook to replace duplicated panel-loading code across `WeatherDashboard` and `SupplementalWeatherPanels`. Activated the previously-unused `usePanelPreload` hook so heavy lazy panels warm up during browser idle.
+- **Status-stack collapse** — App.jsx no longer mounts two `role="status"` regions on every render.
 
 ## Known Limitations
 

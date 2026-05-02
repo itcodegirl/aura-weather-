@@ -108,6 +108,13 @@
   text-transform: uppercase;
 }
 
+/* Hide the keyboard shortcut hint on touch-only devices where "/" is unreachable. */
+@media (hover: none) and (pointer: coarse) {
+  .city-search-shortcut-badge {
+    display: none;
+  }
+}
+
 .city-search-dropdown {
   position: absolute;
   inset: calc(100% + 10px) 0 auto;
