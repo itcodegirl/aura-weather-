@@ -41,13 +41,46 @@ It is designed as a portfolio project with real frontend concerns in scope:
 
 ```text
 src/
-  api/             # Fetch adapters and response normalization
-  domain/          # Weather classification and derived scene logic
-  hooks/           # Location, sync, weather, and view-model orchestration
-  components/      # Dashboard modules, layout, and UI primitives
-  services/        # Cross-cutting services such as saved-location sync
-  utils/           # Date, unit, and formatting helpers
+  api/                       # Open-Meteo + NWS fetch adapters
+    openMeteo.js             #   forecast, archive, AQI, geocode, alerts
+    transforms.js            #   raw → AppWeatherModel normalization
+    types.js                 #   model schema + skeleton factory
+  domain/                    # Pure weather classification logic
+    weatherCodes.js          #   WMO code → label/icon/gradient
+    weatherScene.js          #   forecast + loading + error → UI scene
+    meteorology.js           #   storm risk, pressure trend, comfort
+    aqi.js  wind.js  temperature.js
+  hooks/                     # React orchestration + persistence
+    useWeatherDashboardViewModel.js  # composes the dashboard hook bag
+    useWeather.js            #   location + saved-cities + sync
+    useWeatherData.js        #   forecast + supplemental fetch lifecycle
+    useClimateComparison.js  #   historical archive lifecycle
+    useLocation.js           #   geolocation + persisted/saved cities
+    useSavedLocationsSync.js #   pull/push cloud sync orchestration
+    useCitySearch.js         #   debounced abortable geocoder
+    useRainAnalysis.js  useDeferredMount.js  useDisplayPreferences.js
+    useLocalStorageState.js  useAppShellEffects.js
+    climateComparison.js  savedLocationsSyncHelpers.js   # pure helpers
+  components/                # React surface
+    layout/                  #   AppShell, AppHeader, StatusStack,
+                             #   WeatherDashboard, SupplementalWeatherPanels
+    header/                  #   Saved cities, sync panel, display settings
+    ui/                      #   Card primitives, DataTrustMeta, InfoDrawer
+    HeroCard, RainCard, ForecastCard, NowcastCard,
+    StormWatch, HourlyCard, AlertsCard, ExposureSection,
+    CitySearch, WeatherIcon, AppErrorBoundary
+  services/                  # Cross-cutting services
+    savedLocationsSync.js    #   sync key + jsonblob persistence
+  utils/                     # Pure helpers
+    numbers.js               #   strict toFiniteNumber (rejects null)
+    weatherUnits.js  meteorology.js  dates.js  dataTrust.js
+    sunlight.js  timeSeries.js  weatherCodes.js  temperature.js
 ```
+
+Each layer has a strict dependency direction:
+`components → hooks → api/services → utils/domain`. Components never
+fetch directly; hooks never compute UI gradients; the API layer
+never imports a React module.
 
 ## Running Locally
 
@@ -97,7 +130,7 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`79` tests)
+- `npm test` passes (`103` tests)
 - `npm run build` passes
 - `npm run test:e2e` passes (`13` Playwright checks, including smoke, unicode-escape leak guard, and visual regression)
 - `npm run test:lighthouse` passes the local budget gate
@@ -145,13 +178,26 @@ npm run test:lighthouse
 - Reduced-motion-safe card visibility and transitions
 - Updated mobile touch targets for smaller utility controls
 
+## Architecture Decisions
+
+Short notes on the non-obvious choices a reviewer might question.
+
+- **Forecast is always fetched in Fahrenheit / inch units; conversion is client-side.** Switching the °F/°C toggle must not trigger a refetch — it would invalidate the displayed timestamp and confuse users. A Playwright test asserts that toggling units does not refetch.
+- **Three independent fetch tracks.** Forecast, supplemental (AQI + alerts), and climate-archive run concurrently with separate AbortController + request-id pairs. A slow archive call cannot delay the hero card; an alerts feed outage cannot wipe the AQI reading.
+- **NWS alerts are U.S.-only by design.** A 400/404 from `api.weather.gov/alerts/active` is mapped to an explicit `unsupported` status (not `unavailable`) so the UI can say "Alerts unavailable for this region" instead of an ambiguous "no alerts".
+- **Strict numeric coercion at the API boundary.** `Number(null) === 0` would surface as a fake 0°F humidity / 0% rain chance / 0°F historical sample whenever Open-Meteo returns a missing data point. A single shared `toFiniteNumber` helper rejects nullish, empty-string, boolean, array, and object inputs explicitly. Eight unit tests lock the contract.
+- **Lazy supplemental panels.** The hero, exposure cards, and rain card render synchronously. Hourly chart, storm watch, alerts, forecast, and nowcast are mounted via `Suspense` after a `requestIdleCallback` (or 180ms fallback) so the first paint is just the data the user sees first.
+- **CSS lives next to its component.** App.css holds only global tokens, resets, animations, and one shared focus-visible rule used across header buttons and retry buttons. Every feature's CSS is imported by its owning component.
+
 ## Recent Hardening
 
 - **Unicode-escape rendering bug** — JSX text leaking literal `°` on the hourly chart Y axis and `—` in the AQI/UV empty state was fixed and now gated by an automated regression test.
 - **Hourly chart "Now" alignment** — the active-hour indicator now snaps to the current hour band instead of skipping ahead to the next future timestamp, with a new `currentSlotToleranceMs` option in `findWindowStartIndex` and unit coverage to lock the behavior in.
 - **Architecture trim** — extracted shared `CardFallback`, `useDeferredMount`, and `useClimateComparison` primitives to replace duplicated and oversized hook code. Pure helpers for climate comparison and saved-locations sync moved to dedicated modules with direct unit coverage. Activated the previously-unused `usePanelPreload` hook so heavy lazy panels warm up during browser idle.
-- **CSS co-location** — `App.css` shrank from 2,067 to roughly 1,225 lines as `DataTrustMeta`, `InfoDrawer`, `AppShell`, `StatusStack`, and the bento dashboard layout moved next to their owning components.
+- **CSS co-location** — `App.css` shrank from 2,067 to roughly 500 lines as `DataTrustMeta`, `InfoDrawer`, `AppShell`, `StatusStack`, the bento dashboard layout, and the entire header surface moved next to their owning components.
 - **Scoped live regions** — `SyncAccountPanel` no longer wraps its full body in `aria-live="polite"`; only the error (`role="alert"`) and last-synced timestamp (`role="status"`) announce, and the truncated sync key advertises its full value via aria-label.
+- **Strict API number coercion** — `Number(null)` is `0`, which silently surfaced as fake `0%` humidity, `0 hPa` pressure, `0°F` dew point, and `0°F` historical samples whenever Open-Meteo returned partial data. A shared `toFiniteNumber` helper rejects nullish/empty/boolean/object inputs at the API boundary, then routes the same contract through every per-element parser in HourlyCard, ForecastCard, NowcastCard, and `useRainAnalysis`.
+- **In-flight async announcement** — async buttons (Use my location, Allow location, Retry, Sync now, Disconnect, Create cloud account) now expose `aria-busy` while their work is in flight, so screen-reader users get a signal even after tabbing away.
 - **Climate comparison nullish-input fix** — `buildClimateComparison` now rejects nullish temperatures explicitly instead of coercing them to zero, which previously could surface fake "65°F warmer than average" lines for partial archive responses.
 - **Status-stack collapse** — App.jsx no longer mounts two `role="status"` regions on every render.
 
