@@ -189,7 +189,7 @@ function HeroCard({
     climateStatus === "loading"
       ? "Comparing today's conditions with the historical average..."
       : climateStatus === "unavailable"
-        ? "Climate context is temporarily unavailable. Current weather is still live."
+        ? "Historical comparison is temporarily unavailable."
         : "";
 
   return (
