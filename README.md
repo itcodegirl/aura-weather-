@@ -130,9 +130,9 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`129` tests)
+- `npm test` passes (`130` tests)
 - `npm run build` passes
-- `npm run test:e2e` passes (`13` Playwright checks, including smoke, unicode-escape leak guard, and visual regression)
+- `npm run test:e2e` passes (`14` Playwright checks, including smoke, missing-data placeholder guard, unicode-escape leak guard, and visual regression)
 - `npm run test:lighthouse` passes the local budget gate
 
 ### Current automated coverage
@@ -205,6 +205,9 @@ Short notes on the non-obvious choices a reviewer might question.
 - **DataTrustMeta age guard** — a null `lastUpdatedAt` no longer computes a fake "Stale data (millions m old)" warning before the first response.
 - **Alert overflow signal** — when NWS returns more than four alerts the card now surfaces an "+ N more alerts not shown" footnote ordered by priority.
 - **prefers-reduced-data support** — when the user-agent reports `prefers-reduced-data: reduce`, the historical-archive call is suppressed automatically. The user-facing climate toggle is unchanged.
+- **Consumer-side null-coercion fix** — the API normalization layer correctly returns `null` for missing fields, but several card components still guarded with `Number.isFinite(Number(value))`, which is `true` for `null` (`Number(null) === 0`). HeroCard humidity, pressure, climate sample years, ExposureSection AQI/UV, and the hourly chart's current-temperature metric now route through the strict `toFiniteNumber` so missing readings render the `—` placeholder instead of a fake `0%` / `0 hPa` / `0°` value.
+- **Missing-data visual + a11y treatment** — the `—` placeholder now carries an `.is-missing` modifier (muted color, normal weight) so a sighted user can tell at a glance that a value is intentionally blank, and a wrapping `aria-label="No data available"` span reads correctly to assistive tech instead of speaking the literal "em dash" character.
+- **Hero unit-suffix fix** — readings like `"—°F"` and `"—°C"` no longer appear when a temperature is missing; the unit is hidden on the missing path.
 
 ## Known Limitations
 
