@@ -130,7 +130,7 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`130` tests)
+- `npm test` passes (`142` tests, including 10 React render tests via `@testing-library/react` + `jsdom`)
 - `npm run build` passes
 - `npm run test:e2e` passes (`14` Playwright checks, including smoke, missing-data placeholder guard, unicode-escape leak guard, and visual regression)
 - `npm run test:lighthouse` passes the local budget gate
@@ -189,8 +189,77 @@ Short notes on the non-obvious choices a reviewer might question.
 - **Lazy supplemental panels.** The hero, exposure cards, and rain card render synchronously. Hourly chart, storm watch, alerts, forecast, and nowcast are mounted via `Suspense` after a `requestIdleCallback` (or 180ms fallback) so the first paint is just the data the user sees first.
 - **CSS lives next to its component.** App.css holds only global tokens, resets, animations, and one shared focus-visible rule used across header buttons and retry buttons. Every feature's CSS is imported by its owning component.
 
+## Data Trust Contract
+
+Aura makes one promise loudly: **a missing reading is shown as missing,
+never as zero.** A weather dashboard that silently turns a null humidity
+into "0%" or a missing dew point into "0°F" is worse than one that says
+"unavailable" — it converts a known unknown into a confidently wrong
+reading. The audit pass for this project found and closed every place
+where a `Number(null) === 0` coercion could surface as a fake reading.
+
+The contract is enforced at four layers:
+
+1. **API boundary** — `src/utils/numbers.js` exports a strict
+   `toFiniteNumber(value)` helper that rejects null, undefined,
+   empty/whitespace strings, booleans, and arrays/objects explicitly.
+   `transforms.js` and `openMeteo.js` route every nullable field
+   through it, so the normalized `AppWeatherModel` carries `null` for
+   missing fields — never `0`.
+2. **Per-element parsers** — `HourlyCard`, `ForecastCard`,
+   `NowcastCard`, and `useRainAnalysis` each parse Open-Meteo's
+   per-slot arrays through `toFiniteNumber` so a single null entry
+   becomes a chart gap rather than a fake `0°F` point. The
+   coordinate parser, the trust-meta age clock, and `convertTemp`
+   carry the same guarantee.
+3. **Component fallback rendering** — every consumer that displays a
+   value falls back to the em-dash placeholder (`—`) when its input
+   is non-finite. The hero card hides the unit suffix on the missing
+   path (no more `—°F`), and a small helper note on the card
+   explains *why* a value is missing instead of leaving the user to
+   guess.
+4. **Visual + screen-reader cue** — the `Stat` primitive auto-detects
+   the em-dash placeholder and applies an `.is-missing` modifier
+   (muted color, normal weight) plus an `aria-label="No data
+   available"` so assistive tech announces "no data available"
+   instead of speaking the literal "em dash" character.
+
+The contract is locked in by tests at every layer:
+
+- **Unit (`numbers.test.mjs`, 8 tests)** — `toFiniteNumber` rejects
+  null, undefined, empty strings, booleans, arrays, objects, and
+  `NaN`/`Infinity`.
+- **Integration (`transforms.test.mjs`, 6 tests)** —
+  `normalizeWeatherResponse` preserves null current readings end-to-end.
+- **API (`openMeteo.test.mjs`)** —
+  `fetchHistoricalTemperatureAverage` drops null and empty-string
+  archive samples instead of averaging them as 0°F.
+- **React render (`HeroCard.render.test.mjs`, 6 tests)** — the
+  rendered DOM contains no `0%`, `0 hPa`, or `—°F` leaks; every
+  missing value carries the `.is-missing` modifier and the "No data
+  available" announcement; the helper note appears when any hero
+  stat is missing.
+- **End-to-end (`weather-smoke.spec.js`)** — a Playwright check
+  overrides the forecast mock to return null humidity and pressure,
+  asserts the hero card renders `—` with `.is-missing` and explicitly
+  asserts `0%` / `0 hPa` are not in the rendered text.
+
+To reproduce the missing-data state on demand (for screenshots or
+manual QA), run `npm run dev` and open
+`http://127.0.0.1:5173/?mock=missing`. The dev-only hook in
+`src/dev/missingDataMock.js` patches `fetch` to return Open-Meteo /
+NWS responses where humidity, pressure, dew point, gust speed, and
+several daily highs are null. The current temperature stays real so
+the dashboard still looks like a working forecast — the point is
+that every other field degrades gracefully. The mock is gated on
+`import.meta.env.DEV` and is tree-shaken from production builds.
+
 ## Recent Hardening
 
+- **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.
+- **`?mock=missing` dev mode** — `npm run dev` + `?mock=missing` patches `fetch` to return Open-Meteo / NWS payloads with several null fields so the trust-contract screenshot is reproducible on demand. Production builds tree-shake the mock entirely.
+- **Hero helper note** — when any hero stat is missing the card appends a short "Some readings are unavailable from the provider" line with `role="status"` so the user understands *why* a value is shown as `—`.
+- **`convertTemp` null guard** — the per-display temperature converter (`Math.round(fahrenheit)`) silently produced `0` for null input, which then surfaced as `0°F` even after the API normalization layer was correctly returning null. Routed through the strict `toFiniteNumber` so missing temperatures correctly become `NaN → "—"` downstream.
 - **Unicode-escape rendering bug** — JSX text leaking literal `°` on the hourly chart Y axis and `—` in the AQI/UV empty state was fixed and now gated by an automated regression test.
 - **Hourly chart "Now" alignment** — the active-hour indicator now snaps to the current hour band instead of skipping ahead to the next future timestamp, with a new `currentSlotToleranceMs` option in `findWindowStartIndex` and unit coverage to lock the behavior in.
 - **Architecture trim** — extracted shared `CardFallback`, `useDeferredMount`, and `useClimateComparison` primitives to replace duplicated and oversized hook code. Pure helpers for climate comparison and saved-locations sync moved to dedicated modules with direct unit coverage. Activated the previously-unused `usePanelPreload` hook so heavy lazy panels warm up during browser idle.
@@ -233,7 +302,7 @@ Other strong stories:
 
 - **Desktop hero shot** — current conditions hero, exposure metrics, and risk panels visible together so the bento composition is obvious.
 - **Mobile stack shot** — the dashboard at ≤420 px proving the layout stacks cleanly with no horizontal overflow.
-- **Trust-contract shot** — a card or trust-meta row showing `—` for a missing reading, captured with a network mock that returns null. This is the strongest single signal of the trust narrative.
+- **Trust-contract shot** — load `http://127.0.0.1:5173/?mock=missing` against the dev server to reproduce the missing-data state instantly. The hero card renders muted `—` placeholders for humidity, pressure, dew point, and several daily highs, with the helper note explaining "Some readings are unavailable from the provider." This is the strongest single signal of the trust narrative.
 - **Alert overflow shot** — five or more mocked alerts so the new "+ N more alerts not shown" footnote is visible.
 - **Empty/error states** — the unsupported-region alerts fallback, the refresh-error retry banner, and the permission-onboarding card. These say "the team thought about failure modes" louder than a polished happy-path shot.
 
