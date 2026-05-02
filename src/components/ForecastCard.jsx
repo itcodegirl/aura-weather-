@@ -160,14 +160,25 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
         />
       </div>
 
-      <div className="forecast-precip">
+      <div
+        className="forecast-precip"
+        aria-label={
+          hasNotableRainChance
+            ? `Rain chance ${rainChance} percent`
+            : "Low rain chance"
+        }
+      >
         {hasNotableRainChance ? (
           <>
-            <Droplets size={11} />
-            <span className="forecast-precip-value">{rainChance}%</span>
+            <Droplets size={11} aria-hidden="true" />
+            <span className="forecast-precip-value" aria-hidden="true">
+              {rainChance}%
+            </span>
           </>
         ) : (
-          <span className="forecast-precip-empty">Low</span>
+          <span className="forecast-precip-empty" aria-hidden="true">
+            Low
+          </span>
         )}
       </div>
     </li>
