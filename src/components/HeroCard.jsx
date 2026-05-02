@@ -326,6 +326,8 @@ function HeroCard({
           icon={<Wind size={18} />}
           label="Wind"
           value={windDisplay}
+          missing={windDisplay === MISSING_VALUE_LABEL}
+          title="Wind speed reading is temporarily unavailable from the upstream API."
         />
         <Stat
           icon={<Droplets size={18} />}
@@ -335,6 +337,8 @@ function HeroCard({
               ? `${Math.round(current.humidity)}%`
               : MISSING_VALUE_LABEL
           }
+          missing={!hasFiniteValue(current.humidity)}
+          title="Humidity reading is temporarily unavailable from the upstream API."
         />
         <Stat
           icon={<Gauge size={18} />}
@@ -344,11 +348,15 @@ function HeroCard({
               ? `${Math.round(current.pressure)} hPa`
               : MISSING_VALUE_LABEL
           }
+          missing={!hasFiniteValue(current.pressure)}
+          title="Pressure reading is temporarily unavailable from the upstream API."
         />
         <Stat
           icon={<Thermometer size={18} />}
           label="Dew Point"
           value={dewPoint === MISSING_VALUE_DASH ? MISSING_VALUE_LABEL : dewPoint}
+          missing={dewPoint === MISSING_VALUE_DASH}
+          title="Dew point reading is temporarily unavailable from the upstream API."
         />
       </div>
     </section>

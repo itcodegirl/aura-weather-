@@ -95,6 +95,8 @@ function StormRisk({ risk, cape, summaryId }) {
           </abbr>
         )}
         value={hasCape ? `${safeCape} J/kg` : MISSING_VALUE_LABEL}
+        missing={!hasCape}
+        title="CAPE reading is temporarily unavailable from the upstream API."
       />
     </div>
   );
@@ -279,6 +281,8 @@ function WindIntelligence({
             : MISSING_VALUE_LABEL
         }
         value={hasSustained ? `Gusts ${gustsDisplay}` : ""}
+        missing={!hasSustained}
+        title="Wind reading is temporarily unavailable from the upstream API."
       />
     </div>
   );
@@ -330,6 +334,8 @@ function ComfortIndex({ weather, unit }) {
         valueClassName="storm-detail-value"
         label="Dewpoint"
         value={dewpointDisplay}
+        missing={!hasDewpoint}
+        title="Dew point reading is temporarily unavailable from the upstream API."
       />
     </div>
   );
