@@ -113,20 +113,16 @@ describe("fetchHistoricalTemperatureAverage", () => {
     // station was offline. The Phase 1 strict-coercion contract must
     // hold here: missing samples drop out of the average rather than
     // pulling it toward 0°F.
-    //
-    // Generate date strings using today's UTC month/day so the
-    // function's date-suffix filter matches regardless of when the
-    // test runs.
-    const today = new Date();
-    const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-    const dd = String(today.getUTCDate()).padStart(2, "0");
-    const suffix = `${mm}-${dd}`;
-    const times = [1995, 1996, 1997, 1998, 1999].map((y) => `${y}-${suffix}`);
-
     globalThis.fetch = async () =>
       createJsonResponse({
         daily: {
-          time: times,
+          time: [
+            "1995-05-02",
+            "1996-05-02",
+            "1997-05-02",
+            "1998-05-02",
+            "1999-05-02",
+          ],
           temperature_2m_mean: [60, null, 62, "", 64],
           temperature_2m_min: [50, 52, 54, 56, 58],
           temperature_2m_max: [70, 72, 74, 76, 80],
