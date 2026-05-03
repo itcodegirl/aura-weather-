@@ -1,5 +1,6 @@
 import { memo } from "react";
 import HeaderControls from "../HeaderControls";
+import "./AppHeader.css";
 
 function AppHeader({
   citySearchRef,
@@ -30,7 +31,8 @@ function AppHeader({
       <div className="brand-wrap">
         <img
           src="/atmosphere-ring.svg"
-          alt="Atmospheric icon"
+          alt=""
+          aria-hidden="true"
           className="brand-mark"
           width="28"
           height="28"

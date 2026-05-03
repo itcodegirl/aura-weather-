@@ -1,5 +1,11 @@
 import { memo } from "react";
 
+const MISSING_VALUE_PLACEHOLDER = "—";
+
+function isMissingValue(value) {
+  return typeof value === "string" && value.trim() === MISSING_VALUE_PLACEHOLDER;
+}
+
 function Stat({
   icon,
   label,
@@ -10,41 +16,40 @@ function Stat({
   labelClassName = "stat-label",
   valueClassName = "stat-value",
   valueStyle,
-  missing = false,
-  title,
+  missing,
 }) {
   const hasIcon = Boolean(icon);
-  const dataState = missing ? "missing" : undefined;
-  const valueTitle = missing && typeof title === "string" ? title : undefined;
+  const isMissing = typeof missing === "boolean" ? missing : isMissingValue(value);
+  const finalValueClassName = isMissing
+    ? `${valueClassName} is-missing`.trim()
+    : valueClassName;
+  // Wraps the dash glyph with screen-reader copy that says "no data"
+  // instead of the literal em-dash, so the trust contract reads
+  // correctly to assistive tech as well as sighted users.
+  const renderedValue = isMissing ? (
+    <span aria-label="No data available">{value}</span>
+  ) : (
+    value
+  );
 
   if (!hasIcon) {
     return (
-      <div className={className} data-state={dataState}>
+      <div className={className}>
         <span className={labelClassName}>{label}</span>
-        <span
-          className={valueClassName}
-          style={valueStyle}
-          data-state={dataState}
-          title={valueTitle}
-        >
-          {value}
+        <span className={finalValueClassName} style={valueStyle}>
+          {renderedValue}
         </span>
       </div>
     );
   }
 
   return (
-    <div className={className} data-state={dataState}>
+    <div className={className}>
       <div className={iconClassName}>{icon}</div>
       <div className={bodyClassName}>
         <div className={labelClassName}>{label}</div>
-        <div
-          className={valueClassName}
-          style={valueStyle}
-          data-state={dataState}
-          title={valueTitle}
-        >
-          {value}
+        <div className={finalValueClassName} style={valueStyle}>
+          {renderedValue}
         </div>
       </div>
     </div>

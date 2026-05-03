@@ -13,13 +13,9 @@ import {
 } from "lucide-react";
 import { getWeather } from "../domain/weatherCodes";
 import { convertTemp } from "../utils/temperature";
+import { toFiniteNumber } from "../utils/numbers";
 import { formatWindSpeed } from "../domain/wind";
 import { formatSunClock, formatDaylightLengthLabel } from "../utils/sunlight";
-import {
-  hasFiniteValue,
-  MISSING_VALUE_DASH,
-  MISSING_VALUE_LABEL,
-} from "../utils/missingData";
 import WeatherIcon from "./WeatherIcon";
 import { DataTrustMeta, Stat } from "./ui";
 import "./HeroCard.css";
@@ -51,38 +47,42 @@ function HeroCard({
       ? safeLocation.country.trim()
       : "";
     const info = getWeather(current.conditionCode);
-    const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
-    const formatTempWithUnit = (value) => {
-      if (!hasFiniteValue(value)) {
-        return MISSING_VALUE_DASH;
-      }
+    const toDisplayTemp = (value) => {
       const converted = convertTemp(value, unit);
-      if (!Number.isFinite(converted)) {
-        return MISSING_VALUE_DASH;
-      }
-      return `${Math.round(converted)}${tempUnit}`;
+      return Number.isFinite(converted) ? Math.round(converted) : "\u2014";
+    };
+    // Renders the temperature with its unit suffix, or just the em-dash
+    // placeholder when the reading is missing (so the UI shows "\u2014"
+    // rather than the misleading "\u2014\u00b0F").
+    const formatTempDisplay = (value) => {
+      const display = toDisplayTemp(value);
+      return display === "\u2014" ? display : `${display}${unit === "F" ? "\u00b0F" : "\u00b0C"}`;
     };
 
     const toDisplayTempDelta = (deltaValue) => {
       const numericDelta = Number(deltaValue);
       if (!Number.isFinite(numericDelta)) {
-        return MISSING_VALUE_DASH;
+        return "\u2014";
       }
       const safeDelta = Math.abs(numericDelta);
       const convertedDelta = unit === "C" ? (safeDelta * 5) / 9 : safeDelta;
       return Math.round(convertedDelta);
     };
-    const hasCurrentTemp = hasFiniteValue(current.temperature);
-    const currentTempDisplay = hasCurrentTemp
-      ? Math.round(convertTemp(current.temperature, unit))
-      : MISSING_VALUE_DASH;
-    const feelsLikeDisplay = formatTempWithUnit(current.feelsLike);
-    const todayHigh = formatTempWithUnit(weather?.daily?.temperatureMax?.[0]);
-    const todayLow = formatTempWithUnit(weather?.daily?.temperatureMin?.[0]);
-    const windDisplay = hasFiniteValue(current.windSpeed)
-      ? formatWindSpeed(current.windSpeed, unit)
-      : MISSING_VALUE_LABEL;
-    const dewPoint = formatTempWithUnit(current.dewPoint);
+    const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
+    const todayHighDisplay = formatTempDisplay(
+      weather?.daily?.temperatureMax?.[0]
+    );
+    const todayLowDisplay = formatTempDisplay(
+      weather?.daily?.temperatureMin?.[0]
+    );
+    const windDisplay = formatWindSpeed(current.windSpeed, unit);
+    const dewPointDisplay = formatTempDisplay(current.dewPoint);
+    const humidityValue = toFiniteNumber(current.humidity);
+    const humidityDisplay =
+      humidityValue === null ? "—" : `${Math.round(humidityValue)}%`;
+    const pressureValue = toFiniteNumber(current.pressure);
+    const pressureDisplay =
+      pressureValue === null ? "—" : `${Math.round(pressureValue)} hPa`;
     const sunriseValue = weather?.daily?.sunrise?.[0] ?? "";
     const sunsetValue = weather?.daily?.sunset?.[0] ?? "";
     const sunriseLabel = formatSunClock(sunriseValue);
@@ -106,10 +106,9 @@ function HeroCard({
       else if (climateDeltaRaw < 0) climateDirection = "colder";
       else climateDirection = "about the same";
     }
+    const sampleYearsValue = toFiniteNumber(safeClimateComparison?.sampleYears);
     const climateSource = hasClimateComparison
-      ? `${Number.isFinite(Number(safeClimateComparison?.sampleYears))
-          ? Number(safeClimateComparison.sampleYears)
-          : 30}-year`
+      ? `${sampleYearsValue ?? 30}-year`
       : "";
     const climateDate =
       typeof safeClimateComparison?.referenceDateLabel === "string" &&
@@ -134,14 +133,15 @@ function HeroCard({
       info,
       safeLocationName,
       safeLocationCountry,
+      toDisplayTemp,
+      formatTempDisplay,
       tempUnit,
-      hasCurrentTemp,
-      currentTempDisplay,
-      feelsLikeDisplay,
-      todayHigh,
-      todayLow,
+      todayHighDisplay,
+      todayLowDisplay,
       windDisplay,
-      dewPoint,
+      dewPointDisplay,
+      humidityDisplay,
+      pressureDisplay,
       sunriseValue,
       sunsetValue,
       sunriseLabel,
@@ -177,14 +177,15 @@ function HeroCard({
     info,
     safeLocationName,
     safeLocationCountry,
+    toDisplayTemp,
+    formatTempDisplay,
     tempUnit,
-    hasCurrentTemp,
-    currentTempDisplay,
-    feelsLikeDisplay,
-    todayHigh,
-    todayLow,
+    todayHighDisplay,
+    todayLowDisplay,
     windDisplay,
-    dewPoint,
+    dewPointDisplay,
+    humidityDisplay,
+    pressureDisplay,
     sunriseValue,
     sunsetValue,
     sunriseLabel,
@@ -211,7 +212,7 @@ function HeroCard({
     climateStatus === "loading"
       ? "Comparing today's conditions with the historical average..."
       : climateStatus === "unavailable"
-        ? "Climate context is temporarily unavailable. Current weather is still live."
+        ? "Historical comparison is temporarily unavailable."
         : "";
 
   return (
@@ -239,11 +240,31 @@ function HeroCard({
         >
           <div className="hero-high-low-item">
             <span className="hero-high-low-label">High</span>
-            <span className="hero-high-low-value">{todayHigh}</span>
+            <span
+              className={`hero-high-low-value${
+                todayHighDisplay === "—" ? " is-missing" : ""
+              }`}
+            >
+              {todayHighDisplay === "—" ? (
+                <span aria-label="No data available">{todayHighDisplay}</span>
+              ) : (
+                todayHighDisplay
+              )}
+            </span>
           </div>
           <div className="hero-high-low-item">
             <span className="hero-high-low-label">Low</span>
-            <span className="hero-high-low-value">{todayLow}</span>
+            <span
+              className={`hero-high-low-value${
+                todayLowDisplay === "—" ? " is-missing" : ""
+              }`}
+            >
+              {todayLowDisplay === "—" ? (
+                <span aria-label="No data available">{todayLowDisplay}</span>
+              ) : (
+                todayLowDisplay
+              )}
+            </span>
           </div>
         </div>
       </header>
@@ -269,8 +290,8 @@ function HeroCard({
         <div className="hero-temp-block">
           <div className="hero-temp-row">
             <div className="hero-temp">
-              {currentTempDisplay}
-              {hasCurrentTemp && (
+              {toDisplayTemp(current.temperature)}
+              {toDisplayTemp(current.temperature) !== "—" && (
                 <span className="hero-temp-unit">{tempUnit}</span>
               )}
             </div>
@@ -280,9 +301,7 @@ function HeroCard({
           </div>
           <div className="hero-condition">{info.label}</div>
           <div className="hero-feels">
-            {feelsLikeDisplay === MISSING_VALUE_DASH
-              ? "Feels-like temperature unavailable"
-              : `Feels like ${feelsLikeDisplay}`}
+            Feels like {formatTempDisplay(current.feelsLike)}
           </div>
           {hasClimateComparison && (
             <p className="hero-insight">{climateMessage}</p>
@@ -326,39 +345,33 @@ function HeroCard({
           icon={<Wind size={18} />}
           label="Wind"
           value={windDisplay}
-          missing={windDisplay === MISSING_VALUE_LABEL}
-          title="Wind speed reading is temporarily unavailable from the upstream API."
         />
         <Stat
           icon={<Droplets size={18} />}
           label="Humidity"
-          value={
-            hasFiniteValue(current.humidity)
-              ? `${Math.round(current.humidity)}%`
-              : MISSING_VALUE_LABEL
-          }
-          missing={!hasFiniteValue(current.humidity)}
-          title="Humidity reading is temporarily unavailable from the upstream API."
+          value={humidityDisplay}
         />
         <Stat
           icon={<Gauge size={18} />}
           label="Pressure"
-          value={
-            hasFiniteValue(current.pressure)
-              ? `${Math.round(current.pressure)} hPa`
-              : MISSING_VALUE_LABEL
-          }
-          missing={!hasFiniteValue(current.pressure)}
-          title="Pressure reading is temporarily unavailable from the upstream API."
+          value={pressureDisplay}
         />
         <Stat
           icon={<Thermometer size={18} />}
           label="Dew Point"
-          value={dewPoint === MISSING_VALUE_DASH ? MISSING_VALUE_LABEL : dewPoint}
-          missing={dewPoint === MISSING_VALUE_DASH}
-          title="Dew point reading is temporarily unavailable from the upstream API."
+          value={dewPointDisplay}
         />
       </div>
+      {(humidityDisplay === "—" ||
+        pressureDisplay === "—" ||
+        dewPointDisplay === "—" ||
+        windDisplay === "—") && (
+        <p className="hero-stats-note" role="status">
+          Some readings are unavailable from the provider. Aura shows
+          “—” instead of a fallback value to keep the rest of the
+          forecast trustworthy.
+        </p>
+      )}
     </section>
   );
 }

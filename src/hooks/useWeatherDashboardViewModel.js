@@ -6,6 +6,7 @@ import {
 } from "../mocks/missingData";
 import { useSearchShortcut } from "./useAppShellEffects";
 import { useDisplayPreferences } from "./useDisplayPreferences";
+import { usePrefersReducedData } from "./usePrefersReducedData";
 import { useWeather } from "./useWeather";
 
 const NOOP = () => {};
@@ -41,12 +42,18 @@ function buildMissingMockViewModel() {
 export function useWeatherDashboardViewModel() {
   const { unit, setUnit, showClimateContext, setShowClimateContext } =
     useDisplayPreferences();
+  const prefersReducedData = usePrefersReducedData();
   const citySearchRef = useRef(null);
   const isMissingMock = useMemo(() => getInitialMissingMock(), []);
 
-  const weatherState = useWeather({
-    climateEnabled: showClimateContext && !isMissingMock,
-  });
+  // Honor the OS-level "reduce data" preference by suppressing the
+  // historical-archive fetch even when the user has climate context
+  // enabled. The toggle stays user-settable; this only narrows the
+  // network request. Also suppress when the missing-data mock is active
+  // since that state doesn't need a live archive fetch.
+  const climateEnabled = showClimateContext && !prefersReducedData && !isMissingMock;
+
+  const weatherState = useWeather({ climateEnabled });
   const mockState = useMemo(
     () => (isMissingMock ? buildMissingMockViewModel() : null),
     [isMissingMock]

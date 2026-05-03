@@ -2,20 +2,9 @@ import { memo, Suspense } from "react";
 import NowcastCard from "../NowcastCard";
 import AlertsCard from "../AlertsCard";
 import ForecastCard from "../ForecastCard";
+import PanelErrorBoundary from "../PanelErrorBoundary";
+import { CardFallback } from "../ui";
 import { HourlyPanel, StormWatchPanel } from "../lazyPanels";
-
-function CardFallback({ className, style, title, isRefreshing }) {
-  return (
-    <section
-      className={`${className} loading-card glass`}
-      style={style}
-      data-refreshing={isRefreshing ? "true" : undefined}
-      aria-busy={isRefreshing || undefined}
-    >
-      <p className="loading-card-title">{title}</p>
-    </section>
-  );
-}
 
 function SupplementalWeatherPanels({
   weather,
@@ -41,27 +30,33 @@ function SupplementalWeatherPanels({
         lastUpdatedAt={weatherFetchedAt}
         nowMs={nowMs}
       />
-      <Suspense
-        fallback={(
-          <CardFallback
-            className="bento-chart"
-            style={cardStyleVariables[4]}
-            title="Loading hourly outlook..."
-            isRefreshing={isBackgroundLoading}
-          />
-        )}
+      <PanelErrorBoundary
+        label="Hourly outlook"
+        className="bento-chart"
+        style={cardStyleVariables[4]}
       >
-        <HourlyPanel
-          weather={weather}
-          unit={unit}
-          chartTopColor={weatherInfo?.gradient?.[0]}
-          chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
-          style={cardStyleVariables[4]}
-          isRefreshing={isBackgroundLoading}
-          lastUpdatedAt={weatherFetchedAt}
-          nowMs={nowMs}
-        />
-      </Suspense>
+        <Suspense
+          fallback={(
+            <CardFallback
+              className="bento-chart"
+              style={cardStyleVariables[4]}
+              title="Loading hourly outlook..."
+              isRefreshing={isBackgroundLoading}
+            />
+          )}
+        >
+          <HourlyPanel
+            weather={weather}
+            unit={unit}
+            chartTopColor={weatherInfo?.gradient?.[0]}
+            chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
+            style={cardStyleVariables[4]}
+            isRefreshing={isBackgroundLoading}
+            lastUpdatedAt={weatherFetchedAt}
+            nowMs={nowMs}
+          />
+        </Suspense>
+      </PanelErrorBoundary>
 
       <h2
         id={groupLabelIds.riskSignals}
@@ -78,25 +73,31 @@ function SupplementalWeatherPanels({
         lastUpdatedAt={alertsFetchedAt}
         nowMs={nowMs}
       />
-      <Suspense
-        fallback={(
-          <CardFallback
-            className="bento-storm"
-            style={cardStyleVariables[6]}
-            title="Loading risk signals..."
-            isRefreshing={isBackgroundLoading}
-          />
-        )}
+      <PanelErrorBoundary
+        label="Storm watch"
+        className="bento-storm"
+        style={cardStyleVariables[6]}
       >
-        <StormWatchPanel
-          weather={weather}
-          unit={unit}
-          style={cardStyleVariables[6]}
-          isRefreshing={isBackgroundLoading}
-          lastUpdatedAt={weatherFetchedAt}
-          nowMs={nowMs}
-        />
-      </Suspense>
+        <Suspense
+          fallback={(
+            <CardFallback
+              className="bento-storm"
+              style={cardStyleVariables[6]}
+              title="Loading risk signals..."
+              isRefreshing={isBackgroundLoading}
+            />
+          )}
+        >
+          <StormWatchPanel
+            weather={weather}
+            unit={unit}
+            style={cardStyleVariables[6]}
+            isRefreshing={isBackgroundLoading}
+            lastUpdatedAt={weatherFetchedAt}
+            nowMs={nowMs}
+          />
+        </Suspense>
+      </PanelErrorBoundary>
 
       <h2
         id={groupLabelIds.weekAhead}
