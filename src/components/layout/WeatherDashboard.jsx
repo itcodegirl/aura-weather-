@@ -48,13 +48,50 @@ function WeatherDashboard({
   const [nowMs, setNowMs] = useState(() => Date.now());
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
 
+  // Keep DataTrustMeta's "Updated Nm ago" copy fresh — but only while
+  // the tab is visible. A hidden tab does not need to keep ticking
+  // the clock state, and pausing it avoids a steady churn of card
+  // re-renders for users who keep the dashboard open in a background
+  // tab. When the tab becomes visible again we tick once immediately
+  // so the labels are not stale.
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    if (typeof document === "undefined") {
+      return undefined;
+    }
+
+    let intervalId = null;
+
+    const startTicking = () => {
+      if (intervalId !== null) return;
       setNowMs(Date.now());
-    }, 60_000);
+      intervalId = setInterval(() => {
+        setNowMs(Date.now());
+      }, 60_000);
+    };
+
+    const stopTicking = () => {
+      if (intervalId === null) return;
+      clearInterval(intervalId);
+      intervalId = null;
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        startTicking();
+      } else {
+        stopTicking();
+      }
+    };
+
+    if (document.visibilityState === "visible") {
+      startTicking();
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      clearInterval(intervalId);
+      stopTicking();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
