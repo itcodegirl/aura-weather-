@@ -27,10 +27,10 @@ function ExposureSection({
   const uvStatus = getUvStatus(uvValue);
   const aqiSupportText = hasAqiData
     ? `Current AQI is ${Math.round(aqiValue)} out of 300.`
-    : "Air quality data is temporarily unavailable.";
+    : "Air quality data is temporarily unavailable. Check back after the next refresh.";
   const uvSupportText = hasUvData
     ? `Peak UV is ${uvValue.toFixed(1)} on an 11+ scale.`
-    : "UV data is temporarily unavailable.";
+    : "UV data is temporarily unavailable. Check back after the next refresh.";
 
   return (
     <section
