@@ -296,31 +296,46 @@ function HeroCard({
         />
       )}
 
-      <div className="hero-main">
-        <div className="hero-temp-block">
-          <div className="hero-temp-row">
-            <div className="hero-temp">
-              {toDisplayTemp(current.temperature)}
-              {!isMissingPlaceholder(toDisplayTemp(current.temperature)) && (
-                <span className="hero-temp-unit">{tempUnit}</span>
+      {(() => {
+        const heroTempDisplay = toDisplayTemp(current.temperature);
+        const isHeroTempMissing = isMissingPlaceholder(heroTempDisplay);
+        return (
+          <div className="hero-main">
+            <div className="hero-temp-block">
+              <div className="hero-temp-row">
+                <div
+                  className={`hero-temp${isHeroTempMissing ? " is-missing" : ""}`}
+                  aria-label={
+                    isHeroTempMissing ? "Current temperature unavailable" : undefined
+                  }
+                >
+                  {isHeroTempMissing ? (
+                    <span aria-hidden="true">{heroTempDisplay}</span>
+                  ) : (
+                    heroTempDisplay
+                  )}
+                  {!isHeroTempMissing && (
+                    <span className="hero-temp-unit">{tempUnit}</span>
+                  )}
+                </div>
+                <div className="hero-icon">
+                  <WeatherIcon code={current.conditionCode} size={124} animated />
+                </div>
+              </div>
+              <div className="hero-condition">{info.label}</div>
+              <div className="hero-feels">
+                Feels like {formatTempDisplay(current.feelsLike)}
+              </div>
+              {hasClimateComparison && (
+                <p className="hero-insight">{climateMessage}</p>
+              )}
+              {!hasClimateComparison && climateFallbackMessage && (
+                <p className="hero-insight">{climateFallbackMessage}</p>
               )}
             </div>
-            <div className="hero-icon">
-              <WeatherIcon code={current.conditionCode} size={124} animated />
-            </div>
           </div>
-          <div className="hero-condition">{info.label}</div>
-          <div className="hero-feels">
-            Feels like {formatTempDisplay(current.feelsLike)}
-          </div>
-          {hasClimateComparison && (
-            <p className="hero-insight">{climateMessage}</p>
-          )}
-          {!hasClimateComparison && climateFallbackMessage && (
-            <p className="hero-insight">{climateFallbackMessage}</p>
-          )}
-        </div>
-      </div>
+        );
+      })()}
 
       <div className="hero-sunlight" role="group" aria-label="Sunlight details">
         <div className="hero-sun-chip">
