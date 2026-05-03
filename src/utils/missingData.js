@@ -2,10 +2,7 @@ export const MISSING_VALUE_DASH = "—";
 export const MISSING_VALUE_LABEL = "Data unavailable";
 
 export function toFiniteNumber(value, fallback = null) {
-  if (value === null || value === undefined) {
-    return fallback;
-  }
-  if (typeof value === "string" && value.trim() === "") {
+  if (value == null || (typeof value === "string" && value.trim() === "")) {
     return fallback;
   }
   const numeric = Number(value);
