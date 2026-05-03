@@ -124,9 +124,27 @@
   transform-origin: center;
 }
 
-.hourly-point:hover {
+/* The visible circle is intentionally small for chart density. The
+   sibling .hourly-point-hit is a transparent 14px-radius hit area
+   that captures hover/touch and grows the visible point so users
+   know exactly which sample they are reading. */
+.hourly-point-hit {
+  cursor: default;
+}
+
+.hourly-point-group:hover .hourly-point,
+.hourly-point-group:focus-within .hourly-point {
   opacity: 1;
-  transform: scale(1.18);
+  transform: scale(1.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hourly-point,
+  .hourly-point-group:hover .hourly-point,
+  .hourly-point-group:focus-within .hourly-point {
+    transition: none;
+    transform: none;
+  }
 }
 
 @media (max-width: 980px) {
