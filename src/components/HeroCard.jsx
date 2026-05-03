@@ -12,8 +12,15 @@ import {
   Sun,
 } from "lucide-react";
 import { getWeather } from "../domain/weatherCodes";
-import { convertTemp } from "../utils/temperature";
-import { toFiniteNumber } from "../utils/numbers";
+import {
+  formatTemperatureValue,
+  formatTemperatureWithUnit,
+} from "../utils/temperature";
+import {
+  MISSING_VALUE_PLACEHOLDER,
+  isMissingPlaceholder,
+  toFiniteNumber,
+} from "../utils/numbers";
 import { formatWindSpeed } from "../domain/wind";
 import { formatSunClock, formatDaylightLengthLabel } from "../utils/sunlight";
 import WeatherIcon from "./WeatherIcon";
@@ -47,22 +54,16 @@ function HeroCard({
       ? safeLocation.country.trim()
       : "";
     const info = getWeather(current.conditionCode);
-    const toDisplayTemp = (value) => {
-      const converted = convertTemp(value, unit);
-      return Number.isFinite(converted) ? Math.round(converted) : "\u2014";
-    };
-    // Renders the temperature with its unit suffix, or just the em-dash
-    // placeholder when the reading is missing (so the UI shows "\u2014"
-    // rather than the misleading "\u2014\u00b0F").
-    const formatTempDisplay = (value) => {
-      const display = toDisplayTemp(value);
-      return display === "\u2014" ? display : `${display}${unit === "F" ? "\u00b0F" : "\u00b0C"}`;
-    };
+    // Local convenience wrappers \u2014 keep the JSX readable. Both helpers
+    // delegate to the shared utils/temperature.js implementations so a
+    // future change to the missing-state contract lands in one place.
+    const toDisplayTemp = (value) => formatTemperatureValue(value, unit);
+    const formatTempDisplay = (value) => formatTemperatureWithUnit(value, unit);
 
     const toDisplayTempDelta = (deltaValue) => {
-      const numericDelta = Number(deltaValue);
-      if (!Number.isFinite(numericDelta)) {
-        return "\u2014";
+      const numericDelta = toFiniteNumber(deltaValue);
+      if (numericDelta === null) {
+        return MISSING_VALUE_PLACEHOLDER;
       }
       const safeDelta = Math.abs(numericDelta);
       const convertedDelta = unit === "C" ? (safeDelta * 5) / 9 : safeDelta;
@@ -79,10 +80,14 @@ function HeroCard({
     const dewPointDisplay = formatTempDisplay(current.dewPoint);
     const humidityValue = toFiniteNumber(current.humidity);
     const humidityDisplay =
-      humidityValue === null ? "—" : `${Math.round(humidityValue)}%`;
+      humidityValue === null
+        ? MISSING_VALUE_PLACEHOLDER
+        : `${Math.round(humidityValue)}%`;
     const pressureValue = toFiniteNumber(current.pressure);
     const pressureDisplay =
-      pressureValue === null ? "—" : `${Math.round(pressureValue)} hPa`;
+      pressureValue === null
+        ? MISSING_VALUE_PLACEHOLDER
+        : `${Math.round(pressureValue)} hPa`;
     const sunriseValue = weather?.daily?.sunrise?.[0] ?? "";
     const sunsetValue = weather?.daily?.sunset?.[0] ?? "";
     const sunriseLabel = formatSunClock(sunriseValue);
@@ -236,16 +241,21 @@ function HeroCard({
         <div
           className="hero-high-low"
           role="group"
-          aria-label="Today's high and low temperatures"
+          aria-label={
+            isMissingPlaceholder(todayHighDisplay) &&
+            isMissingPlaceholder(todayLowDisplay)
+              ? "Today's high and low temperatures unavailable"
+              : "Today's high and low temperatures"
+          }
         >
           <div className="hero-high-low-item">
             <span className="hero-high-low-label">High</span>
             <span
               className={`hero-high-low-value${
-                todayHighDisplay === "—" ? " is-missing" : ""
+                isMissingPlaceholder(todayHighDisplay) ? " is-missing" : ""
               }`}
             >
-              {todayHighDisplay === "—" ? (
+              {isMissingPlaceholder(todayHighDisplay) ? (
                 <span aria-label="No data available">{todayHighDisplay}</span>
               ) : (
                 todayHighDisplay
@@ -256,10 +266,10 @@ function HeroCard({
             <span className="hero-high-low-label">Low</span>
             <span
               className={`hero-high-low-value${
-                todayLowDisplay === "—" ? " is-missing" : ""
+                isMissingPlaceholder(todayLowDisplay) ? " is-missing" : ""
               }`}
             >
-              {todayLowDisplay === "—" ? (
+              {isMissingPlaceholder(todayLowDisplay) ? (
                 <span aria-label="No data available">{todayLowDisplay}</span>
               ) : (
                 todayLowDisplay
@@ -291,7 +301,7 @@ function HeroCard({
           <div className="hero-temp-row">
             <div className="hero-temp">
               {toDisplayTemp(current.temperature)}
-              {toDisplayTemp(current.temperature) !== "—" && (
+              {!isMissingPlaceholder(toDisplayTemp(current.temperature)) && (
                 <span className="hero-temp-unit">{tempUnit}</span>
               )}
             </div>
@@ -362,10 +372,10 @@ function HeroCard({
           value={dewPointDisplay}
         />
       </div>
-      {(humidityDisplay === "—" ||
-        pressureDisplay === "—" ||
-        dewPointDisplay === "—" ||
-        windDisplay === "—") && (
+      {(isMissingPlaceholder(humidityDisplay) ||
+        isMissingPlaceholder(pressureDisplay) ||
+        isMissingPlaceholder(dewPointDisplay) ||
+        isMissingPlaceholder(windDisplay)) && (
         <p className="hero-stats-note" role="status">
           Some readings are unavailable from the provider. Aura shows
           “—” instead of a fallback value to keep the rest of the

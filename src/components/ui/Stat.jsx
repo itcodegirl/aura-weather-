@@ -1,10 +1,7 @@
 import { memo } from "react";
+import { isMissingPlaceholder } from "../../utils/numbers";
 
-const MISSING_VALUE_PLACEHOLDER = "—";
-
-function isMissingValue(value) {
-  return typeof value === "string" && value.trim() === MISSING_VALUE_PLACEHOLDER;
-}
+const isMissingValue = isMissingPlaceholder;
 
 function Stat({
   icon,
