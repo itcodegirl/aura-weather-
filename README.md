@@ -130,7 +130,7 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`142` tests, including 10 React render tests via `@testing-library/react` + `jsdom`)
+- `npm test` passes (`160` tests, including 14 React render tests via `@testing-library/react` + `jsdom`)
 - `npm run build` passes
 - `npm run test:e2e` passes (`14` Playwright checks, including smoke, missing-data placeholder guard, unicode-escape leak guard, and visual regression)
 - `npm run test:lighthouse` passes the local budget gate
@@ -253,6 +253,29 @@ several daily highs are null. The current temperature stays real so
 the dashboard still looks like a working forecast — the point is
 that every other field degrades gracefully. The mock is gated on
 `import.meta.env.DEV` and is tree-shaken from production builds.
+
+## How this was audited
+
+Aura Weather went through a structured audit pass with a senior
+frontend engineer, UX reviewer, and hiring-manager hat on. Every
+batch followed the same six-step rhythm:
+
+1. **Stabilize** any obvious runtime bug or crash path.
+2. **Improve architecture** — duplicated logic, oversized hooks,
+   weak folder organisation.
+3. **Strengthen product logic** — missing-data fallbacks, retry
+   behaviour, persistence, recovery states.
+4. **Improve UX/UI** — mobile responsiveness, hierarchy, empty/error
+   states, accessibility, trust cues.
+5. **Testing and QA** — unit, integration, render, and E2E.
+6. **Portfolio readiness** — README, known limitations, case study
+   notes, recruiter-facing project narrative.
+
+A full ledger of the changes shipped during the audit is in
+[`CHANGELOG.md`](./CHANGELOG.md). The single strongest narrative is
+the [Data Trust Contract](#data-trust-contract) — a load-bearing rule
+that a missing reading is shown as missing, never as zero, and the
+four enforcement layers + four test layers that make it true.
 
 ## Recent Hardening
 
