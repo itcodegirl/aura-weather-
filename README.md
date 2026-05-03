@@ -275,7 +275,10 @@ A full ledger of the changes shipped during the audit is in
 [`CHANGELOG.md`](./CHANGELOG.md). The single strongest narrative is
 the [Data Trust Contract](#data-trust-contract) — a load-bearing rule
 that a missing reading is shown as missing, never as zero, and the
-four enforcement layers + four test layers that make it true.
+four enforcement layers + four test layers that make it true. There
+is a longer write-up in
+[`docs/case-study.md`](./docs/case-study.md) that walks through the
+bug, the contract, and the test pyramid.
 
 ## Recent Hardening
 
