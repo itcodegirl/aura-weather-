@@ -76,8 +76,11 @@ export function validateCoordinates(lat, lon) {
 }
 
 export function formatPrecipitation(value, targetUnit, sourceUnit = "F") {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) {
+  // Strict coercion: a null precip reading would otherwise coerce to
+  // 0 and render as "0.00 in" \u2014 implying a confident "no rain" reading
+  // when the API actually returned no sample.
+  const numeric = toFiniteNumber(value);
+  if (numeric === null) {
     return "\u2014";
   }
   const nonNegativeValue = Math.max(numeric, 0);
