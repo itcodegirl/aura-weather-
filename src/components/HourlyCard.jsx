@@ -382,17 +382,35 @@ function HourlyCard({
 
             {geometry.points.map((point) => {
               const info = getWeather(point.code);
+              const tooltip = `${point.label} - ${point.temp}\u00B0${unit} - ${info.label}`;
               return (
-                <circle
+                <g
                   key={`point-${point.time.getTime()}`}
-                  className="hourly-point"
-                  cx={point.x}
-                  cy={point.y}
-                  r="3.2"
-                  fill={topColor}
+                  className="hourly-point-group"
                 >
-                  <title>{`${point.label} - ${point.temp}\u00B0${unit} - ${info.label}`}</title>
-                </circle>
+                  {/* Visible point */}
+                  <circle
+                    className="hourly-point"
+                    cx={point.x}
+                    cy={point.y}
+                    r="3.2"
+                    fill={topColor}
+                  />
+                  {/* Larger transparent hit area so hover/touch is easy
+                      to land on \u2014 the visible circle is intentionally
+                      small for chart density. The native <title> on
+                      this hit circle drives the OS tooltip. */}
+                  <circle
+                    className="hourly-point-hit"
+                    cx={point.x}
+                    cy={point.y}
+                    r="14"
+                    fill="transparent"
+                    aria-label={tooltip}
+                  >
+                    <title>{tooltip}</title>
+                  </circle>
+                </g>
               );
             })}
           </svg>

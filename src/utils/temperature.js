@@ -5,7 +5,7 @@ import {
   normalizeTemperatureUnit,
   formatTemperature,
 } from "../domain/temperature.js";
-import { toFiniteNumber } from "./numbers.js";
+import { MISSING_VALUE_PLACEHOLDER, toFiniteNumber } from "./numbers.js";
 
 export {
   convertTemperature,
@@ -26,4 +26,28 @@ export function convertTemp(fahrenheit, unit) {
     return Math.round(numeric);
   }
   return Math.round(((numeric - 32) * 5) / 9);
+}
+
+/**
+ * Returns the rounded temperature value for display, or the missing
+ * placeholder when the input cannot be parsed. Intended for cases
+ * where the unit suffix is rendered separately (e.g. via a styled
+ * <span>).
+ */
+export function formatTemperatureValue(fahrenheit, unit) {
+  const converted = convertTemp(fahrenheit, unit);
+  return Number.isFinite(converted) ? String(converted) : MISSING_VALUE_PLACEHOLDER;
+}
+
+/**
+ * Returns "65°F" for a valid input or "—" for missing input. The unit
+ * suffix is intentionally suppressed on the missing path so the UI
+ * never renders the misleading "—°F" string.
+ */
+export function formatTemperatureWithUnit(fahrenheit, unit) {
+  const value = formatTemperatureValue(fahrenheit, unit);
+  if (value === MISSING_VALUE_PLACEHOLDER) {
+    return value;
+  }
+  return `${value}${unit === "C" ? "°C" : "°F"}`;
 }

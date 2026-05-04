@@ -108,21 +108,35 @@ describe("Open-Meteo alert coverage helpers", () => {
 });
 
 describe("fetchHistoricalTemperatureAverage", () => {
+  // The function under test computes the target month-day suffix from
+  // the system clock at call time, then filters archive entries by
+  // that suffix. Build the mock entries against today's clock so the
+  // tests do not silently start failing on a calendar-day boundary.
+  function buildArchiveTimes(yearOffsets) {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const parts = formatter.formatToParts(new Date());
+    const month = parts.find((part) => part.type === "month").value;
+    const day = parts.find((part) => part.type === "day").value;
+    const baseYear = Number(parts.find((part) => part.type === "year").value);
+    return yearOffsets.map(
+      (offset) => `${baseYear - offset}-${month}-${day}`
+    );
+  }
+
   test("ignores null and empty-string samples instead of averaging them as 0", async () => {
     // Historical archive responses can contain null entries when a
-    // station was offline. The Phase 1 strict-coercion contract must
-    // hold here: missing samples drop out of the average rather than
+    // station was offline. The strict-coercion contract must hold
+    // here: missing samples drop out of the average rather than
     // pulling it toward 0°F.
     globalThis.fetch = async () =>
       createJsonResponse({
         daily: {
-          time: [
-            "1995-05-02",
-            "1996-05-02",
-            "1997-05-02",
-            "1998-05-02",
-            "1999-05-02",
-          ],
+          time: buildArchiveTimes([5, 4, 3, 2, 1]),
           temperature_2m_mean: [60, null, 62, "", 64],
           temperature_2m_min: [50, 52, 54, 56, 58],
           temperature_2m_max: [70, 72, 74, 76, 80],
@@ -146,7 +160,7 @@ describe("fetchHistoricalTemperatureAverage", () => {
     globalThis.fetch = async () =>
       createJsonResponse({
         daily: {
-          time: ["1995-05-02"],
+          time: buildArchiveTimes([1]),
           temperature_2m_mean: [null],
           temperature_2m_min: [null],
           temperature_2m_max: [null],

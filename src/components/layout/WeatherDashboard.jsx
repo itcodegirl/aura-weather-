@@ -1,10 +1,11 @@
-import { lazy, memo, Suspense, useEffect, useState } from "react";
+import { lazy, memo, Suspense } from "react";
 import HeroCard from "../HeroCard";
 import RainCard from "../RainCard";
 import ExposureSection from "../ExposureSection";
 import { CardFallback } from "../ui";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { usePanelPreload } from "../../hooks/useAppShellEffects";
+import { useTimeNow } from "../../hooks/useTimeNow";
 import { PRELOAD_HEAVY_PANELS } from "../lazyPanels";
 import "./WeatherDashboard.css";
 const SupplementalWeatherPanels = lazy(() => import("./SupplementalWeatherPanels"));
@@ -45,18 +46,8 @@ function WeatherDashboard({
   weatherInfo,
   trustMeta,
 }) {
-  const [nowMs, setNowMs] = useState(() => Date.now());
+  const nowMs = useTimeNow();
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setNowMs(Date.now());
-    }, 60_000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
 
   usePanelPreload(PRELOAD_HEAVY_PANELS);
 
