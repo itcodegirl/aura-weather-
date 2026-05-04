@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --test",
-    "test:render": "node --test 'src/**/*.render.test.mjs'",
+    "test:render": "node scripts/run-render-tests.mjs",
     "test:components": "npm run test:render",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
