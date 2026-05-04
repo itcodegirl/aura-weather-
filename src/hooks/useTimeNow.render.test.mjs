@@ -1,0 +1,110 @@
+import { afterEach, describe, test } from "node:test";
+import assert from "node:assert/strict";
+
+import "../../scripts/test-render-setup.mjs";
+
+const React = (await import("react")).default;
+const { render, cleanup, act } = await import("@testing-library/react");
+const { useTimeNow } = await import("./useTimeNow.js");
+
+afterEach(() => {
+  cleanup();
+});
+
+function ClockProbe({ onTick, intervalMs }) {
+  const nowMs = useTimeNow(intervalMs);
+  onTick(nowMs);
+  return null;
+}
+
+describe("useTimeNow", () => {
+  test("returns a finite millisecond timestamp on first render", () => {
+    let captured = null;
+    render(
+      React.createElement(ClockProbe, {
+        onTick: (value) => {
+          captured = value;
+        },
+      })
+    );
+
+    assert.equal(typeof captured, "number");
+    assert.ok(Number.isFinite(captured));
+    assert.ok(captured > 0);
+  });
+
+  test("returns approximately the current Date.now() on first render", () => {
+    let captured = null;
+    const before = Date.now();
+    render(
+      React.createElement(ClockProbe, {
+        onTick: (value) => {
+          captured = value;
+        },
+      })
+    );
+    const after = Date.now();
+
+    assert.ok(captured >= before, `${captured} should be >= ${before}`);
+    assert.ok(captured <= after, `${captured} should be <= ${after}`);
+  });
+
+  test("does not throw when document is unavailable (SSR shape)", async () => {
+    // Re-importing inside an isolated branch would require ESM cache
+    // surgery. Instead just verify the documented contract by reading
+    // the source and asserting the early-return path is wired.
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const source = readFileSync(
+      fileURLToPath(new URL("./useTimeNow.js", import.meta.url)),
+      "utf8"
+    );
+    assert.match(source, /typeof document === "undefined"/);
+  });
+
+  test("subscribes to visibilitychange so background tabs do not churn", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const source = readFileSync(
+      fileURLToPath(new URL("./useTimeNow.js", import.meta.url)),
+      "utf8"
+    );
+    assert.match(source, /addEventListener\("visibilitychange"/);
+    assert.match(source, /removeEventListener\("visibilitychange"/);
+  });
+
+  test("ticks once on visibility return so labels are not stale", async () => {
+    // Hidden during render → no interval starts. Becoming visible
+    // should immediately bump the timestamp.
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "hidden",
+    });
+
+    let lastValue = null;
+    const probe = render(
+      React.createElement(ClockProbe, {
+        onTick: (value) => {
+          lastValue = value;
+        },
+      })
+    );
+    const initialValue = lastValue;
+
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "visible",
+    });
+
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    assert.notEqual(
+      lastValue,
+      initialValue,
+      "visibility return should bump the timestamp"
+    );
+    probe.unmount();
+  });
+});

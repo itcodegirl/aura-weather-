@@ -1,10 +1,11 @@
-import { lazy, memo, Suspense, useEffect, useState } from "react";
+import { lazy, memo, Suspense } from "react";
 import HeroCard from "../HeroCard";
 import RainCard from "../RainCard";
 import ExposureSection from "../ExposureSection";
 import { CardFallback } from "../ui";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { usePanelPreload } from "../../hooks/useAppShellEffects";
+import { useTimeNow } from "../../hooks/useTimeNow";
 import { PRELOAD_HEAVY_PANELS } from "../lazyPanels";
 import "./WeatherDashboard.css";
 const SupplementalWeatherPanels = lazy(() => import("./SupplementalWeatherPanels"));
@@ -45,55 +46,8 @@ function WeatherDashboard({
   weatherInfo,
   trustMeta,
 }) {
-  const [nowMs, setNowMs] = useState(() => Date.now());
+  const nowMs = useTimeNow();
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
-
-  // Keep DataTrustMeta's "Updated Nm ago" copy fresh — but only while
-  // the tab is visible. A hidden tab does not need to keep ticking
-  // the clock state, and pausing it avoids a steady churn of card
-  // re-renders for users who keep the dashboard open in a background
-  // tab. When the tab becomes visible again we tick once immediately
-  // so the labels are not stale.
-  useEffect(() => {
-    if (typeof document === "undefined") {
-      return undefined;
-    }
-
-    let intervalId = null;
-
-    const startTicking = () => {
-      if (intervalId !== null) return;
-      setNowMs(Date.now());
-      intervalId = setInterval(() => {
-        setNowMs(Date.now());
-      }, 60_000);
-    };
-
-    const stopTicking = () => {
-      if (intervalId === null) return;
-      clearInterval(intervalId);
-      intervalId = null;
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        startTicking();
-      } else {
-        stopTicking();
-      }
-    };
-
-    if (document.visibilityState === "visible") {
-      startTicking();
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      stopTicking();
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
 
   usePanelPreload(PRELOAD_HEAVY_PANELS);
 

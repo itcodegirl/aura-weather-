@@ -99,6 +99,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+.hero-temp.is-missing {
+  /* The em-dash glyph at 122px reads like a typographic accident.
+     Shrink + mute it so missing temperature still feels intentional. */
+  font-size: clamp(48px, 6vw, 72px);
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: -0.02em;
+}
+
 .hero-temp-unit {
   margin-left: 6px;
   font-family: var(--font-display);
