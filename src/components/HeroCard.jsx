@@ -11,20 +11,10 @@ import {
   Sunset,
   Sun,
 } from "lucide-react";
-import { getWeather } from "../domain/weatherCodes";
-import {
-  formatTemperatureValue,
-  formatTemperatureWithUnit,
-} from "../utils/temperature";
-import {
-  MISSING_VALUE_PLACEHOLDER,
-  isMissingPlaceholder,
-  toFiniteNumber,
-} from "../utils/numbers";
-import { formatWindSpeed } from "../domain/wind";
-import { formatSunClock, formatDaylightLengthLabel } from "../utils/sunlight";
+import { isMissingPlaceholder } from "../utils/numbers";
 import WeatherIcon from "./WeatherIcon";
 import { DataTrustMeta, Stat } from "./ui";
+import { buildHeroData } from "./heroCard/buildHeroData";
 import "./HeroCard.css";
 
 function HeroCard({
@@ -40,123 +30,10 @@ function HeroCard({
   climateLastUpdatedAt,
   nowMs,
 }) {
-  const heroData = useMemo(() => {
-    if (!weather?.current || !location) {
-      return null;
-    }
-
-    const current = weather.current;
-    const safeLocation = location && typeof location === "object" ? location : {};
-    const safeLocationName = typeof safeLocation.name === "string" && safeLocation.name.trim()
-      ? safeLocation.name.trim()
-      : "Current location";
-    const safeLocationCountry = typeof safeLocation.country === "string" && safeLocation.country.trim()
-      ? safeLocation.country.trim()
-      : "";
-    const info = getWeather(current.conditionCode);
-    // Local convenience wrappers \u2014 keep the JSX readable. Both helpers
-    // delegate to the shared utils/temperature.js implementations so a
-    // future change to the missing-state contract lands in one place.
-    const toDisplayTemp = (value) => formatTemperatureValue(value, unit);
-    const formatTempDisplay = (value) => formatTemperatureWithUnit(value, unit);
-
-    const toDisplayTempDelta = (deltaValue) => {
-      const numericDelta = toFiniteNumber(deltaValue);
-      if (numericDelta === null) {
-        return MISSING_VALUE_PLACEHOLDER;
-      }
-      const safeDelta = Math.abs(numericDelta);
-      const convertedDelta = unit === "C" ? (safeDelta * 5) / 9 : safeDelta;
-      return Math.round(convertedDelta);
-    };
-    const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
-    const todayHighDisplay = formatTempDisplay(
-      weather?.daily?.temperatureMax?.[0]
-    );
-    const todayLowDisplay = formatTempDisplay(
-      weather?.daily?.temperatureMin?.[0]
-    );
-    const windDisplay = formatWindSpeed(current.windSpeed, unit);
-    const dewPointDisplay = formatTempDisplay(current.dewPoint);
-    const humidityValue = toFiniteNumber(current.humidity);
-    const humidityDisplay =
-      humidityValue === null
-        ? MISSING_VALUE_PLACEHOLDER
-        : `${Math.round(humidityValue)}%`;
-    const pressureValue = toFiniteNumber(current.pressure);
-    const pressureDisplay =
-      pressureValue === null
-        ? MISSING_VALUE_PLACEHOLDER
-        : `${Math.round(pressureValue)} hPa`;
-    const sunriseValue = weather?.daily?.sunrise?.[0] ?? "";
-    const sunsetValue = weather?.daily?.sunset?.[0] ?? "";
-    const sunriseLabel = formatSunClock(sunriseValue);
-    const sunsetLabel = formatSunClock(sunsetValue);
-    const daylightLabel = formatDaylightLengthLabel(sunriseValue, sunsetValue, {
-      fallback: "\u2014",
-    });
-    const safeClimateComparison =
-      climateComparison && typeof climateComparison === "object"
-        ? climateComparison
-        : null;
-    const climateDifference = Number(safeClimateComparison?.difference);
-    const hasClimateComparison = Number.isFinite(climateDifference);
-    const climateDeltaRaw = hasClimateComparison
-      ? climateDifference
-      : null;
-    const climateDelta = hasClimateComparison ? toDisplayTempDelta(climateDeltaRaw) : "\u2014";
-    let climateDirection = "";
-    if (hasClimateComparison) {
-      if (climateDeltaRaw > 0) climateDirection = "warmer";
-      else if (climateDeltaRaw < 0) climateDirection = "colder";
-      else climateDirection = "about the same";
-    }
-    const sampleYearsValue = toFiniteNumber(safeClimateComparison?.sampleYears);
-    const climateSource = hasClimateComparison
-      ? `${sampleYearsValue ?? 30}-year`
-      : "";
-    const climateDate =
-      typeof safeClimateComparison?.referenceDateLabel === "string" &&
-      safeClimateComparison.referenceDateLabel.trim()
-        ? safeClimateComparison.referenceDateLabel.trim()
-        : "today";
-    const climateLocation = safeLocationName || "this location";
-    const climateMessage = hasClimateComparison
-      ? climateDirection === "about the same"
-        ? `Today is about the same as the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`
-        : `Today is ${climateDelta}${tempUnit} ${climateDirection} than the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`
-      : "";
-
-    const today = new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-
-    return {
-      current,
-      info,
-      safeLocationName,
-      safeLocationCountry,
-      toDisplayTemp,
-      formatTempDisplay,
-      tempUnit,
-      todayHighDisplay,
-      todayLowDisplay,
-      windDisplay,
-      dewPointDisplay,
-      humidityDisplay,
-      pressureDisplay,
-      sunriseValue,
-      sunsetValue,
-      sunriseLabel,
-      sunsetLabel,
-      daylightLabel,
-      hasClimateComparison,
-      climateMessage,
-      today,
-    };
-  }, [weather, location, unit, climateComparison]);
+  const heroData = useMemo(
+    () => buildHeroData({ weather, location, unit, climateComparison }),
+    [weather, location, unit, climateComparison]
+  );
 
   if (!heroData) {
     return (
@@ -182,15 +59,16 @@ function HeroCard({
     info,
     safeLocationName,
     safeLocationCountry,
-    toDisplayTemp,
-    formatTempDisplay,
-    tempUnit,
+    currentTempDisplay,
+    isCurrentTempMissing,
+    feelsLikeDisplay,
+    dewPointDisplay,
     todayHighDisplay,
     todayLowDisplay,
     windDisplay,
-    dewPointDisplay,
     humidityDisplay,
     pressureDisplay,
+    heroStatsHaveAnyMissing,
     sunriseValue,
     sunsetValue,
     sunriseLabel,
@@ -199,6 +77,7 @@ function HeroCard({
     hasClimateComparison,
     climateMessage,
     today,
+    tempUnit,
   } = heroData;
   const shouldShowClimateMeta = showClimateContext && climateStatus !== "disabled";
   const climateMetaStatusLabel =
@@ -219,6 +98,9 @@ function HeroCard({
       : climateStatus === "unavailable"
         ? "Historical comparison is temporarily unavailable."
         : "";
+
+  const isHighMissing = isMissingPlaceholder(todayHighDisplay);
+  const isLowMissing = isMissingPlaceholder(todayLowDisplay);
 
   return (
     <section
@@ -242,8 +124,7 @@ function HeroCard({
           className="hero-high-low"
           role="group"
           aria-label={
-            isMissingPlaceholder(todayHighDisplay) &&
-            isMissingPlaceholder(todayLowDisplay)
+            isHighMissing && isLowMissing
               ? "Today's high and low temperatures unavailable"
               : "Today's high and low temperatures"
           }
@@ -252,10 +133,10 @@ function HeroCard({
             <span className="hero-high-low-label">High</span>
             <span
               className={`hero-high-low-value${
-                isMissingPlaceholder(todayHighDisplay) ? " is-missing" : ""
+                isHighMissing ? " is-missing" : ""
               }`}
             >
-              {isMissingPlaceholder(todayHighDisplay) ? (
+              {isHighMissing ? (
                 <span aria-label="No data available">{todayHighDisplay}</span>
               ) : (
                 todayHighDisplay
@@ -266,10 +147,10 @@ function HeroCard({
             <span className="hero-high-low-label">Low</span>
             <span
               className={`hero-high-low-value${
-                isMissingPlaceholder(todayLowDisplay) ? " is-missing" : ""
+                isLowMissing ? " is-missing" : ""
               }`}
             >
-              {isMissingPlaceholder(todayLowDisplay) ? (
+              {isLowMissing ? (
                 <span aria-label="No data available">{todayLowDisplay}</span>
               ) : (
                 todayLowDisplay
@@ -296,46 +177,40 @@ function HeroCard({
         />
       )}
 
-      {(() => {
-        const heroTempDisplay = toDisplayTemp(current.temperature);
-        const isHeroTempMissing = isMissingPlaceholder(heroTempDisplay);
-        return (
-          <div className="hero-main">
-            <div className="hero-temp-block">
-              <div className="hero-temp-row">
-                <div
-                  className={`hero-temp${isHeroTempMissing ? " is-missing" : ""}`}
-                  aria-label={
-                    isHeroTempMissing ? "Current temperature unavailable" : undefined
-                  }
-                >
-                  {isHeroTempMissing ? (
-                    <span aria-hidden="true">{heroTempDisplay}</span>
-                  ) : (
-                    heroTempDisplay
-                  )}
-                  {!isHeroTempMissing && (
-                    <span className="hero-temp-unit">{tempUnit}</span>
-                  )}
-                </div>
-                <div className="hero-icon">
-                  <WeatherIcon code={current.conditionCode} size={124} animated />
-                </div>
-              </div>
-              <div className="hero-condition">{info.label}</div>
-              <div className="hero-feels">
-                Feels like {formatTempDisplay(current.feelsLike)}
-              </div>
-              {hasClimateComparison && (
-                <p className="hero-insight">{climateMessage}</p>
+      <div className="hero-main">
+        <div className="hero-temp-block">
+          <div className="hero-temp-row">
+            <div
+              className={`hero-temp${isCurrentTempMissing ? " is-missing" : ""}`}
+              aria-label={
+                isCurrentTempMissing
+                  ? "Current temperature unavailable"
+                  : undefined
+              }
+            >
+              {isCurrentTempMissing ? (
+                <span aria-hidden="true">{currentTempDisplay}</span>
+              ) : (
+                currentTempDisplay
               )}
-              {!hasClimateComparison && climateFallbackMessage && (
-                <p className="hero-insight">{climateFallbackMessage}</p>
+              {!isCurrentTempMissing && (
+                <span className="hero-temp-unit">{tempUnit}</span>
               )}
             </div>
+            <div className="hero-icon">
+              <WeatherIcon code={current.conditionCode} size={124} animated />
+            </div>
           </div>
-        );
-      })()}
+          <div className="hero-condition">{info.label}</div>
+          <div className="hero-feels">Feels like {feelsLikeDisplay}</div>
+          {hasClimateComparison && (
+            <p className="hero-insight">{climateMessage}</p>
+          )}
+          {!hasClimateComparison && climateFallbackMessage && (
+            <p className="hero-insight">{climateFallbackMessage}</p>
+          )}
+        </div>
+      </div>
 
       <div className="hero-sunlight" role="group" aria-label="Sunlight details">
         <div className="hero-sun-chip">
@@ -387,10 +262,7 @@ function HeroCard({
           value={dewPointDisplay}
         />
       </div>
-      {(isMissingPlaceholder(humidityDisplay) ||
-        isMissingPlaceholder(pressureDisplay) ||
-        isMissingPlaceholder(dewPointDisplay) ||
-        isMissingPlaceholder(windDisplay)) && (
+      {heroStatsHaveAnyMissing && (
         <p className="hero-stats-note" role="status">
           Some readings are unavailable from the provider. Aura shows
           “—” instead of a fallback value to keep the rest of the
@@ -402,5 +274,3 @@ function HeroCard({
 }
 
 export default memo(HeroCard);
-
-

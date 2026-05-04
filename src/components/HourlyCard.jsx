@@ -388,7 +388,7 @@ function HourlyCard({
                   key={`point-${point.time.getTime()}`}
                   className="hourly-point-group"
                 >
-                  {/* Visible point */}
+                  {/* Visible point \u2014 kept small for chart density. */}
                   <circle
                     className="hourly-point"
                     cx={point.x}
@@ -396,10 +396,10 @@ function HourlyCard({
                     r="3.2"
                     fill={topColor}
                   />
-                  {/* Larger transparent hit area so hover/touch is easy
-                      to land on \u2014 the visible circle is intentionally
-                      small for chart density. The native <title> on
-                      this hit circle drives the OS tooltip. */}
+                  {/* Larger transparent hit area so hover and touch are
+                      easy to land on. The native <title> drives the OS
+                      tooltip and the aria-label is announced when the
+                      element is focused. */}
                   <circle
                     className="hourly-point-hit"
                     cx={point.x}

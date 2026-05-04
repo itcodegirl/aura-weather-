@@ -1,5 +1,6 @@
 import { ChevronDown, Cloud } from "lucide-react";
 import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { toFiniteNumber } from "../../utils/numbers";
 
 function SyncAccountPanel({
   syncConnected,
@@ -36,8 +37,10 @@ function SyncAccountPanel({
     return "Optional";
   }, [syncConnected, syncErrorText]);
   const syncLastUpdatedLabel = useMemo(() => {
-    const lastSyncedAt = Number(syncState?.lastSyncedAt);
-    if (!Number.isFinite(lastSyncedAt)) {
+    // Strict coercion: a null syncState.lastSyncedAt would otherwise
+    // coerce to 0 and render as "Last synced 12:00 AM" (epoch).
+    const lastSyncedAt = toFiniteNumber(syncState?.lastSyncedAt);
+    if (lastSyncedAt === null) {
       return "";
     }
 

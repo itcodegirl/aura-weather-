@@ -124,10 +124,10 @@
   transform-origin: center;
 }
 
-/* The visible circle is intentionally small for chart density. The
-   sibling .hourly-point-hit is a transparent 14px-radius hit area
-   that captures hover/touch and grows the visible point so users
-   know exactly which sample they are reading. */
+/* The visible point (.hourly-point) is intentionally small for chart
+   density. The sibling .hourly-point-hit is a transparent 14px-radius
+   circle that captures hover/touch and grows the visible point so
+   users know exactly which sample they are reading. */
 .hourly-point-hit {
   cursor: default;
 }

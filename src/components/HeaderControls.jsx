@@ -3,6 +3,7 @@ import CitySearch from "./CitySearch";
 import DisplaySettingsControls from "./header/DisplaySettingsControls";
 import SavedCitiesStrip from "./header/SavedCitiesStrip";
 import SyncAccountPanel from "./header/SyncAccountPanel";
+import { toFiniteNumber } from "../utils/numbers";
 
 function HeaderControls({
   citySearchRef,
@@ -30,9 +31,12 @@ function HeaderControls({
 }) {
   const handleCitySelect = useCallback(
     (city) => {
-      const lat = Number(city?.lat);
-      const lon = Number(city?.lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      // Strict coercion so a city with null lat/lon does not silently
+      // route to (0, 0) Null Island — Number(null) is 0 and would pass
+      // the legacy Number.isFinite check.
+      const lat = toFiniteNumber(city?.lat);
+      const lon = toFiniteNumber(city?.lon);
+      if (lat === null || lon === null) {
         return;
       }
       loadWeather(lat, lon, city.name, city.country);
