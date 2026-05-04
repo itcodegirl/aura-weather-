@@ -1,4 +1,23 @@
 /**
+ * The single em-dash glyph the dashboard uses everywhere a value is
+ * intentionally missing. Centralised so any consumer that needs to
+ * detect or render the placeholder references one constant instead of
+ * a literal "—" sprinkled across components.
+ */
+export const MISSING_VALUE_PLACEHOLDER = "—";
+
+/**
+ * Returns true when `value` matches the missing placeholder. Tolerates
+ * surrounding whitespace.
+ */
+export function isMissingPlaceholder(value) {
+  return (
+    typeof value === "string" &&
+    value.trim() === MISSING_VALUE_PLACEHOLDER
+  );
+}
+
+/**
  * Strict numeric coercion used at API and domain boundaries.
  *
  * Plain Number() coercion treats null, undefined, "" and false as 0,
