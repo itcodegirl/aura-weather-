@@ -1,4 +1,5 @@
 import { memo, useCallback } from "react";
+import { toFiniteNumber } from "../../utils/numbers";
 
 function SavedCitiesStrip({
   savedCities,
@@ -35,9 +36,18 @@ function SavedCitiesStrip({
     <div className="saved-cities-strip" role="list" aria-label="Saved cities">
       {safeSavedCities.map((city) => {
         const key = `${city.lat}:${city.lon}:${city.name}`;
+        // Strict equality through toFiniteNumber so a null/undefined
+        // active location does not coerce to 0 and falsely match a
+        // saved city with null lat/lon.
+        const activeLat = toFiniteNumber(location?.lat);
+        const activeLon = toFiniteNumber(location?.lon);
+        const cityLat = toFiniteNumber(city.lat);
+        const cityLon = toFiniteNumber(city.lon);
         const isActive =
-          Number(location?.lat) === Number(city.lat) &&
-          Number(location?.lon) === Number(city.lon);
+          activeLat !== null &&
+          activeLon !== null &&
+          activeLat === cityLat &&
+          activeLon === cityLon;
 
         return (
           <div

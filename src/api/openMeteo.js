@@ -345,8 +345,9 @@ export async function fetchAirQuality(lat, lon, options = {}) {
       `${ENDPOINTS.aqi}?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}&current=european_aqi`,
       { signal: options.signal }
     );
-    const aqi = Number(data?.current?.european_aqi);
-    return Number.isFinite(aqi) ? aqi : null;
+    // toFiniteNumber returns null for nullish/empty inputs; the legacy
+    // Number()-based check would have surfaced a null AQI as 0.
+    return toFiniteNumber(data?.current?.european_aqi);
   } catch {
     return null;
   }
