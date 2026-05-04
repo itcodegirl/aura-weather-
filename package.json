@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "node --test",
     "test:render": "node --test 'src/**/*.render.test.mjs'",
+    "test:components": "npm run test:render",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:visual": "playwright test e2e/visual-regression.spec.js",
