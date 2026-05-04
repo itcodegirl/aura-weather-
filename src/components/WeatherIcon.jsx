@@ -80,8 +80,13 @@ const iconColors = {
 };
 
 export default function WeatherIcon({ code, size = 24, className = "", animated = false }) {
-  const weatherCode = Number(code);
-  const normalizedCode = Number.isFinite(weatherCode) ? Math.trunc(weatherCode) : 0;
+  // Strict coercion: a null/undefined code coerces under Number() to
+  // 0 or NaN, both of which the legacy isFinite check would silently
+  // accept (NaN: fail, but 0: pass and render the Sun icon as if the
+  // sky were clear). toFiniteNumber rejects nullish inputs explicitly
+  // so the fallback is a deliberate decision, not a coincidence.
+  const parsedCode = toFiniteNumber(code);
+  const normalizedCode = parsedCode === null ? 0 : Math.trunc(parsedCode);
   const parsedSize = toFiniteNumber(size);
   const iconSize = parsedSize !== null && parsedSize > 0 ? parsedSize : 24;
   const safeClassName = typeof className === "string" ? className : "";
