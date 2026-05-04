@@ -86,10 +86,26 @@ describe("meteorology utils", () => {
     assert.equal(windDirectionName("bad"), "Variable");
   });
 
+  test("windDirectionName returns 'Variable' for nullish input (not 'N')", () => {
+    // Trust contract: a null heading must not silently coerce to 0
+    // and resolve to "N" — that would imply a confident "wind from
+    // the north" reading when the API returned no sample.
+    assert.equal(windDirectionName(null), "Variable");
+    assert.equal(windDirectionName(undefined), "Variable");
+    assert.equal(windDirectionName(""), "Variable");
+  });
+
   test("classifyWind uses mph thresholds and unit conversion", () => {
     assert.equal(classifyWind(2, "F"), "Calm");
     assert.equal(classifyWind(10, "F"), "Light breeze");
     assert.equal(classifyWind(16.0934, "C"), "Light breeze");
     assert.equal(classifyWind("bad", "F"), "Unknown");
+  });
+
+  test("classifyWind returns 'Unknown' for nullish input (not 'Calm')", () => {
+    // A null wind speed must not coerce to 0 and resolve to "Calm".
+    assert.equal(classifyWind(null, "F"), "Unknown");
+    assert.equal(classifyWind(undefined, "C"), "Unknown");
+    assert.equal(classifyWind("", "F"), "Unknown");
   });
 });

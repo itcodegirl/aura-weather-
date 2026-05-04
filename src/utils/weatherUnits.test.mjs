@@ -31,11 +31,26 @@ describe("weatherUnits", () => {
     assert.equal(formatWindSpeed("not-a-number", "C"), "\u2014");
   });
 
+  test("returns the missing placeholder for nullish wind speed (no fake 'Calm' reading)", () => {
+    // Trust contract: a null reading must surface as "\u2014", never as
+    // "0 mph" / "0 km/h" \u2014 which would imply a confident "calm
+    // conditions" measurement when the API returned no sample.
+    assert.equal(formatWindSpeed(null, "F"), "\u2014");
+    assert.equal(formatWindSpeed(undefined, "C"), "\u2014");
+    assert.equal(formatWindSpeed("", "F"), "\u2014");
+  });
+
   test("formats precipitation with source and target units", () => {
     assert.equal(formatPrecipitation(1, "F", "F"), "1.00 in");
     assert.equal(formatPrecipitation(25.4, "F", "C"), "1.00 in");
     assert.equal(formatPrecipitation(1, "C", "F"), "25.40 mm");
     assert.equal(formatPrecipitation("not-a-number", "C"), "\u2014");
+  });
+
+  test("returns the missing placeholder for nullish precipitation (no fake '0.00 in' reading)", () => {
+    assert.equal(formatPrecipitation(null, "F"), "\u2014");
+    assert.equal(formatPrecipitation(undefined, "C"), "\u2014");
+    assert.equal(formatPrecipitation("", "F"), "\u2014");
   });
 
   test("normalizes coordinates and keeps valid values", () => {
