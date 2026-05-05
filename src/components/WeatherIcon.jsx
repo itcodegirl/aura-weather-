@@ -80,8 +80,8 @@ const iconColors = {
 };
 
 export default function WeatherIcon({ code, size = 24, className = "", animated = false }) {
-  const weatherCode = Number(code);
-  const normalizedCode = Number.isFinite(weatherCode) ? Math.trunc(weatherCode) : 0;
+  const weatherCode = toFiniteNumber(code);
+  const normalizedCode = weatherCode !== null ? Math.trunc(weatherCode) : null;
   const parsedSize = toFiniteNumber(size);
   const iconSize = parsedSize !== null && parsedSize > 0 ? parsedSize : 24;
   const safeClassName = typeof className === "string" ? className : "";

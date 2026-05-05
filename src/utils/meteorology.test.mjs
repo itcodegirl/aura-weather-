@@ -34,6 +34,11 @@ describe("meteorology utils", () => {
       color: "#dc2626",
       score: 4,
     });
+    assert.deepEqual(classifyStormRisk(null, null), {
+      level: "Minimal",
+      color: "#38bdf8",
+      score: 0,
+    });
   });
 
   test("calculatePressureTrend detects rising/falling/stable signals", () => {
@@ -72,6 +77,13 @@ describe("meteorology utils", () => {
     });
   });
 
+  test("calculatePressureTrend filters null slots without counting them as 0 hPa", () => {
+    const times = buildHourlyIsoTimes(4, 0);
+    const result = calculatePressureTrend([null, null, 1010, 1012], times);
+    assert.ok(result.sparkline.every((v) => v !== 0), "null slots must not appear as 0 hPa");
+    assert.ok(result.sparkline.length > 0, "valid readings should still produce a sparkline");
+  });
+
   test("classifyComfort handles F/C input and invalid values", () => {
     assert.equal(classifyComfort(45, "F").level, "Dry");
     assert.equal(classifyComfort(10, "C").level, "Comfortable");
@@ -84,6 +96,8 @@ describe("meteorology utils", () => {
     assert.equal(windDirectionName(45), "NE");
     assert.equal(windDirectionName(225), "SW");
     assert.equal(windDirectionName("bad"), "Variable");
+    assert.equal(windDirectionName(null), "Variable");
+    assert.equal(windDirectionName(undefined), "Variable");
   });
 
   test("classifyWind uses mph thresholds and unit conversion", () => {
@@ -91,5 +105,7 @@ describe("meteorology utils", () => {
     assert.equal(classifyWind(10, "F"), "Light breeze");
     assert.equal(classifyWind(16.0934, "C"), "Light breeze");
     assert.equal(classifyWind("bad", "F"), "Unknown");
+    assert.equal(classifyWind(null, "F"), "Unknown");
+    assert.equal(classifyWind(undefined, "F"), "Unknown");
   });
 });

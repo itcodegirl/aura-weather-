@@ -1,3 +1,5 @@
+import { toFiniteNumber } from "../utils/numbers.js";
+
 /**
  * WMO weather interpretation codes from Open-Meteo.
  */
@@ -33,8 +35,8 @@ export const weatherCodes = {
 };
 
 export function getWeather(code) {
-  const numericCode = Number(code);
-  if (!Number.isFinite(numericCode)) {
+  const numericCode = toFiniteNumber(code);
+  if (numericCode === null) {
     return weatherCodes[0];
   }
 

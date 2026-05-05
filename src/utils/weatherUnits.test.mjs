@@ -29,6 +29,8 @@ describe("weatherUnits", () => {
     assert.equal(formatWindSpeed(10, "C"), "16 km/h");
     assert.equal(formatWindSpeed(20, "C"), "32 km/h");
     assert.equal(formatWindSpeed("not-a-number", "C"), "\u2014");
+    assert.equal(formatWindSpeed(null, "F"), "\u2014");
+    assert.equal(formatWindSpeed(undefined, "F"), "\u2014");
   });
 
   test("formats precipitation with source and target units", () => {
@@ -36,6 +38,8 @@ describe("weatherUnits", () => {
     assert.equal(formatPrecipitation(25.4, "F", "C"), "1.00 in");
     assert.equal(formatPrecipitation(1, "C", "F"), "25.40 mm");
     assert.equal(formatPrecipitation("not-a-number", "C"), "\u2014");
+    assert.equal(formatPrecipitation(null, "F"), "\u2014");
+    assert.equal(formatPrecipitation(undefined, "F"), "\u2014");
   });
 
   test("normalizes coordinates and keeps valid values", () => {

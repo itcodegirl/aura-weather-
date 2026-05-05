@@ -1,15 +1,14 @@
 import { toFahrenheit } from "./temperature.js";
+import { toFiniteNumber } from "../utils/numbers.js";
 
 /**
  * Classify storm risk using CAPE (Convective Available Potential Energy).
  */
 export function classifyStormRisk(cape, weatherCode) {
-  const capeValue = Number(cape);
-  const normalizedCape = Number.isFinite(capeValue) ? capeValue : 0;
-  const codeValue = Number(weatherCode);
-  const normalizedCode = Number.isFinite(codeValue)
-    ? Math.trunc(codeValue)
-    : Number.NaN;
+  const capeValue = toFiniteNumber(cape);
+  const normalizedCape = capeValue ?? 0;
+  const codeValue = toFiniteNumber(weatherCode);
+  const normalizedCode = codeValue !== null ? Math.trunc(codeValue) : Number.NaN;
   const isStormCode = [95, 96, 99].includes(normalizedCode);
 
   if (isStormCode || normalizedCape >= 2500) {
@@ -51,9 +50,9 @@ export function calculatePressureTrend(hourlyPressure, hourlyTime) {
   const maxIndex = Math.min(hourlyPressure.length, hourlyTime.length);
 
   for (let i = 0; i < maxIndex; i += 1) {
-    const value = Number(hourlyPressure[i]);
+    const value = toFiniteNumber(hourlyPressure[i]);
     const time = new Date(hourlyTime[i]).getTime();
-    if (Number.isFinite(value) && Number.isFinite(time)) {
+    if (value !== null && Number.isFinite(time)) {
       paired.push({ value, time });
     }
   }
