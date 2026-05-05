@@ -4,8 +4,8 @@ import { toFiniteNumber } from "../../utils/numbers";
 import "../MetricPanels.css";
 
 function clamp(value, min, max) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return min;
+  const numeric = toFiniteNumber(value);
+  if (numeric === null) return min;
   return Math.min(Math.max(numeric, min), max);
 }
 
@@ -41,7 +41,11 @@ function ArcGauge({
   const r = 44;
   const start = -140;
   const end = 100;
-  const safeValue = hasData ? Number(value).toFixed(decimals) : "\u2014";
+  const numericValue = toFiniteNumber(value);
+  const safeValue =
+    hasData && numericValue !== null
+      ? numericValue.toFixed(decimals)
+      : "\u2014";
   const gaugeLabel = hasData ? `${label} ${safeValue}` : `${label} unavailable`;
 
   return (
@@ -67,9 +71,9 @@ function ArcGauge({
 }
 
 function MetricDensityBar({ value, max, statusColor, hasData }) {
-  const safeValue = hasData
-    ? Math.max(0, Math.min(Number(value), max))
-    : 0;
+  const numeric = toFiniteNumber(value);
+  const safeValue =
+    hasData && numeric !== null ? Math.max(0, Math.min(numeric, max)) : 0;
   const progress = max > 0 ? (safeValue / max) * 100 : 0;
 
   return (

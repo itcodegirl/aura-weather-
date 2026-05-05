@@ -69,9 +69,9 @@ function getDatePartsInTimeZone(now, timeZone) {
   const yearPart = parts.find((part) => part.type === "year")?.value;
   const monthPart = parts.find((part) => part.type === "month")?.value;
   const dayPart = parts.find((part) => part.type === "day")?.value;
-  const year = Number(yearPart);
+  const year = toFiniteNumber(yearPart);
 
-  if (!Number.isFinite(year)) {
+  if (year === null) {
     return null;
   }
   if (!/^\d{2}$/.test(monthPart ?? "") || !/^\d{2}$/.test(dayPart ?? "")) {
@@ -398,7 +398,7 @@ export async function fetchSevereWeatherAlerts(lat, lon, options = {}) {
       throw error;
     }
 
-    const status = Number(error?.status);
+    const status = toFiniteNumber(error?.status);
     return {
       alerts: [],
       status:

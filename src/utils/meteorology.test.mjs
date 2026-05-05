@@ -34,11 +34,6 @@ describe("meteorology utils", () => {
       color: "#dc2626",
       score: 4,
     });
-    assert.deepEqual(classifyStormRisk(null, null), {
-      level: "Minimal",
-      color: "#38bdf8",
-      score: 0,
-    });
   });
 
   test("calculatePressureTrend detects rising/falling/stable signals", () => {
@@ -77,11 +72,27 @@ describe("meteorology utils", () => {
     });
   });
 
-  test("calculatePressureTrend filters null slots without counting them as 0 hPa", () => {
-    const times = buildHourlyIsoTimes(4, 0);
-    const result = calculatePressureTrend([null, null, 1010, 1012], times);
-    assert.ok(result.sparkline.every((v) => v !== 0), "null slots must not appear as 0 hPa");
-    assert.ok(result.sparkline.length > 0, "valid readings should still produce a sparkline");
+  test("calculatePressureTrend skips null pressure samples instead of treating them as 0", () => {
+    // A null hourly pressure must NOT coerce to 0 (a fake near-vacuum
+    // reading) and crash the rolling 6-hour delta downward into a
+    // false "Storm possible" signal.
+    const times = buildHourlyIsoTimes(8, 0);
+    const withNulls = calculatePressureTrend(
+      [1010, null, 1010, 1010, 1010, 1010, 1010, 1010],
+      times
+    );
+    assert.equal(withNulls.direction, "steady");
+    assert.equal(withNulls.interpretation, "Stable");
+  });
+
+  test("classifyStormRisk treats null cape as Minimal (not silently 0)", () => {
+    // The fallback IS 0 for cape, but the path must come from explicit
+    // strict coercion — not from Number(null) silently returning 0.
+    assert.deepEqual(classifyStormRisk(null, 0), {
+      level: "Minimal",
+      color: "#38bdf8",
+      score: 0,
+    });
   });
 
   test("classifyComfort handles F/C input and invalid values", () => {
@@ -96,8 +107,15 @@ describe("meteorology utils", () => {
     assert.equal(windDirectionName(45), "NE");
     assert.equal(windDirectionName(225), "SW");
     assert.equal(windDirectionName("bad"), "Variable");
+  });
+
+  test("windDirectionName returns 'Variable' for nullish input (not 'N')", () => {
+    // Trust contract: a null heading must not silently coerce to 0
+    // and resolve to "N" — that would imply a confident "wind from
+    // the north" reading when the API returned no sample.
     assert.equal(windDirectionName(null), "Variable");
     assert.equal(windDirectionName(undefined), "Variable");
+    assert.equal(windDirectionName(""), "Variable");
   });
 
   test("classifyWind uses mph thresholds and unit conversion", () => {
@@ -105,7 +123,12 @@ describe("meteorology utils", () => {
     assert.equal(classifyWind(10, "F"), "Light breeze");
     assert.equal(classifyWind(16.0934, "C"), "Light breeze");
     assert.equal(classifyWind("bad", "F"), "Unknown");
+  });
+
+  test("classifyWind returns 'Unknown' for nullish input (not 'Calm')", () => {
+    // A null wind speed must not coerce to 0 and resolve to "Calm".
     assert.equal(classifyWind(null, "F"), "Unknown");
-    assert.equal(classifyWind(undefined, "F"), "Unknown");
+    assert.equal(classifyWind(undefined, "C"), "Unknown");
+    assert.equal(classifyWind("", "F"), "Unknown");
   });
 });

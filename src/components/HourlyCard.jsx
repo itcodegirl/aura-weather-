@@ -153,9 +153,11 @@ function getHourlySummary(data, unit) {
     return "Hourly temperature data is temporarily unavailable.";
   }
 
+  // Strict coercion: a null entry.temp would silently land as 0 and
+  // crash the min/max into a fake "0 degrees" reading in the summary.
   const validTemps = data
-    .map((entry) => Number(entry?.temp))
-    .filter((value) => Number.isFinite(value));
+    .map((entry) => toFiniteNumber(entry?.temp))
+    .filter((value) => value !== null);
   if (validTemps.length === 0) {
     return "Hourly temperature data is temporarily unavailable.";
   }

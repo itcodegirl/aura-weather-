@@ -1,16 +1,18 @@
+import { toFiniteNumber as toStrictFiniteNumber } from "./numbers.js";
+
 export const MISSING_VALUE_DASH = "—";
 export const MISSING_VALUE_LABEL = "Data unavailable";
 
+// Delegate to the canonical strict helper. The previous local copy
+// allowed booleans and objects through, which silently masked shape
+// mismatches in upstream API payloads.
 export function toFiniteNumber(value, fallback = null) {
-  if (value == null || (typeof value === "string" && value.trim() === "")) {
-    return fallback;
-  }
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : fallback;
+  const numeric = toStrictFiniteNumber(value);
+  return numeric === null ? fallback : numeric;
 }
 
 export function hasFiniteValue(value) {
-  return toFiniteNumber(value) !== null;
+  return toStrictFiniteNumber(value) !== null;
 }
 
 export function formatMissingValue({ unavailable = false } = {}) {
