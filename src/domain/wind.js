@@ -4,9 +4,6 @@ import { toFiniteNumber } from "../utils/numbers.js";
 export const WIND_SPEED_CONVERSION = 1.60934;
 
 export function formatWindSpeed(speed, targetUnit) {
-  // Strict coercion: a null wind speed would otherwise coerce to 0
-  // and render as "0 mph" / "0 km/h" \u2014 implying a confident "calm
-  // conditions" reading when the API actually returned no sample.
   const numeric = toFiniteNumber(speed);
   if (numeric === null) {
     return "\u2014";
