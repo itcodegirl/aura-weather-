@@ -34,6 +34,11 @@ describe("meteorology utils", () => {
       color: "#dc2626",
       score: 4,
     });
+    assert.deepEqual(classifyStormRisk(null, null), {
+      level: "Minimal",
+      color: "#38bdf8",
+      score: 0,
+    });
   });
 
   test("calculatePressureTrend detects rising/falling/stable signals", () => {
@@ -70,6 +75,13 @@ describe("meteorology utils", () => {
       interpretation: "No data",
       sparkline: [],
     });
+  });
+
+  test("calculatePressureTrend filters null slots without counting them as 0 hPa", () => {
+    const times = buildHourlyIsoTimes(4, 0);
+    const result = calculatePressureTrend([null, null, 1010, 1012], times);
+    assert.ok(result.sparkline.every((v) => v !== 0), "null slots must not appear as 0 hPa");
+    assert.ok(result.sparkline.length > 0, "valid readings should still produce a sparkline");
   });
 
   test("classifyComfort handles F/C input and invalid values", () => {
