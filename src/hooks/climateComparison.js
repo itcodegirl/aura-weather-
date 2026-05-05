@@ -1,15 +1,11 @@
+import { toFiniteNumber } from "../utils/numbers.js";
+
 export const SOURCE_TEMPERATURE_UNIT = "F";
 
-function toFiniteTemperature(value) {
-  // Reject null/undefined explicitly — Number(null) is 0, which would
-  // produce a fake "65°F warmer than average" comparison when the
-  // archive returns no usable sample.
-  if (value === null || value === undefined) {
-    return null;
-  }
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
-}
+// Reject null/undefined explicitly — Number(null) is 0, which would
+// produce a fake "65°F warmer than average" comparison when the
+// archive returns no usable sample.
+const toFiniteTemperature = toFiniteNumber;
 
 /**
  * Combines a forecast snapshot with a historical archive sample to

@@ -19,17 +19,14 @@ import {
 } from "../domain";
 import { convertTemp } from "../utils/temperature";
 import { formatWindSpeed } from "../domain/wind";
-import {
-  hasFiniteValue,
-  toFiniteNumber,
-  MISSING_VALUE_DASH,
-} from "../utils/missingData";
+import { toFiniteNumber, MISSING_VALUE_DASH } from "../utils/missingData";
 import { CardHeader, DataTrustMeta, InfoDrawer, Stat } from "./ui";
 import "./StormWatch.css";
 
 function StormRisk({ risk, cape, summaryId }) {
-  const hasCape = hasFiniteValue(cape);
-  const safeCape = hasCape ? Math.round(Number(cape)) : null;
+  const capeNumeric = toFiniteNumber(cape);
+  const hasCape = capeNumeric !== null;
+  const safeCape = hasCape ? Math.round(capeNumeric) : null;
   const stormRiskSummary = hasCape
     ? `Storm risk: ${risk.level}; level ${risk.score + 1} of 5 based on current conditions.`
     : "Storm risk unavailable: live CAPE reading missing.";

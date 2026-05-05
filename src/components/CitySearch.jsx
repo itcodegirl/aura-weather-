@@ -9,18 +9,22 @@ import {
 } from "react";
 import { Search, MapPin, X, Loader2 } from "lucide-react";
 import { useCitySearch } from "../hooks/useCitySearch";
+import { toFiniteNumber } from "../utils/numbers";
 import "./CitySearch.css";
 
 function getCityKey(city, index) {
-  const lat = Number(city?.latitude);
-  const lon = Number(city?.longitude);
+  // Strict coercion: a null lat/lon must NOT coerce to 0 — that would
+  // collide every coord-less result onto the "0:0:..." Null Island key
+  // (and also collide with a real city actually at 0, 0).
+  const lat = toFiniteNumber(city?.latitude);
+  const lon = toFiniteNumber(city?.longitude);
   const rawId = city?.id ?? city?.name ?? "unknown";
   const cityId =
     typeof rawId === "string"
       ? rawId.trim() || "unknown"
       : String(rawId);
-  const safeLat = Number.isFinite(lat) ? lat : "na";
-  const safeLon = Number.isFinite(lon) ? lon : "na";
+  const safeLat = lat === null ? "na" : lat;
+  const safeLon = lon === null ? "na" : lon;
   return `${safeLat}:${safeLon}:${cityId}:${index}`;
 }
 
@@ -59,8 +63,8 @@ function CitySearch({ onSelect }, ref) {
 
   const handleRowMouseEnter = useCallback(
     (event) => {
-      const nextIndex = Number(event.currentTarget?.dataset?.index);
-      if (!Number.isFinite(nextIndex) || nextIndex < 0) {
+      const nextIndex = toFiniteNumber(event.currentTarget?.dataset?.index);
+      if (nextIndex === null || nextIndex < 0) {
         return;
       }
       setActiveIndex(nextIndex);
@@ -70,8 +74,10 @@ function CitySearch({ onSelect }, ref) {
 
   const handleRowSelect = useCallback(
     (event) => {
-      const selectedIndex = Number(event.currentTarget?.dataset?.index);
-      if (!Number.isFinite(selectedIndex) || selectedIndex < 0) {
+      const selectedIndex = toFiniteNumber(
+        event.currentTarget?.dataset?.index
+      );
+      if (selectedIndex === null || selectedIndex < 0) {
         return;
       }
 
