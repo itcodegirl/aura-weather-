@@ -51,6 +51,9 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install chromium
 
+      - name: Install fonts (Liberation Sans ≈ Arial for visual baselines)
+        run: sudo apt-get install -y fonts-liberation
+
       - name: E2E smoke tests
         run: npm run test:e2e
 
