@@ -1,10 +1,11 @@
 import { normalizeTemperatureUnit } from "./temperature.js";
+import { toFiniteNumber } from "../utils/numbers.js";
 
 export const WIND_SPEED_CONVERSION = 1.60934;
 
 export function formatWindSpeed(speed, targetUnit) {
-  const numeric = Number(speed);
-  if (!Number.isFinite(numeric)) {
+  const numeric = toFiniteNumber(speed);
+  if (numeric === null) {
     return "\u2014";
   }
   const nonNegativeSpeed = Math.max(numeric, 0);
@@ -36,8 +37,8 @@ export function windDirectionName(degrees) {
     "NW",
     "NNW",
   ];
-  const numeric = Number(degrees);
-  if (!Number.isFinite(numeric)) {
+  const numeric = toFiniteNumber(degrees);
+  if (numeric === null) {
     return "Variable";
   }
 
@@ -47,8 +48,8 @@ export function windDirectionName(degrees) {
 }
 
 function toMph(speed, unit) {
-  const safeSpeed = Number(speed);
-  if (!Number.isFinite(safeSpeed)) {
+  const safeSpeed = toFiniteNumber(speed);
+  if (safeSpeed === null) {
     return Number.NaN;
   }
 

@@ -76,8 +76,8 @@ export function validateCoordinates(lat, lon) {
 }
 
 export function formatPrecipitation(value, targetUnit, sourceUnit = "F") {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) {
+  const numeric = toFiniteNumber(value);
+  if (numeric === null) {
     return "\u2014";
   }
   const nonNegativeValue = Math.max(numeric, 0);

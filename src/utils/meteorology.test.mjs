@@ -84,6 +84,8 @@ describe("meteorology utils", () => {
     assert.equal(windDirectionName(45), "NE");
     assert.equal(windDirectionName(225), "SW");
     assert.equal(windDirectionName("bad"), "Variable");
+    assert.equal(windDirectionName(null), "Variable");
+    assert.equal(windDirectionName(undefined), "Variable");
   });
 
   test("classifyWind uses mph thresholds and unit conversion", () => {
@@ -91,5 +93,7 @@ describe("meteorology utils", () => {
     assert.equal(classifyWind(10, "F"), "Light breeze");
     assert.equal(classifyWind(16.0934, "C"), "Light breeze");
     assert.equal(classifyWind("bad", "F"), "Unknown");
+    assert.equal(classifyWind(null, "F"), "Unknown");
+    assert.equal(classifyWind(undefined, "F"), "Unknown");
   });
 });
