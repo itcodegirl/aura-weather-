@@ -72,6 +72,29 @@ describe("meteorology utils", () => {
     });
   });
 
+  test("calculatePressureTrend skips null pressure samples instead of treating them as 0", () => {
+    // A null hourly pressure must NOT coerce to 0 (a fake near-vacuum
+    // reading) and crash the rolling 6-hour delta downward into a
+    // false "Storm possible" signal.
+    const times = buildHourlyIsoTimes(8, 0);
+    const withNulls = calculatePressureTrend(
+      [1010, null, 1010, 1010, 1010, 1010, 1010, 1010],
+      times
+    );
+    assert.equal(withNulls.direction, "steady");
+    assert.equal(withNulls.interpretation, "Stable");
+  });
+
+  test("classifyStormRisk treats null cape as Minimal (not silently 0)", () => {
+    // The fallback IS 0 for cape, but the path must come from explicit
+    // strict coercion — not from Number(null) silently returning 0.
+    assert.deepEqual(classifyStormRisk(null, 0), {
+      level: "Minimal",
+      color: "#38bdf8",
+      score: 0,
+    });
+  });
+
   test("classifyComfort handles F/C input and invalid values", () => {
     assert.equal(classifyComfort(45, "F").level, "Dry");
     assert.equal(classifyComfort(10, "C").level, "Comfortable");

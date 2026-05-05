@@ -1,15 +1,16 @@
 import { toFahrenheit } from "./temperature.js";
+import { toFiniteNumber } from "../utils/numbers.js";
 
 /**
  * Classify storm risk using CAPE (Convective Available Potential Energy).
  */
 export function classifyStormRisk(cape, weatherCode) {
-  const capeValue = Number(cape);
-  const normalizedCape = Number.isFinite(capeValue) ? capeValue : 0;
-  const codeValue = Number(weatherCode);
-  const normalizedCode = Number.isFinite(codeValue)
-    ? Math.trunc(codeValue)
-    : Number.NaN;
+  // A null cape reading must not coerce to 0 and silently downgrade
+  // to "Minimal" — strict coercion keeps the fallback explicit.
+  const capeValue = toFiniteNumber(cape);
+  const normalizedCape = capeValue === null ? 0 : capeValue;
+  const codeValue = toFiniteNumber(weatherCode);
+  const normalizedCode = codeValue === null ? Number.NaN : Math.trunc(codeValue);
   const isStormCode = [95, 96, 99].includes(normalizedCode);
 
   if (isStormCode || normalizedCape >= 2500) {
@@ -51,9 +52,11 @@ export function calculatePressureTrend(hourlyPressure, hourlyTime) {
   const maxIndex = Math.min(hourlyPressure.length, hourlyTime.length);
 
   for (let i = 0; i < maxIndex; i += 1) {
-    const value = Number(hourlyPressure[i]);
+    // Strict coercion: a null pressure reading must NOT become 0 — that
+    // would push a fake near-vacuum sample into the trend window.
+    const value = toFiniteNumber(hourlyPressure[i]);
     const time = new Date(hourlyTime[i]).getTime();
-    if (Number.isFinite(value) && Number.isFinite(time)) {
+    if (value !== null && Number.isFinite(time)) {
       paired.push({ value, time });
     }
   }
