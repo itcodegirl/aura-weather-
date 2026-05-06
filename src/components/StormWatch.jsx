@@ -22,8 +22,8 @@ import { formatWindSpeed } from "../domain/wind";
 import {
   hasFiniteValue,
   toFiniteNumber,
-  MISSING_VALUE_DASH,
-} from "../utils/missingData";
+  MISSING_VALUE_PLACEHOLDER,
+} from "../utils/numbers";
 import { CardHeader, DataTrustMeta, InfoDrawer, Stat } from "./ui";
 import "./StormWatch.css";
 
@@ -60,7 +60,7 @@ function StormRisk({ risk, cape, summaryId }) {
         style={{ color: hasCape ? risk.color : "#94a3b8" }}
         aria-describedby={summaryId}
       >
-        {hasCape ? risk.level : MISSING_VALUE_DASH}
+        {hasCape ? risk.level : MISSING_VALUE_PLACEHOLDER}
       </div>
       <p className="storm-module-summary">
         {hasCape
@@ -94,7 +94,7 @@ function StormRisk({ risk, cape, summaryId }) {
             CAPE
           </abbr>
         )}
-        value={hasCape ? `${safeCape} J/kg` : MISSING_VALUE_DASH}
+        value={hasCape ? `${safeCape} J/kg` : MISSING_VALUE_PLACEHOLDER}
         missing={!hasCape}
         title="CAPE reading is temporarily unavailable from the upstream API."
       />
@@ -212,19 +212,19 @@ function WindIntelligence({
 
   const sustainedDisplay = hasSustained
     ? formatWindSpeed(sustainedSpeed, unit)
-    : MISSING_VALUE_DASH;
+    : MISSING_VALUE_PLACEHOLDER;
   const gustsDisplay =
     gustSpeed !== null
       ? formatWindSpeed(gustSpeed, unit)
       : hasSustained
         ? formatWindSpeed(sustainedSpeed, unit)
-        : MISSING_VALUE_DASH;
+        : MISSING_VALUE_PLACEHOLDER;
   const direction = hasDirection
     ? windDirectionName(directionValue)
     : "";
   const strength = hasSustained
     ? classifyWind(sustainedSpeed, "F")
-    : MISSING_VALUE_DASH;
+    : MISSING_VALUE_PLACEHOLDER;
   const compassRotation = hasDirection ? directionValue + 180 : 0;
   const compassLabel = hasDirection
     ? `Wind from ${direction}`
@@ -278,7 +278,7 @@ function WindIntelligence({
             ? hasDirection
               ? `${sustainedDisplay} ${direction}`
               : sustainedDisplay
-            : MISSING_VALUE_DASH
+            : MISSING_VALUE_PLACEHOLDER
         }
         value={hasSustained ? `Gusts ${gustsDisplay}` : ""}
         missing={!hasSustained}
@@ -295,9 +295,9 @@ function ComfortIndex({ weather, unit }) {
   const tempUnit = unit === "F" ? "\u00B0F" : "\u00B0C";
   const dewpointDisplay = Number.isFinite(dewpointConverted)
     ? `${Math.round(dewpointConverted)}${tempUnit}`
-    : MISSING_VALUE_DASH;
+    : MISSING_VALUE_PLACEHOLDER;
   const comfort = hasDewpoint ? classifyComfort(dewpoint, "F") : null;
-  const comfortLevel = comfort?.level ?? MISSING_VALUE_DASH;
+  const comfortLevel = comfort?.level ?? MISSING_VALUE_PLACEHOLDER;
   const comfortColor = comfort?.color ?? "#94a3b8";
 
   return (
@@ -370,7 +370,7 @@ function StormWatch({
   const hasOverviewWind = overviewWindSpeed !== null;
   const overviewWind = hasOverviewWind
     ? classifyWind(overviewWindSpeed, "F")
-    : MISSING_VALUE_DASH;
+    : MISSING_VALUE_PLACEHOLDER;
 
   return (
     <section
@@ -405,7 +405,7 @@ function StormWatch({
         >
           <span className="storm-snapshot-label">Storm risk</span>
           <span className="storm-snapshot-value">
-            {hasOverviewCape ? overviewRisk.level : MISSING_VALUE_DASH}
+            {hasOverviewCape ? overviewRisk.level : MISSING_VALUE_PLACEHOLDER}
           </span>
         </span>
         <span className="storm-snapshot-chip" role="listitem">

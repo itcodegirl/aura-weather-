@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 
-import { toFiniteNumber } from "./numbers.js";
+import { toFiniteNumber, hasFiniteValue } from "./numbers.js";
 
 describe("toFiniteNumber", () => {
   test("returns finite numbers as-is", () => {
@@ -50,5 +50,25 @@ describe("toFiniteNumber", () => {
     assert.equal(toFiniteNumber({}), null);
     assert.equal(toFiniteNumber([]), null);
     assert.equal(toFiniteNumber([42]), null);
+  });
+});
+
+describe("hasFiniteValue", () => {
+  test("returns true for finite numbers and numeric strings", () => {
+    assert.equal(hasFiniteValue(0), true);
+    assert.equal(hasFiniteValue(42), true);
+    assert.equal(hasFiniteValue(-3.14), true);
+    assert.equal(hasFiniteValue("12"), true);
+  });
+
+  test("returns false for the same inputs toFiniteNumber rejects", () => {
+    assert.equal(hasFiniteValue(null), false);
+    assert.equal(hasFiniteValue(undefined), false);
+    assert.equal(hasFiniteValue(""), false);
+    assert.equal(hasFiniteValue("nope"), false);
+    assert.equal(hasFiniteValue(true), false);
+    assert.equal(hasFiniteValue(NaN), false);
+    assert.equal(hasFiniteValue(Infinity), false);
+    assert.equal(hasFiniteValue({}), false);
   });
 });

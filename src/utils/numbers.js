@@ -47,3 +47,11 @@ export function toFiniteNumber(value) {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : null;
 }
+
+/**
+ * Boolean predicate built on toFiniteNumber. Useful at render sites
+ * that branch on "is this a real reading" without needing the value.
+ */
+export function hasFiniteValue(value) {
+  return toFiniteNumber(value) !== null;
+}
