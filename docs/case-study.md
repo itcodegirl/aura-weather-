@@ -4,6 +4,18 @@
 > worse than one that says "unavailable." It converts a known unknown
 > into a confidently wrong reading.
 
+<video src="screenshots/trust-contract-demo.webm" controls muted loop playsinline width="720">
+  Your browser does not render embedded video. Run
+  <code>npm run record:trust-contract-demo</code> from the project
+  root to regenerate the demo, or open
+  <code>http://127.0.0.1:5173/?mock=missing</code> on a local dev
+  server to see the trust-contract state directly.
+</video>
+
+*(The clip toggles from the live forecast to `?mock=missing` so the
+hero card renders muted "—" placeholders instead of fake `0%`
+humidity / `0 hPa` pressure / `—°F` temperatures.)*
+
 ## TL;DR
 
 During a structured audit of Aura Weather, I found and closed an
@@ -169,8 +181,8 @@ unknown URLs to the original fetch.
 
 | | Before audit | After audit |
 |---|---|---|
-| Tests | 45 | **160** Node + 14 React render tests |
-| Playwright checks | 12 | 14 (incl. missing-data + unicode-escape guards) |
+| Tests | 45 | **173** Node + 25 React render tests |
+| Playwright checks | 12 | 21 (incl. missing-data + unicode-escape guards, axe-core on `/` *and* `?mock=missing`, and trust-contract visual baselines) |
 | `App.css` lines | 2,067 | ~500 |
 | Bundle (gzip) | ≈ 84 kB | ≈ 85 kB |
 | `useWeatherData` lines | 459 | 354 |
