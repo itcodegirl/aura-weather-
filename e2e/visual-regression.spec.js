@@ -90,6 +90,17 @@ async function bootstrapMissingMockState(page, context, viewport) {
   // Wait for the helper note — its presence proves the missing-data trust
   // contract is fully rendered and not still in a transient state.
   await expect(page.locator(".hero-stats-note")).toBeVisible();
+  // The dashboard mounts its supplemental panels via Suspense + idle
+  // callback. Wait for those headers so the screenshot captures a
+  // fully-laid-out page rather than a transient mid-mount state where
+  // page height changes as panels appear.
+  await expect(
+    page.getByRole("heading", { name: "Risk Signals" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Week Ahead" })
+  ).toBeVisible();
+  await expect(page.locator(".loading-card")).toHaveCount(0, { timeout: 20_000 });
 
   await applyVisualOverrides(page);
 }
