@@ -11,7 +11,8 @@ export function findWindowStartIndex(timeValues, options = {}) {
   // falls back to the real clock instead of silently using 0 (epoch).
   const parsedNow = toFiniteNumber(now);
   const normalizedNow = parsedNow === null ? Date.now() : parsedNow;
-  const normalizedWindowSize = Math.max(1, Math.trunc(Number(windowSize) || 1));
+  const parsedWindowSize = toFiniteNumber(windowSize);
+  const normalizedWindowSize = Math.max(1, Math.trunc(parsedWindowSize ?? 1));
   const parsedTolerance = toFiniteNumber(currentSlotToleranceMs);
   const normalizedTolerance = Math.max(0, parsedTolerance ?? 0);
 

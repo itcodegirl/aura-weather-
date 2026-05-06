@@ -19,6 +19,23 @@ describe("sunlight formatting utils", () => {
     assert.equal(label, "\u2014");
   });
 
+  test("treats null maxFutureDays as 'no limit' instead of Number(null) === 0", () => {
+    // Guard against the Number(null) === 0 trap: a null maxFutureDays
+    // should mean "no future-day cap", not "cap at zero days from now"
+    // (which would block every future timestamp).
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const label = formatSunClock(tomorrow, { maxFutureDays: null });
+    assert.notEqual(label, "\u2014");
+  });
+
+  test("ignores boolean maxFutureDays instead of coercing true to 1", () => {
+    // Number(true) === 1 would cap at 1 day; toFiniteNumber rejects it
+    // so the helper falls through to the unbounded path.
+    const farFuture = "2099-01-01T08:00:00Z";
+    const label = formatSunClock(farFuture, { maxFutureDays: true });
+    assert.notEqual(label, "\u2014");
+  });
+
   test("formats daylight duration from sunrise and sunset", () => {
     const daylight = formatDaylightLengthLabel(
       "2026-04-21T06:00:00Z",
