@@ -130,9 +130,9 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`190` tests, including 25 React render tests via `jsdom` + `esbuild`)
+- `npm test` passes (`198` tests, including 25 React render tests via `jsdom` + `esbuild`)
 - `npm run build` passes
-- `npm run test:e2e` passes (`14` Playwright checks, including smoke, missing-data placeholder guard, unicode-escape leak guard, and visual regression)
+- `npm run test:e2e` passes (`21` Playwright checks, including smoke, missing-data placeholder guard, unicode-escape leak guard, axe-core a11y on both `/` and `?mock=missing`, and visual baselines for the dashboard + the trust-contract demos)
 - `npm run test:lighthouse` passes the local budget gate
 
 ### Current automated coverage
@@ -153,11 +153,11 @@ npm run test:lighthouse
   - unsupported-region severe alert fallback
   - mobile overflow regression
   - regression guard ensuring no literal `\uXXXX` escape sequences leak into rendered text
-  - accessibility scan using axe-core
+  - axe-core accessibility scan on the live dashboard (`/`) and the trust-contract state (`?mock=missing`)
+  - assistive-tech cue check for the missing-data trust contract (`role="status"` helper note + `aria-label="No data available"` on the missing stat)
 - Playwright visual baselines for:
-  - desktop dashboard
-  - tablet dashboard
-  - mobile dashboard
+  - desktop / tablet / mobile dashboard
+  - desktop / mobile `?mock=missing` (trust-contract) state
 
 ## Demo Expectations
 
@@ -197,6 +197,17 @@ into "0%" or a missing dew point into "0°F" is worse than one that says
 "unavailable" — it converts a known unknown into a confidently wrong
 reading. The audit pass for this project found and closed every place
 where a `Number(null) === 0` coercion could surface as a fake reading.
+
+A short demo of the toggle (live forecast → `?mock=missing` → "—"
+placeholders, helper note, and `Stat` primitive's missing modifier):
+
+<video src="docs/screenshots/trust-contract-demo.webm" controls muted loop playsinline width="720">
+  Your browser does not render embedded video. Run
+  <code>npm run record:trust-contract-demo</code> to regenerate
+  <code>docs/screenshots/trust-contract-demo.webm</code>, or open
+  <code>http://127.0.0.1:5173/?mock=missing</code> on a local dev
+  server to see the trust-contract state directly.
+</video>
 
 The contract is enforced at four layers:
 

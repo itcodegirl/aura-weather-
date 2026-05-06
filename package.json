@@ -16,7 +16,8 @@
     "test:e2e:headed": "playwright test --headed",
     "test:visual": "playwright test e2e/visual-regression.spec.js",
     "test:visual:update": "playwright test e2e/visual-regression.spec.js --update-snapshots",
-    "test:lighthouse": "npm run build && node scripts/run-lighthouse-budgets.mjs"
+    "test:lighthouse": "npm run build && node scripts/run-lighthouse-budgets.mjs",
+    "record:trust-contract-demo": "node scripts/record-trust-contract-demo.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.8.0",

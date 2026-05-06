@@ -21,6 +21,10 @@ lhci-reports
 # as an artifact and the docs/case-study links the rendered version.
 docs/screenshots/*.png
 
+# scripts/record-trust-contract-demo.mjs may produce intermediate
+# artifacts; only the committed demo recording is checked in.
+docs/screenshots/*.tmp.webm
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -182,6 +182,7 @@ function HeroCard({
           <div className="hero-temp-row">
             <div
               className={`hero-temp${isCurrentTempMissing ? " is-missing" : ""}`}
+              role={isCurrentTempMissing ? "img" : undefined}
               aria-label={
                 isCurrentTempMissing
                   ? "Current temperature unavailable"
