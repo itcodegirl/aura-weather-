@@ -130,7 +130,7 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`193` tests, including 25 React render tests via `jsdom` + `esbuild`)
+- `npm test` passes (`190` tests, including 25 React render tests via `jsdom` + `esbuild`)
 - `npm run build` passes
 - `npm run test:e2e` passes (`14` Playwright checks, including smoke, missing-data placeholder guard, unicode-escape leak guard, and visual regression)
 - `npm run test:lighthouse` passes the local budget gate
@@ -322,7 +322,7 @@ Other strong stories:
 - **Resilient client composition** — three independent fetch tracks (forecast, supplemental AQI/alerts, historical archive) with separate AbortControllers and request-id stale-result guards, plus a per-panel error boundary so a lazy chunk failure cannot blank out the dashboard.
 - **Responsive, mobile-first dashboard** — the bento layout has explicit breakpoints at 1200/980/860/760/640/560/420 px, hover-only effects gated behind `(hover: hover)`, and `prefers-reduced-motion` overrides for every animation. Co-located component CSS replaces what was a 2k-line monolith.
 - **Accessibility past axe baseline** — scoped live regions (`role="alert"` for errors, `role="status"` for last-synced metadata), `aria-busy` on async buttons, decorative SVG cleanup, keyboard combobox for search, and a regression test that scans rendered text for literal `\uXXXX` escape sequences.
-- **QA maturity** — 193 tests (168 unit/integration + 25 React render) covering API normalization, climate comparison, location persistence, sync helpers, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, and the null-coercion contract at every domain layer; 14 Playwright checks for smoke, visual regression, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
+- **QA maturity** — 190 tests (165 unit/integration + 25 React render) covering API normalization, climate comparison, location persistence, sync helpers, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, and the null-coercion contract at every domain layer; 14 Playwright checks for smoke, visual regression, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
 
 ## Screenshot Guidance
 
