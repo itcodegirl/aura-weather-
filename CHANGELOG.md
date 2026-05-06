@@ -84,6 +84,16 @@ portfolio-grade product. Format roughly follows
   API boundary (`transforms.js`, `openMeteo.js`) and at every consumer
   (HourlyCard, ForecastCard, NowcastCard, RainCard, ExposureSection,
   HeroCard, NowcastCard, MetricCard, WeatherIcon, DataTrustMeta).
+- Precipitation and wind formatters silently rendering `"0.00 in"`,
+  `"0 mph"`, `"N"`, `"Calm"` for null API reads — `formatPrecipitation`,
+  `formatWindSpeed`, `windDirectionName`, and `classifyWind` now route
+  through `toFiniteNumber` and surface `"—"` / `"Variable"` / `"Unknown"`
+  instead.
+- Domain classifiers leaking the same coercion bug — `classifyStormRisk`
+  (CAPE input), `calculatePressureTrend` (null pressure slots were being
+  counted as 0 hPa data points), and `getWeather` / `WeatherIcon` (null
+  code → "Clear" / Sun icon by accident) now route through
+  `toFiniteNumber` so the null path is explicit.
 - Lazy chunk failures crashing the whole app via the root error
   boundary — now isolated by `PanelErrorBoundary`.
 - `buildClimateComparison` producing fake "65°F warmer than average"
@@ -103,10 +113,17 @@ portfolio-grade product. Format roughly follows
 - Duplicate inline numeric coercion helpers in HourlyCard, ForecastCard,
   NowcastCard, useRainAnalysis (all now route through the shared
   `toFiniteNumber`).
+- `src/utils/missingData.js` — duplicate of `numbers.js` with looser
+  coercion semantics. `hasFiniteValue` moved into `numbers.js`,
+  `MISSING_VALUE_DASH` consumers redirected to the existing
+  `MISSING_VALUE_PLACEHOLDER`, dead `formatMissingValue` export removed.
+  Single source of truth for the trust contract.
 
 ### Tests
 
-- 45 → **160** Node tests, plus 14 React render tests via
-  `@testing-library/react`.
+- 45 → **190** Node tests, including 25 React render tests via
+  `@testing-library/react` + `jsdom` (HeroCard, InfoDrawer, MetricCard,
+  Stat, useTimeNow). New regressions pin null-input contracts for
+  every formatter and domain classifier.
 - 12 → **14** Playwright checks, including a missing-data placeholder
   guard and a unicode-escape leak guard.
