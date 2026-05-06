@@ -75,6 +75,21 @@ describe("time series helpers", () => {
     assert.equal(startIndex, 0);
   });
 
+  test("falls back to default windowSize when an explicit null is passed", () => {
+    // Same Number(null) === 0 family of bug — null windowSize must default
+    // to 1 (one trailing slot), not silently coerce.
+    const now = Date.parse("2026-04-21T20:00:00Z");
+    const series = [
+      "2026-04-21T10:00:00Z",
+      "2026-04-21T11:00:00Z",
+      "2026-04-21T12:00:00Z",
+    ];
+
+    const startIndex = findWindowStartIndex(series, { now, windowSize: null });
+    // With windowSize defaulting to 1, trailing start = length - 1 = 2.
+    assert.equal(startIndex, 2);
+  });
+
   test("falls back to first future when tolerance is too small", () => {
     const now = Date.parse("2026-04-21T12:30:00Z");
     const series = [

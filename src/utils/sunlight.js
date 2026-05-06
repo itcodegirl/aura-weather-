@@ -1,3 +1,5 @@
+import { toFiniteNumber } from "./numbers.js";
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function toValidDate(value) {
@@ -16,8 +18,11 @@ export function formatSunClock(value, options = {}) {
     return fallback;
   }
 
-  const maxFutureDaysNumber = Number(maxFutureDays);
-  if (Number.isFinite(maxFutureDaysNumber) && maxFutureDaysNumber >= 0) {
+  // Strict coercion: a null/undefined/boolean/array maxFutureDays must be
+  // treated as "no limit", not silently coerced (Number(null) === 0 would
+  // block every future date, Number(true) === 1 would cap at 1 day).
+  const maxFutureDaysNumber = toFiniteNumber(maxFutureDays);
+  if (maxFutureDaysNumber !== null && maxFutureDaysNumber >= 0) {
     const maxAllowedTime = Date.now() + maxFutureDaysNumber * DAY_MS;
     if (date.getTime() > maxAllowedTime) {
       return fallback;
