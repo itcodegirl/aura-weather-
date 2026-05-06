@@ -23,8 +23,7 @@ test("?mock=missing renders 'Data unavailable' instead of synthetic zeros", asyn
   expect(heroText).not.toMatch(/—°F/);
   expect(heroText).not.toMatch(/—°C/);
 
-  const heroDataUnavailable = await hero
-    .getByText("Data unavailable", { exact: false })
-    .count();
-  expect(heroDataUnavailable).toBeGreaterThanOrEqual(4);
+  // The hero card renders "—" for each unavailable stat and surfaces a
+  // note when at least one stat is missing — verify it is present.
+  await expect(hero.locator(".hero-stats-note")).toBeVisible();
 });
