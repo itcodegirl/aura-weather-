@@ -37,9 +37,15 @@ function StatusStack({
   cacheCapturedAt = null,
   onRetry,
   serviceWorkerUpdateAvailable = false,
+  serviceWorkerOfflineReady = false,
   isServiceWorkerRefreshing = false,
   onRefreshServiceWorkerUpdate,
   onDismissServiceWorkerUpdate,
+  onDismissServiceWorkerOfflineReady,
+  installPromptAvailable = false,
+  isInstallPromptOpening = false,
+  onInstallApp,
+  onDismissInstallPrompt,
   showRuntimeStatus = true,
   showSetupPrompts = true,
   className = "",
@@ -73,7 +79,9 @@ function StatusStack({
     locationNotice ||
     isBackgroundLoading ||
     showRefreshError ||
-    serviceWorkerUpdateAvailable
+    serviceWorkerUpdateAvailable ||
+    serviceWorkerOfflineReady ||
+    installPromptAvailable
   );
   const hasSetupPrompts = showSetupPrompts && Boolean(
     showLocationSetupPrompt || showPermissionOnboarding
@@ -196,6 +204,48 @@ function StatusStack({
               className="app-status-action"
               onClick={onDismissServiceWorkerUpdate}
               disabled={isServiceWorkerRefreshing}
+            >
+              Later
+            </button>
+          </span>
+        </div>
+      )}
+      {showRuntimeStatus && serviceWorkerOfflineReady && (
+        <div className="app-status app-status--ready" role="status" aria-live="polite">
+          <span className="app-status-message">
+            Offline shell ready. Aura can reopen after the network drops.
+          </span>
+          <span className="app-status-actions">
+            <button
+              type="button"
+              className="app-status-action"
+              onClick={onDismissServiceWorkerOfflineReady}
+            >
+              Got it
+            </button>
+          </span>
+        </div>
+      )}
+      {showRuntimeStatus && installPromptAvailable && (
+        <div className="app-status app-status--install" role="status" aria-live="polite">
+          <span className="app-status-message">
+            Install Aura for faster daily access.
+          </span>
+          <span className="app-status-actions">
+            <button
+              type="button"
+              className="app-status-action app-status-action--primary"
+              onClick={onInstallApp}
+              disabled={isInstallPromptOpening}
+              aria-busy={isInstallPromptOpening || undefined}
+            >
+              {isInstallPromptOpening ? "Opening..." : "Install"}
+            </button>
+            <button
+              type="button"
+              className="app-status-action"
+              onClick={onDismissInstallPrompt}
+              disabled={isInstallPromptOpening}
             >
               Later
             </button>

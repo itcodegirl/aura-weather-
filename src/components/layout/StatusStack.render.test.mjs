@@ -73,4 +73,52 @@ describe("StatusStack", () => {
     assert.equal(refreshCount, 1);
     assert.equal(dismissCount, 1);
   });
+
+  test("renders offline-ready acknowledgement", () => {
+    let dismissCount = 0;
+
+    render(
+      React.createElement(StatusStack, {
+        serviceWorkerOfflineReady: true,
+        onDismissServiceWorkerOfflineReady() {
+          dismissCount += 1;
+        },
+      })
+    );
+
+    assert.ok(
+      screen.getByText(
+        "Offline shell ready. Aura can reopen after the network drops."
+      )
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+
+    assert.equal(dismissCount, 1);
+  });
+
+  test("renders app install prompt actions", () => {
+    let installCount = 0;
+    let dismissCount = 0;
+
+    render(
+      React.createElement(StatusStack, {
+        installPromptAvailable: true,
+        onInstallApp() {
+          installCount += 1;
+        },
+        onDismissInstallPrompt() {
+          dismissCount += 1;
+        },
+      })
+    );
+
+    assert.ok(screen.getByText("Install Aura for faster daily access."));
+
+    fireEvent.click(screen.getByRole("button", { name: "Install" }));
+    fireEvent.click(screen.getByRole("button", { name: "Later" }));
+
+    assert.equal(installCount, 1);
+    assert.equal(dismissCount, 1);
+  });
 });

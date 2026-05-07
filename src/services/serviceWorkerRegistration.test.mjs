@@ -229,6 +229,89 @@ describe("service worker registration", () => {
     assert.deepEqual(updateReadyRegistrations, []);
   });
 
+  test("announces offline readiness after the first install is ready", async () => {
+    const windowRef = createWindowStub();
+    const registration = createEventTargetStub({ scope: "/" });
+    let resolveReady = null;
+    const ready = new Promise((resolve) => {
+      resolveReady = resolve;
+    });
+    const navigatorRef = {
+      serviceWorker: {
+        controller: null,
+        ready,
+        async register() {
+          return registration;
+        },
+      },
+    };
+    const offlineReadyRegistrations = [];
+    const updateReadyRegistrations = [];
+
+    registerServiceWorker({
+      enabled: true,
+      delayMs: 0,
+      windowRef,
+      navigatorRef,
+      onOfflineReady(offlineReadyRegistration) {
+        offlineReadyRegistrations.push(offlineReadyRegistration);
+      },
+      onUpdateReady(updateReadyRegistration) {
+        updateReadyRegistrations.push(updateReadyRegistration);
+      },
+    });
+
+    await windowRef.getListener("load")();
+
+    assert.deepEqual(offlineReadyRegistrations, []);
+    assert.deepEqual(updateReadyRegistrations, []);
+
+    resolveReady(registration);
+    await ready;
+    await Promise.resolve();
+
+    assert.deepEqual(offlineReadyRegistrations, [registration]);
+    assert.deepEqual(updateReadyRegistrations, []);
+  });
+
+  test("does not announce offline readiness for controlled update installs", async () => {
+    const windowRef = createWindowStub();
+    const registration = createEventTargetStub({
+      scope: "/",
+      waiting: {},
+    });
+    const navigatorRef = {
+      serviceWorker: {
+        controller: {},
+        ready: Promise.resolve(registration),
+        async register() {
+          return registration;
+        },
+      },
+    };
+    const offlineReadyRegistrations = [];
+    const updateReadyRegistrations = [];
+
+    registerServiceWorker({
+      enabled: true,
+      delayMs: 0,
+      windowRef,
+      navigatorRef,
+      onOfflineReady(offlineReadyRegistration) {
+        offlineReadyRegistrations.push(offlineReadyRegistration);
+      },
+      onUpdateReady(updateReadyRegistration) {
+        updateReadyRegistrations.push(updateReadyRegistration);
+      },
+    });
+
+    await windowRef.getListener("load")();
+    await Promise.resolve();
+
+    assert.deepEqual(offlineReadyRegistrations, []);
+    assert.deepEqual(updateReadyRegistrations, [registration]);
+  });
+
   test("reports registration failures without throwing", async () => {
     const windowRef = createWindowStub();
     const expectedError = new Error("blocked");

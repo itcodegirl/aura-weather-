@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import "./App.css";
 import { LOCATION_FALLBACK_NOTICE } from "./hooks/useLocation";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
+import { usePwaInstallPrompt } from "./hooks/usePwaInstallPrompt";
 import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
 import { useWeatherDashboardViewModel } from "./hooks/useWeatherDashboardViewModel";
 import {
@@ -26,10 +27,18 @@ function serializeLocationOnboardingPreference(value) {
 function App() {
   const {
     updateAvailable: serviceWorkerUpdateAvailable,
+    offlineReady: serviceWorkerOfflineReady,
     isRefreshing: isServiceWorkerRefreshing,
     refreshUpdate: refreshServiceWorkerUpdate,
     dismissUpdate: dismissServiceWorkerUpdate,
+    dismissOfflineReady: dismissServiceWorkerOfflineReady,
   } = useServiceWorkerUpdate();
+  const {
+    installPromptAvailable,
+    isInstallPromptOpening,
+    promptInstall,
+    dismissInstallPrompt,
+  } = usePwaInstallPrompt();
   const {
     weather,
     location,
@@ -144,9 +153,15 @@ function App() {
         cacheCapturedAt={trustMeta?.cacheCapturedAt}
         onRetry={retryWeather}
         serviceWorkerUpdateAvailable={serviceWorkerUpdateAvailable}
+        serviceWorkerOfflineReady={serviceWorkerOfflineReady}
         isServiceWorkerRefreshing={isServiceWorkerRefreshing}
         onRefreshServiceWorkerUpdate={refreshServiceWorkerUpdate}
         onDismissServiceWorkerUpdate={dismissServiceWorkerUpdate}
+        onDismissServiceWorkerOfflineReady={dismissServiceWorkerOfflineReady}
+        installPromptAvailable={installPromptAvailable}
+        isInstallPromptOpening={isInstallPromptOpening}
+        onInstallApp={promptInstall}
+        onDismissInstallPrompt={dismissInstallPrompt}
         className="status-stack--runtime"
       />
 

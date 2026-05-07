@@ -223,6 +223,26 @@
   box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.14);
 }
 
+.app-status--ready {
+  border-color: rgba(134, 239, 172, 0.42);
+  color: #dcfce7;
+}
+
+.app-status--ready::before {
+  background: linear-gradient(180deg, #dcfce7, #86efac);
+  box-shadow: 0 0 0 3px rgba(134, 239, 172, 0.13);
+}
+
+.app-status--install {
+  border-color: rgba(196, 181, 253, 0.44);
+  color: #f0eaff;
+}
+
+.app-status--install::before {
+  background: linear-gradient(180deg, #f0eaff, #c4b5fd);
+  box-shadow: 0 0 0 3px rgba(196, 181, 253, 0.14);
+}
+
 .app-status-actions {
   display: inline-flex;
   align-items: center;

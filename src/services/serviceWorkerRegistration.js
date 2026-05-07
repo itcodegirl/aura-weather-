@@ -122,6 +122,65 @@ function watchForServiceWorkerUpdates({
   };
 }
 
+function watchForOfflineReady({
+  registration,
+  navigatorRef,
+  onOfflineReady,
+} = {}) {
+  if (!registration || typeof onOfflineReady !== "function") {
+    return () => {};
+  }
+
+  const hasActiveController = Boolean(navigatorRef?.serviceWorker?.controller);
+  if (hasActiveController) {
+    return () => {};
+  }
+
+  let didNotify = false;
+  let isCleanedUp = false;
+  let cleanupStateChange = null;
+
+  function notify(readyRegistration = registration) {
+    if (isCleanedUp || didNotify) {
+      return;
+    }
+
+    didNotify = true;
+    cleanupStateChange?.();
+    cleanupStateChange = null;
+    onOfflineReady(readyRegistration || registration);
+  }
+
+  const readyPromise = navigatorRef?.serviceWorker?.ready;
+  if (readyPromise && typeof readyPromise.then === "function") {
+    readyPromise.then(notify).catch(() => {});
+  } else if (registration.active) {
+    notify(registration);
+  } else {
+    const firstInstallWorker = registration.installing || registration.waiting;
+    if (firstInstallWorker) {
+      function handleStateChange() {
+        if (firstInstallWorker.state === "activated") {
+          notify(registration);
+        }
+      }
+
+      cleanupStateChange = addEventListener(
+        firstInstallWorker,
+        "statechange",
+        handleStateChange
+      );
+      handleStateChange();
+    }
+  }
+
+  return () => {
+    isCleanedUp = true;
+    cleanupStateChange?.();
+    cleanupStateChange = null;
+  };
+}
+
 export function activateWaitingServiceWorker({
   registration,
   windowRef = getBrowserWindow(),
@@ -165,6 +224,7 @@ export function registerServiceWorker({
   delayMs = DEFAULT_REGISTRATION_DELAY_MS,
   onRegistered,
   onUpdateReady,
+  onOfflineReady,
   onError,
 } = {}) {
   if (
@@ -180,6 +240,7 @@ export function registerServiceWorker({
 
   let isCleanedUp = false;
   let cleanupUpdateWatcher = null;
+  let cleanupOfflineReadyWatcher = null;
   const resolvedDelayMs = getServiceWorkerRegistrationDelay({ windowRef, delayMs });
 
   async function register() {
@@ -195,10 +256,16 @@ export function registerServiceWorker({
         onRegistered(registration);
       }
       cleanupUpdateWatcher?.();
+      cleanupOfflineReadyWatcher?.();
       cleanupUpdateWatcher = watchForServiceWorkerUpdates({
         registration,
         navigatorRef,
         onUpdateReady,
+      });
+      cleanupOfflineReadyWatcher = watchForOfflineReady({
+        registration,
+        navigatorRef,
+        onOfflineReady,
       });
       return registration;
     } catch (error) {
@@ -253,7 +320,9 @@ export function registerServiceWorker({
       isCleanedUp = true;
       cancelScheduledRegistration?.();
       cleanupUpdateWatcher?.();
+      cleanupOfflineReadyWatcher?.();
       cleanupUpdateWatcher = null;
+      cleanupOfflineReadyWatcher = null;
     };
   }
 
@@ -272,6 +341,8 @@ export function registerServiceWorker({
     windowRef.removeEventListener("load", handleLoad);
     cancelScheduledRegistration?.();
     cleanupUpdateWatcher?.();
+    cleanupOfflineReadyWatcher?.();
     cleanupUpdateWatcher = null;
+    cleanupOfflineReadyWatcher = null;
   };
 }
