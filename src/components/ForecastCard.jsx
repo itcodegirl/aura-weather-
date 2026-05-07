@@ -17,7 +17,8 @@ function clamp(value, min, max) {
 
 // Wraps the strict shared helper so callers can pass an explicit
 // fallback (e.g. condition code defaults to 0/Clear, while a missing
-// daily high temperature should remain NaN so the row renders "—").
+// daily high temperature should remain NaN so the row uses the shared
+// missing-value placeholder).
 function toFiniteNumber(value, fallback = NaN) {
   const parsed = toStrictFiniteNumber(value);
   return parsed === null ? fallback : parsed;
