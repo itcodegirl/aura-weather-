@@ -1,21 +1,26 @@
 import { createServer } from "node:http";
-import { readFile, writeFile, mkdir, stat } from "node:fs/promises";
+import { readFile, writeFile, mkdir, stat, rm } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
 import { chromium } from "playwright";
-import lighthouse from "lighthouse";
+import lighthouse, { desktopConfig } from "lighthouse";
 import { launch } from "chrome-launcher";
 
 const cwd = process.cwd();
 const distDir = resolve(cwd, "dist");
 const reportDir = resolve(cwd, "lhci-reports");
 const budgetFile = resolve(cwd, "config", "lighthouse-budgets.json");
-const chromeProfileDir = resolve(cwd, ".lighthouseci", "chrome-profile");
+const lighthouseWorkDir = resolve(cwd, ".lighthouseci");
+const chromeProfileDir = resolve(
+  lighthouseWorkDir,
+  `chrome-profile-${process.pid}-${Date.now()}`
+);
 
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
@@ -105,6 +110,7 @@ async function run() {
   }
 
   const chromeExecutablePath = chromium.executablePath();
+  await mkdir(lighthouseWorkDir, { recursive: true });
   await mkdir(chromeProfileDir, { recursive: true });
   await mkdir(reportDir, { recursive: true });
 
@@ -117,21 +123,13 @@ async function run() {
   });
 
   try {
-    const targetUrl = `http://127.0.0.1:${server.port}/index.html`;
+    const targetUrl = `http://127.0.0.1:${server.port}/index.html?mock=missing`;
     const runResult = await lighthouse(targetUrl, {
-      formFactor: "desktop",
       logLevel: "error",
       onlyCategories: categories,
       output: ["json", "html"],
       port: chrome.port,
-      screenEmulation: {
-        mobile: false,
-        width: 1365,
-        height: 940,
-        deviceScaleFactor: 1,
-        disabled: false,
-      },
-    });
+    }, desktopConfig);
 
     if (!runResult || !runResult.lhr) {
       throw new Error("Lighthouse did not return a valid report.");
@@ -171,6 +169,7 @@ async function run() {
   } finally {
     await chrome.kill();
     await server.close();
+    await rm(chromeProfileDir, { recursive: true, force: true }).catch(() => {});
   }
 }
 
