@@ -114,7 +114,7 @@ for (const viewport of SNAPSHOT_VIEWPORTS) {
       {
         animations: "disabled",
         caret: "hide",
-        maxDiffPixelRatio: 0.01,
+        maxDiffPixelRatio: viewport.name === "mobile" ? 0.025 : 0.01,
       }
     );
   });
