@@ -1,6 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 const HEX_COLOR_PATTERN = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+// useLayoutEffect throws a warning on the server and there is no
+// matching meta tag to update there anyway, so fall back to useEffect
+// when document is unavailable.
+const useIsomorphicLayoutEffect =
+  typeof document === "undefined" ? useEffect : useLayoutEffect;
 
 function isValidHex(value) {
   return typeof value === "string" && HEX_COLOR_PATTERN.test(value);
@@ -24,7 +30,7 @@ function ensureMetaThemeColor() {
 // browser chrome's docked position. The first stop is the strongest hue
 // and reads cleanly against typical mobile status bars.
 export function useThemeColor(gradient) {
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (typeof document === "undefined") {
       return;
     }
