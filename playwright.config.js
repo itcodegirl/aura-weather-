@@ -1,5 +1,10 @@
 import { defineConfig } from "@playwright/test";
 
+const previewPort = Number.parseInt(
+  globalThis.process?.env?.PLAYWRIGHT_PREVIEW_PORT || "45173",
+  10
+);
+
 export default defineConfig({
   testDir: "./e2e",
   timeout: 45_000,
@@ -11,7 +16,7 @@ export default defineConfig({
   },
   reporter: [["list"]],
   use: {
-    baseURL: "http://127.0.0.1:45173",
+    baseURL: `http://127.0.0.1:${previewPort}`,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -26,8 +31,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npm run preview -- --host 127.0.0.1 --port 45173 --strictPort",
-    port: 45173,
+    command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${previewPort} --strictPort`,
+    port: previewPort,
     timeout: 120_000,
     reuseExistingServer: false,
   },

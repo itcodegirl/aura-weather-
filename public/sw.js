@@ -18,6 +18,8 @@ const CACHEABLE_DESTINATIONS = new Set([
   "style",
   "worker",
 ]);
+const INDEX_ASSET_PATTERN = /\b(?:href|src)="([^"]+)"/g;
+const BUILD_ASSET_PATTERN = /["'](assets\/[^"']+\.(?:css|js))["']/g;
 
 function isSameOrigin(requestUrl) {
   return requestUrl.origin === self.location.origin;
@@ -32,6 +34,35 @@ function isCacheableRequest(request) {
   return isSameOrigin(requestUrl) && CACHEABLE_DESTINATIONS.has(request.destination);
 }
 
+function getSameOriginAppAsset(path) {
+  try {
+    const assetUrl = new URL(path, self.location.origin);
+    if (!isSameOrigin(assetUrl) || !assetUrl.pathname.startsWith("/assets/")) {
+      return null;
+    }
+
+    return `${assetUrl.pathname}${assetUrl.search}`;
+  } catch {
+    return null;
+  }
+}
+
+function findIndexAssetUrls(indexHtml) {
+  return [
+    ...new Set(
+      Array.from(indexHtml.matchAll(INDEX_ASSET_PATTERN), (match) =>
+        getSameOriginAppAsset(match[1])
+      ).filter(Boolean)
+    ),
+  ];
+}
+
+function findBuildAssetUrls(javascript) {
+  return Array.from(javascript.matchAll(BUILD_ASSET_PATTERN), (match) =>
+    getSameOriginAppAsset(`/${match[1]}`)
+  ).filter(Boolean);
+}
+
 async function cacheResponse(cacheName, request, response) {
   if (!response || response.status >= 400) {
     return;
@@ -39,6 +70,46 @@ async function cacheResponse(cacheName, request, response) {
 
   const cache = await caches.open(cacheName);
   await cache.put(request, response.clone());
+}
+
+async function readAssetText(cache, assetUrl) {
+  const response = (await cache.match(assetUrl)) || (await fetch(assetUrl));
+  if (!response || !response.ok) {
+    return "";
+  }
+
+  await cache.put(assetUrl, response.clone());
+  return response.clone().text();
+}
+
+async function findBuildDependencies(cache, entryAssetUrls) {
+  const discoveredAssetUrls = new Set();
+  const visitedJavascriptUrls = new Set();
+  const pendingJavascriptUrls = entryAssetUrls.filter((assetUrl) =>
+    assetUrl.endsWith(".js")
+  );
+
+  while (pendingJavascriptUrls.length > 0) {
+    const javascriptUrl = pendingJavascriptUrls.pop();
+    if (visitedJavascriptUrls.has(javascriptUrl)) {
+      continue;
+    }
+
+    visitedJavascriptUrls.add(javascriptUrl);
+    const javascript = await readAssetText(cache, javascriptUrl);
+    for (const assetUrl of findBuildAssetUrls(javascript)) {
+      if (discoveredAssetUrls.has(assetUrl)) {
+        continue;
+      }
+
+      discoveredAssetUrls.add(assetUrl);
+      if (assetUrl.endsWith(".js")) {
+        pendingJavascriptUrls.push(assetUrl);
+      }
+    }
+  }
+
+  return [...discoveredAssetUrls];
 }
 
 async function networkFirstNavigation(request) {
@@ -58,12 +129,14 @@ async function networkFirstNavigation(request) {
 }
 
 async function staleWhileRevalidate(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
-  const cachedResponse = await cache.match(request);
+  const runtimeCache = await caches.open(RUNTIME_CACHE);
+  const appShellCache = await caches.open(APP_SHELL_CACHE);
+  const cachedResponse =
+    (await runtimeCache.match(request)) || (await appShellCache.match(request));
   const fetchPromise = fetch(request)
     .then((response) => {
       if (response.ok) {
-        void cache.put(request, response.clone());
+        void runtimeCache.put(request, response.clone());
       }
       return response;
     })
@@ -72,12 +145,26 @@ async function staleWhileRevalidate(request) {
   return cachedResponse || fetchPromise;
 }
 
+async function cacheAppShell() {
+  const cache = await caches.open(APP_SHELL_CACHE);
+  await cache.addAll(APP_SHELL_URLS);
+
+  const indexResponse =
+    (await cache.match("/index.html")) ||
+    (await cache.match("/")) ||
+    (await fetch("/index.html"));
+  const indexHtml = await indexResponse.clone().text();
+  const assetUrls = findIndexAssetUrls(indexHtml);
+  const dependencyUrls = await findBuildDependencies(cache, assetUrls);
+  const urlsToCache = [...new Set([...assetUrls, ...dependencyUrls])];
+
+  if (urlsToCache.length > 0) {
+    await cache.addAll(urlsToCache);
+  }
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(APP_SHELL_CACHE)
-      .then((cache) => cache.addAll(APP_SHELL_URLS))
-  );
+  event.waitUntil(cacheAppShell());
 });
 
 self.addEventListener("message", (event) => {
