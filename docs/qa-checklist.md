@@ -87,6 +87,10 @@ CI runs the same gate serially for Playwright with
       after page load
 - [ ] After one successful production visit, switching DevTools to
       offline and reloading still renders the Aura app shell
+- [ ] On first production install, the status stack shows "Offline shell
+      ready" and the Got it action dismisses it
+- [ ] When the browser exposes `beforeinstallprompt`, Aura shows the
+      Install/Later prompt without blocking the dashboard
 - [ ] Offline weather refreshes show the saved-forecast banner rather
       than claiming live provider data is fresh
 - [ ] Clearing site data removes the service worker/cache and returns
@@ -143,6 +147,8 @@ CI runs the same gate serially for Playwright with
 - [ ] No horizontal scroll
 - [ ] Hero card stacks: location → high/low → temp + icon → condition
 - [ ] Bento groups collapse into single column at ≤ 640 px
+- [ ] Rain and hourly panels show touch sample strips, and selecting a
+      sample updates the selected value without layout shift
 - [ ] Saved cities wrap; X button is at least 24×24
 - [ ] Search dropdown does not overflow the viewport
 - [ ] The `/` keyboard hint is hidden (it is keyboard-only)

@@ -57,6 +57,8 @@ portfolio-grade product. Format roughly follows
 - PWA manifest and production-only service worker registration. The
   service worker caches same-origin app-shell/build assets after a first
   online visit while leaving weather provider calls network-truthful.
+- PWA runtime status prompts for first-install offline readiness and the
+  browser install prompt, with dismissible Install/Later actions.
 - Playwright offline-shell regression coverage that verifies the
   production service worker can restore `?mock=missing` after reload
   without network access.
@@ -69,6 +71,8 @@ portfolio-grade product. Format roughly follows
   options for faster repeat switching.
 - First-load location onboarding and follow-up location prompts use
   shorter copy for better mobile scanning.
+- Mobile rain and hourly panels now expose touch-friendly sample strips
+  so dense timeline values can be inspected without hover.
 - Cloud Sync now stays hidden on fresh first load until the user has at
   least one saved city, while connected/syncing/error states remain
   visible for recovery.
@@ -164,10 +168,11 @@ portfolio-grade product. Format roughly follows
 
 ### Tests
 
-- 45 → **238** Node tests across 54 suites, including React render tests
+- 45 → **244** Node tests across 55 suites, including React render tests
   via `@testing-library/react` + `jsdom`. New regressions pin null-input
   contracts, source-scoped retries, cache restore behavior, honest
-  browser-location labels, and service worker registration gates.
+  browser-location labels, service worker registration gates, and PWA
+  install prompt handling.
 - 12 → **15** Playwright smoke/flow checks, including cached offline
   restore, offline app-shell reload, honest GPS labels, missing-data
   placeholders, missing-demo provider isolation, axe-core, and the
