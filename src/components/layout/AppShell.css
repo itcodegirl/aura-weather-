@@ -18,6 +18,51 @@
   contain-intrinsic-size: 216px;
 }
 
+.panel-boundary-fallback {
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.panel-boundary-retry {
+  margin-top: 4px;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(201, 224, 255, 0.42);
+  background: rgba(8, 17, 38, 0.6);
+  color: #e3efff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.panel-boundary-retry:hover {
+  border-color: rgba(174, 227, 255, 0.6);
+  background: rgba(13, 26, 53, 0.78);
+  transform: translateY(-1px);
+}
+
+.panel-boundary-retry:focus-visible {
+  border-color: rgba(130, 228, 255, 0.66);
+  box-shadow: 0 0 0 3px rgba(64, 196, 255, 0.2);
+}
+
+.panel-boundary-retry:active {
+  transform: scale(var(--press-scale));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-boundary-retry:hover,
+  .panel-boundary-retry:active {
+    transform: none;
+  }
+}
+
 .loading-card-title {
   position: relative;
   overflow: hidden;
