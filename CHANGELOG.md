@@ -9,9 +9,10 @@ portfolio-grade product. Format roughly follows
 
 ### Added
 
-- Source-scoped transient retries for Open-Meteo AQI, NOAA / NWS alerts,
-  and Open-Meteo Archive requests. Unsupported NWS regions still resolve
-  immediately as unsupported coverage rather than retrying.
+- Source-scoped transient retries for Open-Meteo forecast, geocoding,
+  AQI, NOAA / NWS alerts, and Open-Meteo Archive requests. Unsupported
+  NWS regions still resolve immediately as unsupported coverage rather
+  than retrying.
 - **Data Trust Contract** enforcement at four layers (API normalization,
   per-element parsers, component fallback rendering, visual + a11y cue).
   See the README's "Data Trust Contract" section for the full layout.
@@ -51,6 +52,11 @@ portfolio-grade product. Format roughly follows
 - Last-successful forecast cache keyed by normalized coordinates, with
   schema/version guards, capped entries, and a cold-start restore path
   for offline or failed Open-Meteo forecast loads.
+- A 12-hour freshness window for restored forecast snapshots so Aura
+  does not present old weather as daily guidance.
+- Hero daily guidance cards for rain gear, UV exposure, and wind comfort
+  derived from real forecast data, with unavailable states for missing
+  source inputs.
 - Data Sources panel that separates forecast, AQI, NOAA/NWS alerts, and
   archive status so live, saved, unsupported, and unavailable states are
   visible without conflating them with missing readings.
@@ -71,6 +77,10 @@ portfolio-grade product. Format roughly follows
   options for faster repeat switching.
 - First-load location onboarding and follow-up location prompts use
   shorter copy for better mobile scanning.
+- Initial loading now uses a lightweight dashboard-shaped skeleton with
+  provider status copy instead of a generic spinner card.
+- Decorative animated background blobs were removed; the calmer scene is
+  carried by the weather gradient and static atmospheric overlays.
 - Mobile rain and hourly panels now expose touch-friendly sample strips
   so dense timeline values can be inspected without hover.
 - Cloud Sync now stays hidden on fresh first load until the user has at

@@ -79,7 +79,7 @@ test("labels granted browser coordinates as current location", async ({ page }) 
 });
 
 test("renders a cached forecast on cold start when the browser is offline", async ({ page }) => {
-  const cachedAt = Date.parse("2026-04-21T12:00:00-05:00");
+  const cachedAt = Date.now();
   await page.addInitScript(({ cachedAtValue }) => {
     Object.defineProperty(navigator, "onLine", {
       configurable: true,

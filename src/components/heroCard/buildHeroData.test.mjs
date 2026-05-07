@@ -29,6 +29,9 @@ const baseWeather = {
     temperatureMin: [55],
     sunrise: ["2026-04-21T06:18:00-05:00"],
     sunset: ["2026-04-21T19:41:00-05:00"],
+    uvIndexMax: [7.2],
+    rainChanceMax: [22],
+    rainAmountTotal: [0.02],
   },
 };
 
@@ -68,6 +71,58 @@ describe("buildHeroData", () => {
     assert.equal(data.tempUnit, "°F");
     assert.equal(data.isCurrentTempMissing, false);
     assert.equal(data.heroStatsHaveAnyMissing, false);
+  });
+
+  test("builds practical daily guidance from forecast readings", () => {
+    const data = buildHeroData({
+      weather: {
+        ...baseWeather,
+        current: {
+          ...baseWeather.current,
+          windGust: 34,
+        },
+        daily: {
+          ...baseWeather.daily,
+          rainChanceMax: [68],
+          rainAmountTotal: [0.18],
+          uvIndexMax: [8.4],
+        },
+      },
+      location: baseLocation,
+      unit: "F",
+    });
+
+    assert.equal(data.dailyGuidance.length, 3);
+    assert.deepEqual(
+      data.dailyGuidance.map((item) => item.value),
+      ["Bring rain gear", "Very high exposure", "Gusty conditions"]
+    );
+  });
+
+  test("marks daily guidance unavailable instead of inventing readings", () => {
+    const data = buildHeroData({
+      weather: {
+        ...baseWeather,
+        current: {
+          ...baseWeather.current,
+          windSpeed: null,
+          windGust: null,
+        },
+        daily: {
+          ...baseWeather.daily,
+          rainChanceMax: [null],
+          rainAmountTotal: [null],
+          uvIndexMax: [null],
+        },
+      },
+      location: baseLocation,
+      unit: "F",
+    });
+
+    assert.deepEqual(
+      data.dailyGuidance.map((item) => item.tone),
+      ["unavailable", "unavailable", "unavailable"]
+    );
   });
 
   test("converts to Celsius on demand", () => {

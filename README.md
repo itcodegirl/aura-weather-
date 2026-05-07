@@ -19,9 +19,11 @@ It is designed as a portfolio project with real frontend concerns in scope:
 
 - Immediate fallback forecast for Chicago on first load, with optional location permission instead of a stalled geolocation wait
 - Current conditions, hourly outlook, rain guidance, risk signals, and 7-day forecast in one surface
+- Data-driven daily guidance in the hero for rain gear, UV exposure, and wind comfort
 - Open-Meteo powered weather, air quality, geocoding, and archive data
 - NOAA / NWS severe alerts with explicit unsupported-region fallback messaging
-- Transient retries for secondary AQI, alerts, and archive requests without blocking the core forecast
+- Transient retries for forecast, geocoding, AQI, alerts, and archive requests without blocking the core forecast
+- Last-known forecast restore for offline starts, capped to a daily freshness window so stale weather is not presented as useful guidance
 - Saved cities, persisted location preference, and optional cloud sync that appears once there is something to sync
 - Installable PWA metadata, install prompt handling, and a service worker that restores the app shell after a first online visit
 - Temperature-unit changes stay local to the UI instead of forcing fresh forecast/climate requests
@@ -135,7 +137,7 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`244` tests across 55 suites, including React render tests via `jsdom` + `esbuild`)
+- `npm test` passes (`249` tests across 55 suites, including React render tests via `jsdom` + `esbuild`)
 - `npm run build` passes
 - `npm run test:e2e -- --workers=1` passes (`28` Playwright checks, including smoke, screenshots, visual baselines, cached offline restore, offline app-shell reload, honest GPS labels, missing-data placeholder guard, demo-provider guard, unicode-escape leak guard, and axe-core a11y)
 - `npm run test:lighthouse` passes the local app-shell budget gate against the labelled `?mock=missing` demo route
@@ -145,7 +147,9 @@ npm run test:lighthouse
 
 - Node tests for:
   - API model contracts
+  - primary forecast and geocoder retry behavior
   - alert coverage fallback behavior
+  - saved-forecast restore cache freshness
   - saved-location sync normalization and error handling
   - location persistence helpers
   - weather domain utilities and formatters
@@ -173,9 +177,11 @@ npm run test:lighthouse
 ## Demo Expectations
 
 - First load opens to a usable Chicago forecast immediately instead of stalling on a geolocation permission prompt.
+- Initial loading uses a lightweight dashboard skeleton and provider status copy rather than fake forecast values.
 - Browser location is opt-in. Users can keep the fallback city, search manually, or grant location access.
 - Device-location success is labelled "Current location" unless the user selects a named city from search.
 - Core weather data loads first. Air quality, alerts, and climate context can recover independently if a secondary API is slow or unavailable.
+- The hero summarizes daily decisions from real forecast data: rain gear, UV exposure, and wind comfort. Missing source data is labelled unavailable, not guessed.
 - Mobile rain and hourly cards expose touch-friendly sample controls so users can inspect dense timelines without relying on hover.
 - Saved cities appear as search suggestions on focus, so repeat switching does not require typing.
 - Search shows a loading state before empty results, so users do not get a premature "No matching cities" response.
@@ -201,7 +207,8 @@ Short notes on the non-obvious choices a reviewer might question.
 
 - **Forecast is always fetched in Fahrenheit / inch units; conversion is client-side.** Switching the °F/°C toggle must not trigger a refetch — it would invalidate the displayed timestamp and confuse users. A Playwright test asserts that toggling units does not refetch.
 - **Three independent fetch tracks.** Forecast, supplemental (AQI + alerts), and climate-archive run concurrently with separate AbortController + request-id pairs. A slow archive call cannot delay the hero card; an alerts feed outage cannot wipe the AQI reading.
-- **Supplemental retries stay source-scoped.** AQI, alerts, and archive calls retry transient failures once, while known coverage misses such as NWS 400/404 responses stay explicit unsupported-region states.
+- **Retries stay source-scoped.** Forecast, geocoding, AQI, alerts, and archive calls retry transient failures on their own clocks, while known coverage misses such as NWS 400/404 responses stay explicit unsupported-region states.
+- **Cached forecasts have a daily freshness window.** Aura can restore a last-known snapshot when the browser starts offline, but snapshots older than 12 hours are ignored so the app does not present stale weather as daily guidance.
 - **NWS alerts are U.S.-only by design.** A 400/404 from `api.weather.gov/alerts/active` is mapped to an explicit `unsupported` status (not `unavailable`) so the UI can say "Alerts unavailable for this region" instead of an ambiguous "no alerts".
 - **Strict numeric coercion at every layer.** `Number(null) === 0` would surface as a fake 0°F humidity / 0% rain chance / 0°F historical sample whenever Open-Meteo returns a missing data point. A single shared `toFiniteNumber` helper rejects nullish, empty-string, boolean, array, and object inputs explicitly, and is now applied at the API boundary, every formatter, every domain classifier, and every chart slot parser. Eight unit tests lock the core helper; additional assertions pin the null contract for each formatter and domain function.
 - **Lazy supplemental panels.** The hero, exposure cards, and rain card render synchronously. Hourly chart, storm watch, alerts, forecast, and nowcast are mounted via `Suspense` after a `requestIdleCallback` (or 180ms fallback) so the first paint is just the data the user sees first.

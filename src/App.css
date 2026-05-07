@@ -226,39 +226,6 @@ a:focus-visible,
   filter: blur(2px);
 }
 
-.ambient-blob {
-  position: absolute;
-  width: 520px;
-  height: 520px;
-  border-radius: 50%;
-  filter: blur(56px);
-  opacity: 0.74;
-  background: radial-gradient(circle at 30% 30%, rgba(195, 170, 255, 0.34), rgba(110, 210, 255, 0.24) 40%, rgba(66, 100, 196, 0.16) 62%, transparent 80%);
-  pointer-events: none;
-  animation: drift 13s ease-in-out infinite;
-}
-
-.ambient-blob--tl {
-  top: -250px;
-  left: -200px;
-}
-
-.ambient-blob--br {
-  right: -210px;
-  bottom: -250px;
-  animation-delay: 2.8s;
-}
-
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(16px, -12px, 0) scale(1.04);
-  }
-}
-
 @keyframes card-slide-up {
   from {
     opacity: 0;
@@ -424,10 +391,6 @@ a:focus-visible,
     padding-top: 18px;
   }
 
-  .ambient-blob {
-    display: none;
-  }
-
   .city-search {
     order: -1;
     width: 100%;
@@ -452,10 +415,6 @@ a:focus-visible,
     --hero-temp-size: 58px;
     --hero-unit-size: 22px;
     --card-padding: 20px;
-  }
-
-  .ambient-blob {
-    filter: blur(26px);
   }
 }
 
@@ -491,10 +450,6 @@ a:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
     scroll-behavior: auto !important;
-  }
-
-  .ambient-blob {
-    display: none;
   }
 }
 

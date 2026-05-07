@@ -18,6 +18,8 @@ const DEFAULT_TEMPERATURE_UNIT = "fahrenheit";
 const DEFAULT_WIND_SPEED_UNIT = "mph";
 const DEFAULT_PRECIPITATION_UNIT = "inch";
 const DEFAULT_TIMEZONE = "UTC";
+const FORECAST_RETRY_DELAYS_MS = [250, 700];
+const GEOCODE_RETRY_DELAYS_MS = [200];
 const SUPPLEMENTAL_RETRY_DELAYS_MS = [300];
 export const ALERTS_STATUS = {
   ready: "ready",
@@ -321,7 +323,10 @@ export async function fetchWeather(lat, lon, options = {}) {
     past_hours: "48",
   });
 
-  const rawResponse = await fetchJson(`${ENDPOINTS.weather}?${params}`, { signal });
+  const rawResponse = await fetchJsonWithRetry(`${ENDPOINTS.weather}?${params}`, {
+    signal,
+    retryDelaysMs: options.retryDelaysMs ?? FORECAST_RETRY_DELAYS_MS,
+  });
   return normalizeWeatherResponse(rawResponse);
 }
 
@@ -445,9 +450,12 @@ export async function geocodeCity(name, options = {}) {
     return [];
   }
 
-  const data = await fetchJson(
+  const data = await fetchJsonWithRetry(
     `${ENDPOINTS.geocode}?name=${encodeURIComponent(query)}&count=${GEOCODE_RESULTS_LIMIT}`,
-    { signal: options.signal }
+    {
+      signal: options.signal,
+      retryDelaysMs: options.retryDelaysMs ?? GEOCODE_RETRY_DELAYS_MS,
+    }
   );
   return Array.isArray(data?.results) ? data.results : [];
 }

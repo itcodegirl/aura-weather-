@@ -157,6 +157,85 @@
   line-height: 1.5;
 }
 
+.hero-guidance {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hero-guidance-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: flex-start;
+  padding: 11px 12px;
+  min-height: 96px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(190, 214, 252, 0.18);
+  background: rgba(7, 16, 34, 0.42);
+  box-shadow: var(--subcard-shadow);
+}
+
+.hero-guidance-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  color: #e8f6ff;
+  background: rgba(160, 190, 240, 0.16);
+}
+
+.hero-guidance-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.hero-guidance-label {
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero-guidance-value {
+  overflow-wrap: anywhere;
+  color: #f4f9ff;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 780;
+}
+
+.hero-guidance-detail {
+  overflow-wrap: anywhere;
+  color: rgba(211, 226, 250, 0.78);
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 620;
+}
+
+.hero-guidance-item--calm {
+  border-color: rgba(110, 231, 183, 0.24);
+  background: linear-gradient(160deg, rgba(13, 42, 39, 0.3), rgba(7, 16, 34, 0.36));
+}
+
+.hero-guidance-item--notice {
+  border-color: rgba(251, 191, 36, 0.28);
+  background: linear-gradient(160deg, rgba(62, 47, 16, 0.28), rgba(7, 16, 34, 0.36));
+}
+
+.hero-guidance-item--watch {
+  border-color: rgba(251, 146, 60, 0.34);
+  background: linear-gradient(160deg, rgba(76, 32, 17, 0.3), rgba(7, 16, 34, 0.36));
+}
+
+.hero-guidance-item--unavailable {
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
 .hero-sunlight {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -306,6 +385,10 @@
   .hero-insight {
     max-width: 100%;
   }
+
+  .hero-guidance {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
@@ -361,6 +444,11 @@
     margin-top: 12px;
     padding: 10px 12px;
     font-size: 13px;
+  }
+
+  .hero-guidance-item {
+    min-height: 82px;
+    padding: 10px;
   }
 
   .hero-sunlight {
