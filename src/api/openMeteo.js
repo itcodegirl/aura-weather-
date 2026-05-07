@@ -18,11 +18,68 @@ const DEFAULT_TEMPERATURE_UNIT = "fahrenheit";
 const DEFAULT_WIND_SPEED_UNIT = "mph";
 const DEFAULT_PRECIPITATION_UNIT = "inch";
 const DEFAULT_TIMEZONE = "UTC";
+const SUPPLEMENTAL_RETRY_DELAYS_MS = [300];
 export const ALERTS_STATUS = {
   ready: "ready",
   unsupported: "unsupported",
   unavailable: "unavailable",
 };
+
+function isAbortError(error) {
+  return error?.name === "AbortError";
+}
+
+function createAbortError() {
+  const error = new Error("Request aborted");
+  error.name = "AbortError";
+  return error;
+}
+
+function throwIfAborted(signal) {
+  if (signal?.aborted) {
+    throw createAbortError();
+  }
+}
+
+function normalizeRetryDelays(delays) {
+  if (!Array.isArray(delays)) {
+    return SUPPLEMENTAL_RETRY_DELAYS_MS;
+  }
+
+  return delays
+    .map((delay) => toFiniteNumber(delay))
+    .filter((delay) => delay !== null && delay >= 0);
+}
+
+function isRetryableError(error) {
+  if (isAbortError(error)) {
+    return false;
+  }
+
+  const status = toFiniteNumber(error?.status);
+  return status === null || status === 408 || status === 429 || status >= 500;
+}
+
+function waitForRetry(delayMs, signal) {
+  throwIfAborted(signal);
+  if (delayMs <= 0) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      signal?.removeEventListener?.("abort", handleAbort);
+      resolve();
+    }, delayMs);
+
+    function handleAbort() {
+      clearTimeout(timeoutId);
+      reject(createAbortError());
+    }
+
+    signal?.addEventListener?.("abort", handleAbort, { once: true });
+  });
+}
 
 function getSignal(signal) {
   const hasAbortSignal = typeof AbortSignal !== "undefined";
@@ -87,8 +144,9 @@ function getDatePartsInTimeZone(now, timeZone) {
 }
 
 async function fetchJson(url, options = {}) {
+  const { retryDelaysMs: _retryDelaysMs, ...fetchOptions } = options;
   const response = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     signal: getSignal(options.signal),
   });
 
@@ -105,6 +163,25 @@ async function fetchJson(url, options = {}) {
   } catch {
     throw new Error("Invalid JSON response from weather service");
   }
+}
+
+async function fetchJsonWithRetry(url, options = {}) {
+  const retryDelays = normalizeRetryDelays(options.retryDelaysMs);
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= retryDelays.length; attempt += 1) {
+    try {
+      return await fetchJson(url, options);
+    } catch (error) {
+      lastError = error;
+      if (attempt >= retryDelays.length || !isRetryableError(error)) {
+        throw error;
+      }
+      await waitForRetry(retryDelays[attempt], options.signal);
+    }
+  }
+
+  throw lastError;
 }
 
 function getDateInTimeZone(timeZone) {
@@ -281,7 +358,10 @@ export async function fetchHistoricalTemperatureAverage(
     timezone: normalizeTimeZone(timezone),
   });
 
-  const data = await fetchJson(`${ENDPOINTS.archive}?${params}`, { signal });
+  const data = await fetchJsonWithRetry(`${ENDPOINTS.archive}?${params}`, {
+    signal,
+    retryDelaysMs: options.retryDelaysMs,
+  });
   const daily = data?.daily;
   const times = daily?.time;
   if (!Array.isArray(times) || !times.length) {
@@ -341,14 +421,17 @@ export async function fetchHistoricalTemperatureAverage(
 export async function fetchAirQuality(lat, lon, options = {}) {
   const coordinates = validateCoordinates(lat, lon);
   try {
-    const data = await fetchJson(
+    const data = await fetchJsonWithRetry(
       `${ENDPOINTS.aqi}?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}&current=european_aqi`,
-      { signal: options.signal }
+      { signal: options.signal, retryDelaysMs: options.retryDelaysMs }
     );
     // toFiniteNumber returns null for nullish/empty inputs; the legacy
     // Number()-based check would have surfaced a null AQI as 0.
     return toFiniteNumber(data?.current?.european_aqi);
-  } catch {
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
     return null;
   }
 }
@@ -379,8 +462,9 @@ export async function fetchSevereWeatherAlerts(lat, lon, options = {}) {
     point: `${coordinates.latitude},${coordinates.longitude}`,
   });
   try {
-    const payload = await fetchJson(`${ENDPOINTS.alerts}?${params}`, {
+    const payload = await fetchJsonWithRetry(`${ENDPOINTS.alerts}?${params}`, {
       signal: options.signal,
+      retryDelaysMs: options.retryDelaysMs,
       headers: {
         Accept: "application/geo+json",
       },

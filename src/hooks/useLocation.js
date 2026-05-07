@@ -12,6 +12,8 @@ export const LOCATION_FALLBACK_NOTICE =
 export const SAVED_LOCATION_NOTICE = "Showing your previously selected location";
 export const LOCATION_UNSUPPORTED_NOTICE =
   "Location access is unavailable in this browser. Search for a city instead.";
+export const CURRENT_LOCATION_NAME = "Current location";
+export const CURRENT_LOCATION_NOTICE = "Showing your device location";
 const LAST_LOCATION_KEY = "aura-weather-last-location";
 const SAVED_CITIES_KEY = "aura-weather-saved-cities";
 export const MAX_SAVED_CITIES = 6;
@@ -237,7 +239,7 @@ function notifyResolvedLocation(callback, lat, lon, name, country, notice) {
     coordinates.latitude,
     coordinates.longitude,
     normalizeLocationName(name, DEFAULT_LOCATION.name),
-    normalizeLocationName(country, DEFAULT_LOCATION.country),
+    normalizeLocationName(country, ""),
     notice
   );
 }
@@ -351,9 +353,9 @@ export function useLocation(onResolved) {
               resolveCallback,
               position?.coords?.latitude,
               position?.coords?.longitude,
+              CURRENT_LOCATION_NAME,
               "",
-              "",
-              null
+              CURRENT_LOCATION_NOTICE
             );
           },
           () => {
