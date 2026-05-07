@@ -76,35 +76,43 @@ describe("useTimeNow", () => {
   test("ticks once on visibility return so labels are not stale", async () => {
     // Hidden during render → no interval starts. Becoming visible
     // should immediately bump the timestamp.
+    const realDateNow = Date.now;
+    let mockedNow = realDateNow();
+    Date.now = () => mockedNow;
+
     Object.defineProperty(document, "visibilityState", {
       configurable: true,
       get: () => "hidden",
     });
 
-    let lastValue = null;
-    const probe = render(
-      React.createElement(ClockProbe, {
-        onTick: (value) => {
-          lastValue = value;
-        },
-      })
-    );
-    const initialValue = lastValue;
+    try {
+      let lastValue = null;
+      const probe = render(
+        React.createElement(ClockProbe, {
+          onTick: (value) => {
+            lastValue = value;
+          },
+        })
+      );
 
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      get: () => "visible",
-    });
+      mockedNow += 60_000;
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => "visible",
+      });
 
-    await act(async () => {
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
+      await act(async () => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
 
-    assert.notEqual(
-      lastValue,
-      initialValue,
-      "visibility return should bump the timestamp"
-    );
-    probe.unmount();
+      assert.equal(
+        lastValue,
+        mockedNow,
+        "visibility return should bump the timestamp"
+      );
+      probe.unmount();
+    } finally {
+      Date.now = realDateNow;
+    }
   });
 });
