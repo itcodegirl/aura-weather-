@@ -45,6 +45,41 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
   await expect(page.getByRole("heading", { name: "Week Ahead" })).toBeVisible();
 });
 
+test("labels granted browser coordinates as current location", async ({ page }) => {
+  await page.addInitScript(() => {
+    const grantedGeolocation = {
+      getCurrentPosition(success) {
+        success({
+          coords: {
+            latitude: 42.1234,
+            longitude: -88.5678,
+          },
+        });
+      },
+      watchPosition() {
+        return 0;
+      },
+      clearWatch() {},
+    };
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: grantedGeolocation,
+    });
+  });
+
+  await openDashboard(page);
+
+  await page
+    .getByLabel("Location onboarding")
+    .getByRole("button", { name: "Allow location access" })
+    .click();
+
+  await expect(page.locator(".hero-location")).toContainText("Current location");
+  await expect(page.locator(".hero-location")).not.toContainText("United States");
+  await expect(page.getByText("Showing your device location")).toBeVisible();
+});
+
 test("renders a cached forecast on cold start when the browser is offline", async ({ page }) => {
   const cachedAt = Date.parse("2026-04-21T12:00:00-05:00");
   await page.addInitScript(({ cachedAtValue }) => {

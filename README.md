@@ -72,6 +72,7 @@ src/
     CitySearch, WeatherIcon, AppErrorBoundary
   services/                  # Cross-cutting services
     savedLocationsSync.js    #   sync key + jsonblob persistence
+    weatherSnapshotCache.js  #   last-successful forecast restore cache
   utils/                     # Pure helpers
     numbers.js               #   strict toFiniteNumber (rejects null)
     weatherUnits.js  meteorology.js  dates.js  dataTrust.js
@@ -131,9 +132,9 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`198` tests, including 25 React render tests via `jsdom` + `esbuild`)
+- `npm test` passes (`227` tests across 53 suites, including React render tests via `jsdom` + `esbuild`)
 - `npm run build` passes
-- `npm run test:e2e` passes (`21` Playwright checks, including smoke, missing-data placeholder guard, unicode-escape leak guard, axe-core a11y on both `/` and `?mock=missing`, and visual baselines for the dashboard + the trust-contract demos)
+- `npm run test:e2e -- e2e/weather-smoke.spec.js` passes (`13` Playwright smoke checks, including cached offline restore, honest GPS labels, missing-data placeholder guard, unicode-escape leak guard, and axe-core a11y on `/`)
 - `npm run test:lighthouse` passes the local budget gate
 
 ### Current automated coverage
@@ -146,6 +147,7 @@ npm run test:lighthouse
   - weather domain utilities and formatters
 - Playwright smoke coverage for:
   - dashboard boot
+  - granted browser coordinates labelled as "Current location"
   - city search and location switching
   - search loading feedback before empty-result states resolve
   - unit switching without refetching forecast/climate data
@@ -339,7 +341,7 @@ Other strong stories:
 - **Resilient client composition** — three independent fetch tracks (forecast, supplemental AQI/alerts, historical archive) with separate AbortControllers and request-id stale-result guards, plus a per-panel error boundary so a lazy chunk failure cannot blank out the dashboard.
 - **Responsive, mobile-first dashboard** — the bento layout has explicit breakpoints at 1200/980/860/760/640/560/420 px, hover-only effects gated behind `(hover: hover)`, and `prefers-reduced-motion` overrides for every animation. Co-located component CSS replaces what was a 2k-line monolith.
 - **Accessibility past axe baseline** — scoped live regions (`role="alert"` for errors, `role="status"` for last-synced metadata), `aria-busy` on async buttons, decorative SVG cleanup, keyboard combobox for search, and a regression test that scans rendered text for literal `\uXXXX` escape sequences.
-- **QA maturity** — 190 tests (165 unit/integration + 25 React render) covering API normalization, climate comparison, location persistence, sync helpers, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, and the null-coercion contract at every domain layer; 14 Playwright checks for smoke, visual regression, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
+- **QA maturity** — 227 Node tests covering API normalization, source retries, climate comparison, location persistence, sync helpers, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, render-level fallback states, and the null-coercion contract at every domain layer; 13 Playwright smoke checks for cached offline restore, honest GPS labels, search, sync failure, regional alerts, mobile overflow, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
 
 ## Screenshot Guidance
 

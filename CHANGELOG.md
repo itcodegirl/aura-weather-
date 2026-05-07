@@ -143,9 +143,10 @@ portfolio-grade product. Format roughly follows
 
 ### Tests
 
-- 45 → **190** Node tests, including 25 React render tests via
-  `@testing-library/react` + `jsdom` (HeroCard, InfoDrawer, MetricCard,
-  Stat, useTimeNow). New regressions pin null-input contracts for
-  every formatter and domain classifier.
-- 12 → **14** Playwright checks, including a missing-data placeholder
-  guard and a unicode-escape leak guard.
+- 45 → **227** Node tests across 53 suites, including React render tests
+  via `@testing-library/react` + `jsdom`. New regressions pin null-input
+  contracts, source-scoped retries, cache restore behavior, and honest
+  browser-location labels.
+- 12 → **13** Playwright smoke checks, including cached offline restore,
+  honest GPS labels, missing-data placeholders, axe-core, and the
+  unicode-escape leak guard.
