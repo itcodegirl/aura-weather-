@@ -14,6 +14,9 @@ test("?mock=missing renders 'Data unavailable' instead of synthetic zeros", asyn
 
   await expect(page.getByRole("main")).toBeVisible();
   await expect(page.locator(".hero-location")).toContainText("Sample City");
+  await expect(
+    page.getByText("Portfolio demo: showing the missing-data trust contract")
+  ).toBeVisible();
 
   const hero = page.locator(".hero-card");
   await expect(hero).toBeVisible();

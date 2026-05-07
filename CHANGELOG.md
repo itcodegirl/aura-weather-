@@ -27,10 +27,11 @@ portfolio-grade product. Format roughly follows
   load error cannot blank out the whole dashboard.
 - `CardFallback` — shared loading-card primitive (was duplicated
   between `WeatherDashboard` and `SupplementalWeatherPanels`).
-- `?mock=missing` dev mode (`src/dev/missingDataMock.js`) — patches
-  `fetch` to reproduce the missing-data state on demand for screenshots
-  and ad-hoc QA. Tree-shaken from production builds via
-  `import.meta.env.DEV`.
+- `?mock=missing` labelled portfolio demo route (`src/mocks/missingData.js`)
+  for the missing-data trust contract. The app shows an explicit demo
+  notice and does not query live providers in that state. A dev-only
+  fetch patch remains in `src/dev/missingDataMock.js` for lower-level
+  endpoint QA.
 - React render-test harness (`@testing-library/react` + `jsdom`) wired
   into `node:test` via a small esbuild-powered loader. No Vitest
   dependency.
@@ -60,8 +61,10 @@ portfolio-grade product. Format roughly follows
   `aria-live="polite"`; only the error (`role="alert"`) and last-synced
   timestamp (`role="status"`) announce.
 - Async controls (Use my location, Allow location, Retry, Sync now,
-  Disconnect, Create cloud account) now expose `aria-busy` while their
+  Disconnect, Create sync key) now expose `aria-busy` while their
   work is in flight.
+- The jsonblob sync action now says "Create sync key" instead of
+  implying Aura creates a real cloud account.
 - The 1-minute `DataTrustMeta` clock pauses while the tab is hidden so
   background tabs do not churn re-renders.
 - InfoDrawer trigger uses a `HelpCircle` icon instead of a literal `?`.

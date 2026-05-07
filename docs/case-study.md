@@ -158,8 +158,9 @@ fix would slowly drift back as new code shipped:
 
 ## Reproducing the contract on demand
 
-`?mock=missing` patches `fetch` in development to return Open-Meteo
-+ NWS payloads with several null fields:
+`?mock=missing` is a labelled portfolio demo route that serves a
+local missing-data model and shows a runtime notice that live
+providers are not queried:
 
 ```bash
 npm run dev
@@ -168,14 +169,12 @@ open http://127.0.0.1:5173/?mock=missing
 
 The current temperature stays real so the dashboard still looks
 like a working forecast — the point is that every other field
-degrades gracefully. The dev hook is gated on
-`import.meta.env.DEV` and tree-shaken from production builds. CI
-uses the same hook to capture the trust-contract screenshot as an
-artifact on every Playwright run.
+degrades gracefully. CI uses the same labelled demo route to capture
+the trust-contract screenshot as an artifact on every Playwright run.
 
 A 6-test unit suite (`missingDataMock.test.mjs`) verifies that the
-mock returns the expected null shapes for each endpoint and forwards
-unknown URLs to the original fetch.
+dev-only endpoint mock returns the expected null shapes for each
+endpoint and forwards unknown URLs to the original fetch.
 
 ## Numbers
 

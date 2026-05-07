@@ -256,14 +256,13 @@ The contract is locked in by tests at every layer:
   asserts `0%` / `0 hPa` are not in the rendered text.
 
 To reproduce the missing-data state on demand (for screenshots or
-manual QA), run `npm run dev` and open
-`http://127.0.0.1:5173/?mock=missing`. The dev-only hook in
-`src/dev/missingDataMock.js` patches `fetch` to return Open-Meteo /
-NWS responses where humidity, pressure, dew point, gust speed, and
-several daily highs are null. The current temperature stays real so
-the dashboard still looks like a working forecast — the point is
-that every other field degrades gracefully. The mock is gated on
-`import.meta.env.DEV` and is tree-shaken from production builds.
+manual QA), open `/?mock=missing`. This is a labelled portfolio demo
+state, not a silent production override: the app shows a demo notice
+and uses `src/mocks/missingData.js` instead of querying live providers.
+The current temperature stays real so the dashboard still looks like a
+working forecast — the point is that every other field degrades
+gracefully. A dev-only fetch patch remains in
+`src/dev/missingDataMock.js` for lower-level endpoint QA.
 
 ## How this was audited
 
@@ -293,8 +292,8 @@ bug, the contract, and the test pyramid.
 
 ## Recent Hardening
 
-- **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.
-- **`?mock=missing` dev mode** — `npm run dev` + `?mock=missing` patches `fetch` to return Open-Meteo / NWS payloads with several null fields so the trust-contract screenshot is reproducible on demand. Production builds tree-shake the mock entirely.
+- **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard, ForecastCard, RainCard, and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.
+- **`?mock=missing` demo state** — `/?mock=missing` is a labelled portfolio demo route for the trust contract. It shows a clear demo notice and serves a local missing-data model without live provider calls.
 - **Hero helper note** — when any hero stat is missing the card appends a short "Some readings are unavailable from the provider" line with `role="status"` so the user understands *why* a value is shown as `—`.
 - **`convertTemp` null guard** — the per-display temperature converter (`Math.round(fahrenheit)`) silently produced `0` for null input, which then surfaced as `0°F` even after the API normalization layer was correctly returning null. Routed through the strict `toFiniteNumber` so missing temperatures correctly become `NaN → "—"` downstream.
 - **Unicode-escape rendering bug** — JSX text leaking literal `°` on the hourly chart Y axis and `—` in the AQI/UV empty state was fixed and now gated by an automated regression test.
@@ -303,7 +302,7 @@ bug, the contract, and the test pyramid.
 - **CSS co-location** — `App.css` shrank from 2,067 to roughly 500 lines as `DataTrustMeta`, `InfoDrawer`, `AppShell`, `StatusStack`, the bento dashboard layout, and the entire header surface moved next to their owning components.
 - **Scoped live regions** — `SyncAccountPanel` no longer wraps its full body in `aria-live="polite"`; only the error (`role="alert"`) and last-synced timestamp (`role="status"`) announce, and the truncated sync key advertises its full value via aria-label.
 - **Strict API number coercion** — `Number(null)` is `0`, which silently surfaced as fake `0%` humidity, `0 hPa` pressure, `0°F` dew point, and `0°F` historical samples whenever Open-Meteo returned partial data. A shared `toFiniteNumber` helper rejects nullish/empty/boolean/object inputs at the API boundary, then routes the same contract through every per-element parser in HourlyCard, ForecastCard, NowcastCard, and `useRainAnalysis`.
-- **In-flight async announcement** — async buttons (Use my location, Allow location, Retry, Sync now, Disconnect, Create cloud account) now expose `aria-busy` while their work is in flight, so screen-reader users get a signal even after tabbing away.
+- **In-flight async announcement** — async buttons (Use my location, Allow location, Retry, Sync now, Disconnect, Create sync key) now expose `aria-busy` while their work is in flight, so screen-reader users get a signal even after tabbing away.
 - **Climate comparison nullish-input fix** — `buildClimateComparison` now rejects nullish temperatures explicitly instead of coercing them to zero, which previously could surface fake "65°F warmer than average" lines for partial archive responses.
 - **Status-stack collapse** — App.jsx no longer mounts two `role="status"` regions on every render.
 - **Per-panel error boundary** — a lazy chunk loading failure (HourlyChart, StormWatch) used to take down the whole app via the root error boundary. A new `PanelErrorBoundary` isolates per-panel render and dynamic-import errors so the rest of the dashboard keeps working.
@@ -339,7 +338,7 @@ Other strong stories:
 
 - **Desktop hero shot** — current conditions hero, exposure metrics, and risk panels visible together so the bento composition is obvious.
 - **Mobile stack shot** — the dashboard at ≤420 px proving the layout stacks cleanly with no horizontal overflow.
-- **Trust-contract shot** — load `http://127.0.0.1:5173/?mock=missing` against the dev server to reproduce the missing-data state instantly. The hero card renders muted `—` placeholders for humidity, pressure, dew point, and several daily highs, with the helper note explaining "Some readings are unavailable from the provider." This is the strongest single signal of the trust narrative.
+- **Trust-contract shot** — load `/?mock=missing` to reproduce the labelled missing-data demo state instantly. The dashboard renders muted `—` placeholders for humidity, pressure, dew point, daily high/low gaps, and precipitation gaps, with the helper note explaining "Some readings are unavailable from the provider." This is the strongest single signal of the trust narrative.
 - **Alert overflow shot** — five or more mocked alerts so the new "+ N more alerts not shown" footnote is visible.
 - **Empty/error states** — the unsupported-region alerts fallback, the refresh-error retry banner, and the permission-onboarding card. These say "the team thought about failure modes" louder than a polished happy-path shot.
 

@@ -46,6 +46,8 @@ For automated checks, run `npm run lint && npm test && npm run build
 
 - [ ] Visit `/?mock=missing` — humidity, pressure, dew point render
       muted "—" not "0%" / "0 hPa" / "0°F"
+- [ ] The same route shows the labelled portfolio demo notice, so it
+      cannot be mistaken for live provider data
 - [ ] The hero stats helper note appears: "Some readings are
       unavailable from the provider..."
 - [ ] AQI / UV cards read "AQI offline" / "UV offline" with a "No live
@@ -83,7 +85,7 @@ For automated checks, run `npm run lint && npm test && npm run build
 ## Cloud sync (optional flow)
 
 - [ ] Cloud Sync panel collapses by default
-- [ ] Create cloud account → key appears, ellipsised at 32 characters,
+- [ ] Create sync key → key appears, ellipsised at 32 characters,
       tooltip + aria-label expose the full key
 - [ ] Pasting an invalid sync URL produces a `role="alert"` error and
       the panel stays disconnected
@@ -131,8 +133,8 @@ For automated checks, run `npm run lint && npm test && npm run build
 ## Build artifact sanity
 
 - [ ] `dist/` is < 1 MB total
-- [ ] `?mock=missing` is **not** present in production bundles:
-      `grep -r "mock=missing" dist/ && echo LEAKED || echo OK`
+- [ ] `/?mock=missing` in a production build shows the labelled demo
+      notice and does not attempt live provider fetches
 - [ ] No `console.error` / `console.warn` in production smoke run
 
 ---

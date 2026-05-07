@@ -1,7 +1,7 @@
-// Dev-only mock that patches `fetch` to return a payload with several
-// missing readings, so `?mock=missing` reliably reproduces the trust
-// contract for screenshots and ad-hoc QA. The mock is only installed
-// in development builds (Vite's `import.meta.env.DEV` flag) and only
+// Dev-only endpoint mock that patches `fetch` to return payloads with
+// several missing readings for lower-level QA. The user-facing
+// `?mock=missing` portfolio demo is served by src/mocks/missingData.js;
+// this fetch override is only installed in development builds and only
 // when the user explicitly opts in via the URL query parameter.
 
 import { toFiniteNumber } from "../utils/numbers.js";
