@@ -14,7 +14,7 @@ const MISSING_PLACEHOLDER = "\u2014";
 
 function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
   if (!Array.isArray(hours) || hours.length === 0) {
-    return "Hourly precipitation timeline is temporarily unavailable.";
+    return "Open-Meteo did not return an hourly precipitation series. Other forecast panels remain live.";
   }
 
   const peakTime = peak?.time instanceof Date ? formatHour(peak.time) : "later";
@@ -31,7 +31,7 @@ function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
       : "";
 
   if (parsedPeakProbability === null && projectedTotal === MISSING_PLACEHOLDER) {
-    return `Hourly precipitation guidance is temporarily unavailable.${missingNote}`;
+    return `Open-Meteo did not return enough precipitation samples to summarise the next 24 hours.${missingNote}`;
   }
 
   if (nextRain?.time instanceof Date) {
@@ -171,7 +171,7 @@ function RainCard({
     });
     const accessibleText = bars.length
       ? bars.map((bar) => bar.tooltip).join(". ")
-      : "Hourly precipitation timeline is temporarily unavailable.";
+      : "Open-Meteo did not return an hourly precipitation series. Other forecast panels remain live.";
 
     return {
       isDry:
