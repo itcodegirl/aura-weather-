@@ -431,9 +431,12 @@
   }
 
   .hero-temp-row {
-    flex-direction: column-reverse;
-    align-items: flex-start;
-    gap: 10px;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .hero-icon {
+    width: clamp(86px, 28vw, 108px);
   }
 
   .hero-feels {
@@ -475,7 +478,7 @@
   }
 
   .hero-icon {
-    width: 102px;
+    width: clamp(80px, 26vw, 96px);
   }
 
   .hero-stats {
@@ -506,7 +509,7 @@
   }
 
   .hero-icon {
-    width: 88px;
+    width: 76px;
   }
 
   .hero-condition {
