@@ -119,7 +119,11 @@ function HeaderControls({
     <div className="app-header-actions">
       <div className="app-header-primary">
         <div className="app-header-primary-row">
-          <CitySearch ref={citySearchRef} onSelect={handleCitySelect} />
+          <CitySearch
+            ref={citySearchRef}
+            onSelect={handleCitySelect}
+            savedCities={safeSavedCities}
+          />
           <button
             type="button"
             className="current-location-btn glass"

@@ -101,11 +101,11 @@ function StatusStack({
       {showSetupPrompts && showPermissionOnboarding && (
         <section className="permission-onboarding" aria-label="Location onboarding">
           <p className="permission-onboarding-kicker">First-time setup</p>
-          <h2 className="permission-onboarding-title">Set your forecast once, then keep moving</h2>
+          <h2 className="permission-onboarding-title">Set your forecast once</h2>
           <p className="permission-onboarding-copy">
             {isGeolocationSupported
-              ? "Chicago is already loaded as a starting point. Use your browser location for local conditions right now, or search for any city when you want a different view."
-              : "Chicago is already loaded as a starting point. This browser cannot share live location here, so search for any city when you want a different forecast."}
+              ? "Chicago is loaded for now. Use your location or search any city."
+              : "Chicago is loaded for now. Location sharing is unavailable here, so search any city."}
           </p>
           <div className="permission-onboarding-actions">
             {isGeolocationSupported ? (
@@ -141,8 +141,8 @@ function StatusStack({
         <section className="location-setup-prompt" aria-label="Location setup">
           <p className="location-setup-title">
             {isGeolocationSupported
-              ? "Want something more local? Use your current location or search for a city."
-              : "Want something more local? Search for a city. Live browser location is unavailable here."}
+              ? "Use your location or search any city."
+              : "Search any city. Browser location is unavailable here."}
           </p>
           <div className="location-setup-actions">
             {isGeolocationSupported ? (

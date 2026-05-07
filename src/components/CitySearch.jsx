@@ -6,6 +6,7 @@ import {
   useImperativeHandle,
   useCallback,
   memo,
+  useMemo,
 } from "react";
 import { Search, MapPin, X, Loader2 } from "lucide-react";
 import { useCitySearch } from "../hooks/useCitySearch";
@@ -28,12 +29,41 @@ function getCityKey(city, index) {
   return `${safeLat}:${safeLon}:${cityId}:${index}`;
 }
 
-function CitySearch({ onSelect }, ref) {
+function CitySearch({ onSelect, savedCities }, ref) {
   const id = useId();
   const dropdownId = `${id}-dropdown`;
   const resultsId = `${id}-results`;
   const statusId = `${id}-status`;
   const optionIdPrefix = `${id}-option`;
+  const savedCitySuggestions = useMemo(
+    () =>
+      (Array.isArray(savedCities) ? savedCities : [])
+        .map((city, index) => {
+          const lat = toFiniteNumber(city?.lat);
+          const lon = toFiniteNumber(city?.lon);
+          if (lat === null || lon === null) {
+            return null;
+          }
+
+          const name =
+            typeof city?.name === "string" && city.name.trim()
+              ? city.name.trim()
+              : "Saved place";
+          const country =
+            typeof city?.country === "string" ? city.country.trim() : "";
+
+          return {
+            id: `saved-${lat}:${lon}:${index}`,
+            name,
+            country,
+            latitude: lat,
+            longitude: lon,
+            sourceLabel: "Saved city",
+          };
+        })
+        .filter(Boolean),
+    [savedCities]
+  );
   const {
     query,
     results,
@@ -50,7 +80,7 @@ function CitySearch({ onSelect }, ref) {
     handleSelect,
     handleKeyDown,
     handleClear,
-  } = useCitySearch({ onSelect });
+  } = useCitySearch({ onSelect, idleResults: savedCitySuggestions });
 
   const activeDescendant =
     showDropdown && activeIndexSafe >= 0
@@ -202,7 +232,11 @@ function CitySearch({ onSelect }, ref) {
               const name = typeof city?.name === "string" ? city.name : "Unnamed location";
               const admin1 = typeof city?.admin1 === "string" ? city.admin1 : "";
               const country = typeof city?.country === "string" ? city.country : "";
-              const meta = [admin1, country].filter(Boolean).join(" \u00B7 ");
+              const sourceLabel =
+                typeof city?.sourceLabel === "string" ? city.sourceLabel : "";
+              const meta = [sourceLabel, admin1, country]
+                .filter(Boolean)
+                .join(" \u00B7 ");
               const optionLabel = `${name}${meta ? `, ${meta}` : ""}`;
 
               return (
