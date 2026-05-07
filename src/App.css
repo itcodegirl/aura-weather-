@@ -464,4 +464,35 @@ a:focus-visible,
   }
 }
 
+/*
+ * Honour the OS-level "Reduce Transparency" preference. The frosted
+ * glass cards rely on backdrop-filter and translucent fills which can
+ * read as visual noise to people with that preference enabled — drop
+ * the blur and lift the card opacity so each surface stays legible.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --card-backdrop-blur: 0px;
+    --bg-card: rgba(8, 16, 33, 0.96);
+    --bg-card-hover: rgba(12, 22, 44, 0.98);
+    --panel: rgba(7, 14, 30, 0.98);
+    --panel-soft: rgba(8, 16, 33, 0.96);
+    --subcard-bg: rgba(6, 13, 28, 0.96);
+  }
+
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  body {
+    background: linear-gradient(180deg, #0b1023 0%, #070c1b 56%, #050911 100%);
+  }
+
+  .app::before,
+  .app::after {
+    display: none;
+  }
+}
+
 

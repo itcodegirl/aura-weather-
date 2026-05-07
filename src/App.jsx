@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import "./App.css";
 import { LOCATION_FALLBACK_NOTICE } from "./hooks/useLocation";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
@@ -103,6 +103,20 @@ function App() {
   const handleDismissPermissionOnboarding = useCallback(() => {
     setShowPermissionOnboarding(false);
   }, [setShowPermissionOnboarding]);
+
+  // When recovering from a global loader or error screen, focus the
+  // main content so screen-reader users land in the weather dashboard
+  // instead of being silently dropped on document.body. We only fire on
+  // the transition out of those states, not on every dashboard render.
+  const wasInterruptedRef = useRef(showGlobalLoading || showGlobalError);
+  useEffect(() => {
+    const isInterrupted = showGlobalLoading || showGlobalError;
+    if (wasInterruptedRef.current && !isInterrupted) {
+      const main = document.getElementById("main-content");
+      main?.focus?.({ preventScroll: true });
+    }
+    wasInterruptedRef.current = isInterrupted;
+  }, [showGlobalLoading, showGlobalError]);
 
   if (showGlobalLoading) {
     return <AppLoadingState />;
