@@ -3,6 +3,18 @@ import { mockDeniedGeolocation } from "./support/openMeteoMocks";
 
 test.use({ serviceWorkers: "allow" });
 
+const REQUIRED_APP_SHELL_ASSET_PATTERNS = [
+  "^/assets/index-.+\\.js$",
+  "^/assets/index-.+\\.css$",
+  "^/assets/lucide-.+\\.js$",
+  "^/assets/HourlyCard-.+\\.js$",
+  "^/assets/HourlyCard-.+\\.css$",
+  "^/assets/StormWatch-.+\\.js$",
+  "^/assets/StormWatch-.+\\.css$",
+  "^/assets/SupplementalWeatherPanels-.+\\.js$",
+  "^/assets/SupplementalWeatherPanels-.+\\.css$",
+];
+
 async function resetServiceWorkerState(context, page) {
   const cleanupPath = "/__aura-sw-cleanup__";
   await page.route(`**${cleanupPath}`, async (route) => {
@@ -49,14 +61,14 @@ async function waitForCachedAppShellAssets(page) {
   await expect
     .poll(
       async () =>
-        page.evaluate(async () => {
+        page.evaluate(async (requiredAssetPatterns) => {
           const cacheNames = await caches.keys();
           const appShellCacheName = cacheNames.find((cacheName) =>
             cacheName.endsWith("-app-shell")
           );
 
           if (!appShellCacheName) {
-            return false;
+            return requiredAssetPatterns;
           }
 
           const cache = await caches.open(appShellCacheName);
@@ -64,20 +76,17 @@ async function waitForCachedAppShellAssets(page) {
             (request) => new URL(request.url).pathname
           );
 
-          return (
-            cachedPaths.some((path) => /^\/assets\/index-.+\.js$/.test(path)) &&
-            cachedPaths.some((path) => /^\/assets\/index-.+\.css$/.test(path)) &&
-            cachedPaths.some((path) =>
-              /^\/assets\/SupplementalWeatherPanels-.+\.js$/.test(path)
-            )
-          );
-        }),
+          return requiredAssetPatterns.filter((pattern) => {
+            const expression = new RegExp(pattern);
+            return !cachedPaths.some((path) => expression.test(path));
+          });
+        }, REQUIRED_APP_SHELL_ASSET_PATTERNS),
       {
         message: "production app shell assets are cached",
         timeout: 15_000,
       }
     )
-    .toBe(true);
+    .toEqual([]);
 }
 
 test.beforeEach(async ({ context }) => {

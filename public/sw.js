@@ -25,13 +25,20 @@ function isSameOrigin(requestUrl) {
   return requestUrl.origin === self.location.origin;
 }
 
+function isBuildAssetRequest(requestUrl) {
+  return isSameOrigin(requestUrl) && requestUrl.pathname.startsWith("/assets/");
+}
+
 function isCacheableRequest(request) {
   if (request.method !== "GET") {
     return false;
   }
 
   const requestUrl = new URL(request.url);
-  return isSameOrigin(requestUrl) && CACHEABLE_DESTINATIONS.has(request.destination);
+  return (
+    isBuildAssetRequest(requestUrl) ||
+    (isSameOrigin(requestUrl) && CACHEABLE_DESTINATIONS.has(request.destination))
+  );
 }
 
 function getSameOriginAppAsset(path) {
@@ -70,6 +77,24 @@ async function cacheResponse(cacheName, request, response) {
 
   const cache = await caches.open(cacheName);
   await cache.put(request, response.clone());
+}
+
+async function matchCachedRequest(cache, request) {
+  const cachedResponse = await cache.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  const requestUrl = new URL(request.url);
+  if (!isSameOrigin(requestUrl)) {
+    return null;
+  }
+
+  return (
+    (await cache.match(`${requestUrl.pathname}${requestUrl.search}`)) ||
+    (await cache.match(requestUrl.pathname)) ||
+    null
+  );
 }
 
 async function readAssetText(cache, assetUrl) {
@@ -115,12 +140,17 @@ async function findBuildDependencies(cache, entryAssetUrls) {
 async function networkFirstNavigation(request) {
   try {
     const response = await fetch(request);
-    await cacheResponse(APP_SHELL_CACHE, "/", response);
+    await Promise.all([
+      cacheResponse(APP_SHELL_CACHE, request, response),
+      cacheResponse(APP_SHELL_CACHE, "/", response),
+    ]);
     return response;
   } catch {
     const cache = await caches.open(APP_SHELL_CACHE);
+    const requestPath = new URL(request.url).pathname;
     return (
-      (await cache.match(request)) ||
+      (await matchCachedRequest(cache, request)) ||
+      (await cache.match(requestPath)) ||
       (await cache.match("/")) ||
       (await cache.match("/index.html")) ||
       Response.error()
@@ -132,7 +162,8 @@ async function staleWhileRevalidate(request) {
   const runtimeCache = await caches.open(RUNTIME_CACHE);
   const appShellCache = await caches.open(APP_SHELL_CACHE);
   const cachedResponse =
-    (await runtimeCache.match(request)) || (await appShellCache.match(request));
+    (await matchCachedRequest(runtimeCache, request)) ||
+    (await matchCachedRequest(appShellCache, request));
   const fetchPromise = fetch(request)
     .then((response) => {
       if (response.ok) {
