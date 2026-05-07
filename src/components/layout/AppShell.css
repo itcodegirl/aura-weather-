@@ -181,10 +181,10 @@
 }
 
 .error-retry {
-  margin-top: 16px;
-  min-height: 42px;
-  min-width: 116px;
-  padding: 0 16px;
+  margin-top: 18px;
+  min-height: 44px;
+  min-width: 124px;
+  padding: 0 18px;
   border-radius: var(--radius-pill);
   background: linear-gradient(145deg, #f9fcff, #dce9ff);
   color: #081126;

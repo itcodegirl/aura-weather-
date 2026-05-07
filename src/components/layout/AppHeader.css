@@ -135,8 +135,8 @@
 }
 
 .saved-city-remove {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   color: rgba(237, 201, 201, 0.9);
   font-size: 14px;
@@ -377,7 +377,6 @@
 .unit-toggle,
 .toggle-pill,
 .current-location-btn,
-.settings-toggle,
 .header-secondary-action {
   background: rgba(8, 17, 38, 0.56);
   border: 1px solid rgba(198, 218, 255, 0.24);
@@ -480,7 +479,6 @@
 .current-location-btn:hover,
 .unit-btn:hover,
 .toggle-pill-btn:hover,
-.settings-toggle:hover,
 .header-secondary-action:hover {
   color: #f8fbff;
   transform: translateY(-1px);
@@ -500,7 +498,6 @@
 .current-location-btn:active,
 .unit-btn:active,
 .toggle-pill-btn:active,
-.settings-toggle:active,
 .header-secondary-action:active {
   transform: scale(var(--press-scale));
 }
@@ -548,6 +545,14 @@
     padding: 12px;
   }
 
+  .tagline {
+    display: none;
+  }
+
+  .brand-wrap {
+    grid-template-areas: "mark brand";
+  }
+
   .app-header-actions {
     flex-wrap: wrap;
     width: 100%;
@@ -571,10 +576,6 @@
     align-items: stretch;
     width: 100%;
     gap: 8px;
-  }
-
-  .settings-toggle {
-    display: none;
   }
 
   .app-header-secondary .toggle-pill,
@@ -609,10 +610,13 @@
 
   .current-location-btn,
   .toggle-pill-btn,
-  .settings-toggle,
   .unit-btn,
   .header-secondary-action {
-    min-height: 40px;
+    min-height: 44px;
+  }
+
+  .saved-city-chip {
+    min-height: 36px;
   }
 }
 
@@ -641,12 +645,6 @@
     padding: 0 12px;
   }
 
-  .settings-toggle {
-    min-width: 82px;
-    padding: 0 12px;
-    margin-left: 0;
-  }
-
   .app-header-secondary {
     gap: 6px;
   }
@@ -656,15 +654,15 @@
   }
 
   .saved-city-chip {
-    min-height: 28px;
-    padding: 0 8px;
-    font-size: 10px;
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 11px;
   }
 
   .saved-city-remove {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
   }
 
   .sync-account-panel {
@@ -694,7 +692,6 @@
   .current-location-btn:hover,
   .unit-btn:hover,
   .toggle-pill-btn:hover,
-  .settings-toggle:hover,
   .header-secondary-action:hover {
     transform: none;
   }
