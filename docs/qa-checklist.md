@@ -94,7 +94,9 @@ For automated checks, run `npm run lint && npm test && npm run build
 
 ## Cloud sync (optional flow)
 
-- [ ] Cloud Sync panel collapses by default
+- [ ] Cloud Sync is hidden on fresh first load with no saved cities
+- [ ] Selecting or saving a city reveals Cloud Sync below the saved-city
+      strip
 - [ ] Create sync key → key appears, ellipsised at 32 characters,
       tooltip + aria-label expose the full key
 - [ ] Pasting an invalid sync URL produces a `role="alert"` error and
@@ -103,8 +105,11 @@ For automated checks, run `npm run lint && npm test && npm run build
 
 ## Accessibility
 
-- [ ] Tab order: skip link → search → my location → saved cities →
-      sync panel → climate toggle → unit toggle → main content
+- [ ] Tab order before saved cities: skip link → search → my location
+      → climate toggle → unit toggle → main content
+- [ ] Tab order after saved cities: skip link → search → my location
+      → saved cities → sync panel → climate toggle → unit toggle →
+      main content
 - [ ] `Skip to main content` link is the first focusable element and
       visible on focus
 - [ ] All interactive controls have visible focus rings

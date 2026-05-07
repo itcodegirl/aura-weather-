@@ -31,7 +31,7 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
     page.getByLabel("Location onboarding").getByRole("button", { name: "Allow location access" })
   ).toBeVisible();
   await expect(page.locator(".location-notice")).toHaveCount(0);
-  await expect(page.getByText("Cloud Sync")).toBeVisible();
+  await expect(page.getByText("Cloud Sync")).toHaveCount(0);
   await expect(
     page.locator(".header-control-label").filter({ hasText: "Climate Context" })
   ).toBeVisible();
@@ -183,6 +183,7 @@ test("updates hero location when a city is selected from search", async ({ page 
   await expect(page.locator(".hero-location")).toContainText("Tokyo, Japan");
   await expect(searchInput).toHaveValue("");
   await expect(page.locator(".location-notice")).toHaveCount(0);
+  await expect(page.getByText("Cloud Sync")).toBeVisible();
 });
 
 test("shows a searching state before empty search results resolve", async ({ page }) => {
@@ -251,6 +252,11 @@ test("keeps cloud sync disconnected when a manual connect attempt fails", async 
   });
 
   await openDashboard(page);
+  await expect(page.getByText("Cloud Sync")).toHaveCount(0);
+
+  const searchInput = page.getByRole("combobox", { name: "Search for a city" });
+  await searchInput.fill("tok");
+  await page.getByRole("option", { name: /tokyo/i }).click();
 
   await page.getByRole("button", { name: /cloud sync/i }).click();
   await page.getByLabel("Sync key").fill("https://jsonblob.com/api/jsonBlob/broken-sync");

@@ -22,7 +22,7 @@ It is designed as a portfolio project with real frontend concerns in scope:
 - Open-Meteo powered weather, air quality, geocoding, and archive data
 - NOAA / NWS severe alerts with explicit unsupported-region fallback messaging
 - Transient retries for secondary AQI, alerts, and archive requests without blocking the core forecast
-- Saved cities, persisted location preference, and optional cloud sync for saved locations
+- Saved cities, persisted location preference, and optional cloud sync that appears once there is something to sync
 - Temperature-unit changes stay local to the UI instead of forcing fresh forecast/climate requests
 - Keyboard-friendly city search with async cancellation and combobox/listbox behavior
 - Search feedback shows a real loading state before any empty-result messaging appears
@@ -149,6 +149,7 @@ npm run test:lighthouse
   - dashboard boot
   - granted browser coordinates labelled as "Current location"
   - city search and location switching
+  - cloud sync staying hidden until a saved city exists
   - search loading feedback before empty-result states resolve
   - unit switching without refetching forecast/climate data
   - failed cloud-sync connection attempts staying disconnected with an explicit error
@@ -170,6 +171,7 @@ npm run test:lighthouse
 - Core weather data loads first. Air quality, alerts, and climate context can recover independently if a secondary API is slow or unavailable.
 - Search shows a loading state before empty results, so users do not get a premature "No matching cities" response.
 - Startup-city controls stay hidden until a startup preference actually exists.
+- Cloud sync stays out of the header until a saved city exists, while existing connected/error states still remain recoverable.
 - Failed cloud sync connection attempts surface an error and stay disconnected instead of leaving a stale connected-looking state.
 - Cloud sync is optional and intentionally secondary to the main forecast workflow.
 
@@ -297,6 +299,7 @@ bug, the contract, and the test pyramid.
 
 ## Recent Hardening
 
+- **Saved-city-first sync** - Cloud Sync no longer appears on a fresh first load with no saved cities. It becomes available once the user saves a city, and remains visible for connected/error states so recovery controls are not hidden.
 - **Supplemental source retries** - Open-Meteo AQI, NOAA / NWS alerts, and Open-Meteo Archive requests now retry transient failures once. Unsupported NWS regions are not retried because they are coverage facts, not temporary failures.
 - **Honest GPS label** - successful browser geolocation now renders as "Current location" with no country label unless the user picks a named city. Aura no longer lets device coordinates inherit the Chicago fallback label.
 - **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard, ForecastCard, RainCard, and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.

@@ -57,6 +57,9 @@ portfolio-grade product. Format roughly follows
 
 ### Changed
 
+- Cloud Sync now stays hidden on fresh first load until the user has at
+  least one saved city, while connected/syncing/error states remain
+  visible for recovery.
 - Successful browser geolocation now labels raw GPS coordinates as
   "Current location" with no country label instead of inheriting the
   Chicago fallback city/country.
