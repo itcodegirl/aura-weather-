@@ -7,6 +7,9 @@ double-check that catches things the test suite cannot.
 For automated checks, run `npm run lint && npm test && npm run build
 && npm run test:e2e` first — every box below assumes those pass.
 
+CI runs the same gate serially for Playwright with
+`npm run test:e2e -- --workers=1` to reduce visual-screenshot noise.
+
 ## First-load happy path
 
 - [ ] Cold load (`http://127.0.0.1:5173/`) shows the Chicago hero card
@@ -15,8 +18,8 @@ For automated checks, run `npm run lint && npm test && npm run build
       visible on first paint
 - [ ] Granting browser location shows "Current location" rather than a
       guessed city/country label
-- [ ] Permission-onboarding card reads "Set your forecast once, then
-      keep moving" with two buttons
+- [ ] Permission-onboarding card reads "Set your forecast once" with
+      short setup copy and two buttons
 - [ ] Bento groups render in order: Current Conditions → Near-Term
       Outlook → Risk Signals → Week Ahead
 
@@ -28,6 +31,8 @@ For automated checks, run `npm run lint && npm test && npm run build
       status before any "No matching cities" message
 - [ ] Selecting a result clears the input, blurs the field, and
       switches the dashboard to the new city
+- [ ] Focusing an empty search after saving a city shows saved-city
+      suggestions without typing
 - [ ] Pressing `/` (when not focused on an input) focuses the search
       field
 - [ ] Escape closes the dropdown and blurs the field
@@ -74,6 +79,17 @@ For automated checks, run `npm run lint && npm test && npm run build
       NWS regions still show the coverage fallback without retry churn
 - [ ] The Retry button enters a 1.4s cooldown and shows "Retrying..."
       while disabled
+
+## Offline app shell
+
+- [ ] In a production build/preview, the browser registers `/sw.js`
+      after page load
+- [ ] After one successful production visit, switching DevTools to
+      offline and reloading still renders the Aura app shell
+- [ ] Offline weather refreshes show the saved-forecast banner rather
+      than claiming live provider data is fresh
+- [ ] Clearing site data removes the service worker/cache and returns
+      the app to normal first-load behavior
 
 ## Climate context
 
@@ -139,7 +155,8 @@ For automated checks, run `npm run lint && npm test && npm run build
 
 ## Performance
 
-- [ ] Lighthouse local budget passes (`npm run test:lighthouse`)
+- [ ] Lighthouse local budget passes (`npm run test:lighthouse` audits
+      the deterministic `?mock=missing` app shell)
 - [ ] Switching the unit toggle does **not** trigger a forecast or
       archive refetch (verify in devtools Network)
 - [ ] Backgrounding the tab pauses the 1-minute trust-meta clock

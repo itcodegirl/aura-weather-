@@ -23,8 +23,10 @@ It is designed as a portfolio project with real frontend concerns in scope:
 - NOAA / NWS severe alerts with explicit unsupported-region fallback messaging
 - Transient retries for secondary AQI, alerts, and archive requests without blocking the core forecast
 - Saved cities, persisted location preference, and optional cloud sync that appears once there is something to sync
+- Installable PWA metadata plus a service worker that restores the app shell after a first online visit
 - Temperature-unit changes stay local to the UI instead of forcing fresh forecast/climate requests
 - Keyboard-friendly city search with async cancellation and combobox/listbox behavior
+- Saved cities appear inside the search dropdown on focus for quick repeat switching
 - Search feedback shows a real loading state before any empty-result messaging appears
 - Startup-city controls only appear when a startup preference actually exists, reducing first-load clutter
 - Reduced-motion-safe card rendering, refreshed mobile layouts, and deferred loading for lower-priority dashboard panels
@@ -73,6 +75,7 @@ src/
   services/                  # Cross-cutting services
     savedLocationsSync.js    #   sync key + jsonblob persistence
     weatherSnapshotCache.js  #   last-successful forecast restore cache
+    serviceWorkerRegistration.js # production-only PWA registration
   utils/                     # Pure helpers
     numbers.js               #   strict toFiniteNumber (rejects null)
     weatherUnits.js  meteorology.js  dates.js  dataTrust.js
@@ -132,10 +135,11 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`227` tests across 53 suites, including React render tests via `jsdom` + `esbuild`)
+- `npm test` passes (`231` tests across 54 suites, including React render tests via `jsdom` + `esbuild`)
 - `npm run build` passes
-- `npm run test:e2e -- e2e/weather-smoke.spec.js` passes (`13` Playwright smoke checks, including cached offline restore, honest GPS labels, missing-data placeholder guard, unicode-escape leak guard, and axe-core a11y on `/`)
+- `npm run test:e2e -- --workers=1` passes (`27` Playwright checks, including smoke, screenshots, visual baselines, cached offline restore, honest GPS labels, missing-data placeholder guard, unicode-escape leak guard, and axe-core a11y)
 - `npm run test:lighthouse` passes the local budget gate
+- GitHub Actions runs lint, tests, render tests, build, serial Playwright, and Lighthouse budgets on pull requests
 
 ### Current automated coverage
 
@@ -149,12 +153,14 @@ npm run test:lighthouse
   - dashboard boot
   - granted browser coordinates labelled as "Current location"
   - city search and location switching
+  - saved-city suggestions on empty search focus
   - cloud sync staying hidden until a saved city exists
   - search loading feedback before empty-result states resolve
   - unit switching without refetching forecast/climate data
   - failed cloud-sync connection attempts staying disconnected with an explicit error
   - removing the active saved city clearing persisted startup-location storage
   - unsupported-region severe alert fallback
+  - missing-data demo route avoiding live provider requests
   - mobile overflow regression
   - regression guard ensuring no literal `\uXXXX` escape sequences leak into rendered text
   - axe-core accessibility scan on the live dashboard (`/`) and the trust-contract state (`?mock=missing`)
@@ -169,11 +175,13 @@ npm run test:lighthouse
 - Browser location is opt-in. Users can keep the fallback city, search manually, or grant location access.
 - Device-location success is labelled "Current location" unless the user selects a named city from search.
 - Core weather data loads first. Air quality, alerts, and climate context can recover independently if a secondary API is slow or unavailable.
+- Saved cities appear as search suggestions on focus, so repeat switching does not require typing.
 - Search shows a loading state before empty results, so users do not get a premature "No matching cities" response.
 - Startup-city controls stay hidden until a startup preference actually exists.
 - Cloud sync stays out of the header until a saved city exists, while existing connected/error states still remain recoverable.
 - Failed cloud sync connection attempts surface an error and stay disconnected instead of leaving a stale connected-looking state.
 - Cloud sync is optional and intentionally secondary to the main forecast workflow.
+- After a successful production visit, the service worker can serve the app shell offline; live weather API failures still surface through the saved-forecast trust state instead of pretending fresh data exists.
 
 ## Accessibility Notes
 
@@ -266,8 +274,8 @@ To reproduce the missing-data state on demand (for screenshots or
 manual QA), open `/?mock=missing`. This is a labelled portfolio demo
 state, not a silent production override: the app shows a demo notice
 and uses `src/mocks/missingData.js` instead of querying live providers.
-The current temperature stays real so the dashboard still looks like a
-working forecast — the point is that every other field degrades
+The current temperature stays plausible so the dashboard still looks
+like a working forecast; the point is that every other field degrades
 gracefully. A dev-only fetch patch remains in
 `src/dev/missingDataMock.js` for lower-level endpoint QA.
 
@@ -300,7 +308,12 @@ bug, the contract, and the test pyramid.
 ## Recent Hardening
 
 - **Saved-city-first sync** - Cloud Sync no longer appears on a fresh first load with no saved cities. It becomes available once the user saves a city, and remains visible for connected/error states so recovery controls are not hidden.
+- **Saved-city search suggestions** - focusing the empty city search now opens saved cities as selectable combobox options, preserving keyboard and pointer selection behavior.
+- **Shorter setup copy** - first-load location onboarding and follow-up location prompts now use compact copy so the mobile header moves users into the forecast faster.
 - **Supplemental source retries** - Open-Meteo AQI, NOAA / NWS alerts, and Open-Meteo Archive requests now retry transient failures once. Unsupported NWS regions are not retried because they are coverage facts, not temporary failures.
+- **Installable offline shell** - Aura now ships a web manifest and production-only service worker. Same-origin app-shell/build assets are cached after a first online visit; weather providers remain network truth sources, with saved forecast restore handling offline data.
+- **CI quality gates** - Pull requests now run lint, Node tests, render tests, production build, serial Playwright, visual checks, and Lighthouse budgets in GitHub Actions, with build and failure artifacts retained for review.
+- **Deterministic portfolio demo** - the labelled `?mock=missing` route no longer starts live weather provider requests, which keeps trust-contract demos and Lighthouse budget checks stable.
 - **Honest GPS label** - successful browser geolocation now renders as "Current location" with no country label unless the user picks a named city. Aura no longer lets device coordinates inherit the Chicago fallback label.
 - **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard, ForecastCard, RainCard, and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.
 - **`?mock=missing` demo state** — `/?mock=missing` is a labelled portfolio demo route for the trust contract. It shows a clear demo notice and serves a local missing-data model without live provider calls.
@@ -332,8 +345,8 @@ bug, the contract, and the test pyramid.
 - **Lightweight cloud sync.** The optional sync flow uses a public jsonblob.com store and expects either a full sync URL or a configured `VITE_AURA_SYNC_API_BASE`. It is not encrypted at rest and is not a substitute for an account system.
 - **Geolocation falls back fast.** If the browser's geolocation prompt does not resolve in 5 seconds the app drops to the Chicago default rather than blocking the dashboard. Successful device GPS is labelled "Current location"; Aura does not reverse-geocode raw GPS coordinates yet.
 - **Historical archive lag.** The Open-Meteo archive is updated daily and may not include the most recent week; on those days the climate-context panel shows "Climate context unavailable" instead of a stale comparison.
-- **No service worker pre-cache yet.** The app now restores the last successful forecast for a saved location when live weather is unavailable or the browser starts offline, with a labelled saved-forecast banner. It still does not pre-cache shell assets for full installable offline use.
-- **Lighthouse budget passes locally** but real-world performance varies with the network. The CSS and JS footprint shrunk substantially during the audit (App.css 2,067 → ~500 lines), but a service worker and image-pre-caching pass would still be the next wins.
+- **Service worker is shell-only.** After one successful production visit, Aura can restore same-origin app-shell/build assets offline. Live weather providers remain network truth sources and still degrade through the saved-forecast banner.
+- **Lighthouse budget passes locally** against the deterministic `?mock=missing` app shell, but real-world performance varies with live provider latency. The CSS and JS footprint shrunk substantially during the audit (App.css 2,067 → ~500 lines), but image pre-caching and paint-cost tuning would still be useful next wins.
 
 ## Portfolio / Case Study Notes
 
@@ -344,7 +357,7 @@ Other strong stories:
 - **Resilient client composition** — three independent fetch tracks (forecast, supplemental AQI/alerts, historical archive) with separate AbortControllers and request-id stale-result guards, plus a per-panel error boundary so a lazy chunk failure cannot blank out the dashboard.
 - **Responsive, mobile-first dashboard** — the bento layout has explicit breakpoints at 1200/980/860/760/640/560/420 px, hover-only effects gated behind `(hover: hover)`, and `prefers-reduced-motion` overrides for every animation. Co-located component CSS replaces what was a 2k-line monolith.
 - **Accessibility past axe baseline** — scoped live regions (`role="alert"` for errors, `role="status"` for last-synced metadata), `aria-busy` on async buttons, decorative SVG cleanup, keyboard combobox for search, and a regression test that scans rendered text for literal `\uXXXX` escape sequences.
-- **QA maturity** — 227 Node tests covering API normalization, source retries, climate comparison, location persistence, sync helpers, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, render-level fallback states, and the null-coercion contract at every domain layer; 13 Playwright smoke checks for cached offline restore, honest GPS labels, search, sync failure, regional alerts, mobile overflow, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
+- **QA maturity** — 231 Node tests covering API normalization, source retries, climate comparison, location persistence, sync helpers, service worker registration, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, render-level fallback states, and the null-coercion contract at every domain layer; 14 Playwright smoke checks for cached offline restore, honest GPS labels, search, sync failure, regional alerts, missing-demo provider isolation, mobile overflow, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
 
 ## Screenshot Guidance
 
