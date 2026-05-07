@@ -116,11 +116,16 @@ export function buildMissingDashboardState({ now = Date.now() } = {}) {
     weatherInfo: null,
     trustMeta: {
       weatherFetchedAt: now,
-      aqiFetchedAt: now,
+      aqiFetchedAt: null,
+      aqiStatus: "unavailable",
       climateFetchedAt: null,
       climateStatus: "unavailable",
       alertsFetchedAt: now,
       alertsStatus: "ready",
+      forecastStatus: "ready",
+      cacheStatus: "idle",
+      cacheCapturedAt: null,
+      cacheRestoredAt: null,
     },
   };
 }
