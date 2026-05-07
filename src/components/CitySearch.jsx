@@ -30,7 +30,9 @@ function getCityKey(city, index) {
 
 function CitySearch({ onSelect }, ref) {
   const id = useId();
+  const dropdownId = `${id}-dropdown`;
   const resultsId = `${id}-results`;
+  const statusId = `${id}-status`;
   const optionIdPrefix = `${id}-option`;
   const {
     query,
@@ -132,12 +134,16 @@ function CitySearch({ onSelect }, ref) {
           className="city-search-input"
           aria-label="Search for a city"
           aria-expanded={showDropdown}
-          aria-controls={showDropdown && hasResultOptions ? resultsId : undefined}
+          aria-controls={showDropdown ? dropdownId : undefined}
+          aria-describedby={shouldShowStatus ? statusId : undefined}
+          aria-busy={loading || undefined}
+          aria-invalid={Boolean(error) || undefined}
           aria-autocomplete="list"
           aria-haspopup="listbox"
           role="combobox"
           aria-activedescendant={activeDescendant}
           autoComplete="off"
+          enterKeyHint="search"
         />
         {!query && (
           <span className="city-search-shortcut-badge" aria-hidden="true">
@@ -158,10 +164,12 @@ function CitySearch({ onSelect }, ref) {
 
       {showDropdown && (
         <div
+          id={dropdownId}
           className="city-search-dropdown glass"
         >
           {shouldShowStatus && (
             <div
+              id={statusId}
               className="city-search-state"
               role="status"
               aria-live="polite"
@@ -173,7 +181,7 @@ function CitySearch({ onSelect }, ref) {
                   <span>Searching locations...</span>
                 </>
               ) : error ? (
-                <span className="city-search-state city-search-state--error">
+                <span className="city-search-state-message city-search-state-message--error">
                   {error}
                 </span>
               ) : (

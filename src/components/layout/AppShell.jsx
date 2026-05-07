@@ -27,7 +27,7 @@ const AppLoadingState = memo(() => {
 const AppErrorState = memo(({ error, onRetry }) => {
   return (
     <div className="app app--error">
-      <div className="error-card">
+      <div className="error-card" role="alert" aria-live="assertive">
         <CloudOff size={42} className="error-card-icon" aria-hidden="true" />
         <h1>We couldn't load weather data</h1>
         <p>{error}</p>
