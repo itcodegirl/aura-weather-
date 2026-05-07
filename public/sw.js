@@ -77,8 +77,13 @@ self.addEventListener("install", (event) => {
     caches
       .open(APP_SHELL_CACHE)
       .then((cache) => cache.addAll(APP_SHELL_URLS))
-      .then(() => self.skipWaiting())
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", (event) => {

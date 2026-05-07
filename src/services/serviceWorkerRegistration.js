@@ -1,4 +1,7 @@
 const SERVICE_WORKER_URL = "/sw.js";
+const DEFAULT_REGISTRATION_DELAY_MS = 8000;
+const REGISTRATION_DELAY_OVERRIDE_KEY = "__AURA_SW_REGISTRATION_DELAY_MS__";
+const SKIP_WAITING_MESSAGE_TYPE = "SKIP_WAITING";
 
 function getDefaultProductionFlag() {
   return Boolean(import.meta.env?.PROD);
@@ -24,13 +27,144 @@ export function canRegisterServiceWorker({
   );
 }
 
+export function getServiceWorkerRegistrationDelay({
+  windowRef = getBrowserWindow(),
+  delayMs = DEFAULT_REGISTRATION_DELAY_MS,
+} = {}) {
+  const overrideDelayMs = Number(windowRef?.[REGISTRATION_DELAY_OVERRIDE_KEY]);
+
+  if (Number.isFinite(overrideDelayMs) && overrideDelayMs >= 0) {
+    return overrideDelayMs;
+  }
+
+  return delayMs;
+}
+
+function addEventListener(target, type, listener, options) {
+  if (typeof target?.addEventListener === "function") {
+    target.addEventListener(type, listener, options);
+    return () => target.removeEventListener?.(type, listener, options);
+  }
+
+  const handlerName = `on${type}`;
+  const previousHandler = target?.[handlerName];
+  if (target) {
+    target[handlerName] = listener;
+  }
+
+  return () => {
+    if (target?.[handlerName] === listener) {
+      target[handlerName] = previousHandler || null;
+    }
+  };
+}
+
+function watchForServiceWorkerUpdates({
+  registration,
+  navigatorRef,
+  onUpdateReady,
+} = {}) {
+  if (!registration || typeof onUpdateReady !== "function") {
+    return () => {};
+  }
+
+  let lastNotifiedWorker = null;
+  let cleanupStateChange = null;
+
+  function notifyIfWaiting() {
+    const waitingWorker = registration.waiting;
+    const hasActiveController = Boolean(navigatorRef?.serviceWorker?.controller);
+
+    if (!waitingWorker || !hasActiveController || waitingWorker === lastNotifiedWorker) {
+      return;
+    }
+
+    lastNotifiedWorker = waitingWorker;
+    onUpdateReady(registration);
+  }
+
+  function watchInstallingWorker() {
+    cleanupStateChange?.();
+    cleanupStateChange = null;
+
+    const installingWorker = registration.installing;
+    if (!installingWorker) {
+      notifyIfWaiting();
+      return;
+    }
+
+    function handleStateChange() {
+      if (installingWorker.state === "installed") {
+        notifyIfWaiting();
+        cleanupStateChange?.();
+        cleanupStateChange = null;
+      }
+    }
+
+    cleanupStateChange = addEventListener(
+      installingWorker,
+      "statechange",
+      handleStateChange
+    );
+    handleStateChange();
+  }
+
+  notifyIfWaiting();
+  const cleanupUpdateFound = addEventListener(
+    registration,
+    "updatefound",
+    watchInstallingWorker
+  );
+
+  return () => {
+    cleanupUpdateFound?.();
+    cleanupStateChange?.();
+  };
+}
+
+export function activateWaitingServiceWorker({
+  registration,
+  windowRef = getBrowserWindow(),
+  navigatorRef = getBrowserNavigator(),
+} = {}) {
+  const waitingWorker = registration?.waiting;
+
+  if (!waitingWorker || typeof waitingWorker.postMessage !== "function") {
+    return false;
+  }
+
+  let didReload = false;
+  let cleanupControllerChange = null;
+  function reloadOnce() {
+    if (didReload) {
+      return;
+    }
+
+    didReload = true;
+    cleanupControllerChange?.();
+    windowRef?.location?.reload?.();
+  }
+
+  cleanupControllerChange = addEventListener(
+    navigatorRef?.serviceWorker,
+    "controllerchange",
+    reloadOnce,
+    { once: true }
+  );
+  waitingWorker.postMessage({ type: SKIP_WAITING_MESSAGE_TYPE });
+  windowRef?.setTimeout?.(reloadOnce, 4000);
+
+  return true;
+}
+
 export function registerServiceWorker({
   enabled = getDefaultProductionFlag(),
   serviceWorkerUrl = SERVICE_WORKER_URL,
   windowRef = getBrowserWindow(),
   navigatorRef = getBrowserNavigator(),
-  delayMs = 8000,
+  delayMs = DEFAULT_REGISTRATION_DELAY_MS,
   onRegistered,
+  onUpdateReady,
   onError,
 } = {}) {
   if (
@@ -44,14 +178,28 @@ export function registerServiceWorker({
     return null;
   }
 
+  let isCleanedUp = false;
+  let cleanupUpdateWatcher = null;
+  const resolvedDelayMs = getServiceWorkerRegistrationDelay({ windowRef, delayMs });
+
   async function register() {
     try {
       const registration = await navigatorRef.serviceWorker.register(
         serviceWorkerUrl
       );
+      if (isCleanedUp) {
+        return registration;
+      }
+
       if (typeof onRegistered === "function") {
         onRegistered(registration);
       }
+      cleanupUpdateWatcher?.();
+      cleanupUpdateWatcher = watchForServiceWorkerUpdates({
+        registration,
+        navigatorRef,
+        onUpdateReady,
+      });
       return registration;
     } catch (error) {
       if (typeof onError === "function") {
@@ -64,7 +212,7 @@ export function registerServiceWorker({
   }
 
   function scheduleRegistration() {
-    if (delayMs <= 0) {
+    if (resolvedDelayMs <= 0) {
       void register();
       return null;
     }
@@ -83,10 +231,10 @@ export function registerServiceWorker({
           }
 
           void register();
-        }, delayMs)
+        }, resolvedDelayMs)
       : setTimeout(() => {
           void register();
-        }, delayMs);
+        }, resolvedDelayMs);
 
     return () => {
       if (windowRef.clearTimeout) {
@@ -100,8 +248,17 @@ export function registerServiceWorker({
     };
   }
 
+  function buildCleanup(cancelScheduledRegistration = null) {
+    return () => {
+      isCleanedUp = true;
+      cancelScheduledRegistration?.();
+      cleanupUpdateWatcher?.();
+      cleanupUpdateWatcher = null;
+    };
+  }
+
   if (windowRef.document?.readyState === "complete") {
-    return scheduleRegistration();
+    return buildCleanup(scheduleRegistration());
   }
 
   let cancelScheduledRegistration = null;
@@ -111,7 +268,10 @@ export function registerServiceWorker({
 
   windowRef.addEventListener("load", handleLoad, { once: true });
   return () => {
+    isCleanedUp = true;
     windowRef.removeEventListener("load", handleLoad);
     cancelScheduledRegistration?.();
+    cleanupUpdateWatcher?.();
+    cleanupUpdateWatcher = null;
   };
 }

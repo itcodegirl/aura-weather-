@@ -154,7 +154,8 @@
 }
 
 .location-setup-btn:disabled,
-.app-status-retry:disabled {
+.app-status-retry:disabled,
+.app-status-action:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -210,6 +211,54 @@
 .app-status--error::before {
   background: linear-gradient(180deg, #fecaca, #f87171);
   box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.14);
+}
+
+.app-status--update {
+  border-color: rgba(125, 211, 252, 0.44);
+  color: #dff5ff;
+}
+
+.app-status--update::before {
+  background: linear-gradient(180deg, #dff5ff, #7dd3fc);
+  box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.14);
+}
+
+.app-status-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.app-status-action {
+  border: 1px solid rgba(201, 224, 255, 0.42);
+  background: rgba(8, 17, 38, 0.38);
+  color: #e3efff;
+  border-radius: var(--radius-pill);
+  padding: 5px 10px;
+  min-height: 28px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.app-status-action--primary {
+  border-color: rgba(219, 244, 255, 0.7);
+  background: linear-gradient(145deg, #f9fcff, #d9eaff);
+  color: #021127;
+}
+
+.app-status-action:hover {
+  border-color: rgba(174, 227, 255, 0.56);
+  transform: translateY(-1px);
+}
+
+.app-status-action--primary:hover {
+  background: linear-gradient(145deg, #ffffff, #dcedff);
 }
 
 .app-status-retry {
@@ -268,6 +317,11 @@
     justify-content: space-between;
     row-gap: 8px;
   }
+
+  .app-status-actions {
+    width: calc(100% - 17px);
+    margin-left: 17px;
+  }
 }
 
 @media (max-width: 420px) {
@@ -300,10 +354,17 @@
     padding: 4px 9px;
     font-size: 10px;
   }
+
+  .app-status-action {
+    min-height: 26px;
+    padding: 4px 9px;
+    font-size: 10px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-status-retry:hover {
+  .app-status-retry:hover,
+  .app-status-action:hover {
     transform: none;
   }
 }

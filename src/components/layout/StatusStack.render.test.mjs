@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import "../../../scripts/test-render-setup.mjs";
 
 const React = (await import("react")).default;
-const { cleanup, render, screen } = await import("@testing-library/react");
+const { cleanup, fireEvent, render, screen } = await import(
+  "@testing-library/react"
+);
 const StatusStack = (await import("./StatusStack.jsx")).default;
 
 afterEach(() => {
@@ -43,5 +45,32 @@ describe("StatusStack", () => {
         "Could not refresh weather right now. Showing last known data."
       )
     );
+  });
+
+  test("renders service worker update actions", () => {
+    let refreshCount = 0;
+    let dismissCount = 0;
+
+    render(
+      React.createElement(StatusStack, {
+        serviceWorkerUpdateAvailable: true,
+        onRefreshServiceWorkerUpdate() {
+          refreshCount += 1;
+        },
+        onDismissServiceWorkerUpdate() {
+          dismissCount += 1;
+        },
+      })
+    );
+
+    assert.ok(
+      screen.getByText("App update ready. Refresh when you have a moment.")
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    fireEvent.click(screen.getByRole("button", { name: "Later" }));
+
+    assert.equal(refreshCount, 1);
+    assert.equal(dismissCount, 1);
   });
 });

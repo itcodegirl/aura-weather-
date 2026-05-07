@@ -36,6 +36,10 @@ function StatusStack({
   cacheStatus = "idle",
   cacheCapturedAt = null,
   onRetry,
+  serviceWorkerUpdateAvailable = false,
+  isServiceWorkerRefreshing = false,
+  onRefreshServiceWorkerUpdate,
+  onDismissServiceWorkerUpdate,
   showRuntimeStatus = true,
   showSetupPrompts = true,
   className = "",
@@ -68,7 +72,8 @@ function StatusStack({
   const hasRuntimeStatus = showRuntimeStatus && Boolean(
     locationNotice ||
     isBackgroundLoading ||
-    showRefreshError
+    showRefreshError ||
+    serviceWorkerUpdateAvailable
   );
   const hasSetupPrompts = showSetupPrompts && Boolean(
     showLocationSetupPrompt || showPermissionOnboarding
@@ -170,6 +175,32 @@ function StatusStack({
         <p className="app-status app-status--loading" role="status" aria-live="polite">
           Updating weather for your current settings...
         </p>
+      )}
+      {showRuntimeStatus && serviceWorkerUpdateAvailable && (
+        <div className="app-status app-status--update" role="status" aria-live="polite">
+          <span className="app-status-message">
+            App update ready. Refresh when you have a moment.
+          </span>
+          <span className="app-status-actions">
+            <button
+              type="button"
+              className="app-status-action app-status-action--primary"
+              onClick={onRefreshServiceWorkerUpdate}
+              disabled={isServiceWorkerRefreshing}
+              aria-busy={isServiceWorkerRefreshing || undefined}
+            >
+              {isServiceWorkerRefreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            <button
+              type="button"
+              className="app-status-action"
+              onClick={onDismissServiceWorkerUpdate}
+              disabled={isServiceWorkerRefreshing}
+            >
+              Later
+            </button>
+          </span>
+        </div>
       )}
       {showRuntimeStatus && showRefreshError && (
         <div className="app-status app-status--error" role="alert">

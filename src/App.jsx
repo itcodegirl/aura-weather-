@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import "./App.css";
 import { LOCATION_FALLBACK_NOTICE } from "./hooks/useLocation";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
+import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
 import { useWeatherDashboardViewModel } from "./hooks/useWeatherDashboardViewModel";
 import {
   AppShell,
@@ -23,6 +24,12 @@ function serializeLocationOnboardingPreference(value) {
 }
 
 function App() {
+  const {
+    updateAvailable: serviceWorkerUpdateAvailable,
+    isRefreshing: isServiceWorkerRefreshing,
+    refreshUpdate: refreshServiceWorkerUpdate,
+    dismissUpdate: dismissServiceWorkerUpdate,
+  } = useServiceWorkerUpdate();
   const {
     weather,
     location,
@@ -136,6 +143,10 @@ function App() {
         cacheStatus={trustMeta?.cacheStatus}
         cacheCapturedAt={trustMeta?.cacheCapturedAt}
         onRetry={retryWeather}
+        serviceWorkerUpdateAvailable={serviceWorkerUpdateAvailable}
+        isServiceWorkerRefreshing={isServiceWorkerRefreshing}
+        onRefreshServiceWorkerUpdate={refreshServiceWorkerUpdate}
+        onDismissServiceWorkerUpdate={dismissServiceWorkerUpdate}
         className="status-stack--runtime"
       />
 
