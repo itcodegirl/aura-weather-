@@ -3,7 +3,7 @@ import { mockDeniedGeolocation } from "./support/openMeteoMocks";
 
 test.use({ serviceWorkers: "allow" });
 
-async function resetServiceWorkerState(page) {
+async function resetServiceWorkerState(context, page) {
   const cleanupPath = "/__aura-sw-cleanup__";
   await page.route(`**${cleanupPath}`, async (route) => {
     await route.fulfill({
@@ -26,7 +26,8 @@ async function resetServiceWorkerState(page) {
     }
   });
   await page.unroute(`**${cleanupPath}`);
-  await page.goto("about:blank");
+  await page.close();
+  return context.newPage();
 }
 
 async function waitForActiveServiceWorker(page) {
@@ -79,9 +80,9 @@ async function waitForCachedAppShellAssets(page) {
     .toBe(true);
 }
 
-test.beforeEach(async ({ context, page }) => {
+test.beforeEach(async ({ context }) => {
   await mockDeniedGeolocation(context);
-  await page.addInitScript(() => {
+  await context.addInitScript(() => {
     window.localStorage.clear();
     window.__AURA_SW_REGISTRATION_DELAY_MS__ = 0;
   });
@@ -92,7 +93,7 @@ test("serves the app shell after a production load goes offline", async ({
   page,
 }) => {
   test.setTimeout(75_000);
-  await resetServiceWorkerState(page);
+  page = await resetServiceWorkerState(context, page);
   await page.goto("/?mock=missing");
 
   await expect(page.getByRole("main")).toBeVisible();

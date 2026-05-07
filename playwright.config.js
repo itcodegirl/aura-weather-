@@ -20,6 +20,7 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
+    serviceWorkers: "block",
     viewport: { width: 1280, height: 900 },
   },
   projects: [
