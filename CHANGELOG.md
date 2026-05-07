@@ -57,6 +57,9 @@ portfolio-grade product. Format roughly follows
 - PWA manifest and production-only service worker registration. The
   service worker caches same-origin app-shell/build assets after a first
   online visit while leaving weather provider calls network-truthful.
+- Playwright offline-shell regression coverage that verifies the
+  production service worker can restore `?mock=missing` after reload
+  without network access.
 - Deterministic missing-data demo isolation so `?mock=missing` renders
   the trust-contract route without starting live provider requests.
 
@@ -161,10 +164,11 @@ portfolio-grade product. Format roughly follows
 
 ### Tests
 
-- 45 → **231** Node tests across 54 suites, including React render tests
+- 45 → **238** Node tests across 54 suites, including React render tests
   via `@testing-library/react` + `jsdom`. New regressions pin null-input
   contracts, source-scoped retries, cache restore behavior, honest
   browser-location labels, and service worker registration gates.
-- 12 → **14** Playwright smoke checks, including cached offline restore,
-  honest GPS labels, missing-data placeholders, missing-demo provider
-  isolation, axe-core, and the unicode-escape leak guard.
+- 12 → **15** Playwright smoke/flow checks, including cached offline
+  restore, offline app-shell reload, honest GPS labels, missing-data
+  placeholders, missing-demo provider isolation, axe-core, and the
+  unicode-escape leak guard.

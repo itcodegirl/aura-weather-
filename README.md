@@ -135,9 +135,9 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`231` tests across 54 suites, including React render tests via `jsdom` + `esbuild`)
+- `npm test` passes (`238` tests across 54 suites, including React render tests via `jsdom` + `esbuild`)
 - `npm run build` passes
-- `npm run test:e2e -- --workers=1` passes (`27` Playwright checks, including smoke, screenshots, visual baselines, cached offline restore, honest GPS labels, missing-data placeholder guard, demo-provider guard, unicode-escape leak guard, and axe-core a11y)
+- `npm run test:e2e -- --workers=1` passes (`28` Playwright checks, including smoke, screenshots, visual baselines, cached offline restore, offline app-shell reload, honest GPS labels, missing-data placeholder guard, demo-provider guard, unicode-escape leak guard, and axe-core a11y)
 - `npm run test:lighthouse` passes the local app-shell budget gate against the labelled `?mock=missing` demo route
 - GitHub Actions runs lint, tests, render tests, build, serial Playwright, and Lighthouse budgets on pull requests
 
@@ -161,6 +161,7 @@ npm run test:lighthouse
   - removing the active saved city clearing persisted startup-location storage
   - unsupported-region severe alert fallback
   - missing-data demo route avoiding live provider requests
+  - production service worker restoring the app shell after an offline reload
   - mobile overflow regression
   - regression guard ensuring no literal `\uXXXX` escape sequences leak into rendered text
   - axe-core accessibility scan on the live dashboard (`/`) and the trust-contract state (`?mock=missing`)
@@ -357,7 +358,7 @@ Other strong stories:
 - **Resilient client composition** — three independent fetch tracks (forecast, supplemental AQI/alerts, historical archive) with separate AbortControllers and request-id stale-result guards, plus a per-panel error boundary so a lazy chunk failure cannot blank out the dashboard.
 - **Responsive, mobile-first dashboard** — the bento layout has explicit breakpoints at 1200/980/860/760/640/560/420 px, hover-only effects gated behind `(hover: hover)`, and `prefers-reduced-motion` overrides for every animation. Co-located component CSS replaces what was a 2k-line monolith.
 - **Accessibility past axe baseline** — scoped live regions (`role="alert"` for errors, `role="status"` for last-synced metadata), `aria-busy` on async buttons, decorative SVG cleanup, keyboard combobox for search, and a regression test that scans rendered text for literal `\uXXXX` escape sequences.
-- **QA maturity** — 231 Node tests covering API normalization, source retries, climate comparison, location persistence, sync helpers, service worker registration, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, render-level fallback states, and the null-coercion contract at every domain layer; 14 Playwright smoke checks for cached offline restore, honest GPS labels, search, sync failure, regional alerts, missing-demo provider isolation, mobile overflow, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
+- **QA maturity** — 238 Node tests covering API normalization, source retries, climate comparison, location persistence, sync helpers, service worker registration, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, render-level fallback states, and the null-coercion contract at every domain layer; 15 Playwright smoke/flow checks for cached offline restore, offline app-shell reload, honest GPS labels, search, sync failure, regional alerts, missing-demo provider isolation, mobile overflow, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
 
 ## Screenshot Guidance
 
