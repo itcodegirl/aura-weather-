@@ -36,7 +36,7 @@ function getInitialLocationState() {
 }
 
 export function useWeather(options = {}) {
-  const { climateEnabled = true } = options;
+  const { climateEnabled = true, weatherEnabled = true } = options;
   const [initialLocationState] = useState(() => getInitialLocationState());
   const [location, setLocation] = useState(initialLocationState.location);
   const [locationNotice, setLocationNotice] = useState(initialLocationState.notice);
@@ -136,6 +136,7 @@ export function useWeather(options = {}) {
     trustMeta,
   } = useWeatherData(location, {
     climateEnabled,
+    enabled: weatherEnabled,
   });
 
   // Shared entrypoint used by both the search bar (loadWeather, called

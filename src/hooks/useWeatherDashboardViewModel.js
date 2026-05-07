@@ -53,7 +53,10 @@ export function useWeatherDashboardViewModel() {
   // since that state doesn't need a live archive fetch.
   const climateEnabled = showClimateContext && !prefersReducedData && !isMissingMock;
 
-  const weatherState = useWeather({ climateEnabled });
+  const weatherState = useWeather({
+    climateEnabled,
+    weatherEnabled: !isMissingMock,
+  });
   const mockState = useMemo(
     () => (isMissingMock ? buildMissingMockViewModel() : null),
     [isMissingMock]

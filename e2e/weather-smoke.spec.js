@@ -23,9 +23,7 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
 
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(
-    page.getByText(
-      "Chicago is already loaded as a starting point. Use your browser location for local conditions right now, or search for any city when you want a different view."
-    )
+    page.getByText("Chicago is loaded for now. Use your location or search any city.")
   ).toBeVisible();
   await expect(
     page.getByLabel("Location onboarding").getByRole("button", { name: "Allow location access" })
@@ -184,6 +182,13 @@ test("updates hero location when a city is selected from search", async ({ page 
   await expect(searchInput).toHaveValue("");
   await expect(page.locator(".location-notice")).toHaveCount(0);
   await expect(page.getByText("Cloud Sync")).toBeVisible();
+
+  await searchInput.focus();
+  await expect(
+    page.getByRole("option", { name: /Tokyo, Saved city.*Japan/ })
+  ).toBeVisible();
+  await searchInput.press("Enter");
+  await expect(page.locator(".hero-location")).toContainText("Tokyo, Japan");
 });
 
 test("shows a searching state before empty search results resolve", async ({ page }) => {
@@ -373,6 +378,31 @@ test("renders the missing-data placeholder when the forecast reports null fields
     .first();
   await expect(pressureStat).toContainText("—");
   await expect(pressureStat).not.toContainText("0 hPa");
+});
+
+test("does not query live providers in the missing-data portfolio demo", async ({ page }) => {
+  const providerRequests = [];
+
+  page.on("request", (request) => {
+    const url = request.url();
+    if (
+      url.startsWith("https://api.open-meteo.com/") ||
+      url.startsWith("https://archive-api.open-meteo.com/") ||
+      url.startsWith("https://air-quality-api.open-meteo.com/") ||
+      url.startsWith("https://api.weather.gov/")
+    ) {
+      providerRequests.push(url);
+    }
+  });
+
+  await page.goto("/?mock=missing");
+
+  await expect(
+    page.getByText("Portfolio demo: showing the missing-data trust contract. Live providers are not queried.")
+  ).toBeVisible();
+  await page.waitForTimeout(500);
+
+  expect(providerRequests).toEqual([]);
 });
 
 test("does not leak literal unicode escape sequences into rendered text", async ({ page }) => {

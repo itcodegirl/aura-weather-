@@ -137,7 +137,9 @@ function HeroCard({
               }`}
             >
               {isHighMissing ? (
-                <span aria-label="No data available">{todayHighDisplay}</span>
+                <span role="img" aria-label="No data available">
+                  {todayHighDisplay}
+                </span>
               ) : (
                 todayHighDisplay
               )}
@@ -151,7 +153,9 @@ function HeroCard({
               }`}
             >
               {isLowMissing ? (
-                <span aria-label="No data available">{todayLowDisplay}</span>
+                <span role="img" aria-label="No data available">
+                  {todayLowDisplay}
+                </span>
               ) : (
                 todayLowDisplay
               )}
