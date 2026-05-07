@@ -17,6 +17,12 @@ import { DataTrustMeta, Stat } from "./ui";
 import { buildHeroData } from "./heroCard/buildHeroData";
 import "./HeroCard.css";
 
+const GUIDANCE_ICONS = {
+  rain: Droplets,
+  uv: Sun,
+  wind: Wind,
+};
+
 function HeroCard({
   weather,
   location,
@@ -76,6 +82,7 @@ function HeroCard({
     daylightLabel,
     hasClimateComparison,
     climateMessage,
+    dailyGuidance,
     today,
     tempUnit,
   } = heroData;
@@ -216,6 +223,30 @@ function HeroCard({
           )}
         </div>
       </div>
+
+      {Array.isArray(dailyGuidance) && dailyGuidance.length > 0 && (
+        <div className="hero-guidance" role="list" aria-label="Daily guidance">
+          {dailyGuidance.map((item) => {
+            const Icon = GUIDANCE_ICONS[item.kind] ?? Sun;
+            return (
+              <div
+                key={item.kind}
+                className={`hero-guidance-item hero-guidance-item--${item.tone}`}
+                role="listitem"
+              >
+                <div className="hero-guidance-icon">
+                  <Icon size={15} aria-hidden="true" />
+                </div>
+                <div className="hero-guidance-copy">
+                  <span className="hero-guidance-label">{item.label}</span>
+                  <strong className="hero-guidance-value">{item.value}</strong>
+                  <span className="hero-guidance-detail">{item.detail}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="hero-sunlight" role="group" aria-label="Sunlight details">
         <div className="hero-sun-chip">

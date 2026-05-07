@@ -7,18 +7,28 @@ const AppLoadingState = memo(() => {
   return (
     <div className="app app--loading">
       <div
-        className="loader"
+        className="loading-dashboard"
         role="status"
         aria-live="polite"
-        aria-label="Loading weather data"
+        aria-label="Loading weather dashboard"
       >
-        <WeatherIcon
-          code={0}
-          size={80}
-          animated={false}
-          className="loader-weather-icon"
-        />
-        <p className="loader-text">Loading live conditions{"\u2026"}</p>
+        <div className="loading-dashboard-header">
+          <WeatherIcon
+            code={0}
+            size={42}
+            animated={false}
+            className="loader-weather-icon"
+          />
+          <div>
+            <p className="loading-dashboard-brand">Aura</p>
+            <p className="loader-text">Connecting to weather providers{"\u2026"}</p>
+          </div>
+        </div>
+        <div className="loading-dashboard-grid" aria-hidden="true">
+          <div className="loading-skeleton loading-skeleton--hero" />
+          <div className="loading-skeleton loading-skeleton--panel" />
+          <div className="loading-skeleton loading-skeleton--wide" />
+        </div>
       </div>
     </div>
   );
@@ -49,9 +59,6 @@ function AppShell({ background, children }) {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-
-      <div className="ambient-blob ambient-blob--tl" />
-      <div className="ambient-blob ambient-blob--br" />
 
       <div className="app-inner">{children}</div>
     </div>
