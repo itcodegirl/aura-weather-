@@ -3,6 +3,8 @@ import { memo } from "react";
 const CLIMATE_CONTEXT_LABEL_ID = "climate-context-label";
 
 function DisplaySettingsControls({
+  id = "display-settings-panel",
+  isMobileOpen = false,
   showClimateContext,
   onEnableClimateContext,
   onDisableClimateContext,
@@ -14,8 +16,8 @@ function DisplaySettingsControls({
 }) {
   return (
     <div
-      id="display-settings-panel"
-      className="app-header-secondary"
+      id={id}
+      className={`app-header-secondary ${isMobileOpen ? "is-mobile-open" : ""}`.trim()}
       role="region"
       aria-label="Display settings"
     >
