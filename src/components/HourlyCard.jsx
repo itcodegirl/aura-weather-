@@ -1,6 +1,6 @@
 // src/components/HourlyCard.jsx
 
-import { memo, useId, useMemo } from "react";
+import { memo, useId, useMemo, useState } from "react";
 import { LineChart as LineIcon } from "lucide-react";
 import { getWeather } from "../domain/weatherCodes";
 import { convertTemp } from "../utils/temperature";
@@ -187,6 +187,7 @@ function HourlyCard({
   const chartTitleId = `${chartId}-title`;
   const chartSummaryId = `${chartId}-summary`;
   const chartGradientId = `${chartId}-temp-gradient`.replace(/:/g, "");
+  const [selectedSampleKey, setSelectedSampleKey] = useState(null);
   const data = useMemo(() => buildHourlyData(weather?.hourly, unit), [
     weather?.hourly,
     unit,
@@ -270,6 +271,14 @@ function HourlyCard({
   const maxTemp = Math.ceil(chartMetrics.safeMaxTemp + 2);
   const geometry = buildChartGeometry(data, minTemp, maxTemp);
   const nowPoint = geometry?.points?.[0] ?? null;
+  const hourlySamples = geometry?.points ?? [];
+  const selectedSample =
+    hourlySamples.find((point) => String(point.time.getTime()) === selectedSampleKey) ||
+    hourlySamples[0] ||
+    null;
+  const selectedSampleWeather = selectedSample
+    ? getWeather(selectedSample.code)
+    : null;
 
   return (
     <section
@@ -418,6 +427,40 @@ function HourlyCard({
           </svg>
         ) : null}
       </div>
+
+      {hourlySamples.length ? (
+        <div className="hourly-touch-explorer" aria-label="Hourly samples">
+          {selectedSample ? (
+            <p className="hourly-selected-sample" aria-live="polite">
+              <span>{selectedSample.label}</span>
+              <strong>{selectedSample.temp}&deg;{unit}</strong>
+              <span>{selectedSampleWeather?.label || "Weather sample"}</span>
+            </p>
+          ) : null}
+          <div className="hourly-touch-strip" role="list" aria-label="Hourly temperature samples">
+            {hourlySamples.map((point) => {
+              const key = String(point.time.getTime());
+              const info = getWeather(point.code);
+              const isSelected = selectedSample
+                ? key === String(selectedSample.time.getTime())
+                : false;
+              return (
+                <button
+                  key={`sample-${key}`}
+                  type="button"
+                  className={`hourly-touch-sample ${isSelected ? "is-selected" : ""}`.trim()}
+                  aria-pressed={isSelected}
+                  aria-label={`Select ${point.label}, ${point.temp} degrees ${unit}, ${info.label}`}
+                  onClick={() => setSelectedSampleKey(key)}
+                >
+                  <span>{point.label}</span>
+                  <strong>{point.temp}&deg;</strong>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -311,6 +311,18 @@ test("keeps the mobile dashboard within the viewport width", async ({ page }) =>
   await openDashboard(page);
 
   await expect(page.getByRole("heading", { name: "Current Conditions" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rain Outlook" })).toBeVisible();
+
+  const rainSample = page.locator(".rain-touch-sample").first();
+  await expect(rainSample).toBeVisible();
+  await rainSample.click();
+  await expect(page.locator(".rain-selected-sample")).toBeVisible();
+
+  await expect(page.getByRole("heading", { name: "Hourly Temperature" })).toBeVisible();
+  const hourlySample = page.locator(".hourly-touch-sample").first();
+  await expect(hourlySample).toBeVisible();
+  await hourlySample.click();
+  await expect(page.locator(".hourly-selected-sample")).toBeVisible();
 
   const hasHorizontalOverflow = await page.evaluate(() => {
     return document.documentElement.scrollWidth > window.innerWidth;
