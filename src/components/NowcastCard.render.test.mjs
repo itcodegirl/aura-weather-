@@ -52,6 +52,21 @@ describe("analyzeNowcast", () => {
     assert.equal(analysis.peakProbability, null);
     assert.match(analysis.details, /missing from the provider/);
   });
+
+  test("keeps missing precipitation chance unknown when weather codes are dry", () => {
+    const analysis = analyzeNowcast(
+      buildNowcast({
+        rainChance: Array.from({ length: 8 }, () => null),
+        rainAmount: Array.from({ length: 8 }, () => null),
+        conditionCode: Array.from({ length: 8 }, () => 0),
+      })
+    );
+
+    assert.equal(analysis.hasData, true);
+    assert.equal(analysis.hasRain, false);
+    assert.equal(analysis.peakProbability, null);
+    assert.match(analysis.details, /Rain chance is unavailable/);
+  });
 });
 
 describe("NowcastCard", () => {
@@ -72,6 +87,25 @@ describe("NowcastCard", () => {
     assert.ok(screen.getByText("Nowcast data is unavailable."));
     assert.ok(screen.getByText("15-minute precipitation readings are missing from the provider."));
     assert.ok(screen.getAllByText("\u2014").length >= 2);
+    assert.equal(screen.queryByText("0%"), null);
+  });
+
+  test("renders dry weather-code nowcast with unknown peak chance instead of 0%", () => {
+    render(
+      React.createElement(NowcastCard, {
+        weather: {
+          nowcast: buildNowcast({
+            rainChance: Array.from({ length: 8 }, () => null),
+            rainAmount: Array.from({ length: 8 }, () => null),
+            conditionCode: Array.from({ length: 8 }, () => 0),
+          }),
+        },
+      })
+    );
+
+    assert.ok(screen.getByText("Dry window"));
+    assert.ok(screen.getByText("Rain chance is unavailable, but no wet weather code or accumulation was returned."));
+    assert.equal(screen.getByText("Peak chance").nextElementSibling.textContent.trim(), "\u2014");
     assert.equal(screen.queryByText("0%"), null);
   });
 });

@@ -221,6 +221,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.forecast-temp-value.is-missing,
+.forecast-precip-empty.is-missing {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
 .forecast-temp--low .forecast-temp-value {
   color: rgba(227, 238, 255, 0.9);
   font-size: 18px;
@@ -278,6 +284,16 @@
   transition:
     left var(--motion-medium) var(--ease-standard),
     width var(--motion-medium) var(--ease-standard);
+}
+
+.forecast-range--missing::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  border-top: 1px dashed rgba(220, 233, 255, 0.45);
+  transform: translateY(-50%);
 }
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */

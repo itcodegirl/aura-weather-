@@ -168,7 +168,8 @@ function RainCard({
         hasData &&
         safePeakProbability !== null &&
         safePeakProbability < 20 &&
-        (safeTotal ?? 0) < 0.01,
+        safeTotal !== null &&
+        safeTotal < 0.01,
       peakProbability: safePeakProbability,
       peakTimeLabel: safePeakTimeLabel,
       nextRainTimeLabel: safeNextRainTimeLabel,

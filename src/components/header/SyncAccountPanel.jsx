@@ -130,7 +130,7 @@ function SyncAccountPanel({
                 disabled={isSyncing}
                 aria-busy={isSyncing || undefined}
               >
-                Create cloud account
+                Create sync key
               </button>
               <div className="sync-account-manual">
                 <input
