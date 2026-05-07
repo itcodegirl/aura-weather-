@@ -1,0 +1,20 @@
+{
+  "name": "Aura Weather",
+  "short_name": "Aura",
+  "description": "A calm weather dashboard with resilient provider status, saved forecasts, and source-aware data trust cues.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#081225",
+  "theme_color": "#0b1c3f",
+  "orientation": "portrait-primary",
+  "categories": ["weather", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
