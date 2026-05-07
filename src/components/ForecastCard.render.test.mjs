@@ -11,33 +11,79 @@ afterEach(() => {
   cleanup();
 });
 
+function toLocalDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function todayIsoDate() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return today.toISOString().slice(0, 10);
+  return toLocalDateString(today);
+}
+
+function renderForecastWithDaily(daily) {
+  return render(
+    React.createElement(ForecastCard, {
+      unit: "F",
+      weather: {
+        daily: {
+          time: [todayIsoDate()],
+          conditionCode: [2],
+          temperatureMax: [74],
+          temperatureMin: [55],
+          rainChanceMax: [20],
+          ...daily,
+        },
+      },
+    })
+  );
+}
+
+function getTempValues(container) {
+  return Array.from(container.querySelectorAll(".forecast-temp-value"));
 }
 
 describe("ForecastCard missing daily readings", () => {
-  test("renders missing daily high and rain chance as unavailable, not zero", () => {
-    const { container } = render(
-      React.createElement(ForecastCard, {
-        unit: "F",
-        weather: {
-          daily: {
-            time: [todayIsoDate()],
-            conditionCode: [2],
-            temperatureMax: [null],
-            temperatureMin: [55],
-            rainChanceMax: [null],
-          },
-        },
-      })
-    );
+  test("renders a missing daily high without appending a degree symbol", () => {
+    const { container } = renderForecastWithDaily({
+      temperatureMax: [null],
+    });
+
+    const [highValue, lowValue] = getTempValues(container);
 
     assert.ok(screen.getByLabelText("High unavailable"));
     assert.ok(screen.getByLabelText(/High unavailable, low 55 degrees/));
-    assert.ok(screen.getByLabelText("Rain chance unavailable"));
-    assert.equal(container.textContent.includes("0%"), false);
+    assert.equal(highValue.textContent.trim(), "\u2014");
+    assert.equal(highValue.classList.contains("is-missing"), true);
+    assert.equal(lowValue.textContent.trim(), "55\u00B0");
     assert.equal(container.textContent.includes("\u2014\u00B0"), false);
+  });
+
+  test("renders a missing daily low without appending a degree symbol", () => {
+    const { container } = renderForecastWithDaily({
+      temperatureMin: [null],
+    });
+
+    const [highValue, lowValue] = getTempValues(container);
+
+    assert.ok(screen.getByLabelText("Low unavailable"));
+    assert.ok(screen.getByLabelText(/High 74 degrees, low unavailable/));
+    assert.equal(highValue.textContent.trim(), "74\u00B0");
+    assert.equal(lowValue.textContent.trim(), "\u2014");
+    assert.equal(lowValue.classList.contains("is-missing"), true);
+    assert.equal(container.textContent.includes("\u2014\u00B0"), false);
+  });
+
+  test("renders missing daily rain chance as unavailable, not low or zero", () => {
+    const { container } = renderForecastWithDaily({
+      rainChanceMax: [null],
+    });
+
+    assert.ok(screen.getByLabelText("Rain chance unavailable"));
+    assert.equal(container.querySelector(".forecast-precip").textContent.trim(), "\u2014");
+    assert.equal(container.textContent.includes("0%"), false);
   });
 });
