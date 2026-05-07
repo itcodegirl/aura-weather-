@@ -50,8 +50,8 @@ function HeroCard({
         aria-busy={isRefreshing || undefined}
       >
         <header className="hero-meta">
-          <div className="hero-location">
-            <MapPin size={14} />
+          <div className="hero-location" aria-label="Location unavailable">
+            <MapPin size={14} aria-hidden="true" />
             <span>Location unavailable</span>
           </div>
           <p className="hero-date">Loading weather</p>
@@ -118,8 +118,11 @@ function HeroCard({
     >
       <header className="hero-meta">
         <div className="hero-location-block">
-          <div className="hero-location">
-            <MapPin size={14} />
+          <div
+            className="hero-location"
+            aria-label={`Location: ${safeLocationName}${safeLocationCountry ? `, ${safeLocationCountry}` : ""}`}
+          >
+            <MapPin size={14} aria-hidden="true" />
             <span>
               {safeLocationName}
               {safeLocationCountry ? `, ${safeLocationCountry}` : ""}

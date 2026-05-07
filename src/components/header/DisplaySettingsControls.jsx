@@ -33,7 +33,7 @@ function DisplaySettingsControls({
             className={`toggle-pill-btn ${showClimateContext ? "is-active" : ""}`}
             onClick={onEnableClimateContext}
             aria-pressed={showClimateContext}
-            aria-label="Enable climate context"
+            aria-label="Show historical climate comparison"
           >
             On
           </button>
@@ -42,7 +42,7 @@ function DisplaySettingsControls({
             className={`toggle-pill-btn ${!showClimateContext ? "is-active" : ""}`}
             onClick={onDisableClimateContext}
             aria-pressed={!showClimateContext}
-            aria-label="Disable climate context"
+            aria-label="Hide historical climate comparison"
           >
             Off
           </button>

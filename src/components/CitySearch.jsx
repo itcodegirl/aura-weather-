@@ -173,6 +173,10 @@ function CitySearch({ onSelect, savedCities }, ref) {
           role="combobox"
           aria-activedescendant={activeDescendant}
           autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="words"
+          spellCheck="false"
+          inputMode="search"
           enterKeyHint="search"
         />
         {!query && (
