@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { geocodeCity } from "../api";
 import { parseCoordinates } from "../utils/weatherUnits";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const MIN_SEARCH_QUERY_LENGTH = 2;
 
-export function useCitySearch({ onSelect } = {}) {
+export function useCitySearch({ onSelect, idleResults = [] } = {}) {
   const [query, setQueryState] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,16 +57,25 @@ export function useCitySearch({ onSelect } = {}) {
   }, [open]);
 
   const normalizedQuery = query.trim();
+  const safeIdleResults = useMemo(
+    () =>
+      Array.isArray(idleResults)
+        ? idleResults.filter((city) => city && typeof city === "object")
+        : [],
+    [idleResults]
+  );
+  const visibleResults =
+    normalizedQuery.length === 0 ? safeIdleResults : results;
   const showDropdown =
     open &&
     (loading ||
-      results.length > 0 ||
+      visibleResults.length > 0 ||
       error ||
       normalizedQuery.length >= MIN_SEARCH_QUERY_LENGTH);
 
   const activeIndexSafe =
-    showDropdown && activeIndex >= 0 && results.length > 0
-      ? Math.min(activeIndex, results.length - 1)
+    showDropdown && activeIndex >= 0 && visibleResults.length > 0
+      ? Math.min(activeIndex, visibleResults.length - 1)
       : -1;
   const canShowNoResults =
     normalizedQuery.length >= MIN_SEARCH_QUERY_LENGTH &&
@@ -200,7 +209,7 @@ export function useCitySearch({ onSelect } = {}) {
       }
 
       if (event.key === "ArrowDown") {
-        if (results.length === 0) return;
+        if (visibleResults.length === 0) return;
         event.preventDefault();
         if (!showDropdown) {
           setOpen(true);
@@ -208,33 +217,33 @@ export function useCitySearch({ onSelect } = {}) {
           return;
         }
         setActiveIndex((prev) =>
-          prev < 0 ? 0 : Math.min(prev + 1, results.length - 1)
+          prev < 0 ? 0 : Math.min(prev + 1, visibleResults.length - 1)
         );
         return;
       }
 
       if (event.key === "ArrowUp") {
-        if (results.length === 0) return;
+        if (visibleResults.length === 0) return;
         event.preventDefault();
         if (!showDropdown) {
           setOpen(true);
-          setActiveIndex(results.length - 1);
+          setActiveIndex(visibleResults.length - 1);
           return;
         }
         setActiveIndex((prev) => Math.max(prev - 1, 0));
         return;
       }
 
-      if (event.key === "Enter" && results.length > 0) {
+      if (event.key === "Enter" && visibleResults.length > 0) {
         event.preventDefault();
         const targetIndex = activeIndexSafe >= 0 ? activeIndexSafe : 0;
-        const city = results[targetIndex];
+        const city = visibleResults[targetIndex];
         if (city) {
           handleSelect(city);
         }
       }
     },
-    [results, showDropdown, activeIndexSafe, handleSelect]
+    [visibleResults, showDropdown, activeIndexSafe, handleSelect]
   );
 
   const clear = useCallback(() => {
@@ -254,7 +263,7 @@ export function useCitySearch({ onSelect } = {}) {
   return {
     query,
     setQuery,
-    results,
+    results: visibleResults,
     loading,
     error,
     clear,

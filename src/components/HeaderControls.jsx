@@ -29,6 +29,13 @@ function HeaderControls({
   setUnit,
   hasPersistedLocation,
 }) {
+  const safeSavedCities = Array.isArray(savedCities) ? savedCities : [];
+  const syncNeedsAttention =
+    syncState?.status === "syncing" ||
+    (typeof syncState?.error === "string" && Boolean(syncState.error.trim()));
+  const shouldShowSyncPanel =
+    safeSavedCities.length > 0 || syncConnected || syncNeedsAttention;
+
   const handleCitySelect = useCallback(
     (city) => {
       // Strict coercion so a city with null lat/lon does not silently
@@ -112,7 +119,11 @@ function HeaderControls({
     <div className="app-header-actions">
       <div className="app-header-primary">
         <div className="app-header-primary-row">
-          <CitySearch ref={citySearchRef} onSelect={handleCitySelect} />
+          <CitySearch
+            ref={citySearchRef}
+            onSelect={handleCitySelect}
+            savedCities={safeSavedCities}
+          />
           <button
             type="button"
             className="current-location-btn glass"
@@ -136,20 +147,22 @@ function HeaderControls({
           </button>
         </div>
         <SavedCitiesStrip
-          savedCities={savedCities}
+          savedCities={safeSavedCities}
           location={location}
           loadSavedCity={loadSavedCity}
           forgetSavedCity={forgetSavedCity}
         />
-        <SyncAccountPanel
-          syncConnected={syncConnected}
-          syncAccount={syncAccount}
-          syncState={syncState}
-          onCreateSyncAccount={handleCreateSyncAccount}
-          onConnectSyncAccount={handleConnectSyncAccount}
-          onDisconnectSyncAccount={handleDisconnectSyncAccount}
-          onSyncNow={handleSyncNow}
-        />
+        {shouldShowSyncPanel ? (
+          <SyncAccountPanel
+            syncConnected={syncConnected}
+            syncAccount={syncAccount}
+            syncState={syncState}
+            onCreateSyncAccount={handleCreateSyncAccount}
+            onConnectSyncAccount={handleConnectSyncAccount}
+            onDisconnectSyncAccount={handleDisconnectSyncAccount}
+            onSyncNow={handleSyncNow}
+          />
+        ) : null}
       </div>
 
       <DisplaySettingsControls

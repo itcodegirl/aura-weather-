@@ -54,9 +54,28 @@ portfolio-grade product. Format roughly follows
 - Data Sources panel that separates forecast, AQI, NOAA/NWS alerts, and
   archive status so live, saved, unsupported, and unavailable states are
   visible without conflating them with missing readings.
+- PWA manifest and production-only service worker registration. The
+  service worker caches same-origin app-shell/build assets after a first
+  online visit while leaving weather provider calls network-truthful.
+- PWA runtime status prompts for first-install offline readiness and the
+  browser install prompt, with dismissible Install/Later actions.
+- Playwright offline-shell regression coverage that verifies the
+  production service worker can restore `?mock=missing` after reload
+  without network access.
+- Deterministic missing-data demo isolation so `?mock=missing` renders
+  the trust-contract route without starting live provider requests.
 
 ### Changed
 
+- Empty city-search focus now shows saved cities as selectable combobox
+  options for faster repeat switching.
+- First-load location onboarding and follow-up location prompts use
+  shorter copy for better mobile scanning.
+- Mobile rain and hourly panels now expose touch-friendly sample strips
+  so dense timeline values can be inspected without hover.
+- Cloud Sync now stays hidden on fresh first load until the user has at
+  least one saved city, while connected/syncing/error states remain
+  visible for recovery.
 - Successful browser geolocation now labels raw GPS coordinates as
   "Current location" with no country label instead of inheriting the
   Chicago fallback city/country.
@@ -84,6 +103,12 @@ portfolio-grade product. Format roughly follows
 - Supplemental AQI, archive, and alert requests now retry transient
   failures once while preserving abort behavior and unsupported-region
   alert fallbacks.
+- GitHub Actions quality gates now include lint, Node tests, render
+  tests, production build, serial Playwright, visual checks, Lighthouse
+  budgets, concurrency cancellation, and failure artifacts.
+- Lighthouse budget checks now target the deterministic `?mock=missing`
+  app shell and use a per-run Chrome profile to avoid stale service
+  workers or Windows profile-lock failures.
 - The 1-minute `DataTrustMeta` clock pauses while the tab is hidden so
   background tabs do not churn re-renders.
 - InfoDrawer trigger uses a `HelpCircle` icon instead of a literal `?`.
@@ -143,10 +168,12 @@ portfolio-grade product. Format roughly follows
 
 ### Tests
 
-- 45 → **227** Node tests across 53 suites, including React render tests
+- 45 → **244** Node tests across 55 suites, including React render tests
   via `@testing-library/react` + `jsdom`. New regressions pin null-input
-  contracts, source-scoped retries, cache restore behavior, and honest
-  browser-location labels.
-- 12 → **13** Playwright smoke checks, including cached offline restore,
-  honest GPS labels, missing-data placeholders, axe-core, and the
+  contracts, source-scoped retries, cache restore behavior, honest
+  browser-location labels, service worker registration gates, and PWA
+  install prompt handling.
+- 12 → **15** Playwright smoke/flow checks, including cached offline
+  restore, offline app-shell reload, honest GPS labels, missing-data
+  placeholders, missing-demo provider isolation, axe-core, and the
   unicode-escape leak guard.

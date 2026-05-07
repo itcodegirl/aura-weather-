@@ -20,11 +20,12 @@ function Stat({
   const finalValueClassName = isMissing
     ? `${valueClassName} is-missing`.trim()
     : valueClassName;
-  // Wraps the dash glyph with screen-reader copy that says "no data"
-  // instead of the literal em-dash, so the trust contract reads
-  // correctly to assistive tech as well as sighted users.
+  // Treat the dash as a named visual symbol so assistive tech hears
+  // the data state instead of the literal em-dash glyph.
   const renderedValue = isMissing ? (
-    <span aria-label="No data available">{value}</span>
+    <span role="img" aria-label="No data available">
+      {value}
+    </span>
   ) : (
     value
   );

@@ -36,6 +36,16 @@ function StatusStack({
   cacheStatus = "idle",
   cacheCapturedAt = null,
   onRetry,
+  serviceWorkerUpdateAvailable = false,
+  serviceWorkerOfflineReady = false,
+  isServiceWorkerRefreshing = false,
+  onRefreshServiceWorkerUpdate,
+  onDismissServiceWorkerUpdate,
+  onDismissServiceWorkerOfflineReady,
+  installPromptAvailable = false,
+  isInstallPromptOpening = false,
+  onInstallApp,
+  onDismissInstallPrompt,
   showRuntimeStatus = true,
   showSetupPrompts = true,
   className = "",
@@ -68,7 +78,10 @@ function StatusStack({
   const hasRuntimeStatus = showRuntimeStatus && Boolean(
     locationNotice ||
     isBackgroundLoading ||
-    showRefreshError
+    showRefreshError ||
+    serviceWorkerUpdateAvailable ||
+    serviceWorkerOfflineReady ||
+    installPromptAvailable
   );
   const hasSetupPrompts = showSetupPrompts && Boolean(
     showLocationSetupPrompt || showPermissionOnboarding
@@ -101,11 +114,11 @@ function StatusStack({
       {showSetupPrompts && showPermissionOnboarding && (
         <section className="permission-onboarding" aria-label="Location onboarding">
           <p className="permission-onboarding-kicker">First-time setup</p>
-          <h2 className="permission-onboarding-title">Set your forecast once, then keep moving</h2>
+          <h2 className="permission-onboarding-title">Set your forecast once</h2>
           <p className="permission-onboarding-copy">
             {isGeolocationSupported
-              ? "Chicago is already loaded as a starting point. Use your browser location for local conditions right now, or search for any city when you want a different view."
-              : "Chicago is already loaded as a starting point. This browser cannot share live location here, so search for any city when you want a different forecast."}
+              ? "Chicago is loaded for now. Use your location or search any city."
+              : "Chicago is loaded for now. Location sharing is unavailable here, so search any city."}
           </p>
           <div className="permission-onboarding-actions">
             {isGeolocationSupported ? (
@@ -141,8 +154,8 @@ function StatusStack({
         <section className="location-setup-prompt" aria-label="Location setup">
           <p className="location-setup-title">
             {isGeolocationSupported
-              ? "Want something more local? Use your current location or search for a city."
-              : "Want something more local? Search for a city. Live browser location is unavailable here."}
+              ? "Use your location or search any city."
+              : "Search any city. Browser location is unavailable here."}
           </p>
           <div className="location-setup-actions">
             {isGeolocationSupported ? (
@@ -170,6 +183,74 @@ function StatusStack({
         <p className="app-status app-status--loading" role="status" aria-live="polite">
           Updating weather for your current settings...
         </p>
+      )}
+      {showRuntimeStatus && serviceWorkerUpdateAvailable && (
+        <div className="app-status app-status--update" role="status" aria-live="polite">
+          <span className="app-status-message">
+            App update ready. Refresh when you have a moment.
+          </span>
+          <span className="app-status-actions">
+            <button
+              type="button"
+              className="app-status-action app-status-action--primary"
+              onClick={onRefreshServiceWorkerUpdate}
+              disabled={isServiceWorkerRefreshing}
+              aria-busy={isServiceWorkerRefreshing || undefined}
+            >
+              {isServiceWorkerRefreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            <button
+              type="button"
+              className="app-status-action"
+              onClick={onDismissServiceWorkerUpdate}
+              disabled={isServiceWorkerRefreshing}
+            >
+              Later
+            </button>
+          </span>
+        </div>
+      )}
+      {showRuntimeStatus && serviceWorkerOfflineReady && (
+        <div className="app-status app-status--ready" role="status" aria-live="polite">
+          <span className="app-status-message">
+            Offline shell ready. Aura can reopen after the network drops.
+          </span>
+          <span className="app-status-actions">
+            <button
+              type="button"
+              className="app-status-action"
+              onClick={onDismissServiceWorkerOfflineReady}
+            >
+              Got it
+            </button>
+          </span>
+        </div>
+      )}
+      {showRuntimeStatus && installPromptAvailable && (
+        <div className="app-status app-status--install" role="status" aria-live="polite">
+          <span className="app-status-message">
+            Install Aura for faster daily access.
+          </span>
+          <span className="app-status-actions">
+            <button
+              type="button"
+              className="app-status-action app-status-action--primary"
+              onClick={onInstallApp}
+              disabled={isInstallPromptOpening}
+              aria-busy={isInstallPromptOpening || undefined}
+            >
+              {isInstallPromptOpening ? "Opening..." : "Install"}
+            </button>
+            <button
+              type="button"
+              className="app-status-action"
+              onClick={onDismissInstallPrompt}
+              disabled={isInstallPromptOpening}
+            >
+              Later
+            </button>
+          </span>
+        </div>
       )}
       {showRuntimeStatus && showRefreshError && (
         <div className="app-status app-status--error" role="alert">

@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import "../../../scripts/test-render-setup.mjs";
 
 const React = (await import("react")).default;
-const { cleanup, render, screen } = await import("@testing-library/react");
+const { cleanup, fireEvent, render, screen } = await import(
+  "@testing-library/react"
+);
 const StatusStack = (await import("./StatusStack.jsx")).default;
 
 afterEach(() => {
@@ -43,5 +45,80 @@ describe("StatusStack", () => {
         "Could not refresh weather right now. Showing last known data."
       )
     );
+  });
+
+  test("renders service worker update actions", () => {
+    let refreshCount = 0;
+    let dismissCount = 0;
+
+    render(
+      React.createElement(StatusStack, {
+        serviceWorkerUpdateAvailable: true,
+        onRefreshServiceWorkerUpdate() {
+          refreshCount += 1;
+        },
+        onDismissServiceWorkerUpdate() {
+          dismissCount += 1;
+        },
+      })
+    );
+
+    assert.ok(
+      screen.getByText("App update ready. Refresh when you have a moment.")
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    fireEvent.click(screen.getByRole("button", { name: "Later" }));
+
+    assert.equal(refreshCount, 1);
+    assert.equal(dismissCount, 1);
+  });
+
+  test("renders offline-ready acknowledgement", () => {
+    let dismissCount = 0;
+
+    render(
+      React.createElement(StatusStack, {
+        serviceWorkerOfflineReady: true,
+        onDismissServiceWorkerOfflineReady() {
+          dismissCount += 1;
+        },
+      })
+    );
+
+    assert.ok(
+      screen.getByText(
+        "Offline shell ready. Aura can reopen after the network drops."
+      )
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+
+    assert.equal(dismissCount, 1);
+  });
+
+  test("renders app install prompt actions", () => {
+    let installCount = 0;
+    let dismissCount = 0;
+
+    render(
+      React.createElement(StatusStack, {
+        installPromptAvailable: true,
+        onInstallApp() {
+          installCount += 1;
+        },
+        onDismissInstallPrompt() {
+          dismissCount += 1;
+        },
+      })
+    );
+
+    assert.ok(screen.getByText("Install Aura for faster daily access."));
+
+    fireEvent.click(screen.getByRole("button", { name: "Install" }));
+    fireEvent.click(screen.getByRole("button", { name: "Later" }));
+
+    assert.equal(installCount, 1);
+    assert.equal(dismissCount, 1);
   });
 });

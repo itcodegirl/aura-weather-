@@ -444,11 +444,93 @@
   text-transform: uppercase;
 }
 
+.rain-touch-explorer {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rain-mode-btn:hover,
   .rain-mode-btn:active,
   .rain-bar:hover {
     transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .rain-touch-explorer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rain-selected-sample {
+    display: grid;
+    grid-template-columns: minmax(44px, auto) minmax(54px, auto) 1fr;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    border: var(--subcard-border);
+    background: rgba(7, 17, 37, 0.54);
+    color: rgba(222, 236, 255, 0.9);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .rain-selected-sample strong {
+    color: #f7fbff;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 650;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rain-touch-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    padding: 1px 2px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rain-touch-sample {
+    flex: 0 0 64px;
+    min-height: 52px;
+    scroll-snap-align: start;
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    padding: 7px 8px;
+    border-radius: var(--radius-sm);
+    border: var(--subcard-border);
+    background: rgba(7, 17, 37, 0.5);
+    color: rgba(220, 234, 255, 0.84);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rain-touch-sample strong {
+    color: #f6fbff;
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+
+  .rain-touch-sample.is-selected {
+    border-color: rgba(115, 224, 255, 0.56);
+    background: rgba(73, 124, 214, 0.3);
+    box-shadow: inset 0 0 0 1px rgba(110, 231, 255, 0.18);
+  }
+
+  .rain-touch-sample:focus-visible {
+    outline: 2px solid rgba(110, 231, 255, 0.72);
+    outline-offset: 2px;
   }
 }
 

@@ -119,14 +119,14 @@ function buildCachedTrustMeta(snapshot, restoredAt = Date.now()) {
 }
 
 export function useWeatherData(location, options = {}) {
-  const { climateEnabled = true } = options;
+  const { climateEnabled = true, enabled = true } = options;
   const locationLat = location?.lat;
   const locationLon = location?.lon;
   const weatherDataUnit = WEATHER_SOURCE_UNIT;
 
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(() =>
-    Boolean(parseCoordinates(locationLat, locationLon))
+    enabled && Boolean(parseCoordinates(locationLat, locationLon))
   );
   const [error, setError] = useState(null);
   const [trustMeta, setTrustMeta] = useState(DEFAULT_TRUST_META);
@@ -265,6 +265,17 @@ export function useWeatherData(location, options = {}) {
   }, []);
 
   const requestWeatherData = useCallback(async () => {
+    if (!enabled) {
+      abortInFlightRequest();
+      resetClimateComparison();
+      lastFetchedCoordsRef.current = null;
+      setWeather(null);
+      setTrustMeta(DEFAULT_TRUST_META);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     const coordinates = parseCoordinates(locationLat, locationLon);
 
     if (!coordinates) {
@@ -401,6 +412,7 @@ export function useWeatherData(location, options = {}) {
   }, [
     abortInFlightRequest,
     applySupplementalData,
+    enabled,
     locationLat,
     locationLon,
     requestClimateComparison,
@@ -422,6 +434,10 @@ export function useWeatherData(location, options = {}) {
   // the historical comparison for the existing weather snapshot rather
   // than refetching the forecast.
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     if (!climateEnabled) {
       return;
     }
@@ -444,6 +460,7 @@ export function useWeatherData(location, options = {}) {
     climateComparison,
     climateEnabled,
     climateStatus,
+    enabled,
     locationLat,
     locationLon,
     requestClimateComparison,

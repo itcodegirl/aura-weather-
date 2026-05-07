@@ -54,6 +54,7 @@ function RainCard({
   const timelineSummaryId = `${timelineId}-summary`;
   const timelineDetailsId = `${timelineId}-details`;
   const [mode, setMode] = useState("chance");
+  const [selectedSampleKey, setSelectedSampleKey] = useState(null);
   const rainAnalysis = useRainAnalysis(weather?.hourly);
   const {
     hasData,
@@ -148,6 +149,13 @@ function RainCard({
           : mode === "chance"
           ? `${formatHour(hour.time)} \u2014 ${hour.probability}%`
           : `${formatHour(hour.time)} \u2014 ${formatPrecipitation(hour.amount, unit, dataUnit)}`;
+      const valueLabel =
+        isMissing
+          ? MISSING_PLACEHOLDER
+          : mode === "chance"
+            ? `${hour.probability}%`
+            : formatPrecipitation(hour.amount, unit, dataUnit);
+      const timeLabel = formatHour(hour.time);
 
       return {
         key: Number.isFinite(hour.time?.getTime?.())
@@ -156,6 +164,8 @@ function RainCard({
         heightPct,
         opacity,
         tooltip,
+        valueLabel,
+        timeLabel,
         isMissing,
       };
     });
@@ -201,6 +211,10 @@ function RainCard({
 
   const peakProbabilityLabel =
     peakProbability === null ? MISSING_PLACEHOLDER : `${peakProbability}%`;
+  const selectedSample =
+    timelineBars.find((bar) => bar.key === selectedSampleKey) ||
+    timelineBars[0] ||
+    null;
 
   return (
     <section
@@ -369,6 +383,33 @@ function RainCard({
           <span>+12h</span>
           <span>+24h</span>
         </div>
+
+        {timelineBars.length ? (
+          <div className="rain-touch-explorer" aria-label="Rain samples">
+            {selectedSample ? (
+              <p className="rain-selected-sample" aria-live="polite">
+                <span>{selectedSample.timeLabel}</span>
+                <strong>{selectedSample.valueLabel}</strong>
+                <span>{mode === "chance" ? "Rain confidence" : "Rain amount"}</span>
+              </p>
+            ) : null}
+            <div className="rain-touch-strip" role="list" aria-label="Hourly rain samples">
+              {timelineBars.map((bar) => (
+                <button
+                  key={`sample-${bar.key}`}
+                  type="button"
+                  className={`rain-touch-sample ${selectedSample?.key === bar.key ? "is-selected" : ""}`.trim()}
+                  aria-pressed={selectedSample?.key === bar.key}
+                  aria-label={`Select ${bar.tooltip}`}
+                  onClick={() => setSelectedSampleKey(bar.key)}
+                >
+                  <span>{bar.timeLabel}</span>
+                  <strong>{bar.valueLabel}</strong>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );

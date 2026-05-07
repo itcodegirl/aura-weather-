@@ -5,7 +5,11 @@ Most items have automated coverage already; this is the human
 double-check that catches things the test suite cannot.
 
 For automated checks, run `npm run lint && npm test && npm run build
-&& npm run test:e2e` first — every box below assumes those pass.
+&& npm run test:e2e && npm run test:lighthouse` first — every box
+below assumes those pass.
+
+CI runs the same gate serially for Playwright with
+`npm run test:e2e -- --workers=1` to reduce visual-screenshot noise.
 
 ## First-load happy path
 
@@ -15,8 +19,8 @@ For automated checks, run `npm run lint && npm test && npm run build
       visible on first paint
 - [ ] Granting browser location shows "Current location" rather than a
       guessed city/country label
-- [ ] Permission-onboarding card reads "Set your forecast once, then
-      keep moving" with two buttons
+- [ ] Permission-onboarding card reads "Set your forecast once" with
+      short setup copy and two buttons
 - [ ] Bento groups render in order: Current Conditions → Near-Term
       Outlook → Risk Signals → Week Ahead
 
@@ -28,6 +32,8 @@ For automated checks, run `npm run lint && npm test && npm run build
       status before any "No matching cities" message
 - [ ] Selecting a result clears the input, blurs the field, and
       switches the dashboard to the new city
+- [ ] Focusing an empty search after saving a city shows saved-city
+      suggestions without typing
 - [ ] Pressing `/` (when not focused on an input) focuses the search
       field
 - [ ] Escape closes the dropdown and blurs the field
@@ -75,6 +81,21 @@ For automated checks, run `npm run lint && npm test && npm run build
 - [ ] The Retry button enters a 1.4s cooldown and shows "Retrying..."
       while disabled
 
+## Offline app shell
+
+- [ ] In a production build/preview, the browser registers `/sw.js`
+      after page load
+- [ ] After one successful production visit, switching DevTools to
+      offline and reloading still renders the Aura app shell
+- [ ] On first production install, the status stack shows "Offline shell
+      ready" and the Got it action dismisses it
+- [ ] When the browser exposes `beforeinstallprompt`, Aura shows the
+      Install/Later prompt without blocking the dashboard
+- [ ] Offline weather refreshes show the saved-forecast banner rather
+      than claiming live provider data is fresh
+- [ ] Clearing site data removes the service worker/cache and returns
+      the app to normal first-load behavior
+
 ## Climate context
 
 - [ ] Toggling Climate Context off does **not** trigger a forecast
@@ -94,7 +115,9 @@ For automated checks, run `npm run lint && npm test && npm run build
 
 ## Cloud sync (optional flow)
 
-- [ ] Cloud Sync panel collapses by default
+- [ ] Cloud Sync is hidden on fresh first load with no saved cities
+- [ ] Selecting or saving a city reveals Cloud Sync below the saved-city
+      strip
 - [ ] Create sync key → key appears, ellipsised at 32 characters,
       tooltip + aria-label expose the full key
 - [ ] Pasting an invalid sync URL produces a `role="alert"` error and
@@ -103,8 +126,11 @@ For automated checks, run `npm run lint && npm test && npm run build
 
 ## Accessibility
 
-- [ ] Tab order: skip link → search → my location → saved cities →
-      sync panel → climate toggle → unit toggle → main content
+- [ ] Tab order before saved cities: skip link → search → my location
+      → climate toggle → unit toggle → main content
+- [ ] Tab order after saved cities: skip link → search → my location
+      → saved cities → sync panel → climate toggle → unit toggle →
+      main content
 - [ ] `Skip to main content` link is the first focusable element and
       visible on focus
 - [ ] All interactive controls have visible focus rings
@@ -121,6 +147,8 @@ For automated checks, run `npm run lint && npm test && npm run build
 - [ ] No horizontal scroll
 - [ ] Hero card stacks: location → high/low → temp + icon → condition
 - [ ] Bento groups collapse into single column at ≤ 640 px
+- [ ] Rain and hourly panels show touch sample strips, and selecting a
+      sample updates the selected value without layout shift
 - [ ] Saved cities wrap; X button is at least 24×24
 - [ ] Search dropdown does not overflow the viewport
 - [ ] The `/` keyboard hint is hidden (it is keyboard-only)
@@ -134,7 +162,8 @@ For automated checks, run `npm run lint && npm test && npm run build
 
 ## Performance
 
-- [ ] Lighthouse local budget passes (`npm run test:lighthouse`)
+- [ ] Lighthouse local budget passes (`npm run test:lighthouse` audits
+      the deterministic `?mock=missing` app shell)
 - [ ] Switching the unit toggle does **not** trigger a forecast or
       archive refetch (verify in devtools Network)
 - [ ] Backgrounding the tab pauses the 1-minute trust-meta clock

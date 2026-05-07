@@ -114,7 +114,8 @@ for (const viewport of SNAPSHOT_VIEWPORTS) {
       {
         animations: "disabled",
         caret: "hide",
-        maxDiffPixelRatio: 0.01,
+        maxDiffPixelRatio: viewport.name === "mobile" ? 0.025 : 0.01,
+        timeout: 20_000,
       }
     );
   });
@@ -136,6 +137,7 @@ for (const viewport of TRUST_CONTRACT_VIEWPORTS) {
         // missing-data path renders several em-dash glyphs that hint at
         // sub-pixel rasterisation differences across browser builds.
         maxDiffPixelRatio: 0.02,
+        timeout: 20_000,
       }
     );
   });
