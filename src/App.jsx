@@ -132,6 +132,9 @@ function App() {
         isGeolocationSupported={isGeolocationSupported}
         isBackgroundLoading={isBackgroundLoading}
         showRefreshError={showRefreshError}
+        error={error}
+        cacheStatus={trustMeta?.cacheStatus}
+        cacheCapturedAt={trustMeta?.cacheCapturedAt}
         onRetry={retryWeather}
         className="status-stack--runtime"
       />
