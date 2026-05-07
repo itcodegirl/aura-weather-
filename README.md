@@ -21,6 +21,7 @@ It is designed as a portfolio project with real frontend concerns in scope:
 - Current conditions, hourly outlook, rain guidance, risk signals, and 7-day forecast in one surface
 - Open-Meteo powered weather, air quality, geocoding, and archive data
 - NOAA / NWS severe alerts with explicit unsupported-region fallback messaging
+- Transient retries for secondary AQI, alerts, and archive requests without blocking the core forecast
 - Saved cities, persisted location preference, and optional cloud sync for saved locations
 - Temperature-unit changes stay local to the UI instead of forcing fresh forecast/climate requests
 - Keyboard-friendly city search with async cancellation and combobox/listbox behavior
@@ -163,6 +164,7 @@ npm run test:lighthouse
 
 - First load opens to a usable Chicago forecast immediately instead of stalling on a geolocation permission prompt.
 - Browser location is opt-in. Users can keep the fallback city, search manually, or grant location access.
+- Device-location success is labelled "Current location" unless the user selects a named city from search.
 - Core weather data loads first. Air quality, alerts, and climate context can recover independently if a secondary API is slow or unavailable.
 - Search shows a loading state before empty results, so users do not get a premature "No matching cities" response.
 - Startup-city controls stay hidden until a startup preference actually exists.
@@ -184,6 +186,7 @@ Short notes on the non-obvious choices a reviewer might question.
 
 - **Forecast is always fetched in Fahrenheit / inch units; conversion is client-side.** Switching the °F/°C toggle must not trigger a refetch — it would invalidate the displayed timestamp and confuse users. A Playwright test asserts that toggling units does not refetch.
 - **Three independent fetch tracks.** Forecast, supplemental (AQI + alerts), and climate-archive run concurrently with separate AbortController + request-id pairs. A slow archive call cannot delay the hero card; an alerts feed outage cannot wipe the AQI reading.
+- **Supplemental retries stay source-scoped.** AQI, alerts, and archive calls retry transient failures once, while known coverage misses such as NWS 400/404 responses stay explicit unsupported-region states.
 - **NWS alerts are U.S.-only by design.** A 400/404 from `api.weather.gov/alerts/active` is mapped to an explicit `unsupported` status (not `unavailable`) so the UI can say "Alerts unavailable for this region" instead of an ambiguous "no alerts".
 - **Strict numeric coercion at every layer.** `Number(null) === 0` would surface as a fake 0°F humidity / 0% rain chance / 0°F historical sample whenever Open-Meteo returns a missing data point. A single shared `toFiniteNumber` helper rejects nullish, empty-string, boolean, array, and object inputs explicitly, and is now applied at the API boundary, every formatter, every domain classifier, and every chart slot parser. Eight unit tests lock the core helper; additional assertions pin the null contract for each formatter and domain function.
 - **Lazy supplemental panels.** The hero, exposure cards, and rain card render synchronously. Hourly chart, storm watch, alerts, forecast, and nowcast are mounted via `Suspense` after a `requestIdleCallback` (or 180ms fallback) so the first paint is just the data the user sees first.
@@ -292,6 +295,8 @@ bug, the contract, and the test pyramid.
 
 ## Recent Hardening
 
+- **Supplemental source retries** - Open-Meteo AQI, NOAA / NWS alerts, and Open-Meteo Archive requests now retry transient failures once. Unsupported NWS regions are not retried because they are coverage facts, not temporary failures.
+- **Honest GPS label** - successful browser geolocation now renders as "Current location" with no country label unless the user picks a named city. Aura no longer lets device coordinates inherit the Chicago fallback label.
 - **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard, ForecastCard, RainCard, and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.
 - **`?mock=missing` demo state** — `/?mock=missing` is a labelled portfolio demo route for the trust contract. It shows a clear demo notice and serves a local missing-data model without live provider calls.
 - **Hero helper note** — when any hero stat is missing the card appends a short "Some readings are unavailable from the provider" line with `role="status"` so the user understands *why* a value is shown as `—`.
@@ -302,6 +307,8 @@ bug, the contract, and the test pyramid.
 - **CSS co-location** — `App.css` shrank from 2,067 to roughly 500 lines as `DataTrustMeta`, `InfoDrawer`, `AppShell`, `StatusStack`, the bento dashboard layout, and the entire header surface moved next to their owning components.
 - **Scoped live regions** — `SyncAccountPanel` no longer wraps its full body in `aria-live="polite"`; only the error (`role="alert"`) and last-synced timestamp (`role="status"`) announce, and the truncated sync key advertises its full value via aria-label.
 - **Strict API number coercion** — `Number(null)` is `0`, which silently surfaced as fake `0%` humidity, `0 hPa` pressure, `0°F` dew point, and `0°F` historical samples whenever Open-Meteo returned partial data. A shared `toFiniteNumber` helper rejects nullish/empty/boolean/object inputs at the API boundary, then routes the same contract through every per-element parser in HourlyCard, ForecastCard, NowcastCard, and `useRainAnalysis`.
+- **Last-successful forecast cache** — successful forecast snapshots are cached per coordinate with schema/version guards. When live Open-Meteo forecast data fails or the browser starts offline, Aura restores the saved forecast and shows a source-specific banner with the saved timestamp.
+- **Provider health visibility** — the dashboard now surfaces forecast, AQI, NOAA/NWS alert, and archive status separately, so unsupported coverage, saved forecasts, service issues, and missing readings do not collapse into the same vague state.
 - **In-flight async announcement** — async buttons (Use my location, Allow location, Retry, Sync now, Disconnect, Create sync key) now expose `aria-busy` while their work is in flight, so screen-reader users get a signal even after tabbing away.
 - **Climate comparison nullish-input fix** — `buildClimateComparison` now rejects nullish temperatures explicitly instead of coercing them to zero, which previously could surface fake "65°F warmer than average" lines for partial archive responses.
 - **Status-stack collapse** — App.jsx no longer mounts two `role="status"` regions on every render.
@@ -318,9 +325,9 @@ bug, the contract, and the test pyramid.
 
 - **U.S.-only severe alerts.** NOAA / NWS coverage stops at the U.S. border; non-U.S. locations fall back to explanatory messaging instead of a false all-clear.
 - **Lightweight cloud sync.** The optional sync flow uses a public jsonblob.com store and expects either a full sync URL or a configured `VITE_AURA_SYNC_API_BASE`. It is not encrypted at rest and is not a substitute for an account system.
-- **Geolocation falls back fast.** If the browser's geolocation prompt does not resolve in 5 seconds the app drops to the Chicago default rather than blocking the dashboard. The user can re-trigger the prompt at any time from the header.
+- **Geolocation falls back fast.** If the browser's geolocation prompt does not resolve in 5 seconds the app drops to the Chicago default rather than blocking the dashboard. Successful device GPS is labelled "Current location"; Aura does not reverse-geocode raw GPS coordinates yet.
 - **Historical archive lag.** The Open-Meteo archive is updated daily and may not include the most recent week; on those days the climate-context panel shows "Climate context unavailable" instead of a stale comparison.
-- **No service worker / offline mode.** A dropped connection during a refresh keeps the previous reading on screen with a `Stale data` warning, but the app does not synthesize cached forecasts when fully offline.
+- **No service worker pre-cache yet.** The app now restores the last successful forecast for a saved location when live weather is unavailable or the browser starts offline, with a labelled saved-forecast banner. It still does not pre-cache shell assets for full installable offline use.
 - **Lighthouse budget passes locally** but real-world performance varies with the network. The CSS and JS footprint shrunk substantially during the audit (App.css 2,067 → ~500 lines), but a service worker and image-pre-caching pass would still be the next wins.
 
 ## Portfolio / Case Study Notes

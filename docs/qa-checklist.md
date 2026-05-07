@@ -13,6 +13,8 @@ For automated checks, run `npm run lint && npm test && npm run build
       within ~1 second
 - [ ] Header brand `Aura` and tagline `Atmospheric Intelligence` are
       visible on first paint
+- [ ] Granting browser location shows "Current location" rather than a
+      guessed city/country label
 - [ ] Permission-onboarding card reads "Set your forecast once, then
       keep moving" with two buttons
 - [ ] Bento groups render in order: Current Conditions → Near-Term
@@ -62,6 +64,14 @@ For automated checks, run `npm run lint && npm test && npm run build
       show a "Refreshing" pill on a same-city refresh
 - [ ] If a refresh fails, the app shows a "Could not refresh weather
       right now" banner with a Retry button
+- [ ] If the browser starts offline with a cached forecast, Aura renders
+      the saved snapshot and shows a banner naming the failed live
+      forecast source plus the saved timestamp
+- [ ] The Data Sources panel distinguishes live forecast data, saved
+      forecast data, missing AQI, unsupported NOAA/NWS alert coverage,
+      and disabled/reduced-data archive context
+- [ ] Transient AQI, alerts, and archive failures retry once; unsupported
+      NWS regions still show the coverage fallback without retry churn
 - [ ] The Retry button enters a 1.4s cooldown and shows "Retrying..."
       while disabled
 
