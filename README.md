@@ -137,8 +137,8 @@ npm run test:lighthouse
 - `npm run lint` passes
 - `npm test` passes (`231` tests across 54 suites, including React render tests via `jsdom` + `esbuild`)
 - `npm run build` passes
-- `npm run test:e2e -- --workers=1` passes (`27` Playwright checks, including smoke, screenshots, visual baselines, cached offline restore, honest GPS labels, missing-data placeholder guard, unicode-escape leak guard, and axe-core a11y)
-- `npm run test:lighthouse` passes the local budget gate
+- `npm run test:e2e -- --workers=1` passes (`27` Playwright checks, including smoke, screenshots, visual baselines, cached offline restore, honest GPS labels, missing-data placeholder guard, demo-provider guard, unicode-escape leak guard, and axe-core a11y)
+- `npm run test:lighthouse` passes the local app-shell budget gate against the labelled `?mock=missing` demo route
 - GitHub Actions runs lint, tests, render tests, build, serial Playwright, and Lighthouse budgets on pull requests
 
 ### Current automated coverage

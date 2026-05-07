@@ -5,7 +5,8 @@ Most items have automated coverage already; this is the human
 double-check that catches things the test suite cannot.
 
 For automated checks, run `npm run lint && npm test && npm run build
-&& npm run test:e2e` first — every box below assumes those pass.
+&& npm run test:e2e && npm run test:lighthouse` first — every box
+below assumes those pass.
 
 CI runs the same gate serially for Playwright with
 `npm run test:e2e -- --workers=1` to reduce visual-screenshot noise.
