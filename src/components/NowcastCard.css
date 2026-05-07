@@ -90,6 +90,13 @@
   background: rgba(20, 83, 45, 0.24);
 }
 
+.nowcast-risk-badge--partial,
+.nowcast-risk-badge--missing {
+  color: #dbeafe;
+  border-color: rgba(147, 197, 253, 0.42);
+  background: rgba(30, 64, 175, 0.22);
+}
+
 .nowcast-primary {
   display: flex;
   flex-direction: column;

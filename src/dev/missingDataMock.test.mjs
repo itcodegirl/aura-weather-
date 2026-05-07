@@ -53,6 +53,19 @@ describe("installMissingDataMockIfRequested", () => {
     assert.equal(payload.current.apparent_temperature, null);
   });
 
+  test("preserves real zero coordinates in the missing-data forecast mock", async () => {
+    setLocationSearch("?mock=missing");
+    globalThis.fetch = async () => new Response("should not be hit", { status: 200 });
+    installMissingDataMockIfRequested();
+
+    const response = await globalThis.fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0"
+    );
+    const payload = await response.json();
+    assert.equal(payload.latitude, 0);
+    assert.equal(payload.longitude, 0);
+  });
+
   test("returns null AQI when ?mock=missing is set", async () => {
     setLocationSearch("?mock=missing");
     globalThis.fetch = async () => new Response("should not be hit", { status: 200 });

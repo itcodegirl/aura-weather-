@@ -71,6 +71,13 @@
   background: rgba(20, 83, 45, 0.24);
 }
 
+.rain-risk-badge--partial,
+.rain-risk-badge--missing {
+  color: #dbeafe;
+  border-color: rgba(147, 197, 253, 0.42);
+  background: rgba(30, 64, 175, 0.22);
+}
+
 .rain-mode-toggle {
   display: flex;
   gap: 3px;
@@ -193,6 +200,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+.rain-stat-value.is-missing {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
 .rain-stat-label {
   margin-top: 2px;
   color: var(--text-dim);
@@ -268,6 +280,10 @@
   font-weight: 600;
 }
 
+.rain-empty--missing .rain-empty-icon {
+  color: rgba(190, 215, 250, 0.78);
+}
+
 .rain-timeline {
   display: flex;
   align-items: flex-end;
@@ -288,6 +304,14 @@
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.4;
+}
+
+.rain-missing-note {
+  margin: -2px 0 0;
+  color: rgba(205, 221, 247, 0.82);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
@@ -390,6 +414,24 @@
   opacity: 1 !important;
   background: linear-gradient(to top, #0ea5e9, #38bdf8);
   transform: scaleY(1.03);
+}
+
+.rain-bar--missing {
+  background:
+    repeating-linear-gradient(
+      to top,
+      rgba(191, 219, 254, 0.34) 0 4px,
+      rgba(191, 219, 254, 0.08) 4px 7px
+    );
+}
+
+.rain-bar--missing:hover {
+  background:
+    repeating-linear-gradient(
+      to top,
+      rgba(219, 234, 254, 0.46) 0 4px,
+      rgba(219, 234, 254, 0.14) 4px 7px
+    );
 }
 
 .rain-timeline-labels {

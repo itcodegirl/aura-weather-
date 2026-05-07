@@ -4,6 +4,8 @@
 // in development builds (Vite's `import.meta.env.DEV` flag) and only
 // when the user explicitly opts in via the URL query parameter.
 
+import { toFiniteNumber } from "../utils/numbers.js";
+
 const FORECAST_PREFIX = "https://api.open-meteo.com/v1/forecast";
 const AIR_QUALITY_PREFIX = "https://air-quality-api.open-meteo.com/v1/air-quality";
 const ARCHIVE_PREFIX = "https://archive-api.open-meteo.com/v1/archive";
@@ -107,6 +109,10 @@ function buildMissingArchivePayload() {
   return { daily: { time: [], temperature_2m_mean: [], temperature_2m_min: [], temperature_2m_max: [] } };
 }
 
+function parseMockCoordinate(value, fallback) {
+  return toFiniteNumber(value) ?? fallback;
+}
+
 function shouldEnable() {
   if (typeof window === "undefined") return false;
   try {
@@ -133,8 +139,14 @@ export function installMissingDataMockIfRequested() {
 
     if (url.startsWith(FORECAST_PREFIX)) {
       const requestUrl = new URL(url);
-      const latitude = Number(requestUrl.searchParams.get("latitude")) || 41.8781;
-      const longitude = Number(requestUrl.searchParams.get("longitude")) || -87.6298;
+      const latitude = parseMockCoordinate(
+        requestUrl.searchParams.get("latitude"),
+        41.8781
+      );
+      const longitude = parseMockCoordinate(
+        requestUrl.searchParams.get("longitude"),
+        -87.6298
+      );
       return jsonResponse(buildMissingForecastPayload(latitude, longitude));
     }
 
