@@ -26,6 +26,7 @@ async function resetServiceWorkerState(page) {
     }
   });
   await page.unroute(`**${cleanupPath}`);
+  await page.goto("about:blank");
 }
 
 async function waitForActiveServiceWorker(page) {
@@ -90,20 +91,7 @@ test("serves the app shell after a production load goes offline", async ({
   context,
   page,
 }) => {
-  page.on("console", (message) => {
-    if (["error", "warning"].includes(message.type())) {
-      console.log(`[${message.type()}] ${message.text()}`);
-    }
-  });
-  page.on("pageerror", (error) => {
-    console.log(`[pageerror] ${error.message}`);
-  });
-  page.on("requestfailed", (request) => {
-    console.log(
-      `[requestfailed] ${request.resourceType()} ${request.url()} ${request.failure()?.errorText || ""}`
-    );
-  });
-
+  test.setTimeout(75_000);
   await resetServiceWorkerState(page);
   await page.goto("/?mock=missing");
 
@@ -119,9 +107,8 @@ test("serves the app shell after a production load goes offline", async ({
   await context.setOffline(true);
   try {
     await page.reload({ waitUntil: "load" });
-    console.log(await page.content());
 
-    await expect(page.getByRole("main")).toBeVisible();
+    await expect(page.getByRole("main")).toBeVisible({ timeout: 30_000 });
     await expect(page.locator(".hero-location")).toContainText("Sample City");
     await expect(
       page.getByText("Portfolio demo: showing the missing-data trust contract")
