@@ -93,6 +93,10 @@
 .loading-skeleton {
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
   min-height: 128px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(188, 214, 252, 0.18);
@@ -113,15 +117,86 @@
   );
   transform: translateX(-120%);
   animation: loading-sheen 1.8s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .loading-skeleton--hero {
   min-height: 240px;
+  justify-content: space-between;
 }
 
 .loading-skeleton--wide {
   grid-column: 1 / -1;
-  min-height: 104px;
+  min-height: 116px;
+}
+
+.loading-skeleton-block {
+  border-radius: 8px;
+  background: rgba(208, 226, 255, 0.12);
+}
+
+.loading-skeleton-block--meta {
+  width: 40%;
+  height: 12px;
+}
+
+.loading-skeleton-block--temp {
+  width: 70%;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(208, 226, 255, 0.16),
+    rgba(188, 226, 255, 0.22) 50%,
+    rgba(208, 226, 255, 0.16)
+  );
+}
+
+.loading-skeleton-block--row {
+  width: 90%;
+  height: 16px;
+}
+
+.loading-skeleton-block--gauge {
+  width: 86px;
+  height: 86px;
+  align-self: flex-start;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 32%, rgba(232, 246, 255, 0.18), rgba(123, 199, 255, 0.06) 64%),
+    rgba(208, 226, 255, 0.1);
+}
+
+.loading-skeleton-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 56px;
+}
+
+.loading-skeleton-bar {
+  flex: 1 1 0;
+  height: 100%;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(188, 226, 255, 0.06),
+    rgba(123, 199, 255, 0.16)
+  );
+  animation: skeleton-bar-pulse 1.6s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@keyframes skeleton-bar-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.5);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
 }
 
 @keyframes weather-icon-breathe {
@@ -212,6 +287,10 @@
     grid-template-columns: 1fr;
   }
 
+  .loading-skeleton {
+    padding: 16px;
+  }
+
   .loading-skeleton--hero {
     min-height: 190px;
   }
@@ -238,10 +317,19 @@
 
   .loading-skeleton {
     min-height: 108px;
+    padding: 14px;
   }
 
   .loading-skeleton--hero {
     min-height: 170px;
+  }
+
+  .loading-skeleton-block--temp {
+    height: 44px;
+  }
+
+  .loading-skeleton-bars {
+    height: 44px;
   }
 }
 
@@ -249,6 +337,12 @@
   .loading-card-title::after,
   .loading-skeleton::after {
     display: none;
+  }
+
+  .loading-skeleton-bar {
+    animation: none;
+    transform: scaleY(0.7);
+    opacity: 0.7;
   }
 
   .error-retry:hover {

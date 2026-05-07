@@ -25,9 +25,27 @@ const AppLoadingState = memo(() => {
           </div>
         </div>
         <div className="loading-dashboard-grid" aria-hidden="true">
-          <div className="loading-skeleton loading-skeleton--hero" />
-          <div className="loading-skeleton loading-skeleton--panel" />
-          <div className="loading-skeleton loading-skeleton--wide" />
+          <div className="loading-skeleton loading-skeleton--hero">
+            <div className="loading-skeleton-block loading-skeleton-block--meta" />
+            <div className="loading-skeleton-block loading-skeleton-block--temp" />
+            <div className="loading-skeleton-block loading-skeleton-block--row" />
+          </div>
+          <div className="loading-skeleton loading-skeleton--panel">
+            <div className="loading-skeleton-block loading-skeleton-block--meta" />
+            <div className="loading-skeleton-block loading-skeleton-block--gauge" />
+          </div>
+          <div className="loading-skeleton loading-skeleton--wide">
+            <div className="loading-skeleton-block loading-skeleton-block--meta" />
+            <div className="loading-skeleton-bars" aria-hidden="true">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <span
+                  key={index}
+                  className="loading-skeleton-bar"
+                  style={{ animationDelay: `${index * 60}ms` }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
