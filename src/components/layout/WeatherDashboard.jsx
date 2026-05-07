@@ -45,11 +45,14 @@ function WeatherDashboard({
   isBackgroundLoading,
   weatherInfo,
   trustMeta,
+  prefersReducedData = false,
 }) {
   const nowMs = useTimeNow();
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
 
-  usePanelPreload(PRELOAD_HEAVY_PANELS);
+  usePanelPreload(PRELOAD_HEAVY_PANELS, {
+    enabled: !prefersReducedData,
+  });
 
   const weatherFetchedAt = trustMeta?.weatherFetchedAt ?? null;
   const aqiFetchedAt = trustMeta?.aqiFetchedAt ?? null;
@@ -154,7 +157,8 @@ function areWeatherDashboardPropsEqual(prevProps, nextProps) {
     prevProps.showClimateContext === nextProps.showClimateContext &&
     prevProps.isBackgroundLoading === nextProps.isBackgroundLoading &&
     prevProps.weatherInfo === nextProps.weatherInfo &&
-    prevProps.trustMeta === nextProps.trustMeta
+    prevProps.trustMeta === nextProps.trustMeta &&
+    prevProps.prefersReducedData === nextProps.prefersReducedData
   );
 }
 

@@ -55,6 +55,7 @@ function App() {
     trustMeta,
     background,
     citySearchRef,
+    prefersReducedData,
     unit,
     setUnit,
     showClimateContext,
@@ -145,6 +146,7 @@ function App() {
         isBackgroundLoading={isBackgroundLoading}
         weatherInfo={weatherInfo}
         trustMeta={trustMeta}
+        prefersReducedData={prefersReducedData}
       />
     </AppShell>
   );
