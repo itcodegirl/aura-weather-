@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 /**
  * Captures the missing-data trust-contract screenshot for the README /
- * portfolio. Uses the dev-only ?mock=missing query parameter so the
- * dashboard renders with several null fields without depending on
- * Open-Meteo returning real partial data.
+ * portfolio. Uses the labelled ?mock=missing demo state so the dashboard
+ * renders with several null fields without depending on Open-Meteo
+ * returning real partial data.
  *
  * The output PNGs are written to docs/screenshots/ and uploaded as a
  * CI artifact via the quality-gates workflow. The README links the

@@ -27,7 +27,7 @@
   font-size: var(--section-title-lg-size);
   font-weight: 650;
   margin: 0;
-  letter-spacing: -0.015em;
+  letter-spacing: 0;
 }
 
 .storm-lede {
@@ -89,7 +89,7 @@
   color: #eaf3ff;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 

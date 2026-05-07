@@ -12,12 +12,21 @@ import {
 } from "../utils/weatherUnits";
 import { toFiniteNumber } from "../utils/numbers";
 import { useClimateComparison } from "./useClimateComparison";
+import {
+  readCachedWeatherSnapshot,
+  writeCachedWeatherSnapshot,
+} from "../services/weatherSnapshotCache";
 
 const DEFAULT_TRUST_META = {
   weatherFetchedAt: null,
   aqiFetchedAt: null,
+  aqiStatus: "idle",
   alertsFetchedAt: null,
   alertsStatus: "idle",
+  forecastStatus: "idle",
+  cacheStatus: "idle",
+  cacheCapturedAt: null,
+  cacheRestoredAt: null,
 };
 
 // Forecast data is always fetched in Fahrenheit / inch units and converted
@@ -51,12 +60,61 @@ function isAbortError(error) {
   return error?.name === "AbortError";
 }
 
+function isBrowserOffline() {
+  return (
+    typeof navigator !== "undefined" &&
+    typeof navigator.onLine === "boolean" &&
+    navigator.onLine === false
+  );
+}
+
+function getForecastFailureMessage(error) {
+  if (isBrowserOffline()) {
+    return "Browser is offline.";
+  }
+
+  const status = toFiniteNumber(error?.status);
+  if (status !== null) {
+    return `Open-Meteo forecast is unavailable (${status}).`;
+  }
+
+  const detail = getErrorMessage(error, "");
+  if (detail) {
+    return `Open-Meteo forecast is unavailable: ${detail}`;
+  }
+
+  return "Open-Meteo forecast is unavailable.";
+}
+
 function buildBaseWeatherState(weatherData) {
   return {
     ...weatherData,
     aqi: null,
     alerts: [],
     alertsStatus: "idle",
+  };
+}
+
+function buildFreshTrustMeta(fetchedAt) {
+  return {
+    ...DEFAULT_TRUST_META,
+    weatherFetchedAt: fetchedAt,
+    forecastStatus: "ready",
+  };
+}
+
+function buildCachedTrustMeta(snapshot, restoredAt = Date.now()) {
+  const snapshotTrustMeta =
+    snapshot?.trustMeta && typeof snapshot.trustMeta === "object"
+      ? snapshot.trustMeta
+      : {};
+  return {
+    ...DEFAULT_TRUST_META,
+    ...snapshotTrustMeta,
+    forecastStatus: "cached",
+    cacheStatus: "restored",
+    cacheCapturedAt: toFiniteNumber(snapshot?.cachedAt),
+    cacheRestoredAt: restoredAt,
   };
 }
 
@@ -157,6 +215,20 @@ export function useWeatherData(location, options = {}) {
         }
       }
 
+      const nextTrustMeta = {
+        ...DEFAULT_TRUST_META,
+        weatherFetchedAt,
+        forecastStatus: "ready",
+        aqiFetchedAt: toFiniteNumber(nextAqi) === null ? null : Date.now(),
+        aqiStatus: toFiniteNumber(nextAqi) === null ? "unavailable" : "ready",
+        alertsFetchedAt:
+          alertsPayload?.status === ALERTS_STATUS.ready ? Date.now() : null,
+        alertsStatus:
+          typeof alertsPayload?.status === "string"
+            ? alertsPayload.status
+            : ALERTS_STATUS.unavailable,
+      };
+
       setWeather((currentWeather) => {
         if (!currentWeather) {
           return currentWeather;
@@ -175,20 +247,16 @@ export function useWeatherData(location, options = {}) {
               : ALERTS_STATUS.unavailable;
         }
 
+        writeCachedWeatherSnapshot({
+          coordinates,
+          weather: nextWeather,
+          trustMeta: nextTrustMeta,
+        });
+
         return nextWeather;
       });
 
-      setTrustMeta((currentTrustMeta) => ({
-        ...currentTrustMeta,
-        weatherFetchedAt,
-        aqiFetchedAt: toFiniteNumber(nextAqi) === null ? null : Date.now(),
-        alertsFetchedAt:
-          alertsPayload?.status === ALERTS_STATUS.ready ? Date.now() : null,
-        alertsStatus:
-          typeof alertsPayload?.status === "string"
-            ? alertsPayload.status
-            : currentTrustMeta.alertsStatus,
-      }));
+      setTrustMeta(nextTrustMeta);
     } finally {
       if (inFlightRequestRef.current === controller) {
         inFlightRequestRef.current = null;
@@ -211,9 +279,26 @@ export function useWeatherData(location, options = {}) {
     requestIdRef.current = requestId;
 
     const requestWindSpeedUnit = getApiWindSpeedUnit();
+    const cachedSnapshot = readCachedWeatherSnapshot(coordinates);
 
     abortInFlightRequest();
     resetClimateComparison();
+
+    if (isBrowserOffline() && cachedSnapshot) {
+      setWeather(cachedSnapshot.weather);
+      setTrustMeta(buildCachedTrustMeta(cachedSnapshot));
+      lastFetchedCoordsRef.current = {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+      };
+      setError(getForecastFailureMessage());
+      setLoading(false);
+      void requestClimateComparison({
+        coordinates,
+        weatherData: cachedSnapshot.weather,
+      });
+      return;
+    }
 
     const controller = new AbortController();
     inFlightRequestRef.current = controller;
@@ -256,12 +341,15 @@ export function useWeatherData(location, options = {}) {
 
       const fetchedAt = Date.now();
 
-      setWeather(buildBaseWeatherState(weatherData));
-      setTrustMeta({
-        weatherFetchedAt: fetchedAt,
-        aqiFetchedAt: null,
-        alertsFetchedAt: null,
-        alertsStatus: "idle",
+      const baseWeather = buildBaseWeatherState(weatherData);
+      const baseTrustMeta = buildFreshTrustMeta(fetchedAt);
+
+      setWeather(baseWeather);
+      setTrustMeta(baseTrustMeta);
+      writeCachedWeatherSnapshot({
+        coordinates,
+        weather: baseWeather,
+        trustMeta: baseTrustMeta,
       });
       lastFetchedCoordsRef.current = {
         latitude: coordinates.latitude,
@@ -286,7 +374,21 @@ export function useWeatherData(location, options = {}) {
         !isAbortError(requestError) &&
         isMountedRef.current
       ) {
-        setError(getErrorMessage(requestError, "Could not load weather"));
+        if (cachedSnapshot) {
+          setWeather(cachedSnapshot.weather);
+          setTrustMeta(buildCachedTrustMeta(cachedSnapshot));
+          lastFetchedCoordsRef.current = {
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+          };
+          setError(getForecastFailureMessage(requestError));
+          void requestClimateComparison({
+            coordinates,
+            weatherData: cachedSnapshot.weather,
+          });
+        } else {
+          setError(getForecastFailureMessage(requestError));
+        }
       }
     } finally {
       if (requestId === requestIdRef.current && isMountedRef.current) {

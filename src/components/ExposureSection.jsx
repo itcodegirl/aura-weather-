@@ -12,6 +12,7 @@ const METRIC_LABEL_IDS = {
 
 function ExposureSection({
   aqi,
+  aqiStatus = "idle",
   uvIndex,
   style,
   isRefreshing = false,
@@ -23,14 +24,16 @@ function ExposureSection({
   const hasAqiData = aqiValue !== null;
   const hasUvData = uvValue !== null;
   const hasFullExposureData = hasAqiData && hasUvData;
-  const aqiStatus = getAqiStatus(aqiValue);
+  const aqiHealthStatus = getAqiStatus(aqiValue);
   const uvStatus = getUvStatus(uvValue);
   const aqiSupportText = hasAqiData
     ? `Current AQI is ${Math.round(aqiValue)} out of 300.`
+    : aqiStatus === "unavailable"
+      ? "Open-Meteo Air Quality did not return a usable AQI reading. Forecast panels remain available."
     : "Air quality data is temporarily unavailable. Check back after the next refresh.";
   const uvSupportText = hasUvData
     ? `Peak UV is ${uvValue.toFixed(1)} on an 11+ scale.`
-    : "UV data is temporarily unavailable. Check back after the next refresh.";
+    : "Open-Meteo Forecast did not return today's UV index. Current conditions remain available.";
 
   return (
     <section
@@ -59,7 +62,7 @@ function ExposureSection({
           context={hasAqiData ? "AQI" : "AQI offline"}
           value={aqiValue}
           max={300}
-          status={aqiStatus}
+          status={aqiHealthStatus}
           gaugeLabel="Air quality index"
           supportText={aqiSupportText}
           helpTitle="AQI scale explained"

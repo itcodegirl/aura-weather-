@@ -2,7 +2,18 @@ import { useEffect, useState } from "react";
 
 const QUERY = "(prefers-reduced-data: reduce)";
 
-function readMatch() {
+function getConnection() {
+  const navigatorLike =
+    typeof window !== "undefined" ? window.navigator : globalThis.navigator;
+  return navigatorLike?.connection ?? navigatorLike?.mozConnection ?? navigatorLike?.webkitConnection;
+}
+
+export function readReducedDataPreference() {
+  const connection = getConnection();
+  if (connection?.saveData === true) {
+    return true;
+  }
+
   if (
     typeof window === "undefined" ||
     typeof window.matchMedia !== "function"
@@ -26,32 +37,40 @@ function readMatch() {
  * toggles the OS-level preference mid-session.
  */
 export function usePrefersReducedData() {
-  const [prefersReducedData, setPrefersReducedData] = useState(readMatch);
+  const [prefersReducedData, setPrefersReducedData] = useState(
+    readReducedDataPreference
+  );
 
   useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      typeof window.matchMedia !== "function"
-    ) {
+    if (typeof window === "undefined") {
       return undefined;
     }
 
-    const mediaQuery = window.matchMedia(QUERY);
-    const handleChange = (event) => {
-      setPrefersReducedData(Boolean(event.matches));
+    const cleanups = [];
+    const handleChange = () => {
+      setPrefersReducedData(readReducedDataPreference());
     };
 
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
+    if (typeof window.matchMedia === "function") {
+      const mediaQuery = window.matchMedia(QUERY);
+      if (typeof mediaQuery.addEventListener === "function") {
+        mediaQuery.addEventListener("change", handleChange);
+        cleanups.push(() => mediaQuery.removeEventListener("change", handleChange));
+      } else if (typeof mediaQuery.addListener === "function") {
+        mediaQuery.addListener(handleChange);
+        cleanups.push(() => mediaQuery.removeListener(handleChange));
+      }
     }
 
-    if (typeof mediaQuery.addListener === "function") {
-      mediaQuery.addListener(handleChange);
-      return () => mediaQuery.removeListener(handleChange);
+    const connection = getConnection();
+    if (typeof connection?.addEventListener === "function") {
+      connection.addEventListener("change", handleChange);
+      cleanups.push(() => connection.removeEventListener("change", handleChange));
     }
 
-    return undefined;
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
   }, []);
 
   return prefersReducedData;

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   ALERTS_STATUS,
+  fetchAirQuality,
   fetchHistoricalTemperatureAverage,
   fetchWeather,
   fetchSevereWeatherAlerts,
@@ -105,6 +106,83 @@ describe("Open-Meteo alert coverage helpers", () => {
     assert.equal(result.status, ALERTS_STATUS.unavailable);
     assert.deepEqual(result.alerts, []);
   });
+
+  test("does not retry unsupported alert coverage responses", async () => {
+    let requestCount = 0;
+    globalThis.fetch = async () => {
+      requestCount += 1;
+      return createJsonResponse({}, { status: 400 });
+    };
+
+    const result = await fetchSevereWeatherAlerts(35.6762, 139.6503, {
+      retryDelaysMs: [0],
+    });
+
+    assert.equal(result.status, ALERTS_STATUS.unsupported);
+    assert.equal(requestCount, 1);
+  });
+
+  test("retries transient alert failures before returning data", async () => {
+    let requestCount = 0;
+    globalThis.fetch = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return createJsonResponse({}, { status: 503 });
+      }
+      return createJsonResponse(
+        {
+          features: [
+            {
+              properties: {
+                id: "wind-advisory",
+                event: "Wind Advisory",
+                severity: "Moderate",
+                urgency: "Expected",
+              },
+            },
+          ],
+        },
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/geo+json",
+          },
+        }
+      );
+    };
+
+    const result = await fetchSevereWeatherAlerts(41.8781, -87.6298, {
+      retryDelaysMs: [0],
+    });
+
+    assert.equal(result.status, ALERTS_STATUS.ready);
+    assert.equal(result.alerts[0].id, "wind-advisory");
+    assert.equal(requestCount, 2);
+  });
+});
+
+describe("fetchAirQuality", () => {
+  test("retries transient AQI failures before returning a reading", async () => {
+    let requestCount = 0;
+    globalThis.fetch = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return createJsonResponse({}, { status: 502 });
+      }
+      return createJsonResponse({
+        current: {
+          european_aqi: 42,
+        },
+      });
+    };
+
+    const result = await fetchAirQuality(41.8781, -87.6298, {
+      retryDelaysMs: [0],
+    });
+
+    assert.equal(result, 42);
+    assert.equal(requestCount, 2);
+  });
 });
 
 describe("fetchHistoricalTemperatureAverage", () => {
@@ -174,5 +252,33 @@ describe("fetchHistoricalTemperatureAverage", () => {
     );
 
     assert.equal(result, null);
+  });
+
+  test("retries transient archive failures before building the comparison", async () => {
+    let requestCount = 0;
+    globalThis.fetch = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return createJsonResponse({}, { status: 503 });
+      }
+      return createJsonResponse({
+        daily: {
+          time: buildArchiveTimes([2, 1]),
+          temperature_2m_mean: [60, 64],
+          temperature_2m_min: [50, 52],
+          temperature_2m_max: [70, 76],
+        },
+      });
+    };
+
+    const result = await fetchHistoricalTemperatureAverage(
+      41.8781,
+      -87.6298,
+      "America/Chicago",
+      { retryDelaysMs: [0] }
+    );
+
+    assert.equal(result.averageTemperature, 62);
+    assert.equal(requestCount, 2);
   });
 });

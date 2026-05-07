@@ -75,6 +75,7 @@ export function useWeatherDashboardViewModel() {
     ...effectiveState,
     ...scene,
     citySearchRef,
+    prefersReducedData,
     unit,
     setUnit,
     showClimateContext,

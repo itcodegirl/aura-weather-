@@ -1,22 +1,40 @@
 import { useMemo } from "react";
-import { findWindowStartIndex } from "../utils/timeSeries";
-import { toFiniteNumber } from "../utils/numbers";
+import { findWindowStartIndex } from "../utils/timeSeries.js";
+import { toFiniteNumber } from "../utils/numbers.js";
 
 function getEmptyRainAnalysis() {
   return {
+    hasData: false,
     hours: [],
     nextRain: null,
-    peak: { probability: 0, time: new Date(), amount: 0 },
-    total: 0,
-    soFarToday: 0,
-    peakAmount: 0,
-    past12h: 0,
-    past24h: 0,
-    past48h: 0,
+    peak: null,
+    total: null,
+    soFarToday: null,
+    peakAmount: null,
+    past12h: null,
+    past24h: null,
+    past48h: null,
+    missingSlots: 0,
   };
 }
 
-function analyzeRain(hourly) {
+function sumFiniteValues(values) {
+  let total = 0;
+  let count = 0;
+
+  for (const value of values) {
+    const numeric = toFiniteNumber(value);
+    if (numeric === null) {
+      continue;
+    }
+    total += Math.max(numeric, 0);
+    count += 1;
+  }
+
+  return count === 0 ? null : total;
+}
+
+export function analyzeRain(hourly) {
   if (
     !Array.isArray(hourly?.time) ||
     !Array.isArray(hourly?.rainChance) ||
@@ -43,15 +61,14 @@ function analyzeRain(hourly) {
       const timestamp = new Date(timeString);
       if (!Number.isFinite(timestamp.getTime())) return null;
 
-      // Missing precipitation readings should mean "no rain detected"
-      // (0% / 0 inches), so coerce nullish values explicitly to 0.
-      const probability = toFiniteNumber(hourlyProbabilities[idx + i]) ?? 0;
-      const amount = toFiniteNumber(hourlyAmounts[idx + i]) ?? 0;
+      const probability = toFiniteNumber(hourlyProbabilities[idx + i]);
+      const amount = toFiniteNumber(hourlyAmounts[idx + i]);
 
       return {
         time: timestamp,
         probability,
         amount,
+        missing: probability === null && amount === null,
       };
     })
     .filter(Boolean)
@@ -61,12 +78,36 @@ function analyzeRain(hourly) {
     return { ...getEmptyRainAnalysis(), hours };
   }
 
-  const nextRain = hours.find((h) => h.probability >= 40);
-  const peak = hours.reduce(
-    (max, h) => (h.probability > max.probability ? h : max),
-    hours[0]
+  const probabilityHours = hours.filter((hour) => hour.probability !== null);
+  const amountHours = hours.filter((hour) => hour.amount !== null);
+  const hasData = probabilityHours.length > 0 || amountHours.length > 0;
+  const missingSlots = hours.filter((hour) => hour.missing).length;
+
+  if (!hasData) {
+    return {
+      ...getEmptyRainAnalysis(),
+      hours,
+      missingSlots,
+    };
+  }
+
+  const nextRain = hours.find(
+    (h) =>
+      (h.probability !== null && h.probability >= 40) ||
+      (h.amount !== null && h.amount > 0.01)
   );
-  const total = hours.reduce((sum, h) => sum + h.amount, 0);
+  const peakProbabilityHour = probabilityHours.reduce(
+    (max, h) => (h.probability > max.probability ? h : max),
+    probabilityHours[0] ?? null
+  );
+  const peakAmountHour = amountHours.reduce(
+    (max, h) => (h.amount > max.amount ? h : max),
+    amountHours[0] ?? null
+  );
+  const peak = peakProbabilityHour ?? peakAmountHour;
+  const total = amountHours.length
+    ? amountHours.reduce((sum, h) => sum + Math.max(h.amount, 0), 0)
+    : null;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -75,25 +116,18 @@ function analyzeRain(hourly) {
     const timestamp = new Date(t).getTime();
     return Number.isFinite(timestamp) && timestamp >= todayMs;
   });
-  let soFarToday = 0;
+  let soFarToday = null;
   if (todayStartIdx !== -1) {
-    for (let i = todayStartIdx; i < idx; i += 1) {
-      soFarToday += toFiniteNumber(hourlyAmounts[i]) ?? 0;
-    }
+    soFarToday = sumFiniteValues(hourlyAmounts.slice(todayStartIdx, idx));
   }
 
-  const peakAmount = Math.max(...hours.map((h) => h.amount));
+  const peakAmount = amountHours.length
+    ? Math.max(...amountHours.map((h) => h.amount))
+    : null;
 
   const sumPastHours = (hoursBack) => {
     const start = Math.max(0, idx - hoursBack);
-    let sum = 0;
-    for (let i = start; i < idx; i += 1) {
-      const amount = toFiniteNumber(hourlyAmounts[i]);
-      if (amount !== null) {
-        sum += amount;
-      }
-    }
-    return sum;
+    return sumFiniteValues(hourlyAmounts.slice(start, idx));
   };
 
   const past12h = sumPastHours(12);
@@ -101,6 +135,7 @@ function analyzeRain(hourly) {
   const past48h = sumPastHours(48);
 
   return {
+    hasData,
     hours,
     nextRain,
     peak,
@@ -110,6 +145,7 @@ function analyzeRain(hourly) {
     past12h,
     past24h,
     past48h,
+    missingSlots,
   };
 }
 

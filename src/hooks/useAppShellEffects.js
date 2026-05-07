@@ -40,10 +40,11 @@ export function useSearchShortcut(searchRef) {
 }
 
 export function usePanelPreload(loaders, options = {}) {
-  const { idleTimeout = 2000, fallbackDelay = 1200 } = options;
+  const { enabled = true, idleTimeout = 2000, fallbackDelay = 1200 } = options;
 
   useEffect(() => {
     if (
+      !enabled ||
       typeof window === "undefined" ||
       typeof window.setTimeout !== "function"
     ) {
@@ -83,5 +84,5 @@ export function usePanelPreload(loaders, options = {}) {
         window.clearTimeout(timeoutId);
       }
     };
-  }, [loaders, idleTimeout, fallbackDelay]);
+  }, [loaders, enabled, idleTimeout, fallbackDelay]);
 }

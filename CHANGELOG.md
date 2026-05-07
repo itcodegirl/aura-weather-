@@ -9,6 +9,9 @@ portfolio-grade product. Format roughly follows
 
 ### Added
 
+- Source-scoped transient retries for Open-Meteo AQI, NOAA / NWS alerts,
+  and Open-Meteo Archive requests. Unsupported NWS regions still resolve
+  immediately as unsupported coverage rather than retrying.
 - **Data Trust Contract** enforcement at four layers (API normalization,
   per-element parsers, component fallback rendering, visual + a11y cue).
   See the README's "Data Trust Contract" section for the full layout.
@@ -27,10 +30,11 @@ portfolio-grade product. Format roughly follows
   load error cannot blank out the whole dashboard.
 - `CardFallback` — shared loading-card primitive (was duplicated
   between `WeatherDashboard` and `SupplementalWeatherPanels`).
-- `?mock=missing` dev mode (`src/dev/missingDataMock.js`) — patches
-  `fetch` to reproduce the missing-data state on demand for screenshots
-  and ad-hoc QA. Tree-shaken from production builds via
-  `import.meta.env.DEV`.
+- `?mock=missing` labelled portfolio demo route (`src/mocks/missingData.js`)
+  for the missing-data trust contract. The app shows an explicit demo
+  notice and does not query live providers in that state. A dev-only
+  fetch patch remains in `src/dev/missingDataMock.js` for lower-level
+  endpoint QA.
 - React render-test harness (`@testing-library/react` + `jsdom`) wired
   into `node:test` via a small esbuild-powered loader. No Vitest
   dependency.
@@ -44,9 +48,18 @@ portfolio-grade product. Format roughly follows
   suppressed automatically when the user-agent reports the preference.
 - "CURRENT_TEMPERATURE_UNAVAILABLE" aria-label and muted typography for
   the giant hero temperature when the reading is missing.
+- Last-successful forecast cache keyed by normalized coordinates, with
+  schema/version guards, capped entries, and a cold-start restore path
+  for offline or failed Open-Meteo forecast loads.
+- Data Sources panel that separates forecast, AQI, NOAA/NWS alerts, and
+  archive status so live, saved, unsupported, and unavailable states are
+  visible without conflating them with missing readings.
 
 ### Changed
 
+- Successful browser geolocation now labels raw GPS coordinates as
+  "Current location" with no country label instead of inheriting the
+  Chicago fallback city/country.
 - `App.css` shrank from 2,067 → ~500 lines as the bento dashboard,
   AppHeader, AppShell, StatusStack, DataTrustMeta, and InfoDrawer styles
   moved next to their owning components.
@@ -60,8 +73,17 @@ portfolio-grade product. Format roughly follows
   `aria-live="polite"`; only the error (`role="alert"`) and last-synced
   timestamp (`role="status"`) announce.
 - Async controls (Use my location, Allow location, Retry, Sync now,
-  Disconnect, Create cloud account) now expose `aria-busy` while their
+  Disconnect, Create sync key) now expose `aria-busy` while their
   work is in flight.
+- The jsonblob sync action now says "Create sync key" instead of
+  implying Aura creates a real cloud account.
+- Refresh/offline banners now name the failed forecast source and, when
+  a cached forecast is restored, include the saved snapshot timestamp.
+- AQI/UV missing states now name the source that failed or omitted the
+  reading instead of using generic unavailable copy.
+- Supplemental AQI, archive, and alert requests now retry transient
+  failures once while preserving abort behavior and unsupported-region
+  alert fallbacks.
 - The 1-minute `DataTrustMeta` clock pauses while the tab is hidden so
   background tabs do not churn re-renders.
 - InfoDrawer trigger uses a `HelpCircle` icon instead of a literal `?`.
@@ -121,9 +143,10 @@ portfolio-grade product. Format roughly follows
 
 ### Tests
 
-- 45 → **190** Node tests, including 25 React render tests via
-  `@testing-library/react` + `jsdom` (HeroCard, InfoDrawer, MetricCard,
-  Stat, useTimeNow). New regressions pin null-input contracts for
-  every formatter and domain classifier.
-- 12 → **14** Playwright checks, including a missing-data placeholder
-  guard and a unicode-escape leak guard.
+- 45 → **227** Node tests across 53 suites, including React render tests
+  via `@testing-library/react` + `jsdom`. New regressions pin null-input
+  contracts, source-scoped retries, cache restore behavior, and honest
+  browser-location labels.
+- 12 → **13** Playwright smoke checks, including cached offline restore,
+  honest GPS labels, missing-data placeholders, axe-core, and the
+  unicode-escape leak guard.

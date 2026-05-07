@@ -55,6 +55,7 @@ function App() {
     trustMeta,
     background,
     citySearchRef,
+    prefersReducedData,
     unit,
     setUnit,
     showClimateContext,
@@ -131,6 +132,9 @@ function App() {
         isGeolocationSupported={isGeolocationSupported}
         isBackgroundLoading={isBackgroundLoading}
         showRefreshError={showRefreshError}
+        error={error}
+        cacheStatus={trustMeta?.cacheStatus}
+        cacheCapturedAt={trustMeta?.cacheCapturedAt}
         onRetry={retryWeather}
         className="status-stack--runtime"
       />
@@ -145,6 +149,7 @@ function App() {
         isBackgroundLoading={isBackgroundLoading}
         weatherInfo={weatherInfo}
         trustMeta={trustMeta}
+        prefersReducedData={prefersReducedData}
       />
     </AppShell>
   );

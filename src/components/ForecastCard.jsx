@@ -3,7 +3,10 @@ import { memo, useMemo } from "react";
 import { getWeather } from "../domain/weatherCodes";
 import { formatDayLabel, parseLocalDate } from "../utils/dates";
 import { convertTemp } from "../utils/temperature";
-import { toFiniteNumber as toStrictFiniteNumber } from "../utils/numbers";
+import {
+  MISSING_VALUE_PLACEHOLDER,
+  toFiniteNumber as toStrictFiniteNumber,
+} from "../utils/numbers";
 import { CardHeader, DataTrustMeta } from "./ui";
 import WeatherIcon from "./WeatherIcon";
 import "./ForecastCard.css";
@@ -14,14 +17,15 @@ function clamp(value, min, max) {
 
 // Wraps the strict shared helper so callers can pass an explicit
 // fallback (e.g. condition code defaults to 0/Clear, while a missing
-// daily high temperature should remain NaN so the row renders "—").
+// daily high temperature should remain NaN so the row uses the shared
+// missing-value placeholder).
 function toFiniteNumber(value, fallback = NaN) {
   const parsed = toStrictFiniteNumber(value);
   return parsed === null ? fallback : parsed;
 }
 
 function clampPercent(value) {
-  if (!Number.isFinite(value)) return 0;
+  if (!Number.isFinite(value)) return null;
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
@@ -41,7 +45,24 @@ function getDaySignal(day, weekMin, weekMax) {
 
 function toDisplayTemp(value, unit) {
   const converted = convertTemp(value, unit);
-  return Number.isFinite(converted) ? Math.round(converted) : "\u2014";
+  return Number.isFinite(converted) ? Math.round(converted) : null;
+}
+
+function formatForecastTemp(value, unit) {
+  const displayValue = Number.isFinite(value) ? toDisplayTemp(value, unit) : null;
+  if (displayValue === null) {
+    return {
+      text: MISSING_VALUE_PLACEHOLDER,
+      ariaText: "unavailable",
+      isMissing: true,
+    };
+  }
+
+  return {
+    text: `${displayValue}\u00B0`,
+    ariaText: `${displayValue} degrees`,
+    isMissing: false,
+  };
 }
 
 function buildForecastDays(weatherDaily) {
@@ -73,7 +94,7 @@ function buildForecastDays(weatherDaily) {
       temperatureMax: toFiniteNumber(maxTemps[index]),
       temperatureMin: toFiniteNumber(minTemps[index]),
       rainChanceMax: clampPercent(
-        toFiniteNumber(precipProbabilities[index], 0)
+        toFiniteNumber(precipProbabilities[index])
       ),
     }))
     .filter((day) => Number.isFinite(day.temperatureMax) || Number.isFinite(day.temperatureMin))
@@ -96,16 +117,14 @@ function getForecastRangeGradient(weekMin, weekMax) {
 function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
   const info = getWeather(day.conditionCode);
   const label = formatDayLabel(day.date);
-  const high = Number.isFinite(day.temperatureMax)
-    ? toDisplayTemp(day.temperatureMax, unit)
-    : "\u2014";
-  const low = Number.isFinite(day.temperatureMin)
-    ? toDisplayTemp(day.temperatureMin, unit)
-    : "\u2014";
-  const tempUnit = "\u00B0";
+  const high = formatForecastTemp(day.temperatureMax, unit);
+  const low = formatForecastTemp(day.temperatureMin, unit);
   const rainChance = day.rainChanceMax;
-  const hasNotableRainChance = rainChance >= 20;
+  const hasRainChance = Number.isFinite(rainChance);
+  const hasNotableRainChance = hasRainChance && rainChance >= 20;
   const daySignal = getDaySignal(day, weekMin, weekMax);
+  const hasTemperatureRange =
+    Number.isFinite(day.temperatureMin) && Number.isFinite(day.temperatureMax);
 
   const weekRange = weekMax - weekMin || 1;
   const startPct = Number.isFinite(day.temperatureMin)
@@ -134,34 +153,43 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
       <div
         className="forecast-temps"
         role="group"
-        aria-label={`High ${high}${tempUnit}, low ${low}${tempUnit}`}
+        aria-label={`High ${high.ariaText}, low ${low.ariaText}`}
       >
         <div className="forecast-temp forecast-temp--high">
           <span className="forecast-temp-label">High</span>
-          <span className="forecast-temp-value">
-            {high}
-            {tempUnit}
+          <span
+            className={`forecast-temp-value ${high.isMissing ? "is-missing" : ""}`.trim()}
+            aria-label={high.isMissing ? "High unavailable" : undefined}
+          >
+            {high.text}
           </span>
         </div>
         <span className="forecast-temp-divider" aria-hidden="true" />
         <div className="forecast-temp forecast-temp--low">
           <span className="forecast-temp-label">Low</span>
-          <span className="forecast-temp-value">
-            {low}
-            {tempUnit}
+          <span
+            className={`forecast-temp-value ${low.isMissing ? "is-missing" : ""}`.trim()}
+            aria-label={low.isMissing ? "Low unavailable" : undefined}
+          >
+            {low.text}
           </span>
         </div>
       </div>
 
-      <div className="forecast-range" aria-hidden="true">
-        <div
-          className="forecast-range-bar"
-          style={{
-            left: `${startPct}%`,
-            width: `${Math.max(endPct - startPct, 3)}%`,
-            background: rangeGradient,
-          }}
-        />
+      <div
+        className={`forecast-range ${hasTemperatureRange ? "" : "forecast-range--missing"}`.trim()}
+        aria-hidden="true"
+      >
+        {hasTemperatureRange ? (
+          <div
+            className="forecast-range-bar"
+            style={{
+              left: `${startPct}%`,
+              width: `${Math.max(endPct - startPct, 3)}%`,
+              background: rangeGradient,
+            }}
+          />
+        ) : null}
       </div>
 
       <div
@@ -169,6 +197,8 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
         aria-label={
           hasNotableRainChance
             ? `Rain chance ${rainChance} percent`
+            : !hasRainChance
+              ? "Rain chance unavailable"
             : "Low rain chance"
         }
       >
@@ -179,6 +209,10 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
               {rainChance}%
             </span>
           </>
+        ) : !hasRainChance ? (
+          <span className="forecast-precip-empty is-missing" aria-hidden="true">
+            {MISSING_VALUE_PLACEHOLDER}
+          </span>
         ) : (
           <span className="forecast-precip-empty" aria-hidden="true">
             Low
@@ -201,15 +235,19 @@ function buildWeekSummary(days, weekMin, weekMax, unit) {
   const trendText =
     delta >= 3 ? "Warming trend" : delta <= -3 ? "Cooling trend" : "Stable week";
   const wettestDay = days.reduce((highest, day) =>
-    day.rainChanceMax > highest.rainChanceMax
+    (day.rainChanceMax ?? -1) > (highest.rainChanceMax ?? -1)
       ? day
       : highest
   );
   const wettestLabel =
-    wettestDay.rainChanceMax >= 25
+    wettestDay.rainChanceMax === null
+      ? "Rain chance unavailable"
+      : wettestDay.rainChanceMax >= 25
       ? `${formatDayLabel(wettestDay.date)} peaks at ${wettestDay.rainChanceMax}% rain chance`
       : "Rain chances stay mostly low";
-  const weekRangeText = `${toDisplayTemp(weekMin, unit)}\u00B0 to ${toDisplayTemp(weekMax, unit)}\u00B0`;
+  const weekMinText = formatForecastTemp(weekMin, unit).text;
+  const weekMaxText = formatForecastTemp(weekMax, unit).text;
+  const weekRangeText = `${weekMinText} to ${weekMaxText}`;
 
   return `${trendText} \u00b7 ${weekRangeText} \u00b7 ${wettestLabel}`;
 }

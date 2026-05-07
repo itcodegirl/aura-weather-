@@ -1,5 +1,25 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { toFiniteNumber } from "../../utils/numbers";
 import "./StatusStack.css";
+
+function normalizeSentence(value, fallback) {
+  const message = typeof value === "string" && value.trim() ? value.trim() : fallback;
+  return message.replace(/[.!?]+$/, "");
+}
+
+function formatCacheCapturedAt(value) {
+  const timestamp = toFiniteNumber(value);
+  if (timestamp === null) {
+    return "";
+  }
+
+  return new Date(timestamp).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 function StatusStack({
   locationNotice,
@@ -12,6 +32,9 @@ function StatusStack({
   isGeolocationSupported,
   isBackgroundLoading,
   showRefreshError,
+  error = "",
+  cacheStatus = "idle",
+  cacheCapturedAt = null,
   onRetry,
   showRuntimeStatus = true,
   showSetupPrompts = true,
@@ -51,6 +74,17 @@ function StatusStack({
     showLocationSetupPrompt || showPermissionOnboarding
   );
   const hasStatusStack = hasRuntimeStatus || hasSetupPrompts;
+  const isShowingCachedForecast = cacheStatus === "restored";
+  const refreshErrorBase = normalizeSentence(
+    error,
+    isShowingCachedForecast
+      ? "Live weather is unavailable"
+      : "Could not refresh weather right now"
+  );
+  const cacheCapturedLabel = formatCacheCapturedAt(cacheCapturedAt);
+  const refreshErrorMessage = isShowingCachedForecast
+    ? `${refreshErrorBase}. Showing a saved forecast${cacheCapturedLabel ? ` from ${cacheCapturedLabel}` : ""}.`
+    : `${refreshErrorBase}. Showing last known data.`;
 
   if (!hasStatusStack) {
     return null;
@@ -140,7 +174,7 @@ function StatusStack({
       {showRuntimeStatus && showRefreshError && (
         <div className="app-status app-status--error" role="alert">
           <span className="app-status-message">
-            Could not refresh weather right now. Showing last known data.
+            {refreshErrorMessage}
           </span>
           <button
             type="button"

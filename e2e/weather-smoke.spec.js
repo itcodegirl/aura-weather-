@@ -45,6 +45,131 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
   await expect(page.getByRole("heading", { name: "Week Ahead" })).toBeVisible();
 });
 
+test("labels granted browser coordinates as current location", async ({ page }) => {
+  await page.addInitScript(() => {
+    const grantedGeolocation = {
+      getCurrentPosition(success) {
+        success({
+          coords: {
+            latitude: 42.1234,
+            longitude: -88.5678,
+          },
+        });
+      },
+      watchPosition() {
+        return 0;
+      },
+      clearWatch() {},
+    };
+
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: grantedGeolocation,
+    });
+  });
+
+  await openDashboard(page);
+
+  await page
+    .getByLabel("Location onboarding")
+    .getByRole("button", { name: "Allow location access" })
+    .click();
+
+  await expect(page.locator(".hero-location")).toContainText("Current location");
+  await expect(page.locator(".hero-location")).not.toContainText("United States");
+  await expect(page.getByText("Showing your device location")).toBeVisible();
+});
+
+test("renders a cached forecast on cold start when the browser is offline", async ({ page }) => {
+  const cachedAt = Date.parse("2026-04-21T12:00:00-05:00");
+  await page.addInitScript(({ cachedAtValue }) => {
+    Object.defineProperty(navigator, "onLine", {
+      configurable: true,
+      value: false,
+    });
+
+    window.localStorage.setItem(
+      "aura-weather-last-known-forecast-v1",
+      JSON.stringify({
+        version: 1,
+        snapshots: {
+          "41.8781,-87.6298": {
+            version: 1,
+            cachedAt: cachedAtValue,
+            coordinates: {
+              latitude: 41.8781,
+              longitude: -87.6298,
+            },
+            weather: {
+              meta: {
+                latitude: 41.8781,
+                longitude: -87.6298,
+                timezone: "America/Chicago",
+              },
+              current: {
+                temperature: 61.2,
+                humidity: 57,
+                feelsLike: 61.2,
+                conditionCode: 2,
+                windSpeed: 8,
+                windGust: 13,
+                windDirection: 220,
+                pressure: 1012,
+                dewPoint: 48,
+                cloudCover: 35,
+                visibility: 11000,
+              },
+              hourly: {
+                time: [],
+                temperature: [],
+                conditionCode: [],
+                rainChance: [],
+                rainAmount: [],
+                pressure: [],
+                cape: [],
+                windGust: [],
+              },
+              daily: {
+                time: ["2026-04-21"],
+                conditionCode: [2],
+                temperatureMax: [67],
+                temperatureMin: [51],
+                sunrise: ["2026-04-21T11:18:00-05:00"],
+                sunset: ["2026-04-21T23:41:00-05:00"],
+                uvIndexMax: [6.4],
+                rainChanceMax: [20],
+                rainAmountTotal: [0.01],
+              },
+              nowcast: {
+                time: [],
+                conditionCode: [],
+                rainChance: [],
+                rainAmount: [],
+              },
+              aqi: null,
+              alerts: [],
+              alertsStatus: "idle",
+            },
+            trustMeta: {
+              weatherFetchedAt: cachedAtValue,
+              forecastStatus: "ready",
+              alertsStatus: "idle",
+            },
+          },
+        },
+      })
+    );
+  }, { cachedAtValue: cachedAt });
+
+  await openDashboard(page);
+
+  await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
+  await expect(page.locator(".hero-temp")).toContainText("61");
+  await expect(
+    page.getByText(/Browser is offline\. Showing a saved forecast from/)
+  ).toBeVisible();
+});
+
 test("updates hero location when a city is selected from search", async ({ page }) => {
   await openDashboard(page);
 

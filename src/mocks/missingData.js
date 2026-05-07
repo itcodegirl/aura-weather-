@@ -99,7 +99,8 @@ export function buildMissingDashboardState({ now = Date.now() } = {}) {
   return {
     weather: buildMissingWeatherModel(),
     location: { ...MISSING_MOCK_LOCATION },
-    locationNotice: "Showing the mock 'missing data' demo state.",
+    locationNotice:
+      "Portfolio demo: showing the missing-data trust contract. Live providers are not queried.",
     error: null,
     loading: false,
     isBackgroundLoading: false,
@@ -115,11 +116,16 @@ export function buildMissingDashboardState({ now = Date.now() } = {}) {
     weatherInfo: null,
     trustMeta: {
       weatherFetchedAt: now,
-      aqiFetchedAt: now,
+      aqiFetchedAt: null,
+      aqiStatus: "unavailable",
       climateFetchedAt: null,
       climateStatus: "unavailable",
       alertsFetchedAt: now,
       alertsStatus: "ready",
+      forecastStatus: "ready",
+      cacheStatus: "idle",
+      cacheCapturedAt: null,
+      cacheRestoredAt: null,
     },
   };
 }

@@ -10,6 +10,8 @@ import { toFiniteNumber } from "../utils/numbers";
 import { CardHeader, DataTrustMeta } from "./ui";
 import "./RainCard.css";
 
+const MISSING_PLACEHOLDER = "\u2014";
+
 function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
   if (!Array.isArray(hours) || hours.length === 0) {
     return "Hourly precipitation timeline is temporarily unavailable.";
@@ -18,14 +20,25 @@ function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
   const peakTime = peak?.time instanceof Date ? formatHour(peak.time) : "later";
   const parsedPeakProbability = toFiniteNumber(peak?.probability);
   const peakProbability =
-    parsedPeakProbability === null ? 0 : Math.round(parsedPeakProbability);
+    parsedPeakProbability === null
+      ? "unavailable"
+      : `${Math.round(parsedPeakProbability)}%`;
   const projectedTotal = formatPrecipitation(total, unit, dataUnit);
+  const missingSlots = hours.filter((hour) => hour?.missing).length;
+  const missingNote =
+    missingSlots > 0
+      ? ` ${missingSlots} precipitation slot${missingSlots === 1 ? "" : "s"} unavailable.`
+      : "";
 
-  if (nextRain?.time instanceof Date) {
-    return `Rain is most likely around ${formatHour(nextRain.time)}. Peak chance is ${peakProbability}% near ${peakTime}. Projected 24-hour accumulation is ${projectedTotal}.`;
+  if (parsedPeakProbability === null && projectedTotal === MISSING_PLACEHOLDER) {
+    return `Hourly precipitation guidance is temporarily unavailable.${missingNote}`;
   }
 
-  return `No immediate rain onset detected. Peak chance is ${peakProbability}% near ${peakTime}. Projected 24-hour accumulation is ${projectedTotal}.`;
+  if (nextRain?.time instanceof Date) {
+    return `Rain signal appears around ${formatHour(nextRain.time)}. Peak chance is ${peakProbability} near ${peakTime}. Projected 24-hour accumulation is ${projectedTotal}.${missingNote}`;
+  }
+
+  return `No immediate rain onset detected. Peak chance is ${peakProbability} near ${peakTime}. Projected 24-hour accumulation is ${projectedTotal}.${missingNote}`;
 }
 
 function RainCard({
@@ -43,6 +56,7 @@ function RainCard({
   const [mode, setMode] = useState("chance");
   const rainAnalysis = useRainAnalysis(weather?.hourly);
   const {
+    hasData,
     hours,
     nextRain,
     peak,
@@ -52,6 +66,7 @@ function RainCard({
     past12h,
     past24h,
     past48h,
+    missingSlots,
   } = rainAnalysis;
   const timelineSummary = useMemo(
     () => getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit),
@@ -74,46 +89,63 @@ function RainCard({
   } = useMemo(() => {
     const parsedPeakProbability = toFiniteNumber(peak?.probability);
     const safePeakProbability =
-      parsedPeakProbability === null ? 0 : Math.round(parsedPeakProbability);
+      parsedPeakProbability === null ? null : Math.round(parsedPeakProbability);
+    const safeTotal = toFiniteNumber(total);
+    let safeRiskTone = "minimal";
 
-    const safeRiskTone =
-      safePeakProbability >= 70
-        ? "high"
-        : safePeakProbability >= 40
-          ? "moderate"
-          : safePeakProbability >= 20
-            ? "low"
-            : "minimal";
+    if (!hasData) {
+      safeRiskTone = "missing";
+    } else if (safePeakProbability === null) {
+      safeRiskTone = "partial";
+    } else if (safePeakProbability >= 70) {
+      safeRiskTone = "high";
+    } else if (safePeakProbability >= 40) {
+      safeRiskTone = "moderate";
+    } else if (safePeakProbability >= 20) {
+      safeRiskTone = "low";
+    }
 
     const safeRiskLabel =
-      safeRiskTone === "high"
-        ? "High rain risk"
-        : safeRiskTone === "moderate"
-          ? "Moderate rain risk"
-          : safeRiskTone === "low"
-            ? "Low rain risk"
-            : "Minimal rain risk";
+      safeRiskTone === "missing"
+        ? "Rain data offline"
+        : safeRiskTone === "partial"
+          ? "Partial rain data"
+          : safeRiskTone === "high"
+            ? "High rain risk"
+            : safeRiskTone === "moderate"
+              ? "Moderate rain risk"
+              : safeRiskTone === "low"
+                ? "Low rain risk"
+                : "Minimal rain risk";
 
     const safePeakTimeLabel = formatHour(peak?.time);
     const safeNextRainTimeLabel = nextRain ? formatHour(nextRain.time) : "";
-    const safePeakAmount = toFiniteNumber(peakAmount) ?? 0;
+    const safePeakAmount = toFiniteNumber(peakAmount);
     const bars = hours.map((hour) => {
+      const value = mode === "chance" ? hour.probability : hour.amount;
+      const isMissing = value === null;
       const heightPct =
-        mode === "chance"
-          ? Math.max(hour.probability, 3)
-          : safePeakAmount > 0
-            ? Math.max((hour.amount / safePeakAmount) * 100, 3)
-            : 3;
+        isMissing
+          ? 14
+          : mode === "chance"
+            ? Math.max(hour.probability, 3)
+            : safePeakAmount > 0
+              ? Math.max((hour.amount / safePeakAmount) * 100, 3)
+              : 3;
 
       const opacity =
-        mode === "chance"
+        isMissing
+          ? 0.45
+          : mode === "chance"
           ? 0.25 + (hour.probability / 100) * 0.75
           : safePeakAmount > 0
             ? 0.25 + (hour.amount / safePeakAmount) * 0.75
             : 0.25;
 
       const tooltip =
-        mode === "chance"
+        isMissing
+          ? `${formatHour(hour.time)} \u2014 data unavailable`
+          : mode === "chance"
           ? `${formatHour(hour.time)} \u2014 ${hour.probability}%`
           : `${formatHour(hour.time)} \u2014 ${formatPrecipitation(hour.amount, unit, dataUnit)}`;
 
@@ -124,6 +156,7 @@ function RainCard({
         heightPct,
         opacity,
         tooltip,
+        isMissing,
       };
     });
     const accessibleText = bars.length
@@ -131,7 +164,12 @@ function RainCard({
       : "Hourly precipitation timeline is temporarily unavailable.";
 
     return {
-      isDry: safePeakProbability < 20 && total < 0.01,
+      isDry:
+        hasData &&
+        safePeakProbability !== null &&
+        safePeakProbability < 20 &&
+        safeTotal !== null &&
+        safeTotal < 0.01,
       peakProbability: safePeakProbability,
       peakTimeLabel: safePeakTimeLabel,
       nextRainTimeLabel: safeNextRainTimeLabel,
@@ -146,6 +184,7 @@ function RainCard({
       timelineAccessibleText: accessibleText,
     };
   }, [
+    hasData,
     peak,
     nextRain,
     peakAmount,
@@ -159,6 +198,9 @@ function RainCard({
     unit,
     dataUnit,
   ]);
+
+  const peakProbabilityLabel =
+    peakProbability === null ? MISSING_PLACEHOLDER : `${peakProbability}%`;
 
   return (
     <section
@@ -204,7 +246,17 @@ function RainCard({
           </button>
         </div>
 
-      {isDry ? (
+      {!hasData ? (
+        <div className="rain-empty rain-empty--missing" role="status">
+          <div className="rain-empty-icon">
+            <CloudRain size={44} aria-hidden="true" />
+          </div>
+          <div className="rain-empty-title">Rain guidance unavailable</div>
+          <div className="rain-empty-sub">
+            Open-Meteo did not return usable precipitation readings.
+          </div>
+        </div>
+      ) : isDry ? (
         <div className="rain-empty">
           <div className="rain-empty-icon">
             <WeatherIcon code={0} size={44} />
@@ -222,8 +274,10 @@ function RainCard({
             </div>
             <div className="rain-primary-label">
               {nextRain
-                ? `Rain likely (${nextRain.probability}% chance)`
-                : `Highest chance ${peakProbability}% around ${peakTimeLabel}`}
+                ? nextRain.probability === null
+                  ? "Rain signal detected; chance unavailable"
+                  : `Rain likely (${nextRain.probability}% chance)`
+                : `Highest chance ${peakProbabilityLabel} around ${peakTimeLabel}`}
             </div>
           </div>
 
@@ -249,7 +303,9 @@ function RainCard({
             <div className="rain-stat">
               <Clock size={14} />
               <div>
-                <div className="rain-stat-value">{peakProbability}%</div>
+                <div className={`rain-stat-value${peakProbability === null ? " is-missing" : ""}`}>
+                  {peakProbabilityLabel}
+                </div>
                 <div className="rain-stat-label">Peak near {peakTimeLabel}</div>
               </div>
             </div>
@@ -293,7 +349,7 @@ function RainCard({
           {timelineBars.map((bar) => (
             <div
               key={bar.key}
-              className="rain-bar"
+              className={`rain-bar${bar.isMissing ? " rain-bar--missing" : ""}`}
               style={{ height: `${bar.heightPct}%`, opacity: bar.opacity }}
               title={bar.tooltip}
               aria-hidden="true"
@@ -301,6 +357,11 @@ function RainCard({
           ))}
         </div>
         <p id={timelineSummaryId} className="rain-timeline-summary">{timelineSummary}</p>
+        {hasData && missingSlots > 0 ? (
+          <p className="rain-missing-note" role="status">
+            Some precipitation slots are unavailable from the provider.
+          </p>
+        ) : null}
         <p id={timelineDetailsId} className="sr-only">{timelineAccessibleText}</p>
 
         <div className="rain-timeline-labels">

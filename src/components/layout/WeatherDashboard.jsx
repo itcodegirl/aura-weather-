@@ -2,6 +2,7 @@ import { lazy, memo, Suspense } from "react";
 import HeroCard from "../HeroCard";
 import RainCard from "../RainCard";
 import ExposureSection from "../ExposureSection";
+import SourceHealthPanel from "../SourceHealthPanel";
 import { CardFallback } from "../ui";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { usePanelPreload } from "../../hooks/useAppShellEffects";
@@ -19,6 +20,7 @@ const CARD_STYLE_VARIABLES = [
   { "--i": 5 },
   { "--i": 6 },
   { "--i": 7 },
+  { "--i": 8 },
 ];
 
 const GROUP_LABEL_STYLE_VARIABLES = [
@@ -26,6 +28,7 @@ const GROUP_LABEL_STYLE_VARIABLES = [
   { "--group-i": 1 },
   { "--group-i": 2 },
   { "--group-i": 3 },
+  { "--group-i": 4 },
 ];
 
 const GROUP_LABEL_IDS = {
@@ -33,6 +36,7 @@ const GROUP_LABEL_IDS = {
   nearTermOutlook: "group-near-term-outlook",
   riskSignals: "group-risk-signals",
   weekAhead: "group-week-ahead",
+  dataSources: "group-data-sources",
 };
 
 function WeatherDashboard({
@@ -45,14 +49,18 @@ function WeatherDashboard({
   isBackgroundLoading,
   weatherInfo,
   trustMeta,
+  prefersReducedData = false,
 }) {
   const nowMs = useTimeNow();
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
 
-  usePanelPreload(PRELOAD_HEAVY_PANELS);
+  usePanelPreload(PRELOAD_HEAVY_PANELS, {
+    enabled: !prefersReducedData,
+  });
 
   const weatherFetchedAt = trustMeta?.weatherFetchedAt ?? null;
   const aqiFetchedAt = trustMeta?.aqiFetchedAt ?? null;
+  const aqiStatus = trustMeta?.aqiStatus ?? "idle";
   const climateFetchedAt = trustMeta?.climateFetchedAt ?? null;
   const climateStatus = trustMeta?.climateStatus ?? "idle";
 
@@ -86,6 +94,7 @@ function WeatherDashboard({
 
       <ExposureSection
         aqi={weather?.aqi}
+        aqiStatus={aqiStatus}
         uvIndex={weather?.daily?.uvIndexMax?.[0]}
         style={CARD_STYLE_VARIABLES[1]}
         isRefreshing={isBackgroundLoading}
@@ -140,6 +149,19 @@ function WeatherDashboard({
           isRefreshing={isBackgroundLoading}
         />
       )}
+      <h2
+        id={GROUP_LABEL_IDS.dataSources}
+        className="bento-group-label"
+        style={GROUP_LABEL_STYLE_VARIABLES[4]}
+      >
+        Data Sources
+      </h2>
+      <SourceHealthPanel
+        trustMeta={trustMeta}
+        nowMs={nowMs}
+        style={CARD_STYLE_VARIABLES[8]}
+        isRefreshing={isBackgroundLoading}
+      />
     </main>
   );
 }
@@ -154,7 +176,8 @@ function areWeatherDashboardPropsEqual(prevProps, nextProps) {
     prevProps.showClimateContext === nextProps.showClimateContext &&
     prevProps.isBackgroundLoading === nextProps.isBackgroundLoading &&
     prevProps.weatherInfo === nextProps.weatherInfo &&
-    prevProps.trustMeta === nextProps.trustMeta
+    prevProps.trustMeta === nextProps.trustMeta &&
+    prevProps.prefersReducedData === nextProps.prefersReducedData
   );
 }
 

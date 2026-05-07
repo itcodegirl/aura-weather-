@@ -45,6 +45,7 @@ describe("missingData mock", () => {
     const state = buildMissingDashboardState({ now: 1_700_000_000_000 });
     assert.equal(state.weather.aqi, null);
     assert.equal(state.location.name, "Sample City");
+    assert.match(state.locationNotice, /Portfolio demo/);
     assert.equal(state.showGlobalLoading, false);
     assert.equal(state.trustMeta.weatherFetchedAt, 1_700_000_000_000);
     assert.equal(state.trustMeta.climateStatus, "unavailable");
