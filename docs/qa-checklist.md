@@ -17,6 +17,8 @@ CI runs the same gate serially for Playwright with
       within ~1 second
 - [ ] Header brand `Aura` and tagline `Atmospheric Intelligence` are
       visible on first paint
+- [ ] Slow initial network shows the dashboard-shaped loading shell with
+      provider status copy and no fake weather values
 - [ ] Granting browser location shows "Current location" rather than a
       guessed city/country label
 - [ ] Permission-onboarding card reads "Set your forecast once" with
@@ -56,6 +58,8 @@ CI runs the same gate serially for Playwright with
       muted "—" not "0%" / "0 hPa" / "0°F"
 - [ ] The same route shows the labelled portfolio demo notice, so it
       cannot be mistaken for live provider data
+- [ ] The hero daily guidance shows unavailable states for missing rain,
+      UV, or wind inputs instead of inventing advice
 - [ ] The hero stats helper note appears: "Some readings are
       unavailable from the provider..."
 - [ ] AQI / UV cards read "AQI offline" / "UV offline" with a "No live
@@ -73,11 +77,14 @@ CI runs the same gate serially for Playwright with
 - [ ] If the browser starts offline with a cached forecast, Aura renders
       the saved snapshot and shows a banner naming the failed live
       forecast source plus the saved timestamp
+- [ ] If the only cached forecast is older than 12 hours, Aura does not
+      restore it as daily guidance
 - [ ] The Data Sources panel distinguishes live forecast data, saved
       forecast data, missing AQI, unsupported NOAA/NWS alert coverage,
       and disabled/reduced-data archive context
-- [ ] Transient AQI, alerts, and archive failures retry once; unsupported
-      NWS regions still show the coverage fallback without retry churn
+- [ ] Transient forecast, geocode, AQI, alerts, and archive failures
+      retry; unsupported NWS regions still show the coverage fallback
+      without retry churn
 - [ ] The Retry button enters a 1.4s cooldown and shows "Retrying..."
       while disabled
 
@@ -92,7 +99,8 @@ CI runs the same gate serially for Playwright with
 - [ ] When the browser exposes `beforeinstallprompt`, Aura shows the
       Install/Later prompt without blocking the dashboard
 - [ ] Offline weather refreshes show the saved-forecast banner rather
-      than claiming live provider data is fresh
+      than claiming live provider data is fresh; stale snapshots older
+      than 12 hours do not restore
 - [ ] Clearing site data removes the service worker/cache and returns
       the app to normal first-load behavior
 
@@ -145,6 +153,8 @@ CI runs the same gate serially for Playwright with
 ## Mobile (390 × 844 viewport)
 
 - [ ] No horizontal scroll
+- [ ] Daily guidance stacks into single-column rain / UV / wind cards
+      before the sunlight section
 - [ ] Hero card stacks: location → high/low → temp + icon → condition
 - [ ] Bento groups collapse into single column at ≤ 640 px
 - [ ] Rain and hourly panels show touch sample strips, and selecting a
@@ -158,6 +168,7 @@ CI runs the same gate serially for Playwright with
 - [ ] System "Reduce motion" enabled: card-slide-up + bento-section
       hover transforms are disabled
 - [ ] Loader weather icon does not pulse
+- [ ] Loading skeleton sheen is suppressed
 - [ ] Refreshing-pill animation is suppressed
 
 ## Performance

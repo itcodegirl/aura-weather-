@@ -180,10 +180,10 @@ endpoint and forwards unknown URLs to the original fetch.
 
 | | Before audit | After audit |
 |---|---|---|
-| Tests | 45 | **173** Node + 25 React render tests |
-| Playwright checks | 12 | 21 (incl. missing-data + unicode-escape guards, axe-core on `/` *and* `?mock=missing`, and trust-contract visual baselines) |
+| Tests | 45 | **249** Node test-runner checks across 55 suites |
+| Playwright checks | 12 | 28 (incl. missing-data + unicode-escape guards, axe-core on `/` *and* `?mock=missing`, cached offline restore, app-shell offline reload, and visual baselines) |
 | `App.css` lines | 2,067 | ~500 |
-| Bundle (gzip) | ≈ 84 kB | ≈ 85 kB |
+| Bundle (gzip) | ≈ 84 kB | ≈ 92 kB |
 | `useWeatherData` lines | 459 | 354 |
 | `useSavedLocationsSync` lines | 360 | 273 |
 
