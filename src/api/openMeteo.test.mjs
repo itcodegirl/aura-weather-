@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   ALERTS_STATUS,
   fetchAirQuality,
+  geocodeCity,
   fetchHistoricalTemperatureAverage,
   fetchWeather,
   fetchSevereWeatherAlerts,
@@ -48,6 +49,60 @@ describe("Open-Meteo alert coverage helpers", () => {
     assert.equal(requestUrl?.searchParams.get("temperature_unit"), "fahrenheit");
     assert.equal(requestUrl?.searchParams.get("wind_speed_unit"), "mph");
     assert.equal(requestUrl?.searchParams.get("precipitation_unit"), "inch");
+  });
+
+  test("retries transient forecast failures before returning current conditions", async () => {
+    let requestCount = 0;
+    globalThis.fetch = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return createJsonResponse({}, { status: 503 });
+      }
+      return createJsonResponse({
+        latitude: 41.8781,
+        longitude: -87.6298,
+        timezone: "America/Chicago",
+        current: {
+          temperature_2m: 67,
+        },
+        hourly: {},
+        daily: {},
+        minutely_15: {},
+      });
+    };
+
+    const result = await fetchWeather(41.8781, -87.6298, {
+      retryDelaysMs: [0],
+    });
+
+    assert.equal(result.current.temperature, 67);
+    assert.equal(requestCount, 2);
+  });
+
+  test("retries transient geocoding failures before returning suggestions", async () => {
+    let requestCount = 0;
+    globalThis.fetch = async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return createJsonResponse({}, { status: 429 });
+      }
+      return createJsonResponse({
+        results: [
+          {
+            id: 4887398,
+            name: "Chicago",
+            latitude: 41.8781,
+            longitude: -87.6298,
+            country: "United States",
+          },
+        ],
+      });
+    };
+
+    const results = await geocodeCity("chicago", { retryDelaysMs: [0] });
+
+    assert.equal(results[0].name, "Chicago");
+    assert.equal(requestCount, 2);
   });
 
   test("returns sorted alerts with a ready status when NWS data is available", async () => {

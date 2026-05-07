@@ -3,6 +3,7 @@ import { toFiniteNumber } from "../utils/numbers.js";
 const CACHE_KEY = "aura-weather-last-known-forecast-v1";
 const CACHE_VERSION = 1;
 const MAX_CACHED_LOCATIONS = 8;
+const MAX_SNAPSHOT_AGE_MS = 12 * 60 * 60 * 1000;
 
 function getStorage() {
   try {
@@ -80,18 +81,30 @@ function writeCachePayload(payload) {
   }
 }
 
-function isUsableSnapshot(snapshot) {
+function hasUsableSnapshotShape(snapshot) {
   return Boolean(
     snapshot &&
       typeof snapshot === "object" &&
       snapshot.version === CACHE_VERSION &&
+      toFiniteNumber(snapshot.cachedAt) !== null &&
       snapshot.weather &&
       typeof snapshot.weather === "object" &&
       normalizeCoordinates(snapshot.coordinates)
   );
 }
 
-export function readCachedWeatherSnapshot(coordinates) {
+function isFreshSnapshot(snapshot, nowMs = Date.now()) {
+  if (!hasUsableSnapshotShape(snapshot)) {
+    return false;
+  }
+
+  const cachedAt = toFiniteNumber(snapshot.cachedAt);
+  const now = toFiniteNumber(nowMs) ?? Date.now();
+  const ageMs = Math.max(0, now - cachedAt);
+  return ageMs <= MAX_SNAPSHOT_AGE_MS;
+}
+
+export function readCachedWeatherSnapshot(coordinates, options = {}) {
   const key = getSnapshotKey(coordinates);
   if (!key) {
     return null;
@@ -100,7 +113,7 @@ export function readCachedWeatherSnapshot(coordinates) {
   const payload = readCachePayload();
   const snapshot = payload?.snapshots?.[key] ?? null;
 
-  if (!isUsableSnapshot(snapshot)) {
+  if (!isFreshSnapshot(snapshot, options.nowMs)) {
     return null;
   }
 
@@ -137,7 +150,7 @@ export function writeCachedWeatherSnapshot({
   };
 
   const entries = Object.entries(nextSnapshots)
-    .filter(([, snapshot]) => isUsableSnapshot(snapshot))
+    .filter(([, snapshot]) => hasUsableSnapshotShape(snapshot))
     .sort(([, a], [, b]) => {
       const aCachedAt = toFiniteNumber(a.cachedAt) ?? 0;
       const bCachedAt = toFiniteNumber(b.cachedAt) ?? 0;
@@ -154,5 +167,6 @@ export function writeCachedWeatherSnapshot({
 export const weatherSnapshotCacheInternals = {
   CACHE_KEY,
   CACHE_VERSION,
+  MAX_SNAPSHOT_AGE_MS,
   getSnapshotKey,
 };

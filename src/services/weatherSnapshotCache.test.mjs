@@ -59,12 +59,13 @@ afterEach(() => {
 describe("weather snapshot cache", () => {
   test("writes and reads a forecast snapshot by rounded coordinates", () => {
     installWindow();
+    const cachedAt = Date.now();
 
     writeCachedWeatherSnapshot({
       coordinates: { latitude: 41.8781123, longitude: -87.6298123 },
       weather: buildWeather(),
       trustMeta: { weatherFetchedAt: 1_700_000_000_000 },
-      cachedAt: 1_700_000_000_123,
+      cachedAt,
     });
 
     const snapshot = readCachedWeatherSnapshot({
@@ -72,7 +73,7 @@ describe("weather snapshot cache", () => {
       longitude: -87.6298,
     });
 
-    assert.equal(snapshot.cachedAt, 1_700_000_000_123);
+    assert.equal(snapshot.cachedAt, cachedAt);
     assert.equal(snapshot.weather.current.temperature, 67);
     assert.equal(snapshot.trustMeta.weatherFetchedAt, 1_700_000_000_000);
   });
@@ -135,5 +136,25 @@ describe("weather snapshot cache", () => {
       snapshots.some((snapshot) => snapshot.weather.label === "cached-9"),
       true
     );
+  });
+
+  test("does not restore forecasts older than the daily freshness window", () => {
+    installWindow();
+    const nowMs = Date.now();
+    const staleCachedAt =
+      nowMs - weatherSnapshotCacheInternals.MAX_SNAPSHOT_AGE_MS - 1;
+
+    writeCachedWeatherSnapshot({
+      coordinates: { latitude: 41.8781, longitude: -87.6298 },
+      weather: buildWeather("stale"),
+      cachedAt: staleCachedAt,
+    });
+
+    const snapshot = readCachedWeatherSnapshot(
+      { latitude: 41.8781, longitude: -87.6298 },
+      { nowMs }
+    );
+
+    assert.equal(snapshot, null);
   });
 });
