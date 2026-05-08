@@ -52,6 +52,20 @@ function SupplementalWeatherPanels({
       </PanelErrorBoundary>
 
       <h2
+        id={groupLabelIds.weekAhead}
+        className="bento-group-label"
+        style={groupLabelStyleVariables[3]}
+      >
+        Week Ahead
+      </h2>
+      <ForecastCard
+        weather={weather}
+        unit={unit}
+        style={cardStyleVariables[7]}
+        isRefreshing={isBackgroundLoading}
+      />
+
+      <h2
         id={groupLabelIds.riskSignals}
         className="bento-group-label"
         style={groupLabelStyleVariables[2]}
@@ -87,20 +101,6 @@ function SupplementalWeatherPanels({
           />
         </Suspense>
       </PanelErrorBoundary>
-
-      <h2
-        id={groupLabelIds.weekAhead}
-        className="bento-group-label"
-        style={groupLabelStyleVariables[3]}
-      >
-        Week Ahead
-      </h2>
-      <ForecastCard
-        weather={weather}
-        unit={unit}
-        style={cardStyleVariables[7]}
-        isRefreshing={isBackgroundLoading}
-      />
     </>
   );
 }

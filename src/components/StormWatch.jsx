@@ -384,7 +384,8 @@ function StormWatch({
             <span>Risk & Conditions</span>
           </h3>
           <p className="storm-lede">
-            Storm risk, pressure trend, wind, and comfort signals in one panel.
+            Storm risk and pressure trend at a glance. Tap "More" for wind
+            and comfort detail.
           </p>
         </div>
         <span className="storm-subtitle">Storm watch</span>
@@ -410,22 +411,30 @@ function StormWatch({
         </span>
       </div>
 
-      <div className="storm-grid">
+      <div className="storm-grid storm-grid--primary">
         <MemoizedStormRisk
           risk={overviewRisk}
           cape={hasOverviewCape ? overviewCape : null}
           summaryId={stormRiskSummaryId}
         />
         <MemoizedPressureTrend trend={overviewPressure} />
-        <MemoizedWindIntelligence
-          weather={weather}
-          unit={unit}
-        />
-        <MemoizedComfortIndex
-          weather={weather}
-          unit={unit}
-        />
       </div>
+
+      <details className="storm-details-disclosure">
+        <summary className="storm-details-summary">
+          <span>More: wind and comfort</span>
+        </summary>
+        <div className="storm-grid storm-grid--secondary">
+          <MemoizedWindIntelligence
+            weather={weather}
+            unit={unit}
+          />
+          <MemoizedComfortIndex
+            weather={weather}
+            unit={unit}
+          />
+        </div>
+      </details>
     </section>
   );
 }
