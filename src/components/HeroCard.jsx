@@ -212,8 +212,11 @@ function HeroCard({
               <WeatherIcon code={current.conditionCode} size={124} animated />
             </div>
           </div>
-          <div className="hero-condition">{info.label}</div>
-          <div className="hero-feels">Feels like {feelsLikeDisplay}</div>
+          <p className="hero-condition-line">
+            <span className="hero-condition">{info.label}</span>
+            <span className="hero-condition-separator" aria-hidden="true">·</span>
+            <span className="hero-feels">Feels like {feelsLikeDisplay}</span>
+          </p>
           {hasClimateComparison && (
             <p className="hero-insight">{climateMessage}</p>
           )}
@@ -247,63 +250,64 @@ function HeroCard({
         </div>
       )}
 
-      <div className="hero-sunlight" role="group" aria-label="Sunlight details">
-        <div className="hero-sun-chip">
-          <div className="hero-sun-label">
-            <Sunrise size={14} />
-            <span>Sunrise</span>
-          </div>
-          <time className="hero-sun-value" dateTime={sunriseValue || undefined}>
-            {sunriseLabel}
-          </time>
-        </div>
-        <div className="hero-sun-chip">
-          <div className="hero-sun-label">
-            <Sunset size={14} />
-            <span>Sunset</span>
-          </div>
-          <time className="hero-sun-value" dateTime={sunsetValue || undefined}>
-            {sunsetLabel}
-          </time>
-        </div>
-        <div className="hero-sun-chip hero-sun-chip--daylight">
-          <div className="hero-sun-label">
-            <Sun size={14} />
-            <span>Daylight</span>
-          </div>
-          <div className="hero-sun-value">{daylightLabel}</div>
-        </div>
-      </div>
+      <p
+        className="hero-sunlight-line"
+        role="group"
+        aria-label={`Sunrise ${sunriseLabel}, sunset ${sunsetLabel}, ${daylightLabel} of daylight`}
+      >
+        <span className="hero-sunlight-segment">
+          <Sunrise size={13} aria-hidden="true" />
+          <time dateTime={sunriseValue || undefined}>{sunriseLabel}</time>
+        </span>
+        <span className="hero-sunlight-separator" aria-hidden="true">·</span>
+        <span className="hero-sunlight-segment">
+          <Sunset size={13} aria-hidden="true" />
+          <time dateTime={sunsetValue || undefined}>{sunsetLabel}</time>
+        </span>
+        <span className="hero-sunlight-separator" aria-hidden="true">·</span>
+        <span className="hero-sunlight-segment">
+          <Sun size={13} aria-hidden="true" />
+          <span>{daylightLabel}</span>
+        </span>
+      </p>
 
-      <div className="hero-stats">
-        <Stat
-          icon={<Wind size={18} />}
-          label="Wind"
-          value={windDisplay}
-        />
-        <Stat
-          icon={<Droplets size={18} />}
-          label="Humidity"
-          value={humidityDisplay}
-        />
-        <Stat
-          icon={<Gauge size={18} />}
-          label="Pressure"
-          value={pressureDisplay}
-        />
-        <Stat
-          icon={<Thermometer size={18} />}
-          label="Dew Point"
-          value={dewPointDisplay}
-        />
-      </div>
-      {heroStatsHaveAnyMissing && (
-        <p className="hero-stats-note" role="status">
-          Some readings are unavailable from the provider. Aura shows
-          “—” instead of a fallback value to keep the rest of the
-          forecast trustworthy.
-        </p>
-      )}
+      <details
+        className="hero-stats-disclosure"
+        open={heroStatsHaveAnyMissing || undefined}
+      >
+        <summary className="hero-stats-summary">
+          <span>More readings</span>
+        </summary>
+        <div className="hero-stats">
+          <Stat
+            icon={<Wind size={18} />}
+            label="Wind"
+            value={windDisplay}
+          />
+          <Stat
+            icon={<Droplets size={18} />}
+            label="Humidity"
+            value={humidityDisplay}
+          />
+          <Stat
+            icon={<Gauge size={18} />}
+            label="Pressure"
+            value={pressureDisplay}
+          />
+          <Stat
+            icon={<Thermometer size={18} />}
+            label="Dew Point"
+            value={dewPointDisplay}
+          />
+        </div>
+        {heroStatsHaveAnyMissing && (
+          <p className="hero-stats-note" role="status">
+            Some readings are unavailable from the provider. Aura shows
+            “—” instead of a fallback value to keep the rest of the
+            forecast trustworthy.
+          </p>
+        )}
+      </details>
     </section>
   );
 }

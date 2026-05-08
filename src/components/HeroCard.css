@@ -244,16 +244,30 @@
     0 20px 40px rgba(4, 9, 23, 0.42);
 }
 
+.hero-condition-line {
+  margin: 8px 0 0;
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
 .hero-condition {
-  margin-top: 8px;
   font-size: 22px;
   font-weight: 650;
   letter-spacing: 0;
+  color: var(--text);
+}
+
+.hero-condition-separator {
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
 }
 
 .hero-feels {
-  margin-top: 5px;
-  color: var(--text-muted);
   font-size: 15px;
   font-weight: 600;
 }
@@ -349,56 +363,109 @@
   border-color: rgba(148, 163, 184, 0.24);
 }
 
-.hero-sunlight {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.hero-sun-chip {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  min-height: 72px;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  background: var(--subcard-bg);
-  border: var(--subcard-border);
-  box-shadow: var(--subcard-shadow);
-}
-
-.hero-sun-chip--daylight {
-  background:
-    linear-gradient(165deg, rgba(20, 33, 64, 0.52), rgba(10, 20, 42, 0.44)),
-    var(--subcard-bg);
-}
-
-.hero-sun-label {
+/*
+ * Sunlight info collapsed from three boxed chips to a single line.
+ * Each segment is icon + value; segments are separated by a thin
+ * dot. The line wraps gracefully on narrow viewports because both
+ * segment and separator are flex-direction friendly.
+ */
+.hero-sunlight-line {
+  margin: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: var(--text-dim);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.hero-sun-value {
-  color: #edf5ff;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: var(--subcard-border);
+  background: var(--subcard-bg);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
+.hero-sunlight-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #edf5ff;
+}
+
+.hero-sunlight-segment svg {
+  color: rgba(199, 220, 255, 0.78);
+  flex-shrink: 0;
+}
+
+.hero-sunlight-separator {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+/*
+ * Hero stats sit behind a "More readings" disclosure by default. Wind
+ * value already shows in the atmospheric reading sentence on gusty
+ * days, and Dew Point duplicates the StormWatch comfort module — so
+ * surfacing all four on every page load was reference data masquer-
+ * ading as primary data. The disclosure auto-opens when any reading
+ * is missing so the trust-contract note still reaches the user.
+ */
+.hero-stats-disclosure {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(178, 202, 244, 0.2);
+}
+
+.hero-stats-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 0;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.hero-stats-summary::-webkit-details-marker {
+  display: none;
+}
+
+.hero-stats-summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.hero-stats-disclosure[open] .hero-stats-summary::after {
+  transform: rotate(225deg) translate(-2px, -2px);
+}
+
+.hero-stats-summary:hover,
+.hero-stats-summary:focus-visible {
+  color: var(--text-muted);
+}
+
+.hero-stats-summary:focus-visible {
+  outline: 2px solid rgba(130, 228, 255, 0.66);
+  outline-offset: 2px;
+}
+
 .hero-stats {
+  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(178, 202, 244, 0.2);
 }
 
 .stat {
@@ -461,14 +528,6 @@
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
 @media (max-width: 1200px) {
-  .hero-sunlight {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hero-sun-chip--daylight {
-    grid-column: span 2;
-  }
-
   .hero-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -567,28 +626,14 @@
     padding: 10px;
   }
 
-  .hero-sunlight {
+  .hero-sunlight-line {
     gap: 8px;
-  }
-
-  .hero-sun-chip {
-    padding: 9px 10px;
-    min-height: 66px;
-  }
-
-  .hero-sun-value {
-    font-size: 15px;
+    padding: 7px 12px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 560px) {
-  .hero-sunlight {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-sun-chip--daylight {
-    grid-column: auto;
-  }
 
   .hero-icon {
     width: clamp(80px, 26vw, 96px);
@@ -629,17 +674,15 @@
     font-size: 18px;
   }
 
-  .hero-sun-chip {
-    min-height: 60px;
-    gap: 4px;
+  .hero-sunlight-line {
+    padding: 6px 11px;
+    font-size: 11px;
   }
 
-  .hero-sun-label,
   .stat-label {
     font-size: 10px;
   }
 
-  .hero-sun-value,
   .stat-value {
     font-size: 15px;
   }
