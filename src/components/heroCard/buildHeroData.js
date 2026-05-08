@@ -38,23 +38,38 @@ function pickLocationCountry(location) {
   return trimString(location?.country);
 }
 
-function todayLocaleString(nowMs) {
+function todayLocaleString(nowMs, timeZone) {
   // Caller is responsible for passing a real timestamp. We do NOT
   // fall back to Date.now() here because this helper runs inside a
   // useMemo factory in HeroCard.jsx, and reading a mutable global
-  // there would violate react-hooks/purity. The HeroCard wrapper
-  // already substitutes Date.now() outside the memo when nowMs is
-  // missing, then buckets it to one-minute granularity so memos
-  // recompute deterministically.
+  // there would violate react-hooks/purity.
+  //
+  // timeZone is sourced from weather.meta.timezone so a user viewing
+  // Tokyo from Chicago sees Tokyo's day name, not Chicago's. An
+  // unrecognized tz falls back to the device's local zone — passing
+  // an invalid timeZone string to toLocaleDateString throws on some
+  // engines, so we feature-detect and retry without it.
   const referenceTime = toFiniteNumber(nowMs);
   if (referenceTime === null) {
     return "today";
   }
-  return new Date(referenceTime).toLocaleDateString("en-US", {
+  const date = new Date(referenceTime);
+  const baseOptions = {
     weekday: "long",
     month: "long",
     day: "numeric",
-  });
+  };
+  if (typeof timeZone === "string" && timeZone.trim()) {
+    try {
+      return date.toLocaleDateString("en-US", {
+        ...baseOptions,
+        timeZone: timeZone.trim(),
+      });
+    } catch {
+      // Fall through to the device-local format below.
+    }
+  }
+  return date.toLocaleDateString("en-US", baseOptions);
 }
 
 // Show the climate context line only when today is notably different
@@ -367,6 +382,6 @@ export function buildHeroData({
     hasClimateComparison,
     climateMessage,
     dailyGuidance,
-    today: todayLocaleString(nowMs),
+    today: todayLocaleString(nowMs, weather?.meta?.timezone),
   };
 }

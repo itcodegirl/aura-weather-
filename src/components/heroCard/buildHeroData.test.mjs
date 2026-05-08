@@ -73,6 +73,35 @@ describe("buildHeroData", () => {
     assert.equal(data.heroStatsHaveAnyMissing, false);
   });
 
+  test("renders the today label in the forecast's timezone, not the device's", () => {
+    // 2026-04-21 23:00 UTC is 2026-04-22 08:00 in Tokyo (UTC+9) and
+    // 2026-04-21 18:00 in Chicago (UTC-5). With Tokyo's tz, the label
+    // should read Wednesday; with Chicago's, Tuesday.
+    const ts = Date.UTC(2026, 3, 21, 23, 0, 0);
+    const tokyoWeather = {
+      ...baseWeather,
+      meta: { timezone: "Asia/Tokyo" },
+    };
+    const chicagoWeather = {
+      ...baseWeather,
+      meta: { timezone: "America/Chicago" },
+    };
+    const tokyo = buildHeroData({
+      weather: tokyoWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: ts,
+    });
+    const chicago = buildHeroData({
+      weather: chicagoWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: ts,
+    });
+    assert.match(tokyo.today, /Wednesday/);
+    assert.match(chicago.today, /Tuesday/);
+  });
+
   test("derives the today label from the supplied nowMs so midnight rollover refreshes", () => {
     // 2026-04-20 23:50 UTC and 2026-04-21 00:10 UTC straddle midnight
     // depending on TZ, so use noon in two different days to keep the

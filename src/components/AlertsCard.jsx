@@ -70,6 +70,18 @@ function AlertsCard({
     };
   }, [alertsStatus, visibleAlerts.length]);
 
+  // Don't render the panel at all when there are no alerts AND the
+  // feed reported a successful empty list (or is still pending). The
+  // audit's principle: do not narrate a non-event in tense vocabulary.
+  // "Unsupported" and "unavailable" still render because those are
+  // information the user needs (no coverage, or a feed outage).
+  const hasActiveAlerts = visibleAlerts.length > 0;
+  const isInformationalStatus =
+    alertsStatus === "unsupported" || alertsStatus === "unavailable";
+  if (!hasActiveAlerts && !isInformationalStatus) {
+    return null;
+  }
+
   return (
     <section
       className="bento-alerts alerts-card glass"
