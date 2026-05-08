@@ -138,7 +138,11 @@ function App() {
   }
 
   return (
-    <AppShell background={background}>
+    <AppShell
+      background={background}
+      conditionCode={weather?.current?.conditionCode}
+      prefersReducedData={prefersReducedData}
+    >
       <AppHeader
         citySearchRef={citySearchRef}
         loadWeather={loadWeather}

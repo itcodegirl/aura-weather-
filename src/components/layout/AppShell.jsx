@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { CloudOff } from "lucide-react";
+import AtmosphereParticles from "../AtmosphereParticles";
 import WeatherIcon from "../WeatherIcon";
 import "./AppShell.css";
 
@@ -71,12 +72,22 @@ const AppErrorState = memo(({ error, onRetry }) => {
   );
 });
 
-function AppShell({ background, children }) {
+function AppShell({
+  background,
+  conditionCode,
+  prefersReducedData = false,
+  children,
+}) {
   return (
     <div className="app" style={{ background }}>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
+
+      <AtmosphereParticles
+        conditionCode={conditionCode}
+        prefersReducedData={prefersReducedData}
+      />
 
       <div className="app-inner">{children}</div>
     </div>
