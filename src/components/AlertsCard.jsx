@@ -1,6 +1,5 @@
 import { memo, useMemo } from "react";
 import { Siren } from "lucide-react";
-import { DataTrustMeta } from "./ui";
 import "./AlertsCard.css";
 
 function formatAlertTime(value) {
@@ -23,8 +22,6 @@ function AlertsCard({
   alertsStatus = "idle",
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const totalAlertCount = Array.isArray(alerts) ? alerts.length : 0;
   const visibleAlerts = useMemo(() => {
@@ -87,15 +84,6 @@ function AlertsCard({
         </h3>
         <span className="alerts-subtitle">{emptyState.subtitle}</span>
       </header>
-
-      <DataTrustMeta
-        sourceLabel="NOAA / NWS Alerts"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-        staleAfterMinutes={12}
-        statusLabel={lastUpdatedAt ? "" : emptyState.trustLabel}
-        titleOverride={lastUpdatedAt ? "" : emptyState.trustTitle}
-      />
 
       {visibleAlerts.length === 0 ? (
         <div className="alerts-empty" role="status" aria-live="polite">

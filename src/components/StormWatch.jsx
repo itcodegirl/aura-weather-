@@ -23,7 +23,7 @@ import {
   toFiniteNumber,
   MISSING_VALUE_PLACEHOLDER,
 } from "../utils/numbers";
-import { CardHeader, DataTrustMeta, InfoDrawer, Stat } from "./ui";
+import { CardHeader, InfoDrawer, Stat } from "./ui";
 import "./StormWatch.css";
 
 function StormRisk({ risk, cape, summaryId }) {
@@ -351,8 +351,6 @@ function StormWatch({
   unit,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const stormRiskSummaryId = useId();
   const overviewCape = toFiniteNumber(weather?.hourly?.cape?.[0]);
@@ -391,12 +389,6 @@ function StormWatch({
         </div>
         <span className="storm-subtitle">Storm watch</span>
       </header>
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Forecast"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-
       <div className="storm-snapshot" role="list" aria-label="Storm snapshot">
         <span
           className="storm-snapshot-chip"

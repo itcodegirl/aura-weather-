@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { DataTrustMeta, MetricCard } from "./ui";
+import { MetricCard } from "./ui";
 import { getAqiStatus, getUvStatus } from "../utils/meteorology";
 import { toFiniteNumber } from "../utils/numbers";
 import "./MetricPanels.css";
@@ -16,8 +16,6 @@ function ExposureSection({
   uvIndex,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const aqiValue = toFiniteNumber(aqi);
   const uvValue = toFiniteNumber(uvIndex);
@@ -49,12 +47,6 @@ function ExposureSection({
         </h3>
         <span className="metric-context">{hasFullExposureData ? "Live" : "Partial data"}</span>
       </div>
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Air Quality"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-
       <div className="exposure-grid">
         <MetricCard
           id={METRIC_LABEL_IDS.airQuality}
