@@ -224,7 +224,7 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
 }
 
 const FORECAST_EMPTY_MESSAGE =
-  "Open-Meteo did not return a daily forecast series for this location. Current conditions remain live above.";
+  "The 7-day outlook isn't available right now. Current conditions are still live above.";
 
 function buildWeekSummary(days, weekMin, weekMax, unit) {
   if (!Array.isArray(days) || days.length === 0) {

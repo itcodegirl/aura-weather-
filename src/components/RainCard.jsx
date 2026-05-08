@@ -14,7 +14,7 @@ const MISSING_PLACEHOLDER = "\u2014";
 
 function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
   if (!Array.isArray(hours) || hours.length === 0) {
-    return "Open-Meteo did not return an hourly precipitation series. Other forecast panels remain live.";
+    return "Hourly precipitation isn't available right now. Other forecast panels are still live.";
   }
 
   const peakTime = peak?.time instanceof Date ? formatHour(peak.time) : "later";
@@ -31,7 +31,7 @@ function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
       : "";
 
   if (parsedPeakProbability === null && projectedTotal === MISSING_PLACEHOLDER) {
-    return `Open-Meteo did not return enough precipitation samples to summarise the next 24 hours.${missingNote}`;
+    return `Not enough precipitation samples to summarise the next 24 hours.${missingNote}`;
   }
 
   if (nextRain?.time instanceof Date) {
@@ -169,7 +169,7 @@ function RainCard({
     });
     const accessibleText = bars.length
       ? bars.map((bar) => bar.tooltip).join(". ")
-      : "Open-Meteo did not return an hourly precipitation series. Other forecast panels remain live.";
+      : "Hourly precipitation isn't available right now. Other forecast panels are still live.";
 
     return {
       isDry:
@@ -260,7 +260,7 @@ function RainCard({
           </div>
           <div className="rain-empty-title">Rain guidance unavailable</div>
           <div className="rain-empty-sub">
-            Open-Meteo did not return usable precipitation readings.
+            Precipitation readings are unavailable right now.
           </div>
         </div>
       ) : isDry ? (

@@ -149,7 +149,7 @@ function buildChartGeometry(data, minTemp, maxTemp) {
 }
 
 const HOURLY_EMPTY_MESSAGE =
-  "Open-Meteo did not return an hourly temperature series for this location. Current conditions remain live above.";
+  "Hourly temperatures aren't available right now. Current conditions are still live above.";
 
 function getHourlySummary(data, unit) {
   if (!Array.isArray(data) || data.length === 0) {

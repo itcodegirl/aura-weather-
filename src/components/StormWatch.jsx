@@ -30,9 +30,32 @@ function StormRisk({ risk, cape, summaryId }) {
   const capeNumeric = toFiniteNumber(cape);
   const hasCape = capeNumeric !== null;
   const safeCape = hasCape ? Math.round(capeNumeric) : null;
-  const stormRiskSummary = hasCape
-    ? `Storm risk: ${risk.level}; level ${risk.score + 1} of 5 based on current conditions.`
-    : "Storm risk unavailable: live CAPE reading missing.";
+  // When CAPE is reading and the score is 0 (Minimal), the meter and
+  // risk-index ladder were narrating a non-event. Show a calm "All
+  // clear" head-line and hide the 5-pip meter; expose CAPE itself for
+  // anyone who's curious. This matches how a daily user thinks: only
+  // surface the storm vocabulary when there's actually a storm signal.
+  const isAllClear = hasCape && risk.score === 0;
+  const headlineText = !hasCape
+    ? MISSING_VALUE_PLACEHOLDER
+    : isAllClear
+      ? "All clear"
+      : risk.level;
+  const headlineColor = !hasCape
+    ? "#94a3b8"
+    : isAllClear
+      ? "#86efac"
+      : risk.color;
+  const summaryText = !hasCape
+    ? "Live storm energy reading unavailable"
+    : isAllClear
+      ? "No thunderstorm signal in the air mass"
+      : `Risk level ${risk.score} of 4`;
+  const stormRiskSummary = !hasCape
+    ? "Storm risk unavailable: live CAPE reading missing."
+    : isAllClear
+      ? "Storm risk: all clear; no thunderstorm signal in the current air mass."
+      : `Storm risk: ${risk.level}; level ${risk.score} of 4 based on current conditions.`;
 
   return (
     <div className="storm-module">
@@ -57,34 +80,34 @@ function StormRisk({ risk, cape, summaryId }) {
       />
       <div
         className="storm-level"
-        style={{ color: hasCape ? risk.color : "#94a3b8" }}
+        style={{ color: headlineColor }}
         aria-describedby={summaryId}
       >
-        {hasCape ? risk.level : MISSING_VALUE_PLACEHOLDER}
+        {headlineText}
       </div>
-      <p className="storm-module-summary">
-        {hasCape
-          ? `Risk index ${risk.score + 1} of 5`
-          : "Live storm energy reading unavailable"}
-      </p>
+      <p className="storm-module-summary">{summaryText}</p>
       <div id={summaryId} className="storm-risk-accessibility">
         {stormRiskSummary}
       </div>
-      <div className="storm-risk-meter" aria-hidden="true">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="storm-risk-pip"
-            style={{
-              background:
-                hasCape && i <= risk.score ? risk.color : "rgba(255,255,255,0.1)",
-            }}
-          />
-        ))}
-      </div>
-      <p className="storm-term-hint">
-        CAPE estimates atmospheric storm energy. Higher values can support stronger storms.
-      </p>
+      {hasCape && !isAllClear && (
+        <div className="storm-risk-meter" aria-hidden="true">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="storm-risk-pip"
+              style={{
+                background:
+                  i <= risk.score ? risk.color : "rgba(255,255,255,0.1)",
+              }}
+            />
+          ))}
+        </div>
+      )}
+      {!isAllClear && (
+        <p className="storm-term-hint">
+          CAPE estimates atmospheric storm energy. Higher values can support stronger storms.
+        </p>
+      )}
       <Stat
         className="storm-detail"
         labelClassName="storm-detail-label"
@@ -96,7 +119,7 @@ function StormRisk({ risk, cape, summaryId }) {
         )}
         value={hasCape ? `${safeCape} J/kg` : MISSING_VALUE_PLACEHOLDER}
         missing={!hasCape}
-        title="CAPE reading is temporarily unavailable from the upstream API."
+        title="CAPE reading is temporarily unavailable."
       />
     </div>
   );
@@ -282,7 +305,7 @@ function WindIntelligence({
         }
         value={hasSustained ? `Gusts ${gustsDisplay}` : ""}
         missing={!hasSustained}
-        title="Wind reading is temporarily unavailable from the upstream API."
+        title="Wind reading is temporarily unavailable."
       />
     </div>
   );
@@ -335,7 +358,7 @@ function ComfortIndex({ weather, unit }) {
         label="Dewpoint"
         value={dewpointDisplay}
         missing={!hasDewpoint}
-        title="Dew point reading is temporarily unavailable from the upstream API."
+        title="Dew point reading is temporarily unavailable."
       />
     </div>
   );

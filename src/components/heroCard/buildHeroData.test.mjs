@@ -242,7 +242,7 @@ describe("buildHeroData", () => {
       location: baseLocation,
       unit: "F",
       climateComparison: {
-        difference: 4,
+        difference: 7,
         // sampleYears intentionally omitted
         referenceDateLabel: "April 21",
       },
@@ -259,6 +259,25 @@ describe("buildHeroData", () => {
     });
     assert.equal(data.hasClimateComparison, false);
     assert.equal(data.climateMessage, "");
+  });
+
+  test("hides the climate line when the delta is small (statistical noise)", () => {
+    const small = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      climateComparison: { difference: 2, sampleYears: 30 },
+    });
+    assert.equal(small.hasClimateComparison, false);
+    assert.equal(small.climateMessage, "");
+
+    const negativeSmall = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      climateComparison: { difference: -3, sampleYears: 30 },
+    });
+    assert.equal(negativeSmall.hasClimateComparison, false);
   });
 
   test("flags any missing hero stat via heroStatsHaveAnyMissing", () => {

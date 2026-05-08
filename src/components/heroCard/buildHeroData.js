@@ -55,6 +55,12 @@ function todayLocaleString(nowMs) {
   });
 }
 
+// Show the climate context line only when today is notably different
+// from the historical norm. A 1-degree delta is statistical noise to
+// most readers; surface the comparison only when the magnitude crosses
+// a threshold that justifies the line.
+const CLIMATE_NOTABLE_DELTA_F = 5;
+
 function buildClimateMessage({
   climateComparison,
   unit,
@@ -69,6 +75,10 @@ function buildClimateMessage({
     return { hasClimateComparison: false, climateMessage: "" };
   }
 
+  if (Math.abs(climateDelta) < CLIMATE_NOTABLE_DELTA_F) {
+    return { hasClimateComparison: false, climateMessage: "" };
+  }
+
   const sampleYears = toFiniteNumber(climateComparison.sampleYears);
   const climateSource = `${sampleYears ?? DEFAULT_SAMPLE_YEARS}-year`;
   const climateDate =
@@ -76,15 +86,7 @@ function buildClimateMessage({
   const climateLocation = locationName || "this location";
   const tempUnit = unit === "C" ? "°C" : "°F";
 
-  const direction =
-    climateDelta > 0 ? "warmer" : climateDelta < 0 ? "colder" : "about the same";
-
-  if (direction === "about the same") {
-    return {
-      hasClimateComparison: true,
-      climateMessage: `Today is about the same as the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`,
-    };
-  }
+  const direction = climateDelta > 0 ? "warmer" : "colder";
 
   // Convert the absolute delta into the user's chosen unit. The raw
   // delta is in Fahrenheit (always); the visible delta should match
@@ -95,7 +97,7 @@ function buildClimateMessage({
 
   return {
     hasClimateComparison: true,
-    climateMessage: `Today is ${climateDeltaDisplay}${tempUnit} ${direction} than the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`,
+    climateMessage: `Today is ${climateDeltaDisplay}${tempUnit} ${direction} than the ${climateSource} average for ${climateDate} in ${climateLocation}.`,
   };
 }
 
