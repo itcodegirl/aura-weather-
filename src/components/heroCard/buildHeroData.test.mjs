@@ -151,6 +151,57 @@ describe("buildHeroData", () => {
     );
   });
 
+  test("hides calm-tone guidance pills so non-events do not narrate", () => {
+    // Mild, dry, low-UV, low-wind day — every guidance item resolves
+    // to "calm". The hero should render no guidance pills at all.
+    const data = buildHeroData({
+      weather: {
+        ...baseWeather,
+        current: {
+          ...baseWeather.current,
+          windSpeed: 4,
+          windGust: 6,
+        },
+        daily: {
+          ...baseWeather.daily,
+          rainChanceMax: [3],
+          rainAmountTotal: [0],
+          uvIndexMax: [1.2],
+        },
+      },
+      location: baseLocation,
+      unit: "F",
+    });
+
+    assert.equal(data.dailyGuidance.length, 0);
+  });
+
+  test("retains a mix of notice + calm by hiding only the calm ones", () => {
+    // Rain is "watch" (>=55%), UV is calm (<3), wind is calm (<18).
+    // Only the rain guidance should make it through the filter.
+    const data = buildHeroData({
+      weather: {
+        ...baseWeather,
+        current: {
+          ...baseWeather.current,
+          windSpeed: 4,
+          windGust: 6,
+        },
+        daily: {
+          ...baseWeather.daily,
+          rainChanceMax: [70],
+          rainAmountTotal: [0.4],
+          uvIndexMax: [1.5],
+        },
+      },
+      location: baseLocation,
+      unit: "F",
+    });
+
+    assert.equal(data.dailyGuidance.length, 1);
+    assert.equal(data.dailyGuidance[0].kind, "rain");
+  });
+
   test("marks daily guidance unavailable instead of inventing readings", () => {
     const data = buildHeroData({
       weather: {

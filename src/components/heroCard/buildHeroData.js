@@ -275,12 +275,22 @@ function buildWindGuidance(weather, unit) {
   };
 }
 
+/*
+ * Returns only the guidance items that warrant the user's attention.
+ * "calm" tones (dry window / low UV / comfortable wind) used to render
+ * three reassuring pills under the hero on every calm day — the same
+ * non-event narration the audit flagged for AlertsCard and the storm
+ * "Calm" copy. We surface guidance only when the weather is actually
+ * doing something the user might decide on (notice / watch tones), or
+ * when a reading is missing (unavailable) so the trust contract stays
+ * honest.
+ */
 function buildDailyGuidance(weather, unit) {
   return [
     buildRainGuidance(weather),
     buildUvGuidance(weather),
     buildWindGuidance(weather, unit),
-  ];
+  ].filter((item) => item.tone !== "calm");
 }
 
 /**

@@ -244,16 +244,30 @@
     0 20px 40px rgba(4, 9, 23, 0.42);
 }
 
+.hero-condition-line {
+  margin: 8px 0 0;
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
 .hero-condition {
-  margin-top: 8px;
   font-size: 22px;
   font-weight: 650;
   letter-spacing: 0;
+  color: var(--text);
+}
+
+.hero-condition-separator {
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
 }
 
 .hero-feels {
-  margin-top: 5px;
-  color: var(--text-muted);
   font-size: 15px;
   font-weight: 600;
 }
@@ -349,48 +363,45 @@
   border-color: rgba(148, 163, 184, 0.24);
 }
 
-.hero-sunlight {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.hero-sun-chip {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  min-height: 72px;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  background: var(--subcard-bg);
+/*
+ * Sunlight info collapsed from three boxed chips to a single line.
+ * Each segment is icon + value; segments are separated by a thin
+ * dot. The line wraps gracefully on narrow viewports because both
+ * segment and separator are flex-direction friendly.
+ */
+.hero-sunlight-line {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
   border: var(--subcard-border);
-  box-shadow: var(--subcard-shadow);
+  background: var(--subcard-bg);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-.hero-sun-chip--daylight {
-  background:
-    linear-gradient(165deg, rgba(20, 33, 64, 0.52), rgba(10, 20, 42, 0.44)),
-    var(--subcard-bg);
-}
-
-.hero-sun-label {
+.hero-sunlight-segment {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--text-dim);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  color: #edf5ff;
 }
 
-.hero-sun-value {
-  color: #edf5ff;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0;
-  font-variant-numeric: tabular-nums;
+.hero-sunlight-segment svg {
+  color: rgba(199, 220, 255, 0.78);
+  flex-shrink: 0;
+}
+
+.hero-sunlight-separator {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
 }
 
 .hero-stats {
@@ -461,14 +472,6 @@
 
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
 @media (max-width: 1200px) {
-  .hero-sunlight {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hero-sun-chip--daylight {
-    grid-column: span 2;
-  }
-
   .hero-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -567,28 +570,14 @@
     padding: 10px;
   }
 
-  .hero-sunlight {
+  .hero-sunlight-line {
     gap: 8px;
-  }
-
-  .hero-sun-chip {
-    padding: 9px 10px;
-    min-height: 66px;
-  }
-
-  .hero-sun-value {
-    font-size: 15px;
+    padding: 7px 12px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 560px) {
-  .hero-sunlight {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-sun-chip--daylight {
-    grid-column: auto;
-  }
 
   .hero-icon {
     width: clamp(80px, 26vw, 96px);
@@ -629,17 +618,15 @@
     font-size: 18px;
   }
 
-  .hero-sun-chip {
-    min-height: 60px;
-    gap: 4px;
+  .hero-sunlight-line {
+    padding: 6px 11px;
+    font-size: 11px;
   }
 
-  .hero-sun-label,
   .stat-label {
     font-size: 10px;
   }
 
-  .hero-sun-value,
   .stat-value {
     font-size: 15px;
   }
