@@ -125,6 +125,73 @@
   margin: 2px 0;
 }
 
+/*
+ * One-line synthesis of the most decision-relevant fact for right
+ * now. The sentence is opinionated by design — it's the moment of
+ * editorial voice the rest of the dashboard intentionally avoids.
+ * Tone modifiers (alert / watch / notice / calm) shift the leading
+ * accent line so the eye knows whether it's reading a warning or a
+ * pleasantry without parsing the text.
+ */
+.hero-reading {
+  margin: 0;
+  position: relative;
+  padding: 8px 14px 8px 18px;
+  border-radius: var(--radius-sm);
+  background: rgba(8, 17, 36, 0.5);
+  border: 1px solid rgba(186, 212, 252, 0.18);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  max-width: 640px;
+}
+
+.hero-reading::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: calc(100% - 14px);
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.hero-reading--alert {
+  color: #fda4af;
+  background: rgba(60, 12, 24, 0.5);
+  border-color: rgba(248, 113, 113, 0.42);
+}
+
+.hero-reading--watch {
+  color: #fcd34d;
+  background: rgba(54, 28, 8, 0.45);
+  border-color: rgba(251, 191, 36, 0.32);
+}
+
+.hero-reading--notice {
+  color: #93c5fd;
+  background: rgba(10, 22, 48, 0.55);
+  border-color: rgba(125, 211, 252, 0.32);
+}
+
+.hero-reading--calm {
+  color: #c4b5fd;
+  background: rgba(20, 12, 44, 0.45);
+  border-color: rgba(196, 181, 253, 0.28);
+}
+
+@media (max-width: 640px) {
+  .hero-reading {
+    font-size: 13px;
+    padding: 7px 12px 7px 16px;
+  }
+}
+
 .hero-temp-block {
   width: 100%;
 }

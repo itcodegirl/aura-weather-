@@ -93,6 +93,7 @@ function HeroCard({
     sunsetLabel,
     daylightLabel,
     sunlightPhase,
+    atmosphereReading,
     hasClimateComparison,
     climateMessage,
     dailyGuidance,
@@ -178,6 +179,14 @@ function HeroCard({
           </div>
         </div>
       </header>
+      {atmosphereReading && (
+        <p
+          className={`hero-reading hero-reading--${atmosphereReading.tone}`}
+          role="status"
+        >
+          {atmosphereReading.text}
+        </p>
+      )}
       <div className="hero-main">
         <div className="hero-temp-block">
           <div className="hero-temp-row">

@@ -15,6 +15,7 @@ import {
   formatDaylightLengthLabel,
   getSunlightPhase,
 } from "../../utils/sunlight.js";
+import { buildAtmosphereReading } from "./buildAtmosphereReading.js";
 
 const FALLBACK_LOCATION_NAME = "Current location";
 const FALLBACK_DATE_LABEL = "today";
@@ -323,6 +324,7 @@ export function buildHeroData({
     fallback: MISSING_VALUE_PLACEHOLDER,
   });
   const sunlightPhase = getSunlightPhase(sunriseValue, sunsetValue, nowMs);
+  const atmosphereReading = buildAtmosphereReading({ weather, nowMs, unit });
 
   const { hasClimateComparison, climateMessage } = buildClimateMessage({
     climateComparison,
@@ -361,6 +363,7 @@ export function buildHeroData({
     sunsetLabel,
     daylightLabel,
     sunlightPhase,
+    atmosphereReading,
     hasClimateComparison,
     climateMessage,
     dailyGuidance,
