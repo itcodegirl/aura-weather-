@@ -36,7 +36,6 @@ const GROUP_LABEL_IDS = {
   nearTermOutlook: "group-near-term-outlook",
   riskSignals: "group-risk-signals",
   weekAhead: "group-week-ahead",
-  dataSources: "group-data-sources",
 };
 
 function WeatherDashboard({
@@ -149,19 +148,20 @@ function WeatherDashboard({
           isRefreshing={isBackgroundLoading}
         />
       )}
-      <h2
-        id={GROUP_LABEL_IDS.dataSources}
-        className="bento-group-label"
-        style={GROUP_LABEL_STYLE_VARIABLES[4]}
-      >
-        Data Sources
-      </h2>
-      <SourceHealthPanel
-        trustMeta={trustMeta}
-        nowMs={nowMs}
-        style={CARD_STYLE_VARIABLES[8]}
-        isRefreshing={isBackgroundLoading}
-      />
+      <details className="data-status-disclosure">
+        <summary className="data-status-summary">
+          <span className="data-status-summary-label">Data status</span>
+          <span className="data-status-summary-hint">
+            Forecast, AQI, alerts, and archive checks
+          </span>
+        </summary>
+        <SourceHealthPanel
+          trustMeta={trustMeta}
+          nowMs={nowMs}
+          style={CARD_STYLE_VARIABLES[8]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </details>
     </main>
   );
 }
