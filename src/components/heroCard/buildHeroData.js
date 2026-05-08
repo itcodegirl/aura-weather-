@@ -13,6 +13,7 @@ import { formatPrecipitation } from "../../utils/weatherUnits.js";
 import {
   formatSunClock,
   formatDaylightLengthLabel,
+  getSunlightPhase,
 } from "../../utils/sunlight.js";
 
 const FALLBACK_LOCATION_NAME = "Current location";
@@ -321,6 +322,7 @@ export function buildHeroData({
   const daylightLabel = formatDaylightLengthLabel(sunriseValue, sunsetValue, {
     fallback: MISSING_VALUE_PLACEHOLDER,
   });
+  const sunlightPhase = getSunlightPhase(sunriseValue, sunsetValue, nowMs);
 
   const { hasClimateComparison, climateMessage } = buildClimateMessage({
     climateComparison,
@@ -358,6 +360,7 @@ export function buildHeroData({
     sunriseLabel,
     sunsetLabel,
     daylightLabel,
+    sunlightPhase,
     hasClimateComparison,
     climateMessage,
     dailyGuidance,

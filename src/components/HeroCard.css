@@ -3,6 +3,52 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 18px;
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+ * Earned warm wash: a soft, low-opacity overlay that surfaces only
+ * within +/- 30 minutes of sunrise or sunset. Sunrise blooms warm-cool
+ * from the lower-left; sunset blooms amber-magenta from the upper-right.
+ * The user lands on the app during the actual golden-hour window and
+ * the hero quietly acknowledges the time of day. Earned, not constant.
+ */
+.hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 900ms var(--ease-standard);
+  mix-blend-mode: screen;
+}
+
+.hero-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-card--phase-sunrise::after {
+  opacity: 0.55;
+  background:
+    radial-gradient(circle at 18% 88%, rgba(253, 186, 116, 0.6), transparent 60%),
+    radial-gradient(circle at 84% 12%, rgba(125, 211, 252, 0.32), transparent 64%);
+}
+
+.hero-card--phase-sunset::after {
+  opacity: 0.6;
+  background:
+    radial-gradient(circle at 86% 18%, rgba(251, 146, 60, 0.62), transparent 58%),
+    radial-gradient(circle at 12% 86%, rgba(244, 114, 182, 0.34), transparent 64%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .hero-card::after {
+    display: none;
+  }
 }
 
 .hero-meta {

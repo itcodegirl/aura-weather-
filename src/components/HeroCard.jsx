@@ -92,6 +92,7 @@ function HeroCard({
     sunriseLabel,
     sunsetLabel,
     daylightLabel,
+    sunlightPhase,
     hasClimateComparison,
     climateMessage,
     dailyGuidance,
@@ -108,11 +109,16 @@ function HeroCard({
   const isHighMissing = isMissingPlaceholder(todayHighDisplay);
   const isLowMissing = isMissingPlaceholder(todayLowDisplay);
 
+  const sunlightPhaseClass = sunlightPhase
+    ? ` hero-card--phase-${sunlightPhase}`
+    : "";
+
   return (
     <section
-      className="bento-hero hero-card glass"
+      className={`bento-hero hero-card glass${sunlightPhaseClass}`}
       style={style}
       data-refreshing={isRefreshing ? "true" : undefined}
+      data-sunlight-phase={sunlightPhase || undefined}
       aria-busy={isRefreshing || undefined}
     >
       <header className="hero-meta">
