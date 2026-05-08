@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { RefreshCw } from "lucide-react";
 import {
   formatLastUpdatedLabel,
   formatTimestampTitle,
@@ -13,10 +14,10 @@ const STALE_AFTER_MINUTES = 25;
  * One pill that replaces the eight per-card DataTrustMeta lines that
  * used to clutter every section. Shows the freshest weatherFetchedAt
  * (or the cache-restored timestamp when the live request failed) plus
- * a single status dot. Stays out of the way: small, low contrast,
- * does not animate.
+ * a single status dot. The pill is also a manual refresh button —
+ * tapping it re-fetches the current location's forecast.
  */
-function GlobalUpdateIndicator({ trustMeta, nowMs }) {
+function GlobalUpdateIndicator({ trustMeta, nowMs, onRefresh, isRefreshing }) {
   if (!trustMeta) {
     return null;
   }
@@ -42,15 +43,40 @@ function GlobalUpdateIndicator({ trustMeta, nowMs }) {
   const title = formatTimestampTitle(lastUpdatedAt);
   const stateLabel = isCached ? "saved" : isStale ? "stale" : "live";
 
+  const isClickable = typeof onRefresh === "function";
+
+  if (!isClickable) {
+    return (
+      <p
+        className={`global-update-indicator global-update-indicator--${stateLabel}`}
+        title={title}
+      >
+        <span className="global-update-dot" aria-hidden="true" />
+        <span className="global-update-text">{updatedLabel}</span>
+        <span className="global-update-state">{stateLabel}</span>
+      </p>
+    );
+  }
+
   return (
-    <p
-      className={`global-update-indicator global-update-indicator--${stateLabel}`}
-      title={title}
+    <button
+      type="button"
+      className={`global-update-indicator global-update-indicator--${stateLabel} global-update-indicator--button`}
+      title={`${title}. Tap to refresh.`}
+      aria-label={`${updatedLabel}. Tap to refresh weather.`}
+      aria-busy={isRefreshing || undefined}
+      onClick={onRefresh}
+      disabled={isRefreshing}
     >
       <span className="global-update-dot" aria-hidden="true" />
       <span className="global-update-text">{updatedLabel}</span>
       <span className="global-update-state">{stateLabel}</span>
-    </p>
+      <RefreshCw
+        size={12}
+        className={`global-update-refresh${isRefreshing ? " is-spinning" : ""}`}
+        aria-hidden="true"
+      />
+    </button>
   );
 }
 

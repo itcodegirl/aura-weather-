@@ -14,6 +14,7 @@ function HeaderControls({
   savedCities,
   location,
   loadSavedCity,
+  restoreSavedCity,
   forgetSavedCity,
   syncConnected,
   syncAccount,
@@ -176,6 +177,7 @@ function HeaderControls({
           savedCities={safeSavedCities}
           location={location}
           loadSavedCity={loadSavedCity}
+          restoreSavedCity={restoreSavedCity}
           forgetSavedCity={forgetSavedCity}
         />
         {shouldShowSyncPanel ? (

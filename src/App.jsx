@@ -52,6 +52,7 @@ function App() {
     clearSavedLocation,
     savedCities,
     loadSavedCity,
+    restoreSavedCity,
     forgetSavedCity,
     syncConnected,
     syncAccount,
@@ -144,6 +145,7 @@ function App() {
         savedCities={savedCities}
         location={location}
         loadSavedCity={loadSavedCity}
+        restoreSavedCity={restoreSavedCity}
         forgetSavedCity={forgetSavedCity}
         syncConnected={syncConnected}
         syncAccount={syncAccount}
@@ -189,7 +191,12 @@ function App() {
         className="status-stack--runtime"
       />
 
-      <GlobalUpdateIndicator trustMeta={trustMeta} nowMs={indicatorNowMs} />
+      <GlobalUpdateIndicator
+        trustMeta={trustMeta}
+        nowMs={indicatorNowMs}
+        onRefresh={retryWeather}
+        isRefreshing={isBackgroundLoading}
+      />
 
       <WeatherDashboard
         weather={weather}

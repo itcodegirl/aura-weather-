@@ -182,6 +182,19 @@ export function useWeather(options = {}) {
     setLocationNotice(removedSavedLocationNotice);
     locationNoticeRef.current = removedSavedLocationNotice;
   }, []);
+
+  // Re-add a previously-forgotten saved city without switching the
+  // active forecast. Used by the undo affordance on the saved-cities
+  // strip — the user gets a quiet "Restored" path that puts the chip
+  // back exactly where they removed it without surprising the
+  // dashboard.
+  const restoreSavedCity = useCallback((city) => {
+    if (!city) {
+      return;
+    }
+    const next = upsertSavedCity(city.lat, city.lon, city.name, city.country);
+    setSavedCities(next);
+  }, []);
   const {
     syncConnected,
     syncAccount,
@@ -217,6 +230,7 @@ export function useWeather(options = {}) {
     clearSavedLocation,
     savedCities,
     loadSavedCity,
+    restoreSavedCity,
     forgetSavedCity,
     syncConnected,
     syncAccount,
