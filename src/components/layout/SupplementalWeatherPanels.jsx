@@ -12,13 +12,10 @@ function SupplementalWeatherPanels({
   weatherInfo,
   trustMeta,
   isBackgroundLoading,
-  nowMs,
   cardStyleVariables,
   groupLabelStyleVariables,
   groupLabelIds,
 }) {
-  const weatherFetchedAt = trustMeta?.weatherFetchedAt ?? null;
-  const alertsFetchedAt = trustMeta?.alertsFetchedAt ?? null;
   const alertsStatus = trustMeta?.alertsStatus ?? weather?.alertsStatus ?? "idle";
 
   return (
@@ -27,8 +24,6 @@ function SupplementalWeatherPanels({
         weather={weather}
         style={cardStyleVariables[3]}
         isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
-        nowMs={nowMs}
       />
       <PanelErrorBoundary
         label="Hourly outlook"
@@ -52,11 +47,23 @@ function SupplementalWeatherPanels({
             chartBottomColor={weatherInfo?.gradient?.[2] ?? weatherInfo?.gradient?.[1]}
             style={cardStyleVariables[4]}
             isRefreshing={isBackgroundLoading}
-            lastUpdatedAt={weatherFetchedAt}
-            nowMs={nowMs}
           />
         </Suspense>
       </PanelErrorBoundary>
+
+      <h2
+        id={groupLabelIds.weekAhead}
+        className="bento-group-label"
+        style={groupLabelStyleVariables[3]}
+      >
+        Week Ahead
+      </h2>
+      <ForecastCard
+        weather={weather}
+        unit={unit}
+        style={cardStyleVariables[7]}
+        isRefreshing={isBackgroundLoading}
+      />
 
       <h2
         id={groupLabelIds.riskSignals}
@@ -70,8 +77,6 @@ function SupplementalWeatherPanels({
         alertsStatus={alertsStatus}
         style={cardStyleVariables[5]}
         isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={alertsFetchedAt}
-        nowMs={nowMs}
       />
       <PanelErrorBoundary
         label="Storm watch"
@@ -93,27 +98,9 @@ function SupplementalWeatherPanels({
             unit={unit}
             style={cardStyleVariables[6]}
             isRefreshing={isBackgroundLoading}
-            lastUpdatedAt={weatherFetchedAt}
-            nowMs={nowMs}
           />
         </Suspense>
       </PanelErrorBoundary>
-
-      <h2
-        id={groupLabelIds.weekAhead}
-        className="bento-group-label"
-        style={groupLabelStyleVariables[3]}
-      >
-        Week Ahead
-      </h2>
-      <ForecastCard
-        weather={weather}
-        unit={unit}
-        style={cardStyleVariables[7]}
-        isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
-        nowMs={nowMs}
-      />
     </>
   );
 }

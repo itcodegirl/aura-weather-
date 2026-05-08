@@ -5,6 +5,7 @@ import { useLocalStorageState } from "./hooks/useLocalStorageState";
 import { usePwaInstallPrompt } from "./hooks/usePwaInstallPrompt";
 import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
 import { useThemeColor } from "./hooks/useThemeColor";
+import { useUrlLocationSync } from "./hooks/useUrlLocationSync";
 import { useWeatherDashboardViewModel } from "./hooks/useWeatherDashboardViewModel";
 import {
   AppShell,
@@ -14,6 +15,8 @@ import {
   StatusStack,
   WeatherDashboard,
 } from "./components/layout";
+import { GlobalUpdateIndicator } from "./components/ui";
+import { useTimeNow } from "./hooks/useTimeNow";
 
 const LOCATION_ONBOARDING_KEY = "aura-weather-location-onboarding-v1";
 
@@ -50,6 +53,7 @@ function App() {
     clearSavedLocation,
     savedCities,
     loadSavedCity,
+    restoreSavedCity,
     forgetSavedCity,
     syncConnected,
     syncAccount,
@@ -90,6 +94,7 @@ function App() {
   const shouldShowPermissionOnboarding = isFallbackLocation && showPermissionOnboarding;
   const showLocationSetupPrompt = isFallbackLocation && !shouldShowPermissionOnboarding;
   useThemeColor(weatherInfo?.gradient);
+  useUrlLocationSync(location);
 
   useEffect(() => {
     if (!isFallbackLocation && showPermissionOnboarding) {
@@ -118,6 +123,12 @@ function App() {
     wasInterruptedRef.current = isInterrupted;
   }, [showGlobalLoading, showGlobalError]);
 
+  // Single source of truth for the "Updated X ago" pill that lives
+  // between the header and the dashboard. We pull nowMs at the App
+  // level instead of via WeatherDashboard's hook so the relative
+  // label updates without re-rendering the bento on every minute.
+  const indicatorNowMs = useTimeNow();
+
   if (showGlobalLoading) {
     return <AppLoadingState />;
   }
@@ -127,7 +138,11 @@ function App() {
   }
 
   return (
-    <AppShell background={background}>
+    <AppShell
+      background={background}
+      conditionCode={weather?.current?.conditionCode}
+      prefersReducedData={prefersReducedData}
+    >
       <AppHeader
         citySearchRef={citySearchRef}
         loadWeather={loadWeather}
@@ -136,6 +151,7 @@ function App() {
         savedCities={savedCities}
         location={location}
         loadSavedCity={loadSavedCity}
+        restoreSavedCity={restoreSavedCity}
         forgetSavedCity={forgetSavedCity}
         syncConnected={syncConnected}
         syncAccount={syncAccount}
@@ -181,13 +197,19 @@ function App() {
         className="status-stack--runtime"
       />
 
+      <GlobalUpdateIndicator
+        trustMeta={trustMeta}
+        nowMs={indicatorNowMs}
+        onRefresh={retryWeather}
+        isRefreshing={isBackgroundLoading}
+      />
+
       <WeatherDashboard
         weather={weather}
         location={location}
         unit={unit}
         weatherDataUnit={weatherDataUnit}
         climateComparison={climateComparison}
-        showClimateContext={showClimateContext}
         isBackgroundLoading={isBackgroundLoading}
         weatherInfo={weatherInfo}
         trustMeta={trustMeta}

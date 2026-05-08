@@ -3,6 +3,52 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 18px;
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+ * Earned warm wash: a soft, low-opacity overlay that surfaces only
+ * within +/- 30 minutes of sunrise or sunset. Sunrise blooms warm-cool
+ * from the lower-left; sunset blooms amber-magenta from the upper-right.
+ * The user lands on the app during the actual golden-hour window and
+ * the hero quietly acknowledges the time of day. Earned, not constant.
+ */
+.hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 900ms var(--ease-standard);
+  mix-blend-mode: screen;
+}
+
+.hero-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-card--phase-sunrise::after {
+  opacity: 0.55;
+  background:
+    radial-gradient(circle at 18% 88%, rgba(253, 186, 116, 0.6), transparent 60%),
+    radial-gradient(circle at 84% 12%, rgba(125, 211, 252, 0.32), transparent 64%);
+}
+
+.hero-card--phase-sunset::after {
+  opacity: 0.6;
+  background:
+    radial-gradient(circle at 86% 18%, rgba(251, 146, 60, 0.62), transparent 58%),
+    radial-gradient(circle at 12% 86%, rgba(244, 114, 182, 0.34), transparent 64%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .hero-card::after {
+    display: none;
+  }
 }
 
 .hero-meta {
@@ -77,6 +123,73 @@
   display: flex;
   align-items: flex-start;
   margin: 2px 0;
+}
+
+/*
+ * One-line synthesis of the most decision-relevant fact for right
+ * now. The sentence is opinionated by design — it's the moment of
+ * editorial voice the rest of the dashboard intentionally avoids.
+ * Tone modifiers (alert / watch / notice / calm) shift the leading
+ * accent line so the eye knows whether it's reading a warning or a
+ * pleasantry without parsing the text.
+ */
+.hero-reading {
+  margin: 0;
+  position: relative;
+  padding: 8px 14px 8px 18px;
+  border-radius: var(--radius-sm);
+  background: rgba(8, 17, 36, 0.5);
+  border: 1px solid rgba(186, 212, 252, 0.18);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  max-width: 640px;
+}
+
+.hero-reading::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: calc(100% - 14px);
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.hero-reading--alert {
+  color: #fda4af;
+  background: rgba(60, 12, 24, 0.5);
+  border-color: rgba(248, 113, 113, 0.42);
+}
+
+.hero-reading--watch {
+  color: #fcd34d;
+  background: rgba(54, 28, 8, 0.45);
+  border-color: rgba(251, 191, 36, 0.32);
+}
+
+.hero-reading--notice {
+  color: #93c5fd;
+  background: rgba(10, 22, 48, 0.55);
+  border-color: rgba(125, 211, 252, 0.32);
+}
+
+.hero-reading--calm {
+  color: #c4b5fd;
+  background: rgba(20, 12, 44, 0.45);
+  border-color: rgba(196, 181, 253, 0.28);
+}
+
+@media (max-width: 640px) {
+  .hero-reading {
+    font-size: 13px;
+    padding: 7px 12px 7px 16px;
+  }
 }
 
 .hero-temp-block {

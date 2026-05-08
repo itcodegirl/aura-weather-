@@ -36,7 +36,6 @@ const GROUP_LABEL_IDS = {
   nearTermOutlook: "group-near-term-outlook",
   riskSignals: "group-risk-signals",
   weekAhead: "group-week-ahead",
-  dataSources: "group-data-sources",
 };
 
 function WeatherDashboard({
@@ -45,7 +44,6 @@ function WeatherDashboard({
   unit,
   weatherDataUnit,
   climateComparison,
-  showClimateContext,
   isBackgroundLoading,
   weatherInfo,
   trustMeta,
@@ -58,10 +56,7 @@ function WeatherDashboard({
     enabled: !prefersReducedData,
   });
 
-  const weatherFetchedAt = trustMeta?.weatherFetchedAt ?? null;
-  const aqiFetchedAt = trustMeta?.aqiFetchedAt ?? null;
   const aqiStatus = trustMeta?.aqiStatus ?? "idle";
-  const climateFetchedAt = trustMeta?.climateFetchedAt ?? null;
   const climateStatus = trustMeta?.climateStatus ?? "idle";
 
   return (
@@ -83,13 +78,10 @@ function WeatherDashboard({
         location={location}
         unit={unit}
         climateComparison={climateComparison}
-        showClimateContext={showClimateContext}
         climateStatus={climateStatus}
         style={CARD_STYLE_VARIABLES[0]}
         isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
         nowMs={nowMs}
-        climateLastUpdatedAt={climateFetchedAt}
       />
 
       <ExposureSection
@@ -98,8 +90,6 @@ function WeatherDashboard({
         uvIndex={weather?.daily?.uvIndexMax?.[0]}
         style={CARD_STYLE_VARIABLES[1]}
         isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={aqiFetchedAt ?? weatherFetchedAt}
-        nowMs={nowMs}
       />
 
       <h2
@@ -115,8 +105,6 @@ function WeatherDashboard({
         dataUnit={weatherDataUnit}
         style={CARD_STYLE_VARIABLES[2]}
         isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
-        nowMs={nowMs}
       />
       {showSupplementalPanels ? (
         <Suspense
@@ -137,7 +125,6 @@ function WeatherDashboard({
             cardStyleVariables={CARD_STYLE_VARIABLES}
             groupLabelStyleVariables={GROUP_LABEL_STYLE_VARIABLES}
             groupLabelIds={GROUP_LABEL_IDS}
-            nowMs={nowMs}
             isBackgroundLoading={isBackgroundLoading}
           />
         </Suspense>
@@ -149,19 +136,20 @@ function WeatherDashboard({
           isRefreshing={isBackgroundLoading}
         />
       )}
-      <h2
-        id={GROUP_LABEL_IDS.dataSources}
-        className="bento-group-label"
-        style={GROUP_LABEL_STYLE_VARIABLES[4]}
-      >
-        Data Sources
-      </h2>
-      <SourceHealthPanel
-        trustMeta={trustMeta}
-        nowMs={nowMs}
-        style={CARD_STYLE_VARIABLES[8]}
-        isRefreshing={isBackgroundLoading}
-      />
+      <details className="data-status-disclosure">
+        <summary className="data-status-summary">
+          <span className="data-status-summary-label">Data status</span>
+          <span className="data-status-summary-hint">
+            Forecast, AQI, alerts, and archive checks
+          </span>
+        </summary>
+        <SourceHealthPanel
+          trustMeta={trustMeta}
+          nowMs={nowMs}
+          style={CARD_STYLE_VARIABLES[8]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </details>
     </main>
   );
 }
@@ -173,7 +161,6 @@ function areWeatherDashboardPropsEqual(prevProps, nextProps) {
     prevProps.unit === nextProps.unit &&
     prevProps.weatherDataUnit === nextProps.weatherDataUnit &&
     prevProps.climateComparison === nextProps.climateComparison &&
-    prevProps.showClimateContext === nextProps.showClimateContext &&
     prevProps.isBackgroundLoading === nextProps.isBackgroundLoading &&
     prevProps.weatherInfo === nextProps.weatherInfo &&
     prevProps.trustMeta === nextProps.trustMeta &&

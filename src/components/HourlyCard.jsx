@@ -6,7 +6,7 @@ import { getWeather } from "../domain/weatherCodes";
 import { convertTemp } from "../utils/temperature";
 import { findWindowStartIndex } from "../utils/timeSeries";
 import { toFiniteNumber } from "../utils/numbers";
-import { CardHeader, DataTrustMeta } from "./ui";
+import { CardHeader } from "./ui";
 import "./HourlyCard.css";
 
 function toDisplayTemperature(value, unit) {
@@ -149,7 +149,7 @@ function buildChartGeometry(data, minTemp, maxTemp) {
 }
 
 const HOURLY_EMPTY_MESSAGE =
-  "Open-Meteo did not return an hourly temperature series for this location. Current conditions remain live above.";
+  "Hourly temperatures aren't available right now. Current conditions are still live above.";
 
 function getHourlySummary(data, unit) {
   if (!Array.isArray(data) || data.length === 0) {
@@ -181,8 +181,6 @@ function HourlyCard({
   chartBottomColor,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const currentWeatherCode = weather?.current?.conditionCode;
   const currentTemperature = weather?.current?.temperature;
@@ -255,11 +253,6 @@ function HourlyCard({
           subtitle="Next 24h"
           subtitleClassName="chart-subtitle"
         />
-        <DataTrustMeta
-          sourceLabel="Open-Meteo Hourly"
-          lastUpdatedAt={lastUpdatedAt}
-          nowMs={nowMs}
-        />
 
         <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
           <p className="loader-text" role="status" aria-live="polite">
@@ -301,11 +294,6 @@ function HourlyCard({
         icon={<LineIcon size={16} />}
         subtitle="Next 24h"
         subtitleClassName="chart-subtitle"
-      />
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Hourly"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
       />
       <p className="chart-lede">{chartLede}</p>
 

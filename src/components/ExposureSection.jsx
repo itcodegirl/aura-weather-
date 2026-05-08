@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { DataTrustMeta, MetricCard } from "./ui";
+import { MetricCard } from "./ui";
 import { getAqiStatus, getUvStatus } from "../utils/meteorology";
 import { toFiniteNumber } from "../utils/numbers";
 import "./MetricPanels.css";
@@ -16,8 +16,6 @@ function ExposureSection({
   uvIndex,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const aqiValue = toFiniteNumber(aqi);
   const uvValue = toFiniteNumber(uvIndex);
@@ -29,11 +27,11 @@ function ExposureSection({
   const aqiSupportText = hasAqiData
     ? `Current AQI is ${Math.round(aqiValue)} out of 300.`
     : aqiStatus === "unavailable"
-      ? "Open-Meteo Air Quality did not return a usable AQI reading. Forecast panels remain available."
-    : "Air quality data is temporarily unavailable. Check back after the next refresh.";
+      ? "Air quality is unavailable right now. The rest of the dashboard is still live."
+    : "Air quality is loading. Check back after the next refresh.";
   const uvSupportText = hasUvData
     ? `Peak UV is ${uvValue.toFixed(1)} on an 11+ scale.`
-    : "Open-Meteo Forecast did not return today's UV index. Current conditions remain available.";
+    : "Today's UV index is unavailable right now. Current conditions are still live.";
 
   return (
     <section
@@ -49,12 +47,6 @@ function ExposureSection({
         </h3>
         <span className="metric-context">{hasFullExposureData ? "Live" : "Partial data"}</span>
       </div>
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Air Quality"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-
       <div className="exposure-grid">
         <MetricCard
           id={METRIC_LABEL_IDS.airQuality}

@@ -2,15 +2,13 @@ import { memo, useMemo } from "react";
 import { CloudRain } from "lucide-react";
 import { toFiniteNumber as toStrictFiniteNumber } from "../utils/numbers";
 import { analyzeNowcast } from "./nowcast/analyzeNowcast.js";
-import { DataTrustMeta, InfoDrawer } from "./ui";
+import { InfoDrawer } from "./ui";
 import "./NowcastCard.css";
 
 function NowcastCard({
   weather,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const nowcast = useMemo(() => analyzeNowcast(weather?.nowcast), [weather?.nowcast]);
   const {
@@ -98,12 +96,6 @@ function NowcastCard({
           </span>
         </div>
       </header>
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Minutely"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-
       <div className="nowcast-primary">
         <p className="nowcast-summary">{nowcast.summary}</p>
         <p className="nowcast-details">{nowcast.details}</p>

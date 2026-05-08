@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { isMissingPlaceholder } from "../utils/numbers";
 import WeatherIcon from "./WeatherIcon";
-import { DataTrustMeta, Stat } from "./ui";
+import { Stat } from "./ui";
 import { buildHeroData } from "./heroCard/buildHeroData";
 import "./HeroCard.css";
 
@@ -28,12 +28,9 @@ function HeroCard({
   location,
   unit,
   climateComparison,
-  showClimateContext = true,
   climateStatus = "idle",
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  climateLastUpdatedAt,
   nowMs,
 }) {
   // Bucket the timestamp to one-minute granularity so the memo only
@@ -95,25 +92,14 @@ function HeroCard({
     sunriseLabel,
     sunsetLabel,
     daylightLabel,
+    sunlightPhase,
+    atmosphereReading,
     hasClimateComparison,
     climateMessage,
     dailyGuidance,
     today,
     tempUnit,
   } = heroData;
-  const shouldShowClimateMeta = showClimateContext && climateStatus !== "disabled";
-  const climateMetaStatusLabel =
-    climateStatus === "loading"
-      ? "Loading climate context"
-      : climateStatus === "unavailable"
-        ? "Climate context unavailable"
-        : "";
-  const climateMetaTitle =
-    climateStatus === "loading"
-      ? "Aura Weather is comparing current conditions against the historical Open-Meteo archive."
-      : climateStatus === "unavailable"
-        ? "The Open-Meteo historical archive did not return a usable response for this comparison."
-        : "";
   const climateFallbackMessage =
     climateStatus === "loading"
       ? "Comparing today's conditions with the historical average..."
@@ -124,11 +110,16 @@ function HeroCard({
   const isHighMissing = isMissingPlaceholder(todayHighDisplay);
   const isLowMissing = isMissingPlaceholder(todayLowDisplay);
 
+  const sunlightPhaseClass = sunlightPhase
+    ? ` hero-card--phase-${sunlightPhase}`
+    : "";
+
   return (
     <section
-      className="bento-hero hero-card glass"
+      className={`bento-hero hero-card glass${sunlightPhaseClass}`}
       style={style}
       data-refreshing={isRefreshing ? "true" : undefined}
+      data-sunlight-phase={sunlightPhase || undefined}
       aria-busy={isRefreshing || undefined}
     >
       <header className="hero-meta">
@@ -188,24 +179,14 @@ function HeroCard({
           </div>
         </div>
       </header>
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Forecast"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-      {shouldShowClimateMeta && (
-        <DataTrustMeta
-          sourceLabel="Open-Meteo Archive"
-          lastUpdatedAt={
-            climateStatus === "ready" ? climateLastUpdatedAt ?? lastUpdatedAt : null
-          }
-          nowMs={nowMs}
-          staleAfterMinutes={120}
-          statusLabel={climateMetaStatusLabel}
-          titleOverride={climateMetaTitle}
-        />
+      {atmosphereReading && (
+        <p
+          className={`hero-reading hero-reading--${atmosphereReading.tone}`}
+          role="status"
+        >
+          {atmosphereReading.text}
+        </p>
       )}
-
       <div className="hero-main">
         <div className="hero-temp-block">
           <div className="hero-temp-row">

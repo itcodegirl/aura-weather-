@@ -13,7 +13,9 @@ import { formatPrecipitation } from "../../utils/weatherUnits.js";
 import {
   formatSunClock,
   formatDaylightLengthLabel,
+  getSunlightPhase,
 } from "../../utils/sunlight.js";
+import { buildAtmosphereReading } from "./buildAtmosphereReading.js";
 
 const FALLBACK_LOCATION_NAME = "Current location";
 const FALLBACK_DATE_LABEL = "today";
@@ -36,24 +38,45 @@ function pickLocationCountry(location) {
   return trimString(location?.country);
 }
 
-function todayLocaleString(nowMs) {
+function todayLocaleString(nowMs, timeZone) {
   // Caller is responsible for passing a real timestamp. We do NOT
   // fall back to Date.now() here because this helper runs inside a
   // useMemo factory in HeroCard.jsx, and reading a mutable global
-  // there would violate react-hooks/purity. The HeroCard wrapper
-  // already substitutes Date.now() outside the memo when nowMs is
-  // missing, then buckets it to one-minute granularity so memos
-  // recompute deterministically.
+  // there would violate react-hooks/purity.
+  //
+  // timeZone is sourced from weather.meta.timezone so a user viewing
+  // Tokyo from Chicago sees Tokyo's day name, not Chicago's. An
+  // unrecognized tz falls back to the device's local zone — passing
+  // an invalid timeZone string to toLocaleDateString throws on some
+  // engines, so we feature-detect and retry without it.
   const referenceTime = toFiniteNumber(nowMs);
   if (referenceTime === null) {
     return "today";
   }
-  return new Date(referenceTime).toLocaleDateString("en-US", {
+  const date = new Date(referenceTime);
+  const baseOptions = {
     weekday: "long",
     month: "long",
     day: "numeric",
-  });
+  };
+  if (typeof timeZone === "string" && timeZone.trim()) {
+    try {
+      return date.toLocaleDateString("en-US", {
+        ...baseOptions,
+        timeZone: timeZone.trim(),
+      });
+    } catch {
+      // Fall through to the device-local format below.
+    }
+  }
+  return date.toLocaleDateString("en-US", baseOptions);
 }
+
+// Show the climate context line only when today is notably different
+// from the historical norm. A 1-degree delta is statistical noise to
+// most readers; surface the comparison only when the magnitude crosses
+// a threshold that justifies the line.
+const CLIMATE_NOTABLE_DELTA_F = 5;
 
 function buildClimateMessage({
   climateComparison,
@@ -69,6 +92,10 @@ function buildClimateMessage({
     return { hasClimateComparison: false, climateMessage: "" };
   }
 
+  if (Math.abs(climateDelta) < CLIMATE_NOTABLE_DELTA_F) {
+    return { hasClimateComparison: false, climateMessage: "" };
+  }
+
   const sampleYears = toFiniteNumber(climateComparison.sampleYears);
   const climateSource = `${sampleYears ?? DEFAULT_SAMPLE_YEARS}-year`;
   const climateDate =
@@ -76,15 +103,7 @@ function buildClimateMessage({
   const climateLocation = locationName || "this location";
   const tempUnit = unit === "C" ? "°C" : "°F";
 
-  const direction =
-    climateDelta > 0 ? "warmer" : climateDelta < 0 ? "colder" : "about the same";
-
-  if (direction === "about the same") {
-    return {
-      hasClimateComparison: true,
-      climateMessage: `Today is about the same as the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`,
-    };
-  }
+  const direction = climateDelta > 0 ? "warmer" : "colder";
 
   // Convert the absolute delta into the user's chosen unit. The raw
   // delta is in Fahrenheit (always); the visible delta should match
@@ -95,7 +114,7 @@ function buildClimateMessage({
 
   return {
     hasClimateComparison: true,
-    climateMessage: `Today is ${climateDeltaDisplay}${tempUnit} ${direction} than the ${climateSource} average for ${climateDate} in ${climateLocation}, from the Open-Meteo historical archive.`,
+    climateMessage: `Today is ${climateDeltaDisplay}${tempUnit} ${direction} than the ${climateSource} average for ${climateDate} in ${climateLocation}.`,
   };
 }
 
@@ -319,6 +338,8 @@ export function buildHeroData({
   const daylightLabel = formatDaylightLengthLabel(sunriseValue, sunsetValue, {
     fallback: MISSING_VALUE_PLACEHOLDER,
   });
+  const sunlightPhase = getSunlightPhase(sunriseValue, sunsetValue, nowMs);
+  const atmosphereReading = buildAtmosphereReading({ weather, nowMs, unit });
 
   const { hasClimateComparison, climateMessage } = buildClimateMessage({
     climateComparison,
@@ -356,9 +377,11 @@ export function buildHeroData({
     sunriseLabel,
     sunsetLabel,
     daylightLabel,
+    sunlightPhase,
+    atmosphereReading,
     hasClimateComparison,
     climateMessage,
     dailyGuidance,
-    today: todayLocaleString(nowMs),
+    today: todayLocaleString(nowMs, weather?.meta?.timezone),
   };
 }

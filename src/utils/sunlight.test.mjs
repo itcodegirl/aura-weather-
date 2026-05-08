@@ -1,7 +1,11 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 
-import { formatSunClock, formatDaylightLengthLabel } from "./sunlight.js";
+import {
+  formatSunClock,
+  formatDaylightLengthLabel,
+  getSunlightPhase,
+} from "./sunlight.js";
 
 describe("sunlight formatting utils", () => {
   test("formats a valid sunrise timestamp", () => {
@@ -49,5 +53,50 @@ describe("sunlight formatting utils", () => {
       fallback: "unavailable",
     });
     assert.equal(daylight, "unavailable");
+  });
+
+  test("getSunlightPhase returns sunrise within 30 min of sunrise", () => {
+    const sunrise = Date.UTC(2026, 3, 21, 11, 0, 0);
+    const sunset = Date.UTC(2026, 3, 21, 23, 0, 0);
+    const tenMinutesAfterSunrise = sunrise + 10 * 60_000;
+    assert.equal(
+      getSunlightPhase(sunrise, sunset, tenMinutesAfterSunrise),
+      "sunrise"
+    );
+    assert.equal(
+      getSunlightPhase(sunrise, sunset, sunrise - 25 * 60_000),
+      "sunrise"
+    );
+  });
+
+  test("getSunlightPhase returns sunset within 30 min of sunset", () => {
+    const sunrise = Date.UTC(2026, 3, 21, 11, 0, 0);
+    const sunset = Date.UTC(2026, 3, 21, 23, 0, 0);
+    assert.equal(
+      getSunlightPhase(sunrise, sunset, sunset + 5 * 60_000),
+      "sunset"
+    );
+  });
+
+  test("getSunlightPhase returns null mid-day and mid-night", () => {
+    const sunrise = Date.UTC(2026, 3, 21, 11, 0, 0);
+    const sunset = Date.UTC(2026, 3, 21, 23, 0, 0);
+    assert.equal(
+      getSunlightPhase(sunrise, sunset, Date.UTC(2026, 3, 21, 17, 0, 0)),
+      null
+    );
+    assert.equal(
+      getSunlightPhase(sunrise, sunset, Date.UTC(2026, 3, 21, 4, 0, 0)),
+      null
+    );
+  });
+
+  test("getSunlightPhase rejects invalid inputs gracefully", () => {
+    assert.equal(getSunlightPhase(null, null, Date.now()), null);
+    assert.equal(getSunlightPhase("oops", "oops", Date.now()), null);
+    assert.equal(
+      getSunlightPhase("2026-04-21T11:00:00Z", "2026-04-21T23:00:00Z", null),
+      null
+    );
   });
 });

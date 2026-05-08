@@ -7,7 +7,7 @@ import {
   MISSING_VALUE_PLACEHOLDER,
   toFiniteNumber as toStrictFiniteNumber,
 } from "../utils/numbers";
-import { CardHeader, DataTrustMeta } from "./ui";
+import { CardHeader } from "./ui";
 import WeatherIcon from "./WeatherIcon";
 import "./ForecastCard.css";
 
@@ -224,7 +224,7 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
 }
 
 const FORECAST_EMPTY_MESSAGE =
-  "Open-Meteo did not return a daily forecast series for this location. Current conditions remain live above.";
+  "The 7-day outlook isn't available right now. Current conditions are still live above.";
 
 function buildWeekSummary(days, weekMin, weekMax, unit) {
   if (!Array.isArray(days) || days.length === 0) {
@@ -260,8 +260,6 @@ function ForecastCard({
   unit,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const days = useMemo(
     () => buildForecastDays(weather?.daily),
@@ -308,11 +306,6 @@ function ForecastCard({
           subtitle="Upcoming week"
           subtitleClassName="forecast-subtitle"
         />
-        <DataTrustMeta
-          sourceLabel="Open-Meteo Daily"
-          lastUpdatedAt={lastUpdatedAt}
-          nowMs={nowMs}
-        />
         <p className="loader-text" role="status" aria-live="polite">
           {FORECAST_EMPTY_MESSAGE}
         </p>
@@ -339,12 +332,6 @@ function ForecastCard({
         subtitle="Upcoming week"
         subtitleClassName="forecast-subtitle"
       />
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Daily"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-
       <ul className="forecast-list" role="list">
         {days.map((day) => (
           <MemoizedDayRow
@@ -381,7 +368,5 @@ export default memo(
     prevProps.weather?.daily === nextProps.weather?.daily &&
     prevProps.unit === nextProps.unit &&
     prevProps.style === nextProps.style &&
-    prevProps.isRefreshing === nextProps.isRefreshing &&
-    prevProps.lastUpdatedAt === nextProps.lastUpdatedAt &&
-    prevProps.nowMs === nextProps.nowMs
+    prevProps.isRefreshing === nextProps.isRefreshing
 );
