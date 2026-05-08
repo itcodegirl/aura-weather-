@@ -138,6 +138,74 @@ describe("weather snapshot cache", () => {
     );
   });
 
+  test("evicts the oldest snapshot and retries when storage quota is exceeded", () => {
+    let allowSet = false;
+    const writes = [];
+    globalThis.window = {
+      localStorage: {
+        getItem(key) {
+          return store.has(key) ? store.get(key) : null;
+        },
+        setItem(key, value) {
+          writes.push(value);
+          if (!allowSet) {
+            const error = new Error("Quota exceeded");
+            error.name = "QuotaExceededError";
+            throw error;
+          }
+          store.set(key, String(value));
+        },
+        removeItem(key) {
+          store.delete(key);
+        },
+      },
+    };
+
+    // Seed the in-memory store with a payload of two snapshots so the
+    // retry path has something to evict.
+    allowSet = true;
+    writeCachedWeatherSnapshot({
+      coordinates: { latitude: 41.8781, longitude: -87.6298 },
+      weather: buildWeather("first"),
+      cachedAt: 1_700_000_000_000,
+    });
+    writeCachedWeatherSnapshot({
+      coordinates: { latitude: 35.6762, longitude: 139.6503 },
+      weather: buildWeather("second"),
+      cachedAt: 1_700_000_010_000,
+    });
+
+    // Simulate quota pressure on the next write. We want exactly one
+    // retry: first call throws, second call succeeds.
+    let setCalls = 0;
+    globalThis.window.localStorage.setItem = (key, value) => {
+      setCalls += 1;
+      if (setCalls === 1) {
+        const error = new Error("Quota exceeded");
+        error.name = "QuotaExceededError";
+        throw error;
+      }
+      store.set(key, String(value));
+    };
+
+    writeCachedWeatherSnapshot({
+      coordinates: { latitude: 51.5074, longitude: -0.1278 },
+      weather: buildWeather("third"),
+      cachedAt: 1_700_000_020_000,
+    });
+
+    // After eviction, the oldest snapshot ("first") should be gone but
+    // "second" and the new "third" should remain.
+    const payload = readRawCache();
+    const labels = Object.values(payload.snapshots).map(
+      (snapshot) => snapshot.weather.label
+    );
+    assert.equal(labels.includes("first"), false);
+    assert.equal(labels.includes("second"), true);
+    assert.equal(labels.includes("third"), true);
+    assert.equal(setCalls, 2);
+  });
+
   test("does not restore forecasts older than the daily freshness window", () => {
     installWindow();
     const nowMs = Date.now();

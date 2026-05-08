@@ -36,9 +36,24 @@ function HeroCard({
   climateLastUpdatedAt,
   nowMs,
 }) {
+  // Bucket the timestamp to one-minute granularity so the memo only
+  // recomputes when the day actually rolls over (or when the user
+  // crosses a minute boundary that affects sun-clock labels). The
+  // hero "today" string would otherwise stay frozen at first render
+  // and silently show yesterday's day name across midnight. nowMs is
+  // sourced from useTimeNow in the parent, so a missing value is a
+  // programming error rather than a runtime concern.
+  const nowBucket = Number.isFinite(nowMs) ? Math.floor(nowMs / 60_000) : null;
   const heroData = useMemo(
-    () => buildHeroData({ weather, location, unit, climateComparison }),
-    [weather, location, unit, climateComparison]
+    () =>
+      buildHeroData({
+        weather,
+        location,
+        unit,
+        climateComparison,
+        nowMs: nowBucket === null ? null : nowBucket * 60_000,
+      }),
+    [weather, location, unit, climateComparison, nowBucket]
   );
 
   if (!heroData) {
