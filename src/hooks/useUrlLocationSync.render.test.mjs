@@ -66,6 +66,40 @@ describe("useUrlLocationSync write path", () => {
     assert.equal(window.location.search, "?keep=this");
   });
 
+  test("does not call replaceState a second time when the location is unchanged", () => {
+    let replaceCalls = 0;
+    const realReplace = window.history.replaceState.bind(window.history);
+    window.history.replaceState = (...args) => {
+      replaceCalls += 1;
+      return realReplace(...args);
+    };
+
+    const view = render(
+      React.createElement(ProbeWithSync, {
+        location: {
+          lat: 48.8566,
+          lon: 2.3522,
+          name: "Paris",
+          country: "France",
+        },
+      })
+    );
+    assert.equal(replaceCalls, 1);
+
+    // Re-render with the same location values.
+    view.rerender(
+      React.createElement(ProbeWithSync, {
+        location: {
+          lat: 48.8566,
+          lon: 2.3522,
+          name: "Paris",
+          country: "France",
+        },
+      })
+    );
+    assert.equal(replaceCalls, 1);
+  });
+
   test("uses replaceState rather than pushState (no history pollution)", () => {
     // Push a marker entry first; if the hook used pushState, our
     // marker would no longer be the previous entry.

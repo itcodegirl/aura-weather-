@@ -404,12 +404,68 @@
   user-select: none;
 }
 
+/*
+ * Hero stats sit behind a "More readings" disclosure by default. Wind
+ * value already shows in the atmospheric reading sentence on gusty
+ * days, and Dew Point duplicates the StormWatch comfort module — so
+ * surfacing all four on every page load was reference data masquer-
+ * ading as primary data. The disclosure auto-opens when any reading
+ * is missing so the trust-contract note still reaches the user.
+ */
+.hero-stats-disclosure {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(178, 202, 244, 0.2);
+}
+
+.hero-stats-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 0;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.hero-stats-summary::-webkit-details-marker {
+  display: none;
+}
+
+.hero-stats-summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.hero-stats-disclosure[open] .hero-stats-summary::after {
+  transform: rotate(225deg) translate(-2px, -2px);
+}
+
+.hero-stats-summary:hover,
+.hero-stats-summary:focus-visible {
+  color: var(--text-muted);
+}
+
+.hero-stats-summary:focus-visible {
+  outline: 2px solid rgba(130, 228, 255, 0.66);
+  outline-offset: 2px;
+}
+
 .hero-stats {
+  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(178, 202, 244, 0.2);
 }
 
 .stat {

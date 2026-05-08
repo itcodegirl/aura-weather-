@@ -271,35 +271,43 @@ function HeroCard({
         </span>
       </p>
 
-      <div className="hero-stats">
-        <Stat
-          icon={<Wind size={18} />}
-          label="Wind"
-          value={windDisplay}
-        />
-        <Stat
-          icon={<Droplets size={18} />}
-          label="Humidity"
-          value={humidityDisplay}
-        />
-        <Stat
-          icon={<Gauge size={18} />}
-          label="Pressure"
-          value={pressureDisplay}
-        />
-        <Stat
-          icon={<Thermometer size={18} />}
-          label="Dew Point"
-          value={dewPointDisplay}
-        />
-      </div>
-      {heroStatsHaveAnyMissing && (
-        <p className="hero-stats-note" role="status">
-          Some readings are unavailable from the provider. Aura shows
-          “—” instead of a fallback value to keep the rest of the
-          forecast trustworthy.
-        </p>
-      )}
+      <details
+        className="hero-stats-disclosure"
+        open={heroStatsHaveAnyMissing || undefined}
+      >
+        <summary className="hero-stats-summary">
+          <span>More readings</span>
+        </summary>
+        <div className="hero-stats">
+          <Stat
+            icon={<Wind size={18} />}
+            label="Wind"
+            value={windDisplay}
+          />
+          <Stat
+            icon={<Droplets size={18} />}
+            label="Humidity"
+            value={humidityDisplay}
+          />
+          <Stat
+            icon={<Gauge size={18} />}
+            label="Pressure"
+            value={pressureDisplay}
+          />
+          <Stat
+            icon={<Thermometer size={18} />}
+            label="Dew Point"
+            value={dewPointDisplay}
+          />
+        </div>
+        {heroStatsHaveAnyMissing && (
+          <p className="hero-stats-note" role="status">
+            Some readings are unavailable from the provider. Aura shows
+            “—” instead of a fallback value to keep the rest of the
+            forecast trustworthy.
+          </p>
+        )}
+      </details>
     </section>
   );
 }

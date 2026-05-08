@@ -1,4 +1,7 @@
-const CACHE_VERSION = "aura-weather-v1";
+// Bump the version when the static APP_SHELL_URLS list changes so
+// existing installs evict the previous shell on next activation.
+// v2 adds /apple-touch-icon.png after the brand-mark refresh.
+const CACHE_VERSION = "aura-weather-v2";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-app-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const APP_SHELL_URLS = [
@@ -7,6 +10,7 @@ const APP_SHELL_URLS = [
   "/manifest.webmanifest",
   "/favicon.svg",
   "/atmosphere-ring.svg",
+  "/apple-touch-icon.png",
   "/og-image.png",
 ];
 const CACHEABLE_DESTINATIONS = new Set([

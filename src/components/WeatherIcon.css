@@ -55,3 +55,15 @@
     animation: none;
   }
 }
+
+/*
+ * Honour prefers-reduced-data the same way the precipitation overlay
+ * does. The hero icon's idle float / pulse animation is ornamental;
+ * users who request reduced data also typically want fewer GPU
+ * frames spent on decoration.
+ */
+@media (prefers-reduced-data: reduce) {
+  .weather-icon--animated {
+    animation: none;
+  }
+}

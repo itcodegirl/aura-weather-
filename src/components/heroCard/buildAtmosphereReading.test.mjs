@@ -117,6 +117,20 @@ describe("buildAtmosphereReading", () => {
     assert.match(result.text, /Gusts to 35 mph/);
   });
 
+  test("moderate UV during daylight surfaces a softer notice", () => {
+    const weather = buildBaseWeather({
+      current: { temperature: 65, windGust: 5 },
+      daily: {
+        sunrise: [SUNRISE_ISO],
+        sunset: [SUNSET_ISO],
+        uvIndexMax: [6.4],
+      },
+    });
+    const result = buildAtmosphereReading({ weather, nowMs: FIXED_NOW });
+    assert.equal(result.tone, "notice");
+    assert.match(result.text, /Moderate UV/);
+  });
+
   test("hot temperature triggers heat copy", () => {
     const weather = buildBaseWeather({
       current: { temperature: 96, windGust: 5 },
