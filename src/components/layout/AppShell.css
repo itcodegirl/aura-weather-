@@ -18,6 +18,51 @@
   contain-intrinsic-size: 216px;
 }
 
+.panel-boundary-fallback {
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.panel-boundary-retry {
+  margin-top: 4px;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(201, 224, 255, 0.42);
+  background: rgba(8, 17, 38, 0.6);
+  color: #e3efff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.panel-boundary-retry:hover {
+  border-color: rgba(174, 227, 255, 0.6);
+  background: rgba(13, 26, 53, 0.78);
+  transform: translateY(-1px);
+}
+
+.panel-boundary-retry:focus-visible {
+  border-color: rgba(130, 228, 255, 0.66);
+  box-shadow: 0 0 0 3px rgba(64, 196, 255, 0.2);
+}
+
+.panel-boundary-retry:active {
+  transform: scale(var(--press-scale));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-boundary-retry:hover,
+  .panel-boundary-retry:active {
+    transform: none;
+  }
+}
+
 .loading-card-title {
   position: relative;
   overflow: hidden;
@@ -93,6 +138,10 @@
 .loading-skeleton {
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
   min-height: 128px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(188, 214, 252, 0.18);
@@ -113,15 +162,86 @@
   );
   transform: translateX(-120%);
   animation: loading-sheen 1.8s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .loading-skeleton--hero {
   min-height: 240px;
+  justify-content: space-between;
 }
 
 .loading-skeleton--wide {
   grid-column: 1 / -1;
-  min-height: 104px;
+  min-height: 116px;
+}
+
+.loading-skeleton-block {
+  border-radius: 8px;
+  background: rgba(208, 226, 255, 0.12);
+}
+
+.loading-skeleton-block--meta {
+  width: 40%;
+  height: 12px;
+}
+
+.loading-skeleton-block--temp {
+  width: 70%;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(208, 226, 255, 0.16),
+    rgba(188, 226, 255, 0.22) 50%,
+    rgba(208, 226, 255, 0.16)
+  );
+}
+
+.loading-skeleton-block--row {
+  width: 90%;
+  height: 16px;
+}
+
+.loading-skeleton-block--gauge {
+  width: 86px;
+  height: 86px;
+  align-self: flex-start;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 32%, rgba(232, 246, 255, 0.18), rgba(123, 199, 255, 0.06) 64%),
+    rgba(208, 226, 255, 0.1);
+}
+
+.loading-skeleton-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 56px;
+}
+
+.loading-skeleton-bar {
+  flex: 1 1 0;
+  height: 100%;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(188, 226, 255, 0.06),
+    rgba(123, 199, 255, 0.16)
+  );
+  animation: skeleton-bar-pulse 1.6s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@keyframes skeleton-bar-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.5);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
 }
 
 @keyframes weather-icon-breathe {
@@ -181,10 +301,10 @@
 }
 
 .error-retry {
-  margin-top: 16px;
-  min-height: 42px;
-  min-width: 116px;
-  padding: 0 16px;
+  margin-top: 18px;
+  min-height: 44px;
+  min-width: 124px;
+  padding: 0 18px;
   border-radius: var(--radius-pill);
   background: linear-gradient(145deg, #f9fcff, #dce9ff);
   color: #081126;
@@ -210,6 +330,10 @@
 
   .loading-dashboard-grid {
     grid-template-columns: 1fr;
+  }
+
+  .loading-skeleton {
+    padding: 16px;
   }
 
   .loading-skeleton--hero {
@@ -238,10 +362,19 @@
 
   .loading-skeleton {
     min-height: 108px;
+    padding: 14px;
   }
 
   .loading-skeleton--hero {
     min-height: 170px;
+  }
+
+  .loading-skeleton-block--temp {
+    height: 44px;
+  }
+
+  .loading-skeleton-bars {
+    height: 44px;
   }
 }
 
@@ -249,6 +382,12 @@
   .loading-card-title::after,
   .loading-skeleton::after {
     display: none;
+  }
+
+  .loading-skeleton-bar {
+    animation: none;
+    transform: scaleY(0.7);
+    opacity: 0.7;
   }
 
   .error-retry:hover {

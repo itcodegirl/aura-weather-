@@ -234,9 +234,14 @@
 
 @media (max-width: 420px) {
   .bento-group-label {
-    padding-left: 13px;
+    padding-left: 11px;
     font-size: 10px;
     letter-spacing: 0.1em;
+  }
+
+  .bento-group-label::before {
+    width: 3px;
+    height: 12px;
   }
 
   .bento-group-label::after {

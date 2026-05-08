@@ -223,9 +223,12 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
   );
 }
 
+const FORECAST_EMPTY_MESSAGE =
+  "Open-Meteo did not return a daily forecast series for this location. Current conditions remain live above.";
+
 function buildWeekSummary(days, weekMin, weekMax, unit) {
   if (!Array.isArray(days) || days.length === 0) {
-    return "7-day forecast is temporarily unavailable.";
+    return FORECAST_EMPTY_MESSAGE;
   }
 
   const firstMax = days[0]?.temperatureMax;
@@ -311,7 +314,7 @@ function ForecastCard({
           nowMs={nowMs}
         />
         <p className="loader-text" role="status" aria-live="polite">
-          7-day forecast is temporarily unavailable.
+          {FORECAST_EMPTY_MESSAGE}
         </p>
       </section>
     );

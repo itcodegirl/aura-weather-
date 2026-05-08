@@ -1,4 +1,5 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useId, useState } from "react";
+import { Settings2 } from "lucide-react";
 import CitySearch from "./CitySearch";
 import DisplaySettingsControls from "./header/DisplaySettingsControls";
 import SavedCitiesStrip from "./header/SavedCitiesStrip";
@@ -115,6 +116,16 @@ function HeaderControls({
     }
   }, [syncSavedCitiesNow]);
 
+  // The mobile settings sheet collapses the secondary controls (climate
+  // context toggle, unit toggle, clear-startup-city) so they do not push
+  // the hero card three rows down on phones. The button is hidden on
+  // desktop via CSS, where the controls stay inline.
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
+  const mobileSettingsId = useId();
+  const handleToggleMobileSettings = useCallback(() => {
+    setIsMobileSettingsOpen((current) => !current);
+  }, []);
+
   return (
     <div className="app-header-actions">
       <div className="app-header-primary">
@@ -145,6 +156,21 @@ function HeaderControls({
               ? (isLocatingCurrent ? "Finding..." : "My location")
               : "Unavailable"}
           </button>
+          <button
+            type="button"
+            className={`mobile-settings-toggle glass ${isMobileSettingsOpen ? "is-open" : ""}`.trim()}
+            aria-expanded={isMobileSettingsOpen}
+            aria-controls={mobileSettingsId}
+            aria-label={
+              isMobileSettingsOpen
+                ? "Hide display settings"
+                : "Show display settings"
+            }
+            onClick={handleToggleMobileSettings}
+          >
+            <Settings2 size={16} aria-hidden="true" />
+            <span>Settings</span>
+          </button>
         </div>
         <SavedCitiesStrip
           savedCities={safeSavedCities}
@@ -166,6 +192,8 @@ function HeaderControls({
       </div>
 
       <DisplaySettingsControls
+        id={mobileSettingsId}
+        isMobileOpen={isMobileSettingsOpen}
         showClimateContext={showClimateContext}
         onEnableClimateContext={handleEnableClimateContext}
         onDisableClimateContext={handleDisableClimateContext}

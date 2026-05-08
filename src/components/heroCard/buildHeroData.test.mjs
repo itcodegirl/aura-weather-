@@ -73,6 +73,29 @@ describe("buildHeroData", () => {
     assert.equal(data.heroStatsHaveAnyMissing, false);
   });
 
+  test("derives the today label from the supplied nowMs so midnight rollover refreshes", () => {
+    // 2026-04-20 23:50 UTC and 2026-04-21 00:10 UTC straddle midnight
+    // depending on TZ, so use noon in two different days to keep the
+    // assertion timezone-independent.
+    const dayOne = Date.UTC(2026, 3, 20, 18, 0, 0);
+    const dayTwo = Date.UTC(2026, 3, 21, 18, 0, 0);
+
+    const monday = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: dayOne,
+    });
+    const tuesday = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: dayTwo,
+    });
+
+    assert.notEqual(monday.today, tuesday.today);
+  });
+
   test("builds practical daily guidance from forecast readings", () => {
     const data = buildHeroData({
       weather: {

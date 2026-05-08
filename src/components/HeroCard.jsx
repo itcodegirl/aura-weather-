@@ -36,9 +36,24 @@ function HeroCard({
   climateLastUpdatedAt,
   nowMs,
 }) {
+  // Bucket the timestamp to one-minute granularity so the memo only
+  // recomputes when the day actually rolls over (or when the user
+  // crosses a minute boundary that affects sun-clock labels). The
+  // hero "today" string would otherwise stay frozen at first render
+  // and silently show yesterday's day name across midnight. nowMs is
+  // sourced from useTimeNow in the parent, so a missing value is a
+  // programming error rather than a runtime concern.
+  const nowBucket = Number.isFinite(nowMs) ? Math.floor(nowMs / 60_000) : null;
   const heroData = useMemo(
-    () => buildHeroData({ weather, location, unit, climateComparison }),
-    [weather, location, unit, climateComparison]
+    () =>
+      buildHeroData({
+        weather,
+        location,
+        unit,
+        climateComparison,
+        nowMs: nowBucket === null ? null : nowBucket * 60_000,
+      }),
+    [weather, location, unit, climateComparison, nowBucket]
   );
 
   if (!heroData) {
@@ -50,8 +65,8 @@ function HeroCard({
         aria-busy={isRefreshing || undefined}
       >
         <header className="hero-meta">
-          <div className="hero-location">
-            <MapPin size={14} />
+          <div className="hero-location" aria-label="Location unavailable">
+            <MapPin size={14} aria-hidden="true" />
             <span>Location unavailable</span>
           </div>
           <p className="hero-date">Loading weather</p>
@@ -118,8 +133,11 @@ function HeroCard({
     >
       <header className="hero-meta">
         <div className="hero-location-block">
-          <div className="hero-location">
-            <MapPin size={14} />
+          <div
+            className="hero-location"
+            aria-label={`Location: ${safeLocationName}${safeLocationCountry ? `, ${safeLocationCountry}` : ""}`}
+          >
+            <MapPin size={14} aria-hidden="true" />
             <span>
               {safeLocationName}
               {safeLocationCountry ? `, ${safeLocationCountry}` : ""}

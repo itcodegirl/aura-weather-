@@ -5,6 +5,84 @@ work that hardened the dashboard from a polished demo into a
 portfolio-grade product. Format roughly follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] — Production polish pass (2026-05)
+
+### Added
+
+- **Mobile settings drawer.** `HeaderControls.jsx` exposes a
+  mobile-only "Settings" toggle that collapses the climate context,
+  unit, and clear-startup controls behind one button on phones. The
+  panel sets `display: none` while collapsed so it stays out of the AT
+  tree until requested. Desktop layout unchanged.
+- **Per-card retry on lazy-chunk failures.** `PanelErrorBoundary` now
+  renders a "Try again" button that bumps an internal `resetKey` and
+  remounts children via an identity wrapper, letting React re-evaluate
+  the lazy import without taking the dashboard down.
+- **`useThemeColor` hook.** Updates `<meta name="theme-color">` (with
+  prior-value restore on unmount) so the iOS / Android browser chrome
+  blends with the active scene gradient. Runs in a layout effect so
+  the chrome bar settles before paint.
+- **Layout-aware loading skeleton.** Hero meta + temp + row stripes,
+  a circular gauge stub, and eight breathing precip-bar stubs that
+  visually pre-figure the bento layout. Reduced-motion path holds the
+  bars still.
+- **Storage quota guard.** `weatherSnapshotCache` now catches
+  `QuotaExceededError`, evicts the oldest snapshot, and retries once
+  before yielding gracefully. Test coverage in `weatherSnapshotCache.test.mjs`.
+- **Render tests for new code.** `useThemeColor.render.test.mjs`,
+  `PanelErrorBoundary.render.test.mjs`,
+  `HeaderControls.render.test.mjs`.
+
+### Changed
+
+- **Mobile touch targets.** Saved-city remove (24 → 28px), saved-city
+  chips (28 → 36px), status-stack actions and retry (26-28 → 36px),
+  location setup (36 → 44px), AppShell error retry (42 → 44px).
+- **Safe-area support.** `<meta name="viewport">` adds
+  `viewport-fit=cover`; `.app-inner` honours `env(safe-area-inset-*)`
+  on every breakpoint. The previous safe-area work was a no-op on
+  iOS without `viewport-fit`; this pair makes it actually work.
+- **Hero icon position on mobile.** Replaced
+  `flex-direction: column-reverse` with a centred horizontal row at
+  <640px so the WeatherIcon stays beside (not below) the temperature.
+- **Empty-state copy.** Hourly chart, 7-day forecast, and rain
+  timeline now name the provider (Open-Meteo) and reassure that other
+  panels remain live, instead of a generic "X is temporarily
+  unavailable."
+- **Accessible button copy.** Climate-context toggle reads "Show /
+  Hide historical climate comparison." Cloud Sync chevron exposes
+  "Expand / Collapse cloud sync controls" as its accessible name.
+- **City search keyboard hints.** `inputMode="search"`,
+  `autoCorrect="off"`, `autoCapitalize="words"`, `spellCheck="false"`.
+- **Hero "today" rollover.** `buildHeroData` now derives the date
+  label from a passed `nowMs`, bucketed to one minute. The label
+  refreshes correctly across midnight on long-running tabs.
+- **Critical-path preconnects.** Added `preconnect` for the two API
+  origins hit on cold start (`api.open-meteo.com`,
+  `geocoding-api.open-meteo.com`) and `dns-prefetch` for archive,
+  air-quality, and NWS alerts.
+
+### Fixed
+
+- **`prefers-reduced-transparency`.** When the OS preference is on,
+  drop `backdrop-filter`, lift card opacity to ~96%, simplify the body
+  gradient, and disable the wash overlays. Layout and color story
+  stay identical.
+- **Focus management on global error recovery.** When transitioning
+  out of `AppLoadingState` or `AppErrorState`, focus moves to
+  `#main-content` so screen-reader users land back in the dashboard
+  instead of `document.body`.
+- **Hero location aria-label.** A single `aria-label="Location: Tokyo,
+  Japan"` replaces the disjoint MapPin + text reading order.
+- **Dead `.settings-toggle` CSS.** Removed CSS rules that targeted an
+  element with no JSX counterpart.
+
+### Removed
+
+- Static `theme-color="#0b1c3f"` is now a default that
+  `useThemeColor` overrides at runtime; the meta tag itself remains
+  for browsers that load HTML before JS.
+
 ## [Unreleased] — Audit pass (2026-05)
 
 ### Added

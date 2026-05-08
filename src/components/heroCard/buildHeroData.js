@@ -36,8 +36,19 @@ function pickLocationCountry(location) {
   return trimString(location?.country);
 }
 
-function todayLocaleString(now = new Date()) {
-  return now.toLocaleDateString("en-US", {
+function todayLocaleString(nowMs) {
+  // Caller is responsible for passing a real timestamp. We do NOT
+  // fall back to Date.now() here because this helper runs inside a
+  // useMemo factory in HeroCard.jsx, and reading a mutable global
+  // there would violate react-hooks/purity. The HeroCard wrapper
+  // already substitutes Date.now() outside the memo when nowMs is
+  // missing, then buckets it to one-minute granularity so memos
+  // recompute deterministically.
+  const referenceTime = toFiniteNumber(nowMs);
+  if (referenceTime === null) {
+    return "today";
+  }
+  return new Date(referenceTime).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -264,6 +275,7 @@ export function buildHeroData({
   location,
   unit,
   climateComparison,
+  nowMs,
 } = {}) {
   if (!weather?.current || !location) {
     return null;
@@ -347,6 +359,6 @@ export function buildHeroData({
     hasClimateComparison,
     climateMessage,
     dailyGuidance,
-    today: todayLocaleString(),
+    today: todayLocaleString(nowMs),
   };
 }

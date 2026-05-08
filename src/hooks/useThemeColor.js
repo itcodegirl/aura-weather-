@@ -1,0 +1,57 @@
+import { useEffect, useLayoutEffect } from "react";
+
+const HEX_COLOR_PATTERN = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+// useLayoutEffect throws a warning on the server and there is no
+// matching meta tag to update there anyway, so fall back to useEffect
+// when document is unavailable.
+const useIsomorphicLayoutEffect =
+  typeof document === "undefined" ? useEffect : useLayoutEffect;
+
+function isValidHex(value) {
+  return typeof value === "string" && HEX_COLOR_PATTERN.test(value);
+}
+
+function ensureMetaThemeColor() {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    document.head.appendChild(meta);
+  }
+  return meta;
+}
+
+// Pick a hex color from a weather gradient that visually matches the
+// browser chrome's docked position. The first stop is the strongest hue
+// and reads cleanly against typical mobile status bars.
+export function useThemeColor(gradient) {
+  useIsomorphicLayoutEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const candidate = Array.isArray(gradient) ? gradient[0] : null;
+    if (!isValidHex(candidate)) {
+      return;
+    }
+
+    const meta = ensureMetaThemeColor();
+    if (!meta) {
+      return;
+    }
+
+    const previous = meta.getAttribute("content");
+    meta.setAttribute("content", candidate);
+
+    return () => {
+      if (previous) {
+        meta.setAttribute("content", previous);
+      }
+    };
+  }, [gradient]);
+}

@@ -148,9 +148,12 @@ function buildChartGeometry(data, minTemp, maxTemp) {
   };
 }
 
+const HOURLY_EMPTY_MESSAGE =
+  "Open-Meteo did not return an hourly temperature series for this location. Current conditions remain live above.";
+
 function getHourlySummary(data, unit) {
   if (!Array.isArray(data) || data.length === 0) {
-    return "Hourly temperature data is temporarily unavailable.";
+    return HOURLY_EMPTY_MESSAGE;
   }
 
   // Strict coercion: a null entry.temp would silently land as 0 and
@@ -159,7 +162,7 @@ function getHourlySummary(data, unit) {
     .map((entry) => toFiniteNumber(entry?.temp))
     .filter((value) => value !== null);
   if (validTemps.length === 0) {
-    return "Hourly temperature data is temporarily unavailable.";
+    return HOURLY_EMPTY_MESSAGE;
   }
 
   const firstLabel = data[0]?.label || "now";
@@ -260,7 +263,7 @@ function HourlyCard({
 
         <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
           <p className="loader-text" role="status" aria-live="polite">
-            Hourly temperature data is temporarily unavailable.
+            {HOURLY_EMPTY_MESSAGE}
           </p>
         </div>
       </section>

@@ -73,6 +73,11 @@ function SyncAccountPanel({
         className={`sync-account-toggle ${isPanelVisible ? "is-expanded" : ""}`.trim()}
         aria-expanded={isPanelVisible}
         aria-controls={panelId}
+        aria-label={
+          isPanelVisible
+            ? "Collapse cloud sync controls"
+            : "Expand cloud sync controls"
+        }
         onClick={() => setIsExpanded((currentValue) => !currentValue)}
       >
         <span className="sync-account-toggle-copy">
