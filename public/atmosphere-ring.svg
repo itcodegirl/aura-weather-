@@ -1,10 +1,31 @@
-﻿<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Atmospheric ring icon">
-  <circle cx="14" cy="14" r="11" stroke="url(#ringGradient)" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
-  <path d="M7 15C8.5 11.5 12 8.5 14 8.5C16 8.5 19.5 11.5 21 15" stroke="url(#ringGradient)" stroke-width="2" stroke-linecap="round" opacity="0.95" />
+<svg
+  width="28"
+  height="28"
+  viewBox="0 0 28 28"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Aura"
+>
   <defs>
-    <linearGradient id="ringGradient" x1="3" y1="3" x2="25" y2="25" gradientUnits="userSpaceOnUse">
+    <linearGradient id="auraGradient" x1="4" y1="4" x2="24" y2="24" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="100%" stop-color="rgba(255,255,255,0.65)" />
+      <stop offset="100%" stop-color="#bcd6ff" />
     </linearGradient>
+    <radialGradient id="auraCenter" cx="14" cy="14" r="2.4" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#bcd6ff" />
+    </radialGradient>
   </defs>
+  <!--
+    The mark reads as a literal aura — concentric rings radiating
+    out from a single observation point. Outer rings fade so visual
+    weight pulls the eye toward the centre, matching the brand
+    promise of focused atmospheric reading rather than ambient
+    weather noise.
+  -->
+  <circle cx="14" cy="14" r="11.5" stroke="url(#auraGradient)" stroke-width="1" opacity="0.18" />
+  <circle cx="14" cy="14" r="8" stroke="url(#auraGradient)" stroke-width="1.2" opacity="0.36" />
+  <circle cx="14" cy="14" r="4.6" stroke="url(#auraGradient)" stroke-width="1.4" opacity="0.62" />
+  <circle cx="14" cy="14" r="1.6" fill="url(#auraCenter)" />
 </svg>
