@@ -13,12 +13,26 @@ import {
 } from "./useLocation";
 import { useSavedLocationsSync } from "./useSavedLocationsSync";
 import { useWeatherData } from "./useWeatherData";
+import { parseLocationFromUrl } from "./useUrlLocationSync";
 import {
   hasMatchingCoordinates,
   toLocationPayload,
 } from "./locationHelpers";
 
 function getInitialLocationState() {
+  // URL-shared location wins over persisted preference. A user who
+  // taps a shared link expects to see that city, not whatever they
+  // had open last time. The persisted-startup feature still applies
+  // when no URL params are present.
+  const urlLocation = parseLocationFromUrl();
+  if (urlLocation) {
+    return {
+      location: urlLocation,
+      notice: "Showing the shared forecast.",
+      hasPersistedLocation: false,
+    };
+  }
+
   const persistedLocation = getPersistedLocation();
   if (persistedLocation) {
     return {

@@ -5,6 +5,7 @@ import { useLocalStorageState } from "./hooks/useLocalStorageState";
 import { usePwaInstallPrompt } from "./hooks/usePwaInstallPrompt";
 import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
 import { useThemeColor } from "./hooks/useThemeColor";
+import { useUrlLocationSync } from "./hooks/useUrlLocationSync";
 import { useWeatherDashboardViewModel } from "./hooks/useWeatherDashboardViewModel";
 import {
   AppShell,
@@ -93,6 +94,7 @@ function App() {
   const shouldShowPermissionOnboarding = isFallbackLocation && showPermissionOnboarding;
   const showLocationSetupPrompt = isFallbackLocation && !shouldShowPermissionOnboarding;
   useThemeColor(weatherInfo?.gradient);
+  useUrlLocationSync(location);
 
   useEffect(() => {
     if (!isFallbackLocation && showPermissionOnboarding) {
