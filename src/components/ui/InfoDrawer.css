@@ -24,6 +24,19 @@
     transform var(--motion-fast) var(--ease-standard);
 }
 
+/*
+ * On touch devices the visible 28px circle stays the same but the
+ * hit area widens to 44px via padding so the help affordance is
+ * actually tappable next to a metric label without misfires.
+ */
+@media (pointer: coarse) {
+  .info-drawer-trigger {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+}
+
 .info-drawer-trigger:hover {
   border-color: rgba(139, 230, 255, 0.62);
   background: rgba(13, 30, 59, 0.76);
@@ -69,10 +82,16 @@
 }
 
 @media (max-width: 420px) {
+  /*
+   * Even at the narrowest tier, keep the help triggers at 28px so
+   * they remain reachable next to the metric labels. The visual
+   * footprint stayed small in the previous 24px design but the hit
+   * area was unreliable.
+   */
   .info-drawer-trigger {
-    width: 24px;
-    height: 24px;
-    font-size: 11px;
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
   }
 
   .info-drawer-panel {

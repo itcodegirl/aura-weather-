@@ -657,10 +657,15 @@
 @media (max-width: 760px) {
   .app-header {
     padding: 12px;
+    margin-bottom: 18px;
   }
 
   .tagline {
     display: none;
+  }
+
+  .brand {
+    font-size: 28px;
   }
 
   .brand-wrap {

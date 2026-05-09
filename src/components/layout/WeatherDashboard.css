@@ -332,15 +332,25 @@
 }
 
 @media (max-width: 420px) {
+  .bento {
+    /*
+     * Tighter gap on the narrowest phones — every gap pixel adds
+     * to total scroll length and the cards already have generous
+     * internal padding for breathing room.
+     */
+    gap: 10px;
+  }
+
   .bento-group-label {
-    padding-left: 11px;
+    margin: 2px 0 -4px;
+    padding-left: 9px;
     font-size: 10px;
     letter-spacing: 0.1em;
   }
 
   .bento-group-label::before {
     width: 3px;
-    height: 12px;
+    height: 11px;
   }
 
   .bento-group-label::after {
