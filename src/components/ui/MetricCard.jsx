@@ -140,9 +140,9 @@ function MetricCard({
       aria-labelledby={id}
     >
       <div className="metric-head exposure-panel-head">
-        <h3 id={id} className="metric-label">
+        <h4 id={id} className="metric-label">
           {title}
-        </h3>
+        </h4>
         <div className="metric-head-side">
           <span className="metric-context">{context}</span>
           {helpText && (

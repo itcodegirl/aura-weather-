@@ -136,6 +136,7 @@
 }
 
 .saved-city-undo-action {
+  position: relative;
   min-height: 28px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
@@ -150,6 +151,15 @@
     border-color var(--motion-fast) var(--ease-standard);
 }
 
+/* Vertical hit-area extender to reach a comfortable 40px tap height
+ * while the pill keeps its dense 28px presence inline. */
+.saved-city-undo-action::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+  border-radius: inherit;
+}
+
 .saved-city-undo-action:hover {
   background: rgba(20, 38, 70, 0.7);
   border-color: rgba(174, 227, 255, 0.6);
@@ -161,12 +171,22 @@
 }
 
 .saved-city-undo-dismiss {
+  position: relative;
   width: 24px;
   height: 24px;
   border-radius: 50%;
   color: rgba(186, 212, 252, 0.7);
   font-size: 13px;
   line-height: 1;
+}
+
+/* Hit-area extender to lift the small dismiss glyph to a 40px touch
+ * target without bleeding into the adjacent Undo button. */
+.saved-city-undo-dismiss::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
 }
 
 .saved-city-undo-dismiss:hover {
@@ -206,6 +226,7 @@
 }
 
 .saved-city-remove {
+  position: relative;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -215,6 +236,16 @@
   transition:
     color var(--motion-fast) var(--ease-standard),
     background var(--motion-fast) var(--ease-standard);
+}
+
+/* Bump touch area above/below so the X stays comfortable to tap
+ * without growing the visible chip. Vertical-only extension avoids
+ * overlapping the adjacent saved-city-chip in the same wrap. */
+.saved-city-remove::before {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+  border-radius: inherit;
 }
 
 .saved-city-remove:hover {

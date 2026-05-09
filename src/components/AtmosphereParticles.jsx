@@ -1,10 +1,46 @@
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import "./AtmosphereParticles.css";
 
 const RAIN_CODES = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]);
 const SNOW_CODES = new Set([71, 73, 75, 77, 85, 86]);
 const RAIN_PARTICLE_COUNT = 28;
 const SNOW_PARTICLE_COUNT = 40;
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function readReducedMotionPreference() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+  try {
+    return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+  } catch {
+    return false;
+  }
+}
+
+function usePrefersReducedMotion() {
+  const [prefersReduced, setPrefersReduced] = useState(readReducedMotionPreference);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
+    const mediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+    const handleChange = () => setPrefersReduced(mediaQuery.matches);
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+    if (typeof mediaQuery.addListener === "function") {
+      mediaQuery.addListener(handleChange);
+      return () => mediaQuery.removeListener(handleChange);
+    }
+    return undefined;
+  }, []);
+
+  return prefersReduced;
+}
 
 function classifyCondition(code) {
   if (RAIN_CODES.has(code)) {
@@ -49,13 +85,19 @@ function buildParticles(kind) {
 }
 
 function AtmosphereParticles({ conditionCode, prefersReducedData = false }) {
+  const prefersReducedMotion = usePrefersReducedMotion();
   const kind = useMemo(() => classifyCondition(conditionCode), [conditionCode]);
+  // The global `@media (prefers-reduced-motion: reduce)` rule snaps
+  // animations to 1ms, which would freeze the particles as a row of
+  // static dots near the top edge — visual noise that does not aid
+  // comprehension. Skip rendering entirely instead.
+  const shouldRender = kind && !prefersReducedData && !prefersReducedMotion;
   const particles = useMemo(
-    () => (kind && !prefersReducedData ? buildParticles(kind) : []),
-    [kind, prefersReducedData]
+    () => (shouldRender ? buildParticles(kind) : []),
+    [kind, shouldRender]
   );
 
-  if (!kind || prefersReducedData) {
+  if (!shouldRender) {
     return null;
   }
 
