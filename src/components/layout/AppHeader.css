@@ -161,12 +161,24 @@
 }
 
 .saved-city-undo-dismiss {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   color: rgba(186, 212, 252, 0.7);
   font-size: 13px;
   line-height: 1;
+}
+
+/*
+ * Coarse-pointer (touch) devices need a 44px hit area on interactive
+ * controls per Apple HIG / Material guidance. The visual size stays
+ * compact via padding-only, but the click target widens.
+ */
+@media (pointer: coarse) {
+  .saved-city-undo-dismiss {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .saved-city-undo-dismiss:hover {
@@ -177,8 +189,8 @@
 .saved-city-chip-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px 3px;
+  gap: 4px;
+  padding: 3px 4px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(181, 210, 252, 0.26);
   background: rgba(8, 17, 36, 0.5);
@@ -206,8 +218,8 @@
 }
 
 .saved-city-remove {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: rgba(237, 201, 201, 0.9);
   font-size: 14px;
@@ -215,6 +227,13 @@
   transition:
     color var(--motion-fast) var(--ease-standard),
     background var(--motion-fast) var(--ease-standard);
+}
+
+@media (pointer: coarse) {
+  .saved-city-remove {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .saved-city-remove:hover {

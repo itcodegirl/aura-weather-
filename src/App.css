@@ -1,6 +1,6 @@
 ﻿:root {
-  --font-sans: "Manrope", "Segoe UI", sans-serif;
-  --font-display: "Space Grotesk", "Manrope", sans-serif;
+  --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Space Grotesk", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
   --text: #f5f8ff;
   --text-muted: rgba(230, 236, 255, 0.82);
@@ -105,13 +105,21 @@ html::-webkit-scrollbar-track {
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--text);
+  /*
+   * Keep system fonts at the front of the stack so cold starts on
+   * cellular don't show a blank temperature reading until Manrope/
+   * Space Grotesk download. Once the web fonts arrive they swap in
+   * without layout shift because the metrics are similar.
+   */
   font-family: var(--font-sans);
   background:
     radial-gradient(1200px 760px at 14% -10%, #3d4d8a 0%, #1a2550 34%, transparent 70%),
     radial-gradient(980px 650px at 84% -14%, #49598f 0%, #1a2348 34%, transparent 68%),
     linear-gradient(180deg, #0b1023 0%, #070c1b 56%, #050911 100%);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
@@ -436,8 +444,13 @@ a:focus-visible,
   }
 
   .app-inner {
-    padding-top: 12px;
-    padding-bottom: 20px;
+    /*
+     * Honour the safe-area on phones with a home indicator. Without
+     * env() the bottom of the dashboard would tuck behind the
+     * indicator on iPhone X+ in PWA mode.
+     */
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
   }
 }
 

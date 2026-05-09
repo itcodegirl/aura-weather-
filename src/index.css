@@ -3,7 +3,26 @@
   text-rendering: optimizeLegibility;
 }
 
+html {
+  /*
+   * Mobile defensive guard: any single misbehaving element (a long
+   * city name, a debug overlay, a future iframe) would otherwise
+   * unlock the whole document for horizontal panning. The bento is
+   * intentionally width-bounded, so clipping at the document root
+   * is safe and removes the rubber-band sideways scroll on iOS.
+   */
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   min-width: 320px;
+  /*
+   * 100dvh tracks the dynamic viewport so the bottom of the app no
+   * longer hides behind iOS Safari's collapsing chrome. Falls back
+   * to 100vh on older engines.
+   */
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }

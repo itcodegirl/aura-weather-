@@ -96,8 +96,9 @@
 }
 
 .rain-mode-btn {
-  width: 42px;
+  width: 44px;
   height: 40px;
+  min-width: 44px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   color: var(--text-muted);
@@ -110,6 +111,12 @@
     color var(--motion-fast) var(--ease-standard),
     transform var(--motion-fast) var(--ease-standard),
     box-shadow var(--motion-subtle-slow) var(--ease-standard);
+}
+
+@media (pointer: coarse) {
+  .rain-mode-btn {
+    height: 44px;
+  }
 }
 
 .rain-mode-btn.is-active {
@@ -369,8 +376,9 @@
   }
 
   .rain-mode-btn {
-    width: 38px;
-    height: 36px;
+    width: 44px;
+    min-width: 44px;
+    height: 40px;
   }
 
   .rain-primary {
