@@ -415,26 +415,25 @@ function StormWatch({
         </div>
         <span className="storm-subtitle">Storm watch</span>
       </header>
-      <div className="storm-snapshot" role="list" aria-label="Storm snapshot">
-        <span
+      <ul className="storm-snapshot" aria-label="Storm snapshot">
+        <li
           className="storm-snapshot-chip"
-          role="listitem"
           style={{ "--chip-accent": hasOverviewCape ? overviewRisk.color : "#94a3b8" }}
         >
           <span className="storm-snapshot-label">Storm risk</span>
           <span className="storm-snapshot-value">
             {hasOverviewCape ? overviewRisk.level : MISSING_VALUE_PLACEHOLDER}
           </span>
-        </span>
-        <span className="storm-snapshot-chip" role="listitem">
+        </li>
+        <li className="storm-snapshot-chip">
           <span className="storm-snapshot-label">Pressure trend</span>
           <span className="storm-snapshot-value">{overviewPressure.interpretation}</span>
-        </span>
-        <span className="storm-snapshot-chip" role="listitem">
+        </li>
+        <li className="storm-snapshot-chip">
           <span className="storm-snapshot-label">Wind profile</span>
           <span className="storm-snapshot-value">{overviewWind}</span>
-        </span>
-      </div>
+        </li>
+      </ul>
 
       <div className="storm-grid">
         <MemoizedStormRisk

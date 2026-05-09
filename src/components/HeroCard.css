@@ -288,6 +288,11 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+  /* Native <ul>; reset user-agent list defaults so the grid layout
+   * stays exactly as designed. */
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .hero-guidance-item {
