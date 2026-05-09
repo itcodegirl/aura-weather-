@@ -60,7 +60,6 @@
   --motion-slow: 420ms;
   --motion-reveal: 460ms;
   --motion-label-reveal: 420ms;
-  --motion-background-fade: 1.1s;
   --motion-subtle: 200ms;
   --motion-subtle-slow: 220ms;
   --motion-spinner: 800ms;
@@ -200,6 +199,16 @@ a:focus-visible,
   isolation: isolate;
 }
 
+/*
+ * Fixed-position duplicate of the active scene gradient, scaled up
+ * 1.5% and slightly desaturated so the page edges feel softer and the
+ * gradient stays visible past the scrollable content. We previously
+ * declared transition: background here for a crossfade between scenes,
+ * but CSS does not interpolate between two gradient values without
+ * @property registration — the transition was a silent no-op. The
+ * scene now snaps; if a real crossfade is wanted later, it needs an
+ * opacity-on-duplicate-layer implementation.
+ */
 .app::before {
   content: "";
   position: fixed;
@@ -208,7 +217,6 @@ a:focus-visible,
   background: inherit;
   filter: saturate(1.02) brightness(0.94);
   transform: scale(1.015);
-  transition: background var(--motion-background-fade) var(--ease-standard);
 }
 
 .app::after {
