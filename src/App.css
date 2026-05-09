@@ -122,6 +122,26 @@ button {
   cursor: pointer;
 }
 
+/*
+ * Mobile interaction defaults. The default iOS gray tap-highlight flash
+ * conflicts with the dark glassy aesthetic; explicit :active styles
+ * already provide press feedback wherever it matters. touch-action:
+ * manipulation kills the legacy 300ms double-tap delay and prevents
+ * accidental pinch-zoom on chip-sized targets without affecting page
+ * scroll or pan gestures elsewhere.
+ */
+button,
+a,
+[role="button"],
+[role="combobox"],
+[role="option"],
+input[type="text"],
+input[type="search"],
+summary {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 button:focus-visible,
 input:focus-visible,
 a:focus-visible,
