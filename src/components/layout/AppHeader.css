@@ -161,12 +161,18 @@
 }
 
 .saved-city-undo-dismiss {
-  width: 24px;
-  height: 24px;
+  /* 32×32 keeps the dismiss control above the WCAG 2.5.5 spaced-target
+     equivalent (≥24, with sibling spacing) on desktop and we lift it to
+     a full 44 at the mobile breakpoint where targets cluster on touch. */
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: rgba(186, 212, 252, 0.7);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .saved-city-undo-dismiss:hover {
@@ -185,14 +191,20 @@
 }
 
 .saved-city-chip {
-  min-height: 32px;
-  padding: 0 10px;
+  /* Touch targets: 36 baseline for desktop density, 44 at mobile to meet
+     WCAG 2.5.5 AA. The chip + adjacent remove button live in a wrapper
+     shell, so the chip body alone is what receives the city-selection
+     tap — it has to be the full size. */
+  min-height: 36px;
+  padding: 0 12px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   color: rgba(224, 237, 255, 0.92);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
   transition:
     background var(--motion-fast) var(--ease-standard),
     color var(--motion-fast) var(--ease-standard),
@@ -206,12 +218,18 @@
 }
 
 .saved-city-remove {
-  width: 28px;
-  height: 28px;
+  /* 32 desktop / 40 mobile (see media query below). The remove button
+     sits next to the chip in a single wrapper shell — close-cluster
+     targets that need WCAG 2.5.5 distinct hit areas. */
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: rgba(237, 201, 201, 0.9);
   font-size: 14px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     color var(--motion-fast) var(--ease-standard),
     background var(--motion-fast) var(--ease-standard);
@@ -758,7 +776,14 @@
   }
 
   .saved-city-chip {
-    min-height: 36px;
+    min-height: 44px;
+    padding: 0 14px;
+  }
+
+  .saved-city-remove,
+  .saved-city-undo-dismiss {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -796,14 +821,15 @@
   }
 
   .saved-city-chip {
-    min-height: 36px;
-    padding: 0 10px;
+    /* The 560px rule above lifts to 44 for WCAG 2.5.5; we keep that
+       through the 420 tier rather than regressing. Trim padding only. */
+    padding: 0 12px;
     font-size: 11px;
   }
 
   .saved-city-remove {
-    width: 28px;
-    height: 28px;
+    /* 40×40 retained from 560 rule — touch ergonomics matter more
+       than horizontal density on a 4" phone. */
     font-size: 13px;
   }
 
