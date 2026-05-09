@@ -58,9 +58,13 @@ function HeroCard({
       <section
         className="bento-hero hero-card glass"
         style={style}
+        aria-labelledby="hero-card-heading"
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
       >
+        <h3 id="hero-card-heading" className="sr-only">
+          Current weather
+        </h3>
         <header className="hero-meta">
           <div className="hero-location" aria-label="Location unavailable">
             <MapPin size={14} aria-hidden="true" />
@@ -114,14 +118,22 @@ function HeroCard({
     ? ` hero-card--phase-${sunlightPhase}`
     : "";
 
+  const heroHeadingLabel = `Current weather for ${safeLocationName}${
+    safeLocationCountry ? `, ${safeLocationCountry}` : ""
+  }`;
+
   return (
     <section
       className={`bento-hero hero-card glass${sunlightPhaseClass}`}
       style={style}
+      aria-labelledby="hero-card-heading"
       data-refreshing={isRefreshing ? "true" : undefined}
       data-sunlight-phase={sunlightPhase || undefined}
       aria-busy={isRefreshing || undefined}
     >
+      <h3 id="hero-card-heading" className="sr-only">
+        {heroHeadingLabel}
+      </h3>
       <header className="hero-meta">
         <div className="hero-location-block">
           <div

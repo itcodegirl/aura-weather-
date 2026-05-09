@@ -62,7 +62,7 @@ function StormRisk({ risk, cape, summaryId }) {
       <CardHeader
         headerClassName="storm-module-top"
         title="Storm Risk"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Zap size={14} />}
         subtitle={(
@@ -167,7 +167,7 @@ function PressureTrend({ trend }) {
       <CardHeader
         headerClassName="storm-module-top"
         title="Pressure"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Icon size={14} style={{ color: trendColor }} />}
         subtitle={(
@@ -263,7 +263,7 @@ function WindIntelligence({
       <CardHeader
         headerClassName="storm-module-top"
         title="Wind"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Wind size={14} />}
         subtitle="Surface flow"
@@ -328,7 +328,7 @@ function ComfortIndex({ weather, unit }) {
       <CardHeader
         headerClassName="storm-module-top"
         title="Comfort"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Droplets size={14} />}
         subtitle="Moisture"
