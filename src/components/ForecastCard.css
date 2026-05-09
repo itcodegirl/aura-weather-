@@ -97,10 +97,17 @@
   color: #f7fbff;
 }
 
-.forecast-row:hover {
-  transform: translateY(var(--lift-1));
-  background: linear-gradient(162deg, rgba(14, 30, 62, 0.76), rgba(8, 16, 35, 0.58));
-  border-color: rgba(153, 218, 255, 0.38);
+/*
+ * Hover lift is for pointer devices only. On touch the row is
+ * non-interactive (no onClick / role="button"), so a sticky :hover
+ * after a tap reads as a phantom selection. Gate behind hover-pointer.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .forecast-row:hover {
+    transform: translateY(var(--lift-1));
+    background: linear-gradient(162deg, rgba(14, 30, 62, 0.76), rgba(8, 16, 35, 0.58));
+    border-color: rgba(153, 218, 255, 0.38);
+  }
 }
 
 .forecast-day-wrap {
