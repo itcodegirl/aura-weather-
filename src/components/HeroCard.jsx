@@ -226,59 +226,55 @@ function HeroCard({
         </div>
       </div>
 
-      {Array.isArray(dailyGuidance) && dailyGuidance.length > 0 && (
-        <div className="hero-guidance" role="list" aria-label="Daily guidance">
-          {dailyGuidance.map((item) => {
-            const Icon = GUIDANCE_ICONS[item.kind] ?? Sun;
-            return (
-              <div
-                key={item.kind}
-                className={`hero-guidance-item hero-guidance-item--${item.tone}`}
-                role="listitem"
-              >
-                <div className="hero-guidance-icon">
-                  <Icon size={15} aria-hidden="true" />
-                </div>
-                <div className="hero-guidance-copy">
-                  <span className="hero-guidance-label">{item.label}</span>
-                  <strong className="hero-guidance-value">{item.value}</strong>
-                  <span className="hero-guidance-detail">{item.detail}</span>
-                </div>
-              </div>
-            );
-          })}
+      <div className="hero-bottom">
+        <div className="hero-bottom-left">
+          {Array.isArray(dailyGuidance) && dailyGuidance.length > 0 && (
+            <div className="hero-guidance" role="list" aria-label="Daily guidance">
+              {dailyGuidance.map((item) => {
+                const Icon = GUIDANCE_ICONS[item.kind] ?? Sun;
+                return (
+                  <div
+                    key={item.kind}
+                    className={`hero-guidance-item hero-guidance-item--${item.tone}`}
+                    role="listitem"
+                  >
+                    <div className="hero-guidance-icon">
+                      <Icon size={15} aria-hidden="true" />
+                    </div>
+                    <div className="hero-guidance-copy">
+                      <span className="hero-guidance-label">{item.label}</span>
+                      <strong className="hero-guidance-value">{item.value}</strong>
+                      <span className="hero-guidance-detail">{item.detail}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <p
+            className="hero-sunlight-line"
+            role="group"
+            aria-label={`Sunrise ${sunriseLabel}, sunset ${sunsetLabel}, ${daylightLabel} of daylight`}
+          >
+            <span className="hero-sunlight-segment">
+              <Sunrise size={13} aria-hidden="true" />
+              <time dateTime={sunriseValue || undefined}>{sunriseLabel}</time>
+            </span>
+            <span className="hero-sunlight-separator" aria-hidden="true">·</span>
+            <span className="hero-sunlight-segment">
+              <Sunset size={13} aria-hidden="true" />
+              <time dateTime={sunsetValue || undefined}>{sunsetLabel}</time>
+            </span>
+            <span className="hero-sunlight-separator" aria-hidden="true">·</span>
+            <span className="hero-sunlight-segment">
+              <Sun size={13} aria-hidden="true" />
+              <span>{daylightLabel}</span>
+            </span>
+          </p>
         </div>
-      )}
 
-      <p
-        className="hero-sunlight-line"
-        role="group"
-        aria-label={`Sunrise ${sunriseLabel}, sunset ${sunsetLabel}, ${daylightLabel} of daylight`}
-      >
-        <span className="hero-sunlight-segment">
-          <Sunrise size={13} aria-hidden="true" />
-          <time dateTime={sunriseValue || undefined}>{sunriseLabel}</time>
-        </span>
-        <span className="hero-sunlight-separator" aria-hidden="true">·</span>
-        <span className="hero-sunlight-segment">
-          <Sunset size={13} aria-hidden="true" />
-          <time dateTime={sunsetValue || undefined}>{sunsetLabel}</time>
-        </span>
-        <span className="hero-sunlight-separator" aria-hidden="true">·</span>
-        <span className="hero-sunlight-segment">
-          <Sun size={13} aria-hidden="true" />
-          <span>{daylightLabel}</span>
-        </span>
-      </p>
-
-      <details
-        className="hero-stats-disclosure"
-        open={heroStatsHaveAnyMissing || undefined}
-      >
-        <summary className="hero-stats-summary">
-          <span>More readings</span>
-        </summary>
-        <div className="hero-stats">
+        <div className="hero-stats" role="group" aria-label="Current readings">
           <Stat
             icon={<Wind size={18} />}
             label="Wind"
@@ -300,14 +296,15 @@ function HeroCard({
             value={dewPointDisplay}
           />
         </div>
-        {heroStatsHaveAnyMissing && (
-          <p className="hero-stats-note" role="status">
-            Some readings are unavailable from the provider. Aura shows
-            “—” instead of a fallback value to keep the rest of the
-            forecast trustworthy.
-          </p>
-        )}
-      </details>
+      </div>
+
+      {heroStatsHaveAnyMissing && (
+        <p className="hero-stats-note" role="status">
+          Some readings are unavailable from the provider. Aura shows
+          “—” instead of a fallback value to keep the rest of the
+          forecast trustworthy.
+        </p>
+      )}
     </section>
   );
 }
