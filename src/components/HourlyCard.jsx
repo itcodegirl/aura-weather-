@@ -239,7 +239,6 @@ function HourlyCard({
         className="bento-chart hourly-chart glass"
         style={style}
         aria-labelledby={chartTitleId}
-        aria-describedby={chartSummaryId}
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
       >
