@@ -54,6 +54,21 @@ function HeroCard({
   );
 
   if (!heroData) {
+    // The global AppLoadingState screen handles cold-start loading, but
+    // this fallback still fires in the rare window where the location
+    // is known but the weather payload has not resolved yet (e.g. a
+    // mid-flight retry). When that happens, show the user the location
+    // we already have so the card does not lie about it.
+    const fallbackLocationName =
+      typeof location?.name === "string" ? location.name.trim() : "";
+    const fallbackLocationCountry =
+      typeof location?.country === "string" ? location.country.trim() : "";
+    const isFallbackLocationKnown = Boolean(fallbackLocationName);
+    const fallbackLocationLabel = isFallbackLocationKnown
+      ? `${fallbackLocationName}${
+          fallbackLocationCountry ? `, ${fallbackLocationCountry}` : ""
+        }`
+      : "Location unavailable";
     return (
       <section
         className="bento-hero hero-card glass"
@@ -62,11 +77,22 @@ function HeroCard({
         aria-busy={isRefreshing || undefined}
       >
         <header className="hero-meta">
-          <div className="hero-location" aria-label="Location unavailable">
+          <div
+            className="hero-location"
+            aria-label={
+              isFallbackLocationKnown
+                ? `Location: ${fallbackLocationLabel}`
+                : "Location unavailable"
+            }
+          >
             <MapPin size={14} aria-hidden="true" />
-            <span>Location unavailable</span>
+            <span>{fallbackLocationLabel}</span>
           </div>
-          <p className="hero-date">Loading weather</p>
+          <p className="hero-date">
+            {isFallbackLocationKnown
+              ? "Loading current conditions…"
+              : "Loading weather…"}
+          </p>
         </header>
       </section>
     );
