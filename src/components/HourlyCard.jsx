@@ -254,9 +254,13 @@ function HourlyCard({
           subtitleClassName="chart-subtitle eyebrow-pill"
         />
 
-        <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
-          <p className="loader-text" role="status" aria-live="polite">
-            {HOURLY_EMPTY_MESSAGE}
+        <div className="card-empty" role="status">
+          <div className="card-empty__icon">
+            <LineIcon size={36} aria-hidden="true" />
+          </div>
+          <p className="card-empty__title">Hourly chart unavailable</p>
+          <p className="card-empty__copy">
+            Current conditions are still live above.
           </p>
         </div>
       </section>

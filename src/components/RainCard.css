@@ -54,8 +54,15 @@
 }
 
 .rain-mode-btn {
-  width: 42px;
-  height: 40px;
+  /*
+   * Min 44x44 hit target. The visual chip is smaller (driven by the
+   * font + padding inside) but the actual click area meets WCAG 2.5.5.
+   * Earlier the button was 42x40 (and 38x36 on mobile), which fails
+   * the standard especially on touch.
+   */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   color: var(--text-muted);
@@ -203,35 +210,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-.rain-empty {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 10px 0;
-  text-align: center;
-}
-
-.rain-empty-icon {
-  margin-bottom: 4px;
-}
-
-.rain-empty-title {
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.rain-empty-sub {
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.rain-empty--missing .rain-empty-icon {
-  color: rgba(190, 215, 250, 0.78);
-}
+/*
+ * Empty / dry-state visuals are now provided by the shared `.card-empty`
+ * pattern in App.css (used by Forecast, Hourly, Rain, Alerts).
+ */
 
 .rain-timeline {
   display: flex;
@@ -316,11 +298,11 @@
     gap: 2px;
     padding: 2px;
   }
-
-  .rain-mode-btn {
-    width: 38px;
-    height: 36px;
-  }
+  /*
+   * .rain-mode-btn keeps its 44x44 hit target on mobile by design —
+   * not overridden here. The visible chip stays compact via its font
+   * and padding, but the actual touch surface is a friendly 44x44.
+   */
 
   .rain-primary {
     padding: 10px;
