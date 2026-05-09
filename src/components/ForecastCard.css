@@ -376,9 +376,19 @@
     font-size: 9px;
   }
 
+  /*
+   * Mobile forecast row: collapse to a clean single row of
+   *   day · icon · temps · precip
+   * The signal chip ("Warm Peak", "Steady") is editorial flavour
+   * that adds visual density without earning its space on a phone,
+   * and the range bar repeats data already legible from temps.
+   * Hide both at this tier so the 7-day list reads as a calm scan
+   * column instead of a stack of mini-dashboards.
+   */
   .forecast-row {
-    grid-template-columns: minmax(70px, 1fr) 32px 1fr auto;
-    gap: 8px;
+    grid-template-columns: minmax(70px, 1fr) 32px auto auto;
+    grid-template-areas: "day icon temps precip";
+    gap: 10px;
     padding: 11px 10px;
   }
 
@@ -402,9 +412,11 @@
   }
 
   .forecast-signal-chip {
-    min-height: 16px;
-    padding: 1px 6px;
-    font-size: 8px;
+    display: none;
+  }
+
+  .forecast-range {
+    display: none;
   }
 
   .forecast-temp-value {
@@ -428,12 +440,9 @@
 
 @media (max-width: 420px) {
   .forecast-row {
-    grid-template-columns: minmax(62px, 1fr) 30px auto;
-    grid-template-areas:
-      "day icon precip"
-      "temps temps temps"
-      "range range range";
-    gap: 7px;
+    grid-template-columns: minmax(58px, 1fr) 28px auto auto;
+    grid-template-areas: "day icon temps precip";
+    gap: 8px;
     padding: 10px 9px;
   }
 
@@ -447,14 +456,34 @@
     font-size: 12px;
   }
 
+  /*
+   * Drop the visible "High/Low" labels at the narrowest tier —
+   * the spatial position (left vs right of the divider) carries
+   * the meaning, and the labels remain in the aria description
+   * for screen readers.
+   */
+  .forecast-temp-label {
+    display: none;
+  }
+
+  .forecast-condition {
+    display: none;
+  }
+
+  .forecast-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
   .forecast-precip {
-    min-width: 54px;
-    padding: 6px 7px;
-    font-size: 10px;
+    min-width: 50px;
+    padding: 5px 8px;
+    font-size: 11px;
   }
 
   .forecast-temps {
-    padding: 6px 8px;
+    padding: 5px 8px;
   }
 
   .forecast-temp-value {

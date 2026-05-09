@@ -297,8 +297,32 @@
     gap: 12px;
   }
 
+  /*
+   * Group labels are navigational scaffolding — useful on a wide
+   * bento where multiple cards sit under one heading, but on a
+   * single-column phone they double the visible label count
+   * (every section already has its own h3). Quieten them so the
+   * cards lead the rhythm; the labels remain in the DOM for screen
+   * readers and the hash-link affordance stays intact.
+   */
   .bento-group-label {
+    margin: 4px 0 -2px;
+    padding-left: 10px;
+    color: rgba(220, 233, 255, 0.74);
+    font-size: 10px;
+    letter-spacing: 0.14em;
     justify-content: flex-start;
+  }
+
+  .bento-group-label::before {
+    width: 3px;
+    height: 11px;
+    box-shadow: none;
+    background: rgba(166, 209, 255, 0.62);
+  }
+
+  .bento-group-label::after {
+    display: none;
   }
 
   .bento > [class*="bento-"] {

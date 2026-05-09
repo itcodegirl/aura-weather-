@@ -330,7 +330,7 @@
 
   .rain-stats,
   .rain-history-pills {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
 
@@ -340,9 +340,39 @@
 }
 
 @media (max-width: 640px) {
-  .rain-stats,
+  /*
+   * Keep the three rain stat pills inline on phones — stacking
+   * adds ~120px of vertical card height for parallel data that's
+   * easier to scan in a row. Only collapse to 1-col at the
+   * narrowest tier where the labels would otherwise wrap.
+   */
+  .rain-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
   .rain-history-pills {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .rain-stat,
+  .rain-history-pill {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 8px 9px;
+  }
+
+  .rain-stat-label,
+  .rain-history-pill-label {
+    font-size: 9px;
+    letter-spacing: 0.05em;
+  }
+
+  .rain-stat-value,
+  .rain-history-pill-value {
+    font-size: 13px;
   }
 
   .rain-primary {

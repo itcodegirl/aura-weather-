@@ -189,9 +189,15 @@
     align-items: flex-start;
   }
 
+  /*
+   * Keep the three nowcast chips in a single row on phones — they
+   * carry parallel data (next-hour-precip, peak window, intensity)
+   * so visual parallel matters more than label legibility. Stacking
+   * adds ~100px of card height for a marginal readability gain.
+   */
   .nowcast-chips {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
   }
 
   .nowcast-summary {
@@ -241,15 +247,17 @@
   }
 
   .nowcast-chip {
-    padding: 8px 9px;
+    padding: 7px 8px;
+    gap: 2px;
   }
 
   .nowcast-chip-label {
-    font-size: 10px;
+    font-size: 9px;
+    letter-spacing: 0.05em;
   }
 
   .nowcast-chip-value {
-    font-size: 15px;
+    font-size: 13px;
   }
 }
 
