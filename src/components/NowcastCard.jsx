@@ -116,9 +116,11 @@ function NowcastCard({
         </li>
       </ul>
 
-      <p className="nowcast-meta">
-        {nowcast.hasData ? "Short-range precipitation guidance" : "Nowcast offline"}
-      </p>
+      {!nowcast.hasData && (
+        <p className="nowcast-meta" role="status">
+          Nowcast offline
+        </p>
+      )}
     </section>
   );
 }
