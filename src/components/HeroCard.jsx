@@ -100,12 +100,14 @@ function HeroCard({
     today,
     tempUnit,
   } = heroData;
-  const climateFallbackMessage =
-    climateStatus === "loading"
-      ? "Comparing today's conditions with the historical average..."
-      : climateStatus === "unavailable"
-        ? "Historical comparison is temporarily unavailable."
-        : "";
+
+  // Climate-context loading and unavailable states used to render a
+  // placeholder sentence between the temperature and the bottom block,
+  // talking to itself while the historical comparison resolved. The
+  // audit flagged this as the hero "talking to itself" — supplemental
+  // context should be silent when absent, not announce its absence.
+  // Suppress fallback copy; only render the resolved insight.
+  void climateStatus;
 
   const isHighMissing = isMissingPlaceholder(todayHighDisplay);
   const isLowMissing = isMissingPlaceholder(todayLowDisplay);
@@ -179,14 +181,6 @@ function HeroCard({
           </div>
         </div>
       </header>
-      {atmosphereReading && (
-        <p
-          className={`hero-reading hero-reading--${atmosphereReading.tone}`}
-          role="status"
-        >
-          {atmosphereReading.text}
-        </p>
-      )}
       <div className="hero-main">
         <div className="hero-temp-block">
           <div className="hero-temp-row">
@@ -217,11 +211,24 @@ function HeroCard({
             <span className="hero-condition-separator" aria-hidden="true">·</span>
             <span className="hero-feels">Feels like {feelsLikeDisplay}</span>
           </p>
+          {/*
+           * Editorial atmosphere reading sits below the temperature
+           * block instead of above it. The user lands on the gestalt
+           * (number + condition + feels-like) first; the synthesised
+           * sentence becomes context, not gating copy. Earned: only
+           * renders when buildAtmosphereReading found a signal worth
+           * the line; baseline returns null so we render nothing.
+           */}
+          {atmosphereReading && (
+            <p
+              className={`hero-reading hero-reading--${atmosphereReading.tone}`}
+              role="status"
+            >
+              {atmosphereReading.text}
+            </p>
+          )}
           {hasClimateComparison && (
             <p className="hero-insight">{climateMessage}</p>
-          )}
-          {!hasClimateComparison && climateFallbackMessage && (
-            <p className="hero-insight">{climateFallbackMessage}</p>
           )}
         </div>
       </div>

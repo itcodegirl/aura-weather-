@@ -138,9 +138,9 @@ function WeatherDashboard({
       )}
       <details className="data-status-disclosure">
         <summary className="data-status-summary">
-          <span className="data-status-summary-label">Data status</span>
+          <span className="data-status-summary-label">Where this data comes from</span>
           <span className="data-status-summary-hint">
-            Forecast, AQI, alerts, and archive checks
+            Forecast, air quality, alerts, historical comparison
           </span>
         </summary>
         <SourceHealthPanel

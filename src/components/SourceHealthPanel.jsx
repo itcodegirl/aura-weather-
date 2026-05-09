@@ -75,7 +75,7 @@ function getAqiSource(trustMeta, nowMs) {
       provider: "Open-Meteo AQI",
       status: "unavailable",
       label: "No reading",
-      detail: "AQI is missing or unreachable",
+      detail: "Air-quality reading is missing right now",
     };
   }
 
@@ -86,7 +86,7 @@ function getAqiSource(trustMeta, nowMs) {
     provider: "Open-Meteo AQI",
     status: "pending",
     label: "Pending",
-    detail: "Checking after forecast load",
+    detail: "Loading after the forecast",
   };
 }
 
@@ -151,13 +151,13 @@ function getClimateSource(trustMeta, nowMs) {
     return {
       key: "climate",
       icon: Database,
-      name: "Climate Context",
+      name: "Historical comparison",
       provider: "Open-Meteo Archive",
       status: "ready",
       label: "Live",
       detail: climateFetchedAt
         ? formatLastUpdatedLabel(climateFetchedAt, nowMs)
-        : "Archive comparison ready",
+        : "Comparison against the historical normal is ready",
     };
   }
 
@@ -165,11 +165,11 @@ function getClimateSource(trustMeta, nowMs) {
     return {
       key: "climate",
       icon: Database,
-      name: "Climate Context",
+      name: "Historical comparison",
       provider: "Open-Meteo Archive",
       status: "limited",
       label: "Reduced data",
-      detail: "Archive fetch is paused",
+      detail: "Paused while saving data",
     };
   }
 
@@ -177,22 +177,22 @@ function getClimateSource(trustMeta, nowMs) {
     return {
       key: "climate",
       icon: Database,
-      name: "Climate Context",
+      name: "Historical comparison",
       provider: "Open-Meteo Archive",
       status: "unavailable",
       label: "Unavailable",
-      detail: "Historical comparison missing",
+      detail: "Couldn’t reach the historical normals right now",
     };
   }
 
   return {
     key: "climate",
     icon: Database,
-    name: "Climate Context",
+    name: "Historical comparison",
     provider: "Open-Meteo Archive",
     status: climateStatus === "loading" ? "pending" : "idle",
     label: climateStatus === "loading" ? "Loading" : "Pending",
-    detail: "Historical lookup queued",
+    detail: "Looking up the historical normal",
   };
 }
 
@@ -222,14 +222,14 @@ function SourceHealthPanel({
     >
       <header className="source-health-header">
         <div>
-          <p className="source-health-kicker">Trust layer</p>
+          <p className="source-health-kicker">Where this data comes from</p>
           <h3 id="source-health-title" className="source-health-title">
             <Activity size={16} aria-hidden="true" />
-            <span>Data Sources</span>
+            <span>Data sources</span>
           </h3>
         </div>
         <p className="source-health-summary">
-          Forecast, AQI, alerts, and archive checks.
+          Forecast, air quality, alerts, and historical comparison.
         </p>
       </header>
 
