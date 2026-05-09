@@ -614,73 +614,27 @@
 }
 
 /*
- * At narrow-desktop widths (980-1200) the header was rendering primary
- * (search + cities + sync) and secondary (climate ctx, unit, clear)
- * side-by-side, so the search row got squeezed and the "MY LOCATION"
- * button label wrapped to two lines. Stack secondary below primary
- * at this tier so each block gets the full row width.
+ * Drawer pattern for narrow-desktop and below. The audit flagged
+ * the 980–1200 range: secondary controls (climate ctx, unit toggle,
+ * clear-startup) stacked into a full-width second row, giving the
+ * header three rows total (brand + primary + secondary) and pushing
+ * the hero close to the fold on common 1280×720 / 1366×768 laptops.
+ *
+ * Solution: reuse the same Settings-drawer pattern that already runs
+ * on mobile, but trigger it earlier — at ≤1200 — so narrow desktops
+ * get a single-row primary plus a tucked-away secondary the user can
+ * open on demand. Wide desktops (>1200) keep the inline secondary
+ * row where there's actual horizontal room for it.
  */
 @media (max-width: 1200px) {
   .app-header-actions {
     flex-wrap: wrap;
-  }
-
-  .app-header-primary {
-    flex: 1 1 100%;
-  }
-
-  .app-header-secondary {
-    flex: 1 1 100%;
-    align-items: stretch;
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 980px) {
-  .app-header {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 14px 16px;
-  }
-
-  .app-header-actions {
-    width: 100%;
-  }
-
-  .app-header-primary {
-    flex: 1 1 100%;
-    gap: 8px;
-  }
-}
-
-@media (max-width: 760px) {
-  .app-header {
-    padding: 12px;
-  }
-
-  .tagline {
-    display: none;
-  }
-
-  .brand-wrap {
-    grid-template-areas: "mark brand";
-  }
-
-  .app-header-actions {
-    flex-wrap: wrap;
-    width: 100%;
-    gap: 8px;
-    justify-content: flex-start;
-  }
-
-  .app-header-primary {
     width: 100%;
     gap: 8px;
   }
 
-  .app-header-primary-row {
-    width: 100%;
-    flex-wrap: wrap;
+  .app-header-primary {
+    flex: 1 1 100%;
   }
 
   .mobile-settings-toggle {
@@ -724,6 +678,7 @@
     flex-wrap: wrap;
     align-items: stretch;
     width: 100%;
+    flex: 1 1 100%;
     gap: 10px;
     margin-top: 4px;
     padding: 12px;
@@ -760,6 +715,46 @@
   .app-header-secondary .toggle-pill-btn,
   .app-header-secondary .unit-btn {
     flex: 1 1 0;
+  }
+}
+
+@media (max-width: 980px) {
+  .app-header {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .app-header-primary {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-header {
+    padding: 12px;
+  }
+
+  .tagline {
+    display: none;
+  }
+
+  .brand-wrap {
+    grid-template-areas: "mark brand";
+  }
+
+  .app-header-actions {
+    justify-content: flex-start;
+  }
+
+  .app-header-primary {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .app-header-primary-row {
+    width: 100%;
+    flex-wrap: wrap;
   }
 }
 
