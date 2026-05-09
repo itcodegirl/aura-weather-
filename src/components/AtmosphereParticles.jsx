@@ -1,10 +1,21 @@
-import { memo, useMemo } from "react";
+import { memo, useMemo, useSyncExternalStore } from "react";
 import "./AtmosphereParticles.css";
 
 const RAIN_CODES = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]);
 const SNOW_CODES = new Set([71, 73, 75, 77, 85, 86]);
-const RAIN_PARTICLE_COUNT = 28;
-const SNOW_PARTICLE_COUNT = 40;
+
+/*
+ * Particle counts scale with viewport. On a phone the rain/snow strip
+ * only needs to cover ~360px of width; spawning desktop counts (28/40)
+ * means an absolutely-positioned span every ~9px which is wasted DOM
+ * and a real cost on low-end Androids running infinite CSS animations.
+ * Mobile counts roughly halve the working set.
+ */
+const RAIN_PARTICLE_COUNT_DESKTOP = 28;
+const SNOW_PARTICLE_COUNT_DESKTOP = 40;
+const RAIN_PARTICLE_COUNT_MOBILE = 14;
+const SNOW_PARTICLE_COUNT_MOBILE = 20;
+const MOBILE_BREAKPOINT_PX = 640;
 
 function classifyCondition(code) {
   if (RAIN_CODES.has(code)) {
@@ -24,8 +35,7 @@ function deterministicFraction(seed) {
   return value - Math.floor(value);
 }
 
-function buildParticles(kind) {
-  const count = kind === "rain" ? RAIN_PARTICLE_COUNT : SNOW_PARTICLE_COUNT;
+function buildParticles(kind, count) {
   const baseDuration = kind === "rain" ? 0.85 : 6;
   const durationVariance = kind === "rain" ? 0.45 : 3;
   const delayVariance = kind === "rain" ? 1.2 : 5;
@@ -48,12 +58,57 @@ function buildParticles(kind) {
   });
 }
 
+function subscribeToMobileViewport(callback) {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return () => {};
+  }
+  const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`);
+  const listener = () => callback();
+  if (typeof mq.addEventListener === "function") {
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }
+  // Older Safari fallback.
+  mq.addListener(listener);
+  return () => mq.removeListener(listener);
+}
+
+function getMobileViewportSnapshot() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+  return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`).matches;
+}
+
+function getMobileViewportServerSnapshot() {
+  return false;
+}
+
+function useIsMobileViewport() {
+  return useSyncExternalStore(
+    subscribeToMobileViewport,
+    getMobileViewportSnapshot,
+    getMobileViewportServerSnapshot
+  );
+}
+
 function AtmosphereParticles({ conditionCode, prefersReducedData = false }) {
   const kind = useMemo(() => classifyCondition(conditionCode), [conditionCode]);
-  const particles = useMemo(
-    () => (kind && !prefersReducedData ? buildParticles(kind) : []),
-    [kind, prefersReducedData]
-  );
+  const isMobile = useIsMobileViewport();
+  const particles = useMemo(() => {
+    if (!kind || prefersReducedData) {
+      return [];
+    }
+    const count =
+      kind === "rain"
+        ? isMobile
+          ? RAIN_PARTICLE_COUNT_MOBILE
+          : RAIN_PARTICLE_COUNT_DESKTOP
+        : isMobile
+          ? SNOW_PARTICLE_COUNT_MOBILE
+          : SNOW_PARTICLE_COUNT_DESKTOP;
+    return buildParticles(kind, count);
+  }, [kind, prefersReducedData, isMobile]);
 
   if (!kind || prefersReducedData) {
     return null;

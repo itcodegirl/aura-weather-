@@ -434,6 +434,16 @@ a:focus-visible,
     --hero-temp-size: 58px;
     --hero-unit-size: 22px;
     --card-padding: 20px;
+    /*
+     * Compress card-enter animation on phones. The 9-card staggered
+     * reveal totals 1.15s on desktop (520ms duration + 8 × 70ms
+     * stagger), which feels deliberate on a wide bento but reads
+     * as 'still loading' on a single-column phone where each card
+     * is below the fold of its predecessor. Halving the values
+     * keeps the polish without the wait.
+     */
+    --card-enter-duration: 360ms;
+    --card-enter-stagger: 35ms;
   }
 }
 
@@ -441,6 +451,14 @@ a:focus-visible,
   :root {
     --content-gutter: 0.78rem;
     --card-padding: 18px;
+    /*
+     * Last blur step. 18px (desktop) → 10px (560) → 6px (420).
+     * Each backdrop-filter pass is a per-pixel screen-space blur on
+     * mobile GPUs, and at this tier the cards already mostly cover
+     * each other so the blur effect contributes very little
+     * perceptual depth.
+     */
+    --card-backdrop-blur: 6px;
   }
 
   .app-inner {
@@ -529,6 +547,19 @@ a:focus-visible,
   }
 
   .app::before,
+  .app::after {
+    display: none;
+  }
+}
+
+/*
+ * Drop the secondary background overlay on the narrowest phones.
+ * .app::after is a 4-layer radial-gradient stack that contributes
+ * a full-screen compositor pass for ~5% of perceptual polish — a
+ * straight win on low-end devices where every fill costs frame budget.
+ * The underlying body gradient already sets the colour scene.
+ */
+@media (max-width: 560px) {
   .app::after {
     display: none;
   }

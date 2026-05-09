@@ -329,6 +329,23 @@
     grid-column: auto;
     min-height: 0;
   }
+
+  /*
+   * Skip layout/paint for cards that aren't on screen yet. On a
+   * phone the bento is one tall column; the storm watch and source
+   * health rows live well below the fold and pay full render cost
+   * on first load even though the user can't see them. content-
+   * visibility lets the browser short-circuit until they scroll
+   * into the viewport. The fixed intrinsic size avoids the layout
+   * shift the bare directive would otherwise produce.
+   *
+   * Hero stays opted-out — it's always visible and we want its
+   * card-slide-up animation to run on first paint.
+   */
+  .bento > section:not(.bento-hero) {
+    content-visibility: auto;
+    contain-intrinsic-size: 320px;
+  }
 }
 
 @media (max-width: 420px) {
