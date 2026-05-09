@@ -304,7 +304,7 @@ function ForecastCard({
           icon={<CalendarDays size={16} />}
           leftClassName="forecast-heading"
           subtitle="Upcoming week"
-          subtitleClassName="forecast-subtitle"
+          subtitleClassName="forecast-subtitle eyebrow-pill"
         />
         <p className="loader-text" role="status" aria-live="polite">
           {FORECAST_EMPTY_MESSAGE}

@@ -410,7 +410,7 @@ function StormWatch({
             Storm risk, pressure trend, wind, and comfort signals in one panel.
           </p>
         </div>
-        <span className="storm-subtitle">Storm watch</span>
+        <span className="storm-subtitle eyebrow-pill">Storm watch</span>
       </header>
       <div className="storm-snapshot" role="list" aria-label="Storm snapshot">
         <span

@@ -40,17 +40,12 @@
   line-height: 1.4;
 }
 
-.bento-forecast .forecast-subtitle {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 10px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(179, 206, 245, 0.24);
-  background: rgba(8, 17, 35, 0.44);
-  color: rgba(224, 236, 255, 0.9);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-}
+/*
+ * `.forecast-subtitle` is rendered as `<span class="forecast-subtitle eyebrow-pill">`
+ * in JSX, so the shared `.eyebrow-pill` rule handles all visuals. The
+ * declarations below intentionally only adjust component-specific
+ * placement (no padding/border/bg overrides).
+ */
 
 .forecast-list {
   display: flex;
@@ -68,7 +63,7 @@
   padding: 13px 14px;
   border-radius: var(--radius-sm);
   background: linear-gradient(165deg, rgba(12, 23, 45, 0.66), rgba(7, 14, 31, 0.54));
-  border: 1px solid rgba(188, 212, 252, 0.22);
+  border: var(--border-default);
   box-shadow:
     inset 0 1px 0 rgba(236, 244, 255, 0.08),
     0 10px 20px rgba(3, 8, 22, 0.2);
@@ -103,7 +98,7 @@
 }
 
 .forecast-row:hover {
-  transform: translateY(-1px);
+  transform: translateY(var(--lift-1));
   background: linear-gradient(162deg, rgba(14, 30, 62, 0.76), rgba(8, 16, 35, 0.58));
   border-color: rgba(153, 218, 255, 0.38);
 }
@@ -132,7 +127,7 @@
   color: var(--text-dim);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--track-loose);
   text-transform: uppercase;
 }
 
@@ -142,11 +137,11 @@
   min-height: 18px;
   padding: 2px 8px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(191, 215, 252, 0.22);
-  background: rgba(8, 18, 38, 0.58);
+  border: var(--border-default);
+  background: var(--surface-3);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.11em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
@@ -175,10 +170,10 @@
   height: 38px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
-  border: 1px solid rgba(191, 215, 252, 0.24);
-  background: rgba(7, 17, 37, 0.56);
-  box-shadow: inset 0 1px 0 rgba(237, 245, 255, 0.08);
+  border-radius: var(--radius-control);
+  border: var(--border-default);
+  background: var(--surface-2);
+  box-shadow: var(--subcard-shadow);
 }
 
 .forecast-temps {
@@ -188,9 +183,9 @@
   gap: 8px;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(186, 210, 250, 0.2);
-  background: rgba(8, 17, 36, 0.48);
-  box-shadow: inset 0 1px 0 rgba(230, 239, 255, 0.08);
+  border: var(--border-soft);
+  background: var(--surface-1);
+  box-shadow: var(--subcard-shadow);
 }
 
 .forecast-temp {
@@ -207,7 +202,7 @@
   color: var(--text-dim);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--track-loose);
   text-transform: uppercase;
 }
 
@@ -249,8 +244,8 @@
   min-width: 72px;
   padding: 7px 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(181, 220, 255, 0.28);
-  background: rgba(8, 19, 40, 0.52);
+  border: var(--border-default);
+  background: var(--surface-2);
   color: #84e7ff;
   font-size: 12px;
   font-weight: 700;

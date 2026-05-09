@@ -251,7 +251,7 @@ function HourlyCard({
           titleClassName="chart-title"
           icon={<LineIcon size={16} />}
           subtitle="Next 24h"
-          subtitleClassName="chart-subtitle"
+          subtitleClassName="chart-subtitle eyebrow-pill"
         />
 
         <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
@@ -293,7 +293,7 @@ function HourlyCard({
         titleClassName="chart-title"
         icon={<LineIcon size={16} />}
         subtitle="Next 24h"
-        subtitleClassName="chart-subtitle"
+        subtitleClassName="chart-subtitle eyebrow-pill"
       />
       <p className="chart-lede">{chartLede}</p>
 

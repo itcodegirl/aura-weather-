@@ -229,7 +229,7 @@ function RainCard({
         icon={<CloudRain size={16} />}
         leftClassName="rain-title-wrap"
         subtitle={
-          <span className={`rain-risk-badge rain-risk-badge--${rainRiskTone}`}>
+          <span className={`severity-badge severity-badge--${rainRiskTone}`}>
             {rainRiskLabel}
           </span>
         }
