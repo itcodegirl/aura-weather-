@@ -185,7 +185,13 @@
 }
 
 .saved-city-chip {
-  min-height: 32px;
+  /*
+   * Saved-city chips are the primary "switch city" action in the
+   * header. 32px was below the comfortable hit floor even on desktop
+   * with a mouse — bump to 36px so it lines up with the saved-city-
+   * remove sibling without changing the visual hierarchy.
+   */
+  min-height: 36px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
@@ -756,7 +762,14 @@
   }
 
   .saved-city-chip {
-    min-height: 36px;
+    /*
+     * Mobile chip target: 40px is the practical compromise between
+     * the WCAG 2.5.5 floor of 44px and keeping the strip from
+     * forcing extra wraps when several cities are saved. The chip
+     * sits inside a wrap with 2-3px padding, so total touch surface
+     * is ~44px including the wrap halo.
+     */
+    min-height: 40px;
   }
 }
 
@@ -794,7 +807,7 @@
   }
 
   .saved-city-chip {
-    min-height: 36px;
+    min-height: 40px;
     padding: 0 10px;
     font-size: 11px;
   }
