@@ -20,11 +20,17 @@ function SupplementalWeatherPanels({
 
   return (
     <>
-      <NowcastCard
-        weather={weather}
+      <PanelErrorBoundary
+        label="Nowcast"
+        className="bento-nowcast"
         style={cardStyleVariables[3]}
-        isRefreshing={isBackgroundLoading}
-      />
+      >
+        <NowcastCard
+          weather={weather}
+          style={cardStyleVariables[3]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
       <PanelErrorBoundary
         label="Hourly outlook"
         className="bento-chart"
@@ -58,12 +64,18 @@ function SupplementalWeatherPanels({
       >
         Week Ahead
       </h2>
-      <ForecastCard
-        weather={weather}
-        unit={unit}
+      <PanelErrorBoundary
+        label="7-day forecast"
+        className="bento-forecast"
         style={cardStyleVariables[7]}
-        isRefreshing={isBackgroundLoading}
-      />
+      >
+        <ForecastCard
+          weather={weather}
+          unit={unit}
+          style={cardStyleVariables[7]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
 
       <h2
         id={groupLabelIds.riskSignals}
@@ -72,12 +84,18 @@ function SupplementalWeatherPanels({
       >
         Risk Signals
       </h2>
-      <AlertsCard
-        alerts={weather?.alerts}
-        alertsStatus={alertsStatus}
+      <PanelErrorBoundary
+        label="Severe alerts"
+        className="bento-alerts"
         style={cardStyleVariables[5]}
-        isRefreshing={isBackgroundLoading}
-      />
+      >
+        <AlertsCard
+          alerts={weather?.alerts}
+          alertsStatus={alertsStatus}
+          style={cardStyleVariables[5]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
       <PanelErrorBoundary
         label="Storm watch"
         className="bento-storm"
