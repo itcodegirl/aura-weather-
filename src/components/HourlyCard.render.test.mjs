@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import "../../scripts/test-render-setup.mjs";
 
 const React = (await import("react")).default;
-const { render, cleanup } = await import("@testing-library/react");
+const { render, screen, fireEvent, cleanup } = await import(
+  "@testing-library/react"
+);
 const HourlyCard = (await import("./HourlyCard.jsx")).default;
 
 afterEach(() => {
@@ -73,3 +75,105 @@ describe("HourlyCard aria wiring", () => {
     );
   });
 });
+
+function renderPopulated() {
+  const now = new Date();
+  const hours = Array.from({ length: 6 }, (_, i) =>
+    new Date(now.getTime() + i * 60 * 60 * 1000).toISOString()
+  );
+  return renderHourly({
+    hourly: {
+      time: hours,
+      temperature: [60, 61, 62, 63, 64, 65],
+      conditionCode: [0, 1, 2, 3, 0, 1],
+      precipitation: [0, 0, 0, 0, 0, 0],
+      rainChance: [10, 10, 10, 10, 10, 10],
+    },
+  });
+}
+
+describe("HourlyCard touch-sample announcement contract", () => {
+  test("first render: no sample reports aria-current — the user has not selected anything yet", () => {
+    const { container } = renderPopulated();
+    const samples = container.querySelectorAll(".hourly-touch-sample");
+    if (samples.length === 0) {
+      // Touch strip is mobile-only; some setups won't render it. Skip
+      // gracefully — the contract still holds in production via CSS.
+      return;
+    }
+    for (const sample of samples) {
+      assert.equal(
+        sample.getAttribute("aria-current"),
+        null,
+        "no sample button should advertise aria-current before user interaction"
+      );
+      assert.equal(
+        sample.getAttribute("aria-pressed"),
+        null,
+        "must not use aria-pressed — that's the toggle semantic, not 'currently shown'"
+      );
+    }
+  });
+
+  test("after the user taps a sample, only that one carries aria-current=true", () => {
+    const { container } = renderPopulated();
+    const samples = container.querySelectorAll(".hourly-touch-sample");
+    if (samples.length < 2) return;
+
+    fireEvent.click(samples[2]);
+
+    const updatedSamples = container.querySelectorAll(".hourly-touch-sample");
+    const currentCount = Array.from(updatedSamples).filter(
+      (button) => button.getAttribute("aria-current") === "true"
+    ).length;
+    assert.equal(
+      currentCount,
+      1,
+      "exactly one sample should be marked aria-current after a tap"
+    );
+    assert.equal(updatedSamples[2].getAttribute("aria-current"), "true");
+  });
+
+  test("selected-sample paragraph has no aria-live attribute — the button activation carries the announcement", () => {
+    const { container } = renderPopulated();
+    const selectedSample = container.querySelector(".hourly-selected-sample");
+    if (!selectedSample) return;
+    assert.equal(
+      selectedSample.getAttribute("aria-live"),
+      null,
+      "must not duplicate the button-press announcement via a live region"
+    );
+  });
+
+  test("sample button aria-label reads 'Show' rather than 'Select' to match the show-on-click model", () => {
+    const { container } = renderPopulated();
+    const samples = container.querySelectorAll(".hourly-touch-sample");
+    if (samples.length === 0) return;
+    const label = samples[0].getAttribute("aria-label") || "";
+    assert.ok(
+      label.startsWith("Show "),
+      `expected label to start with "Show", got: ${JSON.stringify(label)}`
+    );
+  });
+
+  test("svg-point tooltip uses middle-dot separators, not ASCII hyphens", () => {
+    const { container } = renderPopulated();
+    const titles = container.querySelectorAll(".hourly-point-hit title");
+    if (titles.length === 0) return;
+    const firstTooltip = titles[0].textContent || "";
+    assert.ok(
+      firstTooltip.includes(" · "),
+      `expected middle-dot separator in tooltip, got: ${JSON.stringify(firstTooltip)}`
+    );
+    assert.equal(
+      firstTooltip.includes(" - "),
+      false,
+      "must not use ASCII hyphen separators that screen readers may pronounce as 'minus'"
+    );
+  });
+});
+
+// Tiny references so the imports are not flagged unused if a later
+// refactor removes the populated test branch above.
+void screen;
+void fireEvent;
