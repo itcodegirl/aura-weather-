@@ -6,7 +6,6 @@ import SourceHealthPanel from "../SourceHealthPanel";
 import { CardFallback } from "../ui";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { usePanelPreload } from "../../hooks/useAppShellEffects";
-import { useTimeNow } from "../../hooks/useTimeNow";
 import { PRELOAD_HEAVY_PANELS } from "../lazyPanels";
 import "./WeatherDashboard.css";
 const SupplementalWeatherPanels = lazy(() => import("./SupplementalWeatherPanels"));
@@ -49,7 +48,6 @@ function WeatherDashboard({
   trustMeta,
   prefersReducedData = false,
 }) {
-  const nowMs = useTimeNow();
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
 
   usePanelPreload(PRELOAD_HEAVY_PANELS, {
@@ -99,7 +97,6 @@ function WeatherDashboard({
         climateStatus={climateStatus}
         style={CARD_STYLE_VARIABLES[0]}
         isRefreshing={isBackgroundLoading}
-        nowMs={nowMs}
       />
 
       <ExposureSection
@@ -163,7 +160,6 @@ function WeatherDashboard({
         </summary>
         <SourceHealthPanel
           trustMeta={trustMeta}
-          nowMs={nowMs}
           style={CARD_STYLE_VARIABLES[8]}
           isRefreshing={isBackgroundLoading}
         />

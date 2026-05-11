@@ -12,10 +12,16 @@ import {
   Sun,
 } from "lucide-react";
 import { isMissingPlaceholder } from "../utils/numbers";
+import { useTimeNow } from "../hooks/useTimeNow";
 import WeatherIcon from "./WeatherIcon";
 import { Stat } from "./ui";
 import { buildHeroData } from "./heroCard/buildHeroData";
 import "./HeroCard.css";
+
+// Sunlight phase + day-name label only change a few times per day.
+// A 5-minute bucket keeps the hero useMemo stable for most ticks
+// while still rolling over at midnight and around sunrise/sunset.
+const HERO_NOW_BUCKET_MS = 5 * 60_000;
 
 const GUIDANCE_ICONS = {
   rain: Droplets,
@@ -31,17 +37,17 @@ function HeroCard({
   climateStatus = "idle",
   style,
   isRefreshing = false,
-  nowMs,
 }) {
-  // Bucket the timestamp to one-minute granularity so the memo only
-  // recomputes when the day actually rolls over (or when the user
-  // crosses a minute boundary that affects sun-clock labels). The
-  // hero "today" string would otherwise stay frozen at first render
-  // and silently show yesterday's day name across midnight. nowMs is
-  // sourced from useTimeNow in the parent, so a missing value is a
-  // programming error rather than a runtime concern.
+  // Subscribe directly at the 5-minute cadence so the dashboard does
+  // not have to thread nowMs through every card. Sunlight phase, the
+  // date label, and sunrise/sunset all transition slowly enough that
+  // a 5-minute interval rolls over reliably across midnight without
+  // re-rendering the hero every minute for an unchanged display.
+  const nowMs = useTimeNow(HERO_NOW_BUCKET_MS);
   const headingId = useId();
-  const nowBucket = Number.isFinite(nowMs) ? Math.floor(nowMs / 60_000) : null;
+  const nowBucket = Number.isFinite(nowMs)
+    ? Math.floor(nowMs / HERO_NOW_BUCKET_MS)
+    : null;
   const heroData = useMemo(
     () =>
       buildHeroData({
@@ -49,7 +55,7 @@ function HeroCard({
         location,
         unit,
         climateComparison,
-        nowMs: nowBucket === null ? null : nowBucket * 60_000,
+        nowMs: nowBucket === null ? null : nowBucket * HERO_NOW_BUCKET_MS,
       }),
     [weather, location, unit, climateComparison, nowBucket]
   );

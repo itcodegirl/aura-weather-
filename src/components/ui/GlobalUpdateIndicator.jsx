@@ -6,6 +6,7 @@ import {
   getAgeMinutes,
 } from "../../utils/dataTrust";
 import { toFiniteNumber } from "../../utils/numbers";
+import { useTimeNow } from "../../hooks/useTimeNow";
 import "./GlobalUpdateIndicator.css";
 
 const STALE_AFTER_MINUTES = 25;
@@ -17,7 +18,12 @@ const STALE_AFTER_MINUTES = 25;
  * a single status dot. The pill is also a manual refresh button —
  * tapping it re-fetches the current location's forecast.
  */
-function GlobalUpdateIndicator({ trustMeta, nowMs, onRefresh, isRefreshing }) {
+function GlobalUpdateIndicator({ trustMeta, onRefresh, isRefreshing }) {
+  // Subscribe to the shared minute ticker directly so the parent
+  // does not have to thread nowMs through; only this leaf re-renders
+  // when the "Updated Nm ago" label changes.
+  const nowMs = useTimeNow();
+
   /*
    * Refresh-complete announcement. The button broadcasts aria-busy
    * while a refresh is in flight, but a screen-reader user used to

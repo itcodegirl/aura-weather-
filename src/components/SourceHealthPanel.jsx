@@ -7,6 +7,7 @@ import {
   Wind,
 } from "lucide-react";
 import { formatLastUpdatedLabel } from "../utils/dataTrust";
+import { useTimeNow } from "../hooks/useTimeNow";
 import "./SourceHealthPanel.css";
 
 function getForecastSource(trustMeta, nowMs) {
@@ -198,10 +199,17 @@ function getClimateSource(trustMeta, nowMs) {
 
 function SourceHealthPanel({
   trustMeta,
-  nowMs,
   style,
   isRefreshing = false,
+  nowMs: overrideNowMs,
 }) {
+  // Subscribe directly so the dashboard does not have to forward
+  // nowMs through the bento — only this panel needs the minute
+  // tick for "Updated Nm ago" labels, so only this panel re-renders.
+  // Tests pass an explicit nowMs to lock the rendered relative time;
+  // production never threads the value.
+  const tickNowMs = useTimeNow();
+  const nowMs = overrideNowMs ?? tickNowMs;
   const sources = useMemo(
     () => [
       getForecastSource(trustMeta, nowMs),
