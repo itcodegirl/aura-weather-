@@ -74,4 +74,63 @@ describe("PanelErrorBoundary", () => {
 
     console.error = originalError;
   });
+
+  test("a thrown sibling does not take down the rest of the dashboard", () => {
+    // Mirrors the production layout: each dashboard card is its own
+    // PanelErrorBoundary, so one card throwing must leave the
+    // others rendering. This guards against accidentally regressing
+    // back to a single top-level boundary that would crash everything.
+    const originalError = console.error;
+    console.error = () => {};
+
+    const view = render(
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          PanelErrorBoundary,
+          { label: "Hero" },
+          React.createElement(FlakyChild)
+        ),
+        React.createElement(
+          PanelErrorBoundary,
+          { label: "Forecast" },
+          React.createElement(
+            "p",
+            { "data-testid": "neighbour" },
+            "Sibling alive"
+          )
+        )
+      )
+    );
+
+    assert.match(view.container.textContent, /Hero is unavailable/);
+    const sibling = view.queryByTestId("neighbour");
+    assert.notEqual(sibling, null, "neighbouring card still renders");
+    assert.equal(sibling.textContent, "Sibling alive");
+
+    console.error = originalError;
+  });
+
+  test("fallback uses the panel's grid-class so it stays in the right bento slot", () => {
+    const originalError = console.error;
+    console.error = () => {};
+
+    const view = render(
+      React.createElement(
+        PanelErrorBoundary,
+        { label: "Hero", className: "bento-hero" },
+        React.createElement(FlakyChild)
+      )
+    );
+
+    const fallback = view.container.querySelector(".panel-boundary-fallback");
+    assert.ok(fallback, "fallback section renders");
+    assert.ok(
+      fallback.classList.contains("bento-hero"),
+      "fallback carries the caller-provided grid-class so layout doesn't shift"
+    );
+
+    console.error = originalError;
+  });
 });
