@@ -75,7 +75,11 @@ function HeroCard({
         style={style}
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
+        aria-labelledby="hero-card-heading"
       >
+        <h3 id="hero-card-heading" className="sr-only">
+          Current weather
+        </h3>
         <header className="hero-meta">
           <div
             className="hero-location"
@@ -149,7 +153,16 @@ function HeroCard({
       data-refreshing={isRefreshing ? "true" : undefined}
       data-sunlight-phase={sunlightPhase || undefined}
       aria-busy={isRefreshing || undefined}
+      aria-labelledby="hero-card-heading"
     >
+      {/* Hidden heading so screen-reader users land on the hero card
+          when navigating by heading. The h2 group label above ("Current
+          Conditions") covers the section, and the visible hero presents
+          the data — so this only needs to exist for assistive tech. */}
+      <h3 id="hero-card-heading" className="sr-only">
+        Current weather
+        {safeLocationName ? ` in ${safeLocationName}` : ""}
+      </h3>
       <header className="hero-meta">
         <div className="hero-location-block">
           <div
@@ -262,14 +275,13 @@ function HeroCard({
       <div className="hero-bottom">
         <div className="hero-bottom-left">
           {Array.isArray(dailyGuidance) && dailyGuidance.length > 0 && (
-            <div className="hero-guidance" role="list" aria-label="Daily guidance">
+            <ul className="hero-guidance" aria-label="Daily guidance">
               {dailyGuidance.map((item) => {
                 const Icon = GUIDANCE_ICONS[item.kind] ?? Sun;
                 return (
-                  <div
+                  <li
                     key={item.kind}
                     className={`hero-guidance-item hero-guidance-item--${item.tone}`}
-                    role="listitem"
                   >
                     <div className="hero-guidance-icon">
                       <Icon size={15} aria-hidden="true" />
@@ -279,10 +291,10 @@ function HeroCard({
                       <strong className="hero-guidance-value">{item.value}</strong>
                       <span className="hero-guidance-detail">{item.detail}</span>
                     </div>
-                  </div>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
 
           <p

@@ -136,6 +136,7 @@
 }
 
 .saved-city-undo-action {
+  position: relative;
   min-height: 28px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
@@ -148,6 +149,15 @@
   transition:
     background var(--motion-fast) var(--ease-standard),
     border-color var(--motion-fast) var(--ease-standard);
+}
+
+/* Vertical hit-area extender to reach a comfortable 40px tap height
+ * while the pill keeps its dense 28px presence inline. */
+.saved-city-undo-action::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+  border-radius: inherit;
 }
 
 .saved-city-undo-action:hover {
@@ -169,6 +179,7 @@
   /* 32×32 keeps the dismiss control above the WCAG 2.5.5 spaced-target
      equivalent (≥24, with sibling spacing) on desktop and we lift it to
      a full 44 at the mobile breakpoint where targets cluster on touch. */
+  position: relative;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -178,6 +189,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Hit-area extender to lift the small dismiss glyph to a 40px touch
+ * target without bleeding into the adjacent Undo button. */
+.saved-city-undo-dismiss::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
 }
 
 .saved-city-undo-dismiss:hover {
@@ -232,6 +252,7 @@
   /* 32 desktop / 40 mobile (see media query below). The remove button
      sits next to the chip in a single wrapper shell — close-cluster
      targets that need WCAG 2.5.5 distinct hit areas. */
+  position: relative;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -244,6 +265,16 @@
   transition:
     color var(--motion-fast) var(--ease-standard),
     background var(--motion-fast) var(--ease-standard);
+}
+
+/* Bump touch area above/below so the X stays comfortable to tap
+ * without growing the visible chip. Vertical-only extension avoids
+ * overlapping the adjacent saved-city-chip in the same wrap. */
+.saved-city-remove::before {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+  border-radius: inherit;
 }
 
 .saved-city-remove:hover {

@@ -69,6 +69,7 @@
 }
 
 .city-search-clear {
+  position: relative;
   display: grid;
   place-items: center;
   width: 34px;
@@ -78,6 +79,16 @@
   transition:
     color var(--motion-subtle) var(--ease-standard),
     background var(--motion-subtle) var(--ease-standard);
+}
+
+/* Invisible hit-area extender so the visible 34x34 glyph still gets a
+ * 44x44 touch target (WCAG 2.5.5). Keeps the design dense without
+ * forcing fingers to land precisely on a small icon. */
+.city-search-clear::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
 }
 
 .city-search-clear:hover {
