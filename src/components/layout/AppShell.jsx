@@ -1,10 +1,27 @@
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import { CloudOff } from "lucide-react";
 import AtmosphereParticles from "../AtmosphereParticles";
 import WeatherIcon from "../WeatherIcon";
 import "./AppShell.css";
 
+const SLOW_LOAD_MS = 7000;
+
 const AppLoadingState = memo(() => {
+  // Hold the upbeat "Connecting\u2026" for the first 7s \u2014 that's the
+  // happy-path window for a healthy network. After that the user
+  // deserves a reassurance beat so they don't think the app is frozen.
+  // The live region is polite, so this drops in without interrupting
+  // assistive tech mid-utterance.
+  const [isSlow, setIsSlow] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsSlow(true), SLOW_LOAD_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const loaderText = isSlow
+    ? "Still working\u2026 your network may be slow."
+    : "Connecting to weather providers\u2026";
+
   return (
     <div className="app app--loading">
       <div
@@ -22,7 +39,7 @@ const AppLoadingState = memo(() => {
           />
           <div>
             <p className="loading-dashboard-brand">Aura</p>
-            <p className="loader-text">Connecting to weather providers{"\u2026"}</p>
+            <p className="loader-text">{loaderText}</p>
           </div>
         </div>
         <div className="loading-dashboard-grid" aria-hidden="true">

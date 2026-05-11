@@ -1,6 +1,6 @@
 // src/components/HeroCard.jsx
 
-import { memo, useMemo } from "react";
+import { memo, useId, useMemo } from "react";
 import {
   MapPin,
   Wind,
@@ -40,6 +40,7 @@ function HeroCard({
   // and silently show yesterday's day name across midnight. nowMs is
   // sourced from useTimeNow in the parent, so a missing value is a
   // programming error rather than a runtime concern.
+  const headingId = useId();
   const nowBucket = Number.isFinite(nowMs) ? Math.floor(nowMs / 60_000) : null;
   const heroData = useMemo(
     () =>
@@ -73,11 +74,11 @@ function HeroCard({
       <section
         className="bento-hero hero-card glass"
         style={style}
-        aria-labelledby="hero-card-heading"
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
+        aria-labelledby={headingId}
       >
-        <h3 id="hero-card-heading" className="sr-only">
+        <h3 id={headingId} className="sr-only">
           Current weather
         </h3>
         <header className="hero-meta">
@@ -150,16 +151,16 @@ function HeroCard({
     <section
       className={`bento-hero hero-card glass${sunlightPhaseClass}`}
       style={style}
-      aria-labelledby="hero-card-heading"
       data-refreshing={isRefreshing ? "true" : undefined}
       data-sunlight-phase={sunlightPhase || undefined}
       aria-busy={isRefreshing || undefined}
+      aria-labelledby={headingId}
     >
       {/* Hidden heading so screen-reader users land on the hero card
           when navigating by heading. The h2 group label above ("Current
           Conditions") covers the section, and the visible hero presents
           the data — so this only needs to exist for assistive tech. */}
-      <h3 id="hero-card-heading" className="sr-only">
+      <h3 id={headingId} className="sr-only">
         Current weather
         {safeLocationName ? ` in ${safeLocationName}` : ""}
       </h3>
