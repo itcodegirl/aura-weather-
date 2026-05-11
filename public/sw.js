@@ -1,18 +1,23 @@
 // Bump the version when the static APP_SHELL_URLS list changes so
 // existing installs evict the previous shell on next activation.
-// v2 adds /apple-touch-icon.png after the brand-mark refresh.
-const CACHE_VERSION = "aura-weather-v2";
+// v3 adds best-effort precache (atomic addAll → per-URL add) so a
+// single missing asset can no longer break offline install.
+const CACHE_VERSION = "aura-weather-v3";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-app-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
-const APP_SHELL_URLS = [
-  "/",
-  "/index.html",
-  "/manifest.webmanifest",
+// CRITICAL_APP_SHELL_URLS must succeed for offline to be useful — if
+// any of these fail to cache the install still completes, but the
+// navigation fallback flow will not have an index document. The other
+// URLs are convenience: a missing apple-touch-icon or og-image should
+// not break offline launch.
+const CRITICAL_APP_SHELL_URLS = ["/", "/index.html", "/manifest.webmanifest"];
+const OPTIONAL_APP_SHELL_URLS = [
   "/favicon.svg",
   "/atmosphere-ring.svg",
   "/apple-touch-icon.png",
   "/og-image.png",
 ];
+const RUNTIME_CACHE_MAX_ENTRIES = 80;
 const CACHEABLE_DESTINATIONS = new Set([
   "document",
   "font",
@@ -81,6 +86,35 @@ async function cacheResponse(cacheName, request, response) {
 
   const cache = await caches.open(cacheName);
   await cache.put(request, response.clone());
+}
+
+async function trimCache(cacheName, maxEntries) {
+  if (!Number.isFinite(maxEntries) || maxEntries <= 0) {
+    return;
+  }
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  if (keys.length <= maxEntries) {
+    return;
+  }
+  // Drop oldest first (cache.keys() returns insertion order in
+  // Chromium/WebKit). Keep this bounded so a long-lived install does
+  // not accumulate stale runtime entries indefinitely.
+  const overflow = keys.length - maxEntries;
+  for (let index = 0; index < overflow; index += 1) {
+    await cache.delete(keys[index]);
+  }
+}
+
+async function bestEffortCacheAdd(cache, url) {
+  try {
+    await cache.add(url);
+    return true;
+  } catch {
+    // A single missing asset must not abort the install. Offline
+    // launch still works as long as the critical shell URLs landed.
+    return false;
+  }
 }
 
 async function matchCachedRequest(cache, request) {
@@ -172,6 +206,9 @@ async function staleWhileRevalidate(request) {
     .then((response) => {
       if (response.ok) {
         void runtimeCache.put(request, response.clone());
+        // Trim asynchronously so we never block the response. The
+        // ceiling keeps the runtime cache bounded over time.
+        void trimCache(RUNTIME_CACHE, RUNTIME_CACHE_MAX_ENTRIES);
       }
       return response;
     })
@@ -182,20 +219,47 @@ async function staleWhileRevalidate(request) {
 
 async function cacheAppShell() {
   const cache = await caches.open(APP_SHELL_CACHE);
-  await cache.addAll(APP_SHELL_URLS);
+
+  // Critical URLs go through addAll so a failure surfaces the install
+  // problem in the SW console; without an index document offline mode
+  // is meaningless.
+  try {
+    await cache.addAll(CRITICAL_APP_SHELL_URLS);
+  } catch {
+    // Fall back to per-URL adds so we still cache whatever we can
+    // — a single bad response should not block the rest of the
+    // install lifecycle.
+    for (const url of CRITICAL_APP_SHELL_URLS) {
+      await bestEffortCacheAdd(cache, url);
+    }
+  }
+
+  // Optional URLs (icons, og-image) are best-effort. A missing or
+  // renamed icon must not break offline support.
+  await Promise.all(
+    OPTIONAL_APP_SHELL_URLS.map((url) => bestEffortCacheAdd(cache, url))
+  );
 
   const indexResponse =
     (await cache.match("/index.html")) ||
     (await cache.match("/")) ||
-    (await fetch("/index.html"));
+    (await fetch("/index.html").catch(() => null));
+  if (!indexResponse) {
+    // No index document anywhere — the dependency walk has nothing
+    // to follow. The install still completes; the runtime cache will
+    // pick up assets on first online navigation.
+    return;
+  }
   const indexHtml = await indexResponse.clone().text();
   const assetUrls = findIndexAssetUrls(indexHtml);
   const dependencyUrls = await findBuildDependencies(cache, assetUrls);
   const urlsToCache = [...new Set([...assetUrls, ...dependencyUrls])];
 
-  if (urlsToCache.length > 0) {
-    await cache.addAll(urlsToCache);
-  }
+  // Per-URL best-effort: missing chunks (e.g. a stale hashed name in
+  // an older deployment) should not abort the precache walk.
+  await Promise.all(
+    urlsToCache.map((url) => bestEffortCacheAdd(cache, url))
+  );
 }
 
 self.addEventListener("install", (event) => {

@@ -16,6 +16,16 @@
   user-select: none;
 }
 
+/* Reserves the indicator slot before trustMeta arrives so the bento
+   does not shift down when the live label first appears. The empty
+   placeholder is invisible but occupies the same min-height. */
+.global-update-indicator--placeholder {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
 .global-update-indicator--button {
   cursor: pointer;
   transition:

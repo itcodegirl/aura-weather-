@@ -1,15 +1,17 @@
-import { lazy, memo, Suspense } from "react";
+import { lazy, memo, Suspense, useCallback, useState } from "react";
 import HeroCard from "../HeroCard";
 import RainCard from "../RainCard";
 import ExposureSection from "../ExposureSection";
-import SourceHealthPanel from "../SourceHealthPanel";
 import { CardFallback } from "../ui";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { usePanelPreload } from "../../hooks/useAppShellEffects";
-import { useTimeNow } from "../../hooks/useTimeNow";
 import { PRELOAD_HEAVY_PANELS } from "../lazyPanels";
 import "./WeatherDashboard.css";
 const SupplementalWeatherPanels = lazy(() => import("./SupplementalWeatherPanels"));
+// Data-status is a diagnostic surface most users never open. Defer
+// the JS + CSS into its own chunk so the bento's first paint does
+// not pay for a panel collapsed behind <details> by default.
+const SourceHealthPanel = lazy(() => import("../SourceHealthPanel"));
 
 const CARD_STYLE_VARIABLES = [
   { "--i": 0 },
@@ -49,8 +51,16 @@ function WeatherDashboard({
   trustMeta,
   prefersReducedData = false,
 }) {
-  const nowMs = useTimeNow();
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
+  // Once a user opens data-status we keep the panel mounted so the
+  // toggle no longer pays for a network round-trip; the chunk is
+  // cached after first reveal.
+  const [hasOpenedSourceHealth, setHasOpenedSourceHealth] = useState(false);
+  const handleSourceHealthToggle = useCallback((event) => {
+    if (event.currentTarget?.open) {
+      setHasOpenedSourceHealth(true);
+    }
+  }, []);
 
   usePanelPreload(PRELOAD_HEAVY_PANELS, {
     enabled: !prefersReducedData,
@@ -99,7 +109,6 @@ function WeatherDashboard({
         climateStatus={climateStatus}
         style={CARD_STYLE_VARIABLES[0]}
         isRefreshing={isBackgroundLoading}
-        nowMs={nowMs}
       />
 
       <ExposureSection
@@ -154,19 +163,34 @@ function WeatherDashboard({
           isRefreshing={isBackgroundLoading}
         />
       )}
-      <details className="data-status-disclosure">
+      <details
+        className="data-status-disclosure"
+        onToggle={handleSourceHealthToggle}
+      >
         <summary className="data-status-summary">
           <span className="data-status-summary-label">Where this data comes from</span>
           <span className="data-status-summary-hint">
             Forecast, air quality, alerts, historical comparison
           </span>
         </summary>
-        <SourceHealthPanel
-          trustMeta={trustMeta}
-          nowMs={nowMs}
-          style={CARD_STYLE_VARIABLES[8]}
-          isRefreshing={isBackgroundLoading}
-        />
+        {hasOpenedSourceHealth ? (
+          <Suspense
+            fallback={(
+              <CardFallback
+                className="bento-source-health"
+                style={CARD_STYLE_VARIABLES[8]}
+                title="Loading data status..."
+                isRefreshing={isBackgroundLoading}
+              />
+            )}
+          >
+            <SourceHealthPanel
+              trustMeta={trustMeta}
+              style={CARD_STYLE_VARIABLES[8]}
+              isRefreshing={isBackgroundLoading}
+            />
+          </Suspense>
+        ) : null}
       </details>
     </main>
   );

@@ -20,7 +20,14 @@ const DEFAULT_PRECIPITATION_UNIT = "inch";
 const DEFAULT_TIMEZONE = "UTC";
 const FORECAST_RETRY_DELAYS_MS = [250, 700];
 const GEOCODE_RETRY_DELAYS_MS = [200];
-const SUPPLEMENTAL_RETRY_DELAYS_MS = [300];
+// Two retries with growing backoff: weak mobile connections often
+// drop a single packet but recover quickly. The supplemental fetches
+// (AQI, alerts, archive) return null/empty on failure rather than
+// blocking the UI, so the extra ~900ms is paid only when the wider
+// network is degraded — and it materially improves the chance that
+// the user lands on a full dashboard instead of "Air quality
+// unavailable" right after the forecast resolves.
+const SUPPLEMENTAL_RETRY_DELAYS_MS = [300, 900];
 export const ALERTS_STATUS = {
   ready: "ready",
   unsupported: "unsupported",
