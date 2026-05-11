@@ -9,6 +9,18 @@ portfolio-grade product. Format roughly follows
 
 ### Added
 
+- **`useDocumentTitle` hook.** Mirrors the active forecast location
+  into `<title>` (`Tokyo, Japan · Aura Weather`) once a location is
+  known, and restores the static index.html title on unmount so cold
+  starts still look branded. Five render tests pin the contract:
+  preserves the static title until a name is known, includes the
+  country when present, restores on unmount, and ignores non-string
+  fields without crashing.
+- **Screen-reader location landmark.** The first dashboard heading
+  now appends an sr-only `in {location}` suffix (`Current Conditions
+  in Tokyo, Japan`) so the heading list anchors to where the data is
+  for instead of four generic group labels in a row. Sighted layout
+  is unchanged.
 - **Mobile settings drawer.** `HeaderControls.jsx` exposes a
   mobile-only "Settings" toggle that collapses the climate context,
   unit, and clear-startup controls behind one button on phones. The
@@ -35,6 +47,27 @@ portfolio-grade product. Format roughly follows
 
 ### Changed
 
+- **Mobile hero density.** The four hero readings (Wind, Humidity,
+  Pressure, Dew Point) used to collapse to a single column at 560px,
+  producing four full-width rows that pushed the rest of the
+  dashboard ~240px below the fold on phones. Keep the 2x2 grid down
+  to 421px and tighten the per-stat padding so each cell fits
+  comfortably; single-column still kicks in at the narrowest tier
+  (≤420px) where individual cells would otherwise crush.
+- **Mobile interaction polish.** Killed the default iOS gray
+  tap-highlight on every interactive element via a global
+  `-webkit-tap-highlight-color: transparent` rule; turned on
+  `touch-action: manipulation` to eliminate the legacy 300ms
+  double-tap delay on Safari; and normalised `:active` press feedback
+  (`scale(var(--press-scale))`) on saved-city chips, the saved-city
+  remove + undo actions, the mobile settings toggle, and sync
+  buttons + toggle so every tap signals consistently.
+- **Keyboard-aware city dropdown.** `100vh` on iOS Safari is the
+  largest possible viewport — it does not shrink when the on-screen
+  keyboard pops up — so a 320px-tall dropdown could end up entirely
+  behind the keyboard on a 375x812 phone. Switch the dropdown's
+  `max-height` to `dvh` and keep the `vh` declaration as a fallback
+  for engines that do not yet support it.
 - **Mobile touch targets.** Saved-city remove (24 → 28px), saved-city
   chips (28 → 36px), status-stack actions and retry (26-28 → 36px),
   location setup (36 → 44px), AppShell error retry (42 → 44px).
@@ -64,6 +97,12 @@ portfolio-grade product. Format roughly follows
 
 ### Fixed
 
+- **HeroCard fallback honours known location.** The no-data fallback
+  hardcoded "Location unavailable" / "Loading weather", which lied to
+  the user during the rare window where the location was already set
+  but a weather refetch was still in flight (e.g. during a transient
+  retry). Use the known location name when we have one and switch
+  the status line to "Loading current conditions…" accordingly.
 - **`prefers-reduced-transparency`.** When the OS preference is on,
   drop `backdrop-filter`, lift card opacity to ~96%, simplify the body
   gradient, and disable the wash overlays. Layout and color story

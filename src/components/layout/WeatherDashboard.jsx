@@ -59,6 +59,21 @@ function WeatherDashboard({
   const aqiStatus = trustMeta?.aqiStatus ?? "idle";
   const climateStatus = trustMeta?.climateStatus ?? "idle";
 
+  // Append the active location to the first heading for assistive
+  // tech only. Sighted users read "Current Conditions" as a visual
+  // eyebrow; screen-reader users hear "Current Conditions in Tokyo,
+  // Japan" so the heading list actually tells them where the weather
+  // is for instead of four generic group labels in a row.
+  const dashboardLocationName =
+    typeof location?.name === "string" ? location.name.trim() : "";
+  const dashboardLocationCountry =
+    typeof location?.country === "string" ? location.country.trim() : "";
+  const accessibleLocationSuffix = dashboardLocationName
+    ? ` in ${dashboardLocationName}${
+        dashboardLocationCountry ? `, ${dashboardLocationCountry}` : ""
+      }`
+    : "";
+
   return (
     <main
       className="bento"
@@ -72,6 +87,9 @@ function WeatherDashboard({
         style={GROUP_LABEL_STYLE_VARIABLES[0]}
       >
         Current Conditions
+        {accessibleLocationSuffix && (
+          <span className="sr-only">{accessibleLocationSuffix}</span>
+        )}
       </h2>
       <HeroCard
         weather={weather}
