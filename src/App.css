@@ -108,10 +108,9 @@ body {
   min-height: 100dvh;
   color: var(--text);
   /*
-   * Keep system fonts at the front of the stack so cold starts on
-   * cellular don't show a blank temperature reading until Manrope/
-   * Space Grotesk download. Once the web fonts arrive they swap in
-   * without layout shift because the metrics are similar.
+   * Include robust system fallbacks in the font stack so text renders
+   * immediately while Manrope/Space Grotesk are still loading. Once
+   * the web fonts arrive, they can swap in over the fallback fonts.
    */
   font-family: var(--font-sans);
   background:
