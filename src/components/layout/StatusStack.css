@@ -121,8 +121,8 @@
 }
 
 .location-setup-btn {
-  min-height: 40px;
-  padding: 0 14px;
+  min-height: 44px;
+  padding: 0 16px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(188, 213, 252, 0.34);
   background: rgba(8, 17, 38, 0.54);
@@ -142,6 +142,19 @@
   color: #021127;
 }
 
+/*
+ * Tertiary "Keep showing Chicago" — quieter than the primary or
+ * secondary CTA so the three buttons read as a clear ladder
+ * (use my location > search > stick with the fallback). Same hit
+ * area, less ink.
+ */
+.location-setup-btn--ghost {
+  border-color: rgba(186, 212, 252, 0.16);
+  background: transparent;
+  color: rgba(216, 230, 252, 0.86);
+  font-weight: 600;
+}
+
 .location-setup-btn:hover {
   border-color: rgba(174, 227, 255, 0.48);
   transform: translateY(-1px);
@@ -149,6 +162,11 @@
 
 .location-setup-btn--primary:hover {
   background: linear-gradient(145deg, #ffffff, #dcedff);
+}
+
+.location-setup-btn--ghost:hover {
+  background: rgba(8, 17, 38, 0.4);
+  color: #f0f6ff;
 }
 
 .location-setup-btn:disabled,

@@ -134,7 +134,10 @@
  * pleasantry without parsing the text.
  */
 .hero-reading {
-  margin: 0;
+  /* Lives inside .hero-temp-block now (was sibling of .hero-main).
+     Top margin gives breathing room from the condition line above
+     without reaching the larger spacing the climate insight uses. */
+  margin: 12px 0 0;
   position: relative;
   padding: 8px 14px 8px 18px;
   border-radius: var(--radius-sm);
@@ -146,6 +149,12 @@
   line-height: 1.4;
   letter-spacing: 0;
   max-width: 640px;
+}
+
+/* Tighter top margin when both reading and climate insight stack —
+   they shouldn't double up on space, since both are supplemental. */
+.hero-reading + .hero-insight {
+  margin-top: 10px;
 }
 
 .hero-reading::before {
@@ -605,12 +614,12 @@
   }
 
   /*
-   * Keep the four stats as a 2x2 on phones rather than stacking them
-   * into a single column. A single column would balloon the hero
-   * card vertically (4 full-width stat rows ≈ 220px of fold), which
-   * directly worsens scroll fatigue and pushes the next section off
-   * the first screen. The 2x2 holds total card height roughly
-   * constant across the breakpoint.
+   * Keep the four readings in a 2x2 grid even on phones. Collapsing to
+   * a single column produced four full-width rows of stats below the
+   * temperature, which pushed the rest of the dashboard ~240px off the
+   * fold. A 2x2 grid at this width still leaves each cell ~160px wide,
+   * which is enough room for "Comfortable" / "1013 hPa" without
+   * truncation. Stats remain stacked at the very narrow tier below.
    */
   .hero-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -618,8 +627,8 @@
   }
 
   .stat {
-    gap: 8px;
     padding: 10px;
+    gap: 10px;
   }
 
   .stat-icon {

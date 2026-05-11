@@ -1,4 +1,12 @@
 ﻿:root {
+  /* Dark-only commitment. The CSS color-scheme property (alongside the
+     <meta name="color-scheme" content="dark only">) tells the UA to
+     style scrollbars, form controls, and autofill overlays for a dark
+     surface even when the OS is in light mode. The audit found the
+     previous half-light handler (light body, dark cards) read as a UI
+     bug; this is the disciplined alternative. */
+  color-scheme: dark only;
+
   --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-display: "Space Grotesk", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
@@ -128,6 +136,26 @@ button {
   color: inherit;
   font: inherit;
   cursor: pointer;
+}
+
+/*
+ * Mobile interaction defaults. The default iOS gray tap-highlight flash
+ * conflicts with the dark glassy aesthetic; explicit :active styles
+ * already provide press feedback wherever it matters. touch-action:
+ * manipulation kills the legacy 300ms double-tap delay and prevents
+ * accidental pinch-zoom on chip-sized targets without affecting page
+ * scroll or pan gestures elsewhere.
+ */
+button,
+a,
+[role="button"],
+[role="combobox"],
+[role="option"],
+input[type="text"],
+input[type="search"],
+summary {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 button:focus-visible,
@@ -492,32 +520,6 @@ a:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
     scroll-behavior: auto !important;
-  }
-}
-
-/*
- * Light-mode awareness. The weather scene gradient covers most of
- * the canvas once data loads, so we only need to soften the cold-
- * start fallback (visible for ~1 frame before weather resolves) and
- * the loading skeleton to keep light-mode cold starts from looking
- * harshly dark on a phone that has switched to light at sunrise.
- * Cards intentionally stay dark — they're frosted surfaces designed
- * to sit on top of the colourful weather scene in either mode.
- */
-@media (prefers-color-scheme: light) {
-  body {
-    background:
-      radial-gradient(1200px 760px at 14% -10%, #d9e6ff 0%, #aac6ef 36%, transparent 70%),
-      radial-gradient(980px 650px at 84% -14%, #e4ecff 0%, #b8cdef 36%, transparent 68%),
-      linear-gradient(180deg, #eef3ff 0%, #d6e2ff 56%, #b8cbeb 100%);
-  }
-
-  .app::after {
-    background:
-      radial-gradient(circle at 14% 16%, rgba(255, 220, 240, 0.32), transparent 44%),
-      radial-gradient(circle at 84% 12%, rgba(192, 224, 255, 0.36), transparent 46%),
-      radial-gradient(circle at 74% 82%, rgba(220, 232, 255, 0.32), transparent 43%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(225, 235, 255, 0.06) 42%, rgba(207, 220, 245, 0.18) 100%);
   }
 }
 

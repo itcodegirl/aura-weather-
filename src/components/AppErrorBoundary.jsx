@@ -31,8 +31,11 @@ class AppErrorBoundary extends Component {
       <div className="app app--error">
         <div className="error-card" role="alert" aria-live="assertive">
           <CloudOff size={42} className="error-card-icon" aria-hidden="true" />
-          <h1>Something went wrong</h1>
-          <p>We hit an unexpected issue while rendering the dashboard.</p>
+          <h1>Aura couldn’t render the dashboard.</h1>
+          <p>
+            A reload usually clears it. Your saved cities and unit
+            preferences are kept locally — they’ll be here when you’re back.
+          </p>
           <button
             type="button"
             className="error-retry"

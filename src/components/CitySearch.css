@@ -138,7 +138,16 @@
   inset: calc(100% + 10px) 0 auto;
   z-index: 50;
   --card-backdrop-blur: 14px;
+  /*
+   * 100vh on iOS Safari is the LARGEST possible viewport — it does not
+   * shrink when the on-screen keyboard pops up, so a 320px dropdown
+   * could end up entirely behind the keyboard on a 375x812 phone with
+   * the search input near the top of the page. dvh tracks the actual
+   * visible viewport (keyboard subtracted), and we keep 100vh as the
+   * fallback for the few engines that still don't support dvh.
+   */
   max-height: min(320px, calc(100vh - 180px));
+  max-height: min(320px, calc(100dvh - 180px));
   overflow: hidden auto;
   overscroll-behavior: contain;
   list-style: none;
@@ -305,6 +314,7 @@
   .city-search-dropdown {
     inset: calc(100% + 8px) 0 auto;
     max-height: min(280px, calc(100vh - 150px));
+    max-height: min(280px, calc(100dvh - 150px));
   }
 
   .city-search-result {
