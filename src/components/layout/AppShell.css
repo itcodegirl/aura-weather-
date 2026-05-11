@@ -421,79 +421,10 @@
 }
 
 /*
- * Light-mode loading skeleton. The default dark skeleton would render
- * as a blocky dark rectangle on a light cold-start canvas; lift the
- * card body to a soft frosted white so the skeleton blends with the
- * light body gradient instead of fighting it.
+ * Aura is dark-only (see App.css and the `color-scheme: dark only`
+ * meta declaration). The prior light-mode loading-skeleton handler
+ * has been removed — it painted the cold-start skeleton + error
+ * card in light colors that contradicted the dark dashboard the
+ * user lands on a moment later, which is exactly the half-light
+ * inconsistency the audit flagged.
  */
-@media (prefers-color-scheme: light) {
-  .loading-dashboard {
-    background:
-      linear-gradient(165deg, rgba(255, 255, 255, 0.78), rgba(232, 240, 255, 0.7)),
-      linear-gradient(130deg, rgba(189, 172, 255, 0.18), rgba(123, 198, 255, 0.12) 58%, transparent 84%);
-    border-color: rgba(120, 154, 215, 0.32);
-  }
-
-  .loading-dashboard-brand,
-  .loader-text {
-    color: #1f2a4a;
-  }
-
-  .loader-text {
-    color: rgba(31, 42, 74, 0.72);
-  }
-
-  .loading-skeleton {
-    background:
-      linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(228, 236, 255, 0.6)),
-      rgba(232, 238, 255, 0.6);
-    border-color: rgba(120, 154, 215, 0.26);
-  }
-
-  .loading-skeleton::after {
-    background: linear-gradient(
-      100deg,
-      transparent 20%,
-      rgba(120, 154, 215, 0.18) 48%,
-      transparent 76%
-    );
-  }
-
-  .loading-skeleton-block {
-    background: rgba(80, 110, 170, 0.16);
-  }
-
-  .loading-skeleton-block--temp {
-    background: linear-gradient(
-      90deg,
-      rgba(80, 110, 170, 0.18),
-      rgba(80, 110, 170, 0.26) 50%,
-      rgba(80, 110, 170, 0.18)
-    );
-  }
-
-  .loading-skeleton-bar {
-    background: linear-gradient(
-      180deg,
-      rgba(80, 110, 170, 0.1),
-      rgba(80, 110, 170, 0.24)
-    );
-  }
-
-  .error-card {
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.92), rgba(228, 236, 255, 0.88));
-    color: #1f2a4a;
-  }
-
-  .error-card h1 {
-    color: #1a2238;
-  }
-
-  .error-card p {
-    color: rgba(31, 42, 74, 0.78);
-  }
-
-  .error-card-icon {
-    color: rgba(31, 42, 74, 0.72);
-  }
-}

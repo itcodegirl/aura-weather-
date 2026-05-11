@@ -31,8 +31,15 @@ function NowcastCard({
         : peakProbability >= 40
           ? "moderate"
           : "low";
+    /*
+     * Risk-label voice ladder: stays in user vocabulary on every
+     * branch. The previous "Nowcast offline" string treated the panel
+     * as a system that could be online/offline — engineering talk.
+     * "Reading unavailable" matches the trust contract used elsewhere
+     * (HeroCard placeholder, AlertsCard unavailable state).
+     */
     const riskLabel = !nowcast.hasData
-      ? "Nowcast offline"
+      ? "Reading unavailable"
       : !nowcast.hasRain
       ? "Dry window"
       : peakProbability === null
@@ -115,10 +122,13 @@ function NowcastCard({
           <span className="nowcast-chip-value">{peakValue}</span>
         </li>
       </ul>
-
-      <p className="nowcast-meta">
-        {nowcast.hasData ? "Short-range precipitation guidance" : "Nowcast offline"}
-      </p>
+      {/*
+       * The trailing meta line ("Short-range precipitation guidance" /
+       * "Nowcast offline") used to render here. Both copies were
+       * redundant with content the user already saw: the explainer at
+       * the top says "15-minute rain guidance over the next 2 hours."
+       * and the badge already announces the unavailable state. Removed.
+       */}
     </section>
   );
 }

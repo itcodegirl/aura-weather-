@@ -13,6 +13,18 @@ function SavedCitiesStrip({
   const safeSavedCities = Array.isArray(savedCities) ? savedCities : [];
   const [pendingUndo, setPendingUndo] = useState(null);
   const undoTimeoutRef = useRef(null);
+  // Focus-management: after a chip is removed, the focused remove button
+  // unmounts and the browser drops focus to document.body. Move focus to
+  // the Undo button instead so keyboard / SR users can act on the
+  // recovery affordance without re-tabbing through the header.
+  const undoButtonRef = useRef(null);
+  const shouldFocusUndoRef = useRef(false);
+  useEffect(() => {
+    if (shouldFocusUndoRef.current && pendingUndo && undoButtonRef.current) {
+      undoButtonRef.current.focus();
+      shouldFocusUndoRef.current = false;
+    }
+  }, [pendingUndo]);
 
   const clearUndoTimer = useCallback(() => {
     if (undoTimeoutRef.current) {
@@ -44,6 +56,10 @@ function SavedCitiesStrip({
       // they tap Undo, restoreSavedCity puts the chip back without
       // switching the active forecast.
       clearUndoTimer();
+      // Mark that the upcoming render should hand focus to the Undo
+      // button. We flip this BEFORE setPendingUndo so the effect that
+      // reads it on the next render finds it set.
+      shouldFocusUndoRef.current = true;
       setPendingUndo(city);
       undoTimeoutRef.current = setTimeout(() => {
         setPendingUndo(null);
@@ -106,7 +122,13 @@ function SavedCitiesStrip({
                   type="button"
                   className={`saved-city-chip ${isActive ? "is-active" : ""}`}
                   onClick={() => handleLoadSavedCity(city)}
-                  aria-pressed={isActive}
+                  /*
+                   * aria-current rather than aria-pressed: the active
+                   * chip indicates "this is the currently-displayed
+                   * location", not "the user has toggled this on".
+                   * Same rationale as the HourlyCard touch-sample fix.
+                   */
+                  aria-current={isActive ? "true" : undefined}
                 >
                   {city.name}
                 </button>
@@ -136,6 +158,7 @@ function SavedCitiesStrip({
             type="button"
             className="saved-city-undo-action"
             onClick={handleUndo}
+            ref={undoButtonRef}
           >
             Undo
           </button>

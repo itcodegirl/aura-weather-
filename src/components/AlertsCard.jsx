@@ -120,8 +120,21 @@ function AlertsCard({
                   </p>
                 </div>
                 <div className="alerts-item-meta">
-                  <span className={`alerts-priority alerts-priority--${alert.priority || "low"}`}>
-                    {(alert.priority || "low").toUpperCase()}
+                  {/*
+                   * Priority badge: text content stays in normal case so
+                   * (a) copy-paste produces a readable word, (b) screen-
+                   * reader engines that spell out short all-caps strings
+                   * letter-by-letter read it as "high" / "extreme" /
+                   * "moderate". CSS text-transform: uppercase handles the
+                   * visual presentation. aria-label ties the floating
+                   * badge text to its semantic meaning ("Priority: high")
+                   * so a SR user hears context, not just an adjective.
+                   */}
+                  <span
+                    className={`alerts-priority alerts-priority--${alert.priority || "low"}`}
+                    aria-label={`Priority: ${alert.priority || "low"}`}
+                  >
+                    {alert.priority || "low"}
                   </span>
                   <span className="alerts-window">
                     Until {formatAlertTime(alert.endsAt)}

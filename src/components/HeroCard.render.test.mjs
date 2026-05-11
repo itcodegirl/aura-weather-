@@ -184,3 +184,80 @@ describe("HeroCard with missing readings", () => {
     );
   });
 });
+
+describe("HeroCard placeholder path (buildHeroData returned null)", () => {
+  test("with a resolved location, surfaces the location name and names the missing piece", () => {
+    // weather.current is missing — we know where the user is but the
+    // forecast hasn't given us readings. The hero must not call this
+    // a loading state (the previous "Loading weather" copy lied) and
+    // must keep showing the actual location.
+    render(
+      React.createElement(HeroCard, {
+        weather: { meta: { timezone: "America/Chicago" } },
+        location: baseLocation,
+        unit: "F",
+        nowMs: Date.parse("2026-04-21T12:00:00-05:00"),
+      })
+    );
+
+    assert.ok(
+      screen.getByText("Chicago, United States"),
+      "real location stays visible on the placeholder path"
+    );
+    assert.ok(
+      screen.getByText("Readings unavailable"),
+      "date slot names the missing piece honestly"
+    );
+    assert.ok(
+      screen.getByText(/Current readings aren’t available right now/),
+      "body copy explains the state in the trust-contract voice"
+    );
+    assert.equal(
+      screen.queryByText("Loading weather"),
+      null,
+      "must not regress to the old 'Loading weather' copy"
+    );
+    assert.equal(
+      screen.queryByText("Location unavailable"),
+      null,
+      "must not regress to the old 'Location unavailable' copy when location is resolved"
+    );
+  });
+
+  test("with no location, invites the user to pick one — does not fake a loading state", () => {
+    render(
+      React.createElement(HeroCard, {
+        weather: null,
+        location: null,
+        unit: "F",
+        nowMs: Date.parse("2026-04-21T12:00:00-05:00"),
+      })
+    );
+
+    assert.ok(screen.getByText("No location selected"));
+    assert.ok(screen.getByText("Choose a place to begin"));
+    assert.ok(screen.getByText(/Pick a location to see live conditions/));
+    assert.equal(
+      screen.queryByText("Loading weather"),
+      null,
+      "no-location path must not pretend to be loading either"
+    );
+  });
+
+  test("placeholder body region is announced politely (role=status)", () => {
+    render(
+      React.createElement(HeroCard, {
+        weather: null,
+        location: null,
+        unit: "F",
+        nowMs: Date.parse("2026-04-21T12:00:00-05:00"),
+      })
+    );
+
+    const region = screen.getByRole("status");
+    assert.ok(
+      region.textContent.includes("Pick a location"),
+      "status region carries the actionable invitation copy"
+    );
+  });
+});

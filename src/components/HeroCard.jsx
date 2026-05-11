@@ -55,24 +55,38 @@ function HeroCard({
   );
 
   if (!heroData) {
-    // The global AppLoadingState screen handles cold-start loading, but
-    // this fallback still fires in the rare window where the location
-    // is known but the weather payload has not resolved yet (e.g. a
-    // mid-flight retry). When that happens, show the user the location
-    // we already have so the card does not lie about it.
+    /*
+     * buildHeroData returns null when weather.current is missing or
+     * location is missing. HeroCard only renders after the app-level
+     * AppLoadingState screen clears, so a null heroData at this
+     * point is not a cold-start loading state — it's either a real
+     * data-shape issue or a mid-flight retry where the prior payload
+     * was cleared. Either way the trust contract says: name what's
+     * missing, don't pretend to be loading. The body copy explicitly
+     * mentions retry-on-next-refresh so the user understands this is
+     * a transient state we'll recover from.
+     */
     const fallbackLocationName =
-      typeof location?.name === "string" ? location.name.trim() : "";
+      typeof location?.name === "string" && location.name.trim()
+        ? location.name.trim()
+        : "";
     const fallbackLocationCountry =
-      typeof location?.country === "string" ? location.country.trim() : "";
-    const isFallbackLocationKnown = Boolean(fallbackLocationName);
-    const fallbackLocationLabel = isFallbackLocationKnown
+      typeof location?.country === "string" && location.country.trim()
+        ? location.country.trim()
+        : "";
+    const hasResolvedLocation = Boolean(fallbackLocationName);
+    const locationLabel = hasResolvedLocation
       ? `${fallbackLocationName}${
           fallbackLocationCountry ? `, ${fallbackLocationCountry}` : ""
         }`
-      : "Location unavailable";
+      : "No location selected";
+    const bodyCopy = hasResolvedLocation
+      ? "Current readings aren’t available right now. Aura will retry on the next refresh."
+      : "Pick a location to see live conditions. Use the search above or grant device location.";
+
     return (
       <section
-        className="bento-hero hero-card glass"
+        className="bento-hero hero-card glass hero-card--placeholder"
         style={style}
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
@@ -85,20 +99,23 @@ function HeroCard({
           <div
             className="hero-location"
             aria-label={
-              isFallbackLocationKnown
-                ? `Location: ${fallbackLocationLabel}`
-                : "Location unavailable"
+              hasResolvedLocation
+                ? `Location: ${locationLabel}`
+                : "No location selected"
             }
           >
             <MapPin size={14} aria-hidden="true" />
-            <span>{fallbackLocationLabel}</span>
+            <span>{locationLabel}</span>
           </div>
           <p className="hero-date">
-            {isFallbackLocationKnown
-              ? "Loading current conditions…"
-              : "Loading weather…"}
+            {hasResolvedLocation
+              ? "Readings unavailable"
+              : "Choose a place to begin"}
           </p>
         </header>
+        <p className="hero-placeholder-copy" role="status">
+          {bodyCopy}
+        </p>
       </section>
     );
   }

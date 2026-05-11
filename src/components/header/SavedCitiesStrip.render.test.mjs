@@ -120,3 +120,88 @@ describe("SavedCitiesStrip undo affordance", () => {
     assert.equal(view.container.firstChild, null);
   });
 });
+
+describe("SavedCitiesStrip active-city semantic", () => {
+  test("active chip uses aria-current=true rather than aria-pressed", () => {
+    const view = render(
+      React.createElement(SavedCitiesStrip, {
+        savedCities: [TOKYO],
+        location: { lat: TOKYO.lat, lon: TOKYO.lon, name: "Tokyo" },
+        loadSavedCity: () => {},
+        forgetSavedCity: () => {},
+        restoreSavedCity: () => {},
+      })
+    );
+    const chip = view.getByRole("button", { name: "Tokyo" });
+    assert.equal(
+      chip.getAttribute("aria-current"),
+      "true",
+      "active chip indicates 'currently displayed', not a toggle state"
+    );
+    assert.equal(
+      chip.getAttribute("aria-pressed"),
+      null,
+      "must not use aria-pressed — that's the toggle semantic, not 'currently shown'"
+    );
+  });
+
+  test("inactive chip exposes no aria-current attribute", () => {
+    const view = render(
+      React.createElement(SavedCitiesStrip, {
+        savedCities: [TOKYO],
+        location: { lat: 0, lon: 0 },
+        loadSavedCity: () => {},
+        forgetSavedCity: () => {},
+        restoreSavedCity: () => {},
+      })
+    );
+    const chip = view.getByRole("button", { name: "Tokyo" });
+    assert.equal(chip.getAttribute("aria-current"), null);
+    assert.equal(chip.getAttribute("aria-pressed"), null);
+  });
+
+  test("a null active location does not coerce to (0, 0) and falsely mark a chip current", () => {
+    // Defends against the Number(null) === 0 pitfall — a saved city at
+    // 0,0 (Null Island) would falsely match a missing active location
+    // if we coerced loosely.
+    const nullIsland = { lat: 0, lon: 0, name: "Null Island", country: "" };
+    const view = render(
+      React.createElement(SavedCitiesStrip, {
+        savedCities: [nullIsland],
+        location: null,
+        loadSavedCity: () => {},
+        forgetSavedCity: () => {},
+        restoreSavedCity: () => {},
+      })
+    );
+    const chip = view.getByRole("button", { name: "Null Island" });
+    assert.equal(chip.getAttribute("aria-current"), null);
+  });
+});
+
+describe("SavedCitiesStrip focus-management after remove", () => {
+  test("focus moves to the Undo button when a chip is removed", async () => {
+    const view = render(
+      React.createElement(SavedCitiesStrip, {
+        savedCities: [TOKYO],
+        location: { lat: 0, lon: 0 },
+        loadSavedCity: () => {},
+        forgetSavedCity: () => {},
+        restoreSavedCity: () => {},
+      })
+    );
+
+    await act(async () => {
+      view
+        .getByRole("button", { name: "Remove Tokyo from saved cities" })
+        .click();
+    });
+
+    const undoButton = view.getByRole("button", { name: "Undo" });
+    assert.equal(
+      view.container.ownerDocument.activeElement,
+      undoButton,
+      "after removing a chip, focus lands on the Undo recovery button so keyboard / SR users can act without re-tabbing"
+    );
+  });
+});
