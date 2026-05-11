@@ -300,8 +300,15 @@
   font-size: 14px;
 }
 
-.error-retry {
+.error-card-actions {
   margin-top: 18px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.error-retry {
   min-height: 44px;
   min-width: 124px;
   padding: 0 18px;
@@ -311,6 +318,24 @@
   font-size: 14px;
   font-weight: 700;
   transition: transform var(--motion-fast) var(--ease-standard), box-shadow var(--motion-medium) var(--ease-standard);
+}
+
+.error-card > .error-retry {
+  margin-top: 18px;
+}
+
+/* Secondary "Reload app" style — visually subordinate to the primary
+ * "Try again" pill so the user reaches for the cheap soft retry first.
+ * The hard reload is still one tap away when soft retry can't recover. */
+.error-retry--subtle {
+  background: transparent;
+  color: rgba(229, 240, 255, 0.92);
+  border: 1px solid rgba(196, 220, 255, 0.34);
+}
+
+.error-retry--subtle:hover {
+  background: rgba(13, 26, 53, 0.5);
+  border-color: rgba(174, 227, 255, 0.5);
 }
 
 .error-retry:hover {
