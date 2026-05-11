@@ -169,6 +169,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 44px;
   padding: 10px 14px;
   cursor: pointer;
   list-style: none;
@@ -303,26 +304,77 @@
     gap: 12px;
   }
 
+  /*
+   * Group labels are navigational scaffolding — useful on a wide
+   * bento where multiple cards sit under one heading, but on a
+   * single-column phone they double the visible label count
+   * (every section already has its own h3). Quieten them so the
+   * cards lead the rhythm; the labels remain in the DOM for screen
+   * readers and the hash-link affordance stays intact.
+   */
   .bento-group-label {
+    margin: 4px 0 -2px;
+    padding-left: 10px;
+    color: rgba(220, 233, 255, 0.74);
+    font-size: 10px;
+    letter-spacing: 0.14em;
     justify-content: flex-start;
+  }
+
+  .bento-group-label::before {
+    width: 3px;
+    height: 11px;
+    box-shadow: none;
+    background: rgba(166, 209, 255, 0.62);
+  }
+
+  .bento-group-label::after {
+    display: none;
   }
 
   .bento > [class*="bento-"] {
     grid-column: auto;
     min-height: 0;
   }
+
+  /*
+   * Skip layout/paint for cards that aren't on screen yet. On a
+   * phone the bento is one tall column; the storm watch and source
+   * health rows live well below the fold and pay full render cost
+   * on first load even though the user can't see them. content-
+   * visibility lets the browser short-circuit until they scroll
+   * into the viewport. The fixed intrinsic size avoids the layout
+   * shift the bare directive would otherwise produce.
+   *
+   * Hero stays opted-out — it's always visible and we want its
+   * card-slide-up animation to run on first paint.
+   */
+  .bento > section:not(.bento-hero) {
+    content-visibility: auto;
+    contain-intrinsic-size: 320px;
+  }
 }
 
 @media (max-width: 420px) {
+  .bento {
+    /*
+     * Tighter gap on the narrowest phones — every gap pixel adds
+     * to total scroll length and the cards already have generous
+     * internal padding for breathing room.
+     */
+    gap: 10px;
+  }
+
   .bento-group-label {
-    padding-left: 11px;
+    margin: 2px 0 -4px;
+    padding-left: 9px;
     font-size: 10px;
     letter-spacing: 0.1em;
   }
 
   .bento-group-label::before {
     width: 3px;
-    height: 12px;
+    height: 11px;
   }
 
   .bento-group-label::after {

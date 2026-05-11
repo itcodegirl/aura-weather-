@@ -51,6 +51,7 @@ function ExposureSection({
         <MetricCard
           id={METRIC_LABEL_IDS.airQuality}
           title="Air Quality"
+          titleTag="h4"
           context={hasAqiData ? "AQI" : "AQI offline"}
           value={aqiValue}
           max={300}
@@ -63,6 +64,7 @@ function ExposureSection({
         <MetricCard
           id={METRIC_LABEL_IDS.uvIndex}
           title="UV Index"
+          titleTag="h4"
           context={hasUvData ? "Today" : "UV offline"}
           value={uvValue}
           max={11}

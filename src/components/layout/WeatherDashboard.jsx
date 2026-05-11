@@ -2,6 +2,7 @@ import { lazy, memo, Suspense, useCallback, useState } from "react";
 import HeroCard from "../HeroCard";
 import RainCard from "../RainCard";
 import ExposureSection from "../ExposureSection";
+import PanelErrorBoundary from "../PanelErrorBoundary";
 import { CardFallback } from "../ui";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { usePanelPreload } from "../../hooks/useAppShellEffects";
@@ -101,23 +102,35 @@ function WeatherDashboard({
           <span className="sr-only">{accessibleLocationSuffix}</span>
         )}
       </h2>
-      <HeroCard
-        weather={weather}
-        location={location}
-        unit={unit}
-        climateComparison={climateComparison}
-        climateStatus={climateStatus}
+      <PanelErrorBoundary
+        label="Current weather"
+        className="bento-hero"
         style={CARD_STYLE_VARIABLES[0]}
-        isRefreshing={isBackgroundLoading}
-      />
+      >
+        <HeroCard
+          weather={weather}
+          location={location}
+          unit={unit}
+          climateComparison={climateComparison}
+          climateStatus={climateStatus}
+          style={CARD_STYLE_VARIABLES[0]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
 
-      <ExposureSection
-        aqi={weather?.aqi}
-        aqiStatus={aqiStatus}
-        uvIndex={weather?.daily?.uvIndexMax?.[0]}
+      <PanelErrorBoundary
+        label="Environmental exposure"
+        className="bento-exposure"
         style={CARD_STYLE_VARIABLES[1]}
-        isRefreshing={isBackgroundLoading}
-      />
+      >
+        <ExposureSection
+          aqi={weather?.aqi}
+          aqiStatus={aqiStatus}
+          uvIndex={weather?.daily?.uvIndexMax?.[0]}
+          style={CARD_STYLE_VARIABLES[1]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
 
       <h2
         id={GROUP_LABEL_IDS.nearTermOutlook}
@@ -126,13 +139,19 @@ function WeatherDashboard({
       >
         Near-Term Outlook
       </h2>
-      <RainCard
-        weather={weather}
-        unit={unit}
-        dataUnit={weatherDataUnit}
+      <PanelErrorBoundary
+        label="Rain outlook"
+        className="bento-rain"
         style={CARD_STYLE_VARIABLES[2]}
-        isRefreshing={isBackgroundLoading}
-      />
+      >
+        <RainCard
+          weather={weather}
+          unit={unit}
+          dataUnit={weatherDataUnit}
+          style={CARD_STYLE_VARIABLES[2]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
       {showSupplementalPanels ? (
         <Suspense
           fallback={(

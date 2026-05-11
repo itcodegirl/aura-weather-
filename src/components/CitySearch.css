@@ -60,8 +60,19 @@
   outline: none;
   background: none;
   color: #f3f8ff;
+  /*
+   * 16px+ font-size at coarse pointer (mobile) is the magic value
+   * iOS Safari uses to skip the auto-zoom on focus. Fine-pointer
+   * keeps the tighter 15px rhythm.
+   */
   font-size: 15px;
   font-weight: 600;
+}
+
+@media (pointer: coarse) {
+  .city-search-input {
+    font-size: 16px;
+  }
 }
 
 .city-search-input::placeholder {
@@ -72,8 +83,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   color: var(--text-dim);
   transition:
@@ -285,18 +296,23 @@
 
 @media (max-width: 420px) {
   .city-search-input-wrap {
-    min-height: 42px;
+    /*
+     * 16px input font-size on iOS prevents the auto-zoom on focus
+     * that disorients the user when the keyboard opens. Bump back
+     * to 16px on phones even though the visual rhythm wants 14.
+     */
+    min-height: 44px;
     padding: 0 11px;
   }
 
   .city-search-input {
-    font-size: 14px;
+    font-size: 16px;
     padding: 8px 8px;
   }
 
   .city-search-clear {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
   }
 
   .city-search-dropdown {

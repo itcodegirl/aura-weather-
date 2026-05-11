@@ -53,6 +53,7 @@
 @media (prefers-reduced-motion: reduce) {
   .weather-icon--animated {
     animation: none;
+    will-change: auto;
   }
 }
 
@@ -65,5 +66,6 @@
 @media (prefers-reduced-data: reduce) {
   .weather-icon--animated {
     animation: none;
+    will-change: auto;
   }
 }
