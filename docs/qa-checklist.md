@@ -63,8 +63,9 @@ CI runs the same gate serially for Playwright with
       UV, or wind inputs instead of inventing advice
 - [ ] The hero stats helper note appears: "Some readings are
       unavailable from the provider..."
-- [ ] AQI / UV cards read "AQI offline" / "UV offline" with a "No live
-      data" pill (not a 0 gauge)
+- [ ] AQI / UV cards read "Unavailable" with a "No live data" pill (not
+      a 0 gauge); supportText explains the missing reading without
+      claiming a fake zero value
 - [ ] Daily forecast rows with null highs/lows render "—" not "0°"
 - [ ] Switch back to live data and confirm every value reappears as a
       real reading
