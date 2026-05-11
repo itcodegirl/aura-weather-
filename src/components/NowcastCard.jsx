@@ -91,7 +91,7 @@ function NowcastCard({
           <p className="nowcast-explainer">
             15-minute rain guidance over the next 2 hours.
           </p>
-          <span className={`nowcast-risk-badge nowcast-risk-badge--${nowcastRiskTone}`}>
+          <span className={`severity-badge severity-badge--${nowcastRiskTone}`}>
             {nowcastRiskLabel}
           </span>
         </div>

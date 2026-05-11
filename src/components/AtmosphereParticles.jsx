@@ -1,4 +1,4 @@
-import { memo, useMemo, useSyncExternalStore } from "react";
+import { memo, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import "./AtmosphereParticles.css";
 
 const RAIN_CODES = new Set([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]);
@@ -16,6 +16,42 @@ const SNOW_PARTICLE_COUNT_DESKTOP = 40;
 const RAIN_PARTICLE_COUNT_MOBILE = 14;
 const SNOW_PARTICLE_COUNT_MOBILE = 20;
 const MOBILE_BREAKPOINT_PX = 640;
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function readReducedMotionPreference() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+  try {
+    return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+  } catch {
+    return false;
+  }
+}
+
+function usePrefersReducedMotion() {
+  const [prefersReduced, setPrefersReduced] = useState(readReducedMotionPreference);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
+    const mediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+    const handleChange = () => setPrefersReduced(mediaQuery.matches);
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+    if (typeof mediaQuery.addListener === "function") {
+      mediaQuery.addListener(handleChange);
+      return () => mediaQuery.removeListener(handleChange);
+    }
+    return undefined;
+  }, []);
+
+  return prefersReduced;
+}
 
 function classifyCondition(code) {
   if (RAIN_CODES.has(code)) {
@@ -93,12 +129,14 @@ function useIsMobileViewport() {
 }
 
 function AtmosphereParticles({ conditionCode, prefersReducedData = false }) {
+  const prefersReducedMotion = usePrefersReducedMotion();
   const kind = useMemo(() => classifyCondition(conditionCode), [conditionCode]);
   const isMobile = useIsMobileViewport();
+  // Skip rendering when reduced-motion is set — the CSS @media rule would
+  // snap all animations to 1ms, leaving a frozen row of particles.
+  const shouldRender = kind && !prefersReducedData && !prefersReducedMotion;
   const particles = useMemo(() => {
-    if (!kind || prefersReducedData) {
-      return [];
-    }
+    if (!shouldRender) return [];
     const count =
       kind === "rain"
         ? isMobile
@@ -108,9 +146,9 @@ function AtmosphereParticles({ conditionCode, prefersReducedData = false }) {
           ? SNOW_PARTICLE_COUNT_MOBILE
           : SNOW_PARTICLE_COUNT_DESKTOP;
     return buildParticles(kind, count);
-  }, [kind, prefersReducedData, isMobile]);
+  }, [kind, shouldRender, isMobile]);
 
-  if (!kind || prefersReducedData) {
+  if (!shouldRender) {
     return null;
   }
 

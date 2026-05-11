@@ -121,7 +121,10 @@ function StormRisk({ risk, cape, summaryId }) {
           labelClassName="storm-detail-label"
           valueClassName="storm-detail-value"
           label={(
-            <abbr title="Convective available potential energy">
+            <abbr
+              title="Convective available potential energy"
+              aria-label="CAPE, convective available potential energy"
+            >
               CAPE
             </abbr>
           )}
@@ -438,7 +441,7 @@ function StormWatch({
           </h3>
           <p className="storm-lede">{ledeText}</p>
         </div>
-        <span className="storm-subtitle">{eyebrowText}</span>
+        <span className="storm-subtitle eyebrow-pill">{eyebrowText}</span>
       </header>
 
       <div className="storm-grid">

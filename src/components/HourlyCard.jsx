@@ -239,7 +239,6 @@ function HourlyCard({
         className="bento-chart hourly-chart glass"
         style={style}
         aria-labelledby={chartTitleId}
-        aria-describedby={chartSummaryId}
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
       >
@@ -251,12 +250,16 @@ function HourlyCard({
           titleClassName="chart-title"
           icon={<LineIcon size={16} />}
           subtitle="Next 24h"
-          subtitleClassName="chart-subtitle"
+          subtitleClassName="chart-subtitle eyebrow-pill"
         />
 
-        <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
-          <p className="loader-text" role="status" aria-live="polite">
-            {HOURLY_EMPTY_MESSAGE}
+        <div className="card-empty" role="status">
+          <div className="card-empty__icon">
+            <LineIcon size={36} aria-hidden="true" />
+          </div>
+          <p className="card-empty__title">Hourly chart unavailable</p>
+          <p className="card-empty__copy">
+            Current conditions are still live above.
           </p>
         </div>
       </section>
@@ -293,7 +296,7 @@ function HourlyCard({
         titleClassName="chart-title"
         icon={<LineIcon size={16} />}
         subtitle="Next 24h"
-        subtitleClassName="chart-subtitle"
+        subtitleClassName="chart-subtitle eyebrow-pill"
       />
       <p className="chart-lede">{chartLede}</p>
 

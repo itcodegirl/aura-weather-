@@ -14,43 +14,45 @@ function InfoDrawer({
   const triggerRef = useRef(null);
   const triggerLabel = typeof label === "string" && label.trim() ? label : "More info";
 
+  const close = useCallback(() => {
+    setOpen(false);
+  }, []);
+
   const handleToggle = useCallback(() => {
     setOpen((previous) => !previous);
   }, []);
 
-  // Escape closes the drawer and returns focus to the trigger so
-  // keyboard users don't get stranded in the panel — and click-
-  // outside dismisses to match every other popover in the app
-  // (city search dropdown, mobile settings sheet). Without these
-  // the only way to close was hunting for the same tiny "?" again.
+  // Escape closes the panel and returns focus to the trigger so a
+  // keyboard user does not lose their place. We also dismiss on any
+  // pointer activity outside the drawer; the audit caught a stuck-open
+  // panel after a help button was tapped and the user moved on.
   useEffect(() => {
-    if (!open || typeof document === "undefined") {
-      return undefined;
-    }
+    if (!open) return undefined;
 
-    function handleKeyDown(event) {
+    const handleKeyDown = (event) => {
       if (event.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
+        event.stopPropagation();
+        close();
+        triggerRef.current?.focus?.();
       }
-    }
+    };
 
-    function handlePointerDown(event) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setOpen(false);
+    const handlePointerDown = (event) => {
+      const container = containerRef.current;
+      if (!container) return;
+      if (event.target instanceof Node && container.contains(event.target)) {
+        return;
       }
-    }
+      close();
+    };
 
     document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("pointerdown", handlePointerDown, true);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("pointerdown", handlePointerDown, true);
     };
-  }, [open]);
+  }, [open, close]);
 
   return (
     <div ref={containerRef} className={`info-drawer ${className}`.trim()}>

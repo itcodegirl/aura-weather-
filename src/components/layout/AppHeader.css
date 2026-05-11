@@ -55,7 +55,7 @@
   font-size: 10px;
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--track-loose);
   text-transform: uppercase;
 }
 
@@ -120,8 +120,8 @@
   align-self: flex-start;
   padding: 6px 10px 6px 12px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(186, 212, 252, 0.32);
-  background: rgba(8, 17, 36, 0.62);
+  border: var(--border-strong);
+  background: var(--surface-3);
   color: var(--text-muted);
   font-size: 11px;
   font-weight: 600;
@@ -136,6 +136,7 @@
 }
 
 .saved-city-undo-action {
+  position: relative;
   min-height: 28px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
@@ -150,13 +151,22 @@
     border-color var(--motion-fast) var(--ease-standard);
 }
 
+/* Vertical hit-area extender to reach a comfortable 40px tap height
+ * while the pill keeps its dense 28px presence inline. */
+.saved-city-undo-action::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+  border-radius: inherit;
+}
+
 .saved-city-undo-action:hover {
   background: rgba(20, 38, 70, 0.7);
   border-color: rgba(174, 227, 255, 0.6);
 }
 
 .saved-city-undo-action:focus-visible {
-  outline: 2px solid rgba(130, 228, 255, 0.66);
+  outline: 2px solid var(--focus-outline);
   outline-offset: 2px;
 }
 
@@ -169,6 +179,7 @@
   /* 32×32 keeps the dismiss control above the WCAG 2.5.5 spaced-target
      equivalent (≥24, with sibling spacing) on desktop and we lift it to
      a full 44 at the mobile breakpoint where targets cluster on touch. */
+  position: relative;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -180,16 +191,13 @@
   justify-content: center;
 }
 
-/*
- * On coarse-pointer devices, slightly increase the dismiss control's
- * interactive size from 28px to 36px for easier tapping while keeping
- * the control visually compact.
- */
-@media (pointer: coarse) {
-  .saved-city-undo-dismiss {
-    width: 36px;
-    height: 36px;
-  }
+/* Hit-area extender to lift the small dismiss glyph to a 40px touch
+ * target without bleeding into the adjacent Undo button. */
+.saved-city-undo-dismiss::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
 }
 
 .saved-city-undo-dismiss:hover {
@@ -203,8 +211,8 @@
   gap: 4px;
   padding: 3px 4px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(181, 210, 252, 0.26);
-  background: rgba(8, 17, 36, 0.5);
+  border: var(--border-default);
+  background: var(--surface-2);
 }
 
 .saved-city-chip {
@@ -219,7 +227,7 @@
   color: rgba(224, 237, 255, 0.92);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--track-tight);
   display: inline-flex;
   align-items: center;
   transition:
@@ -231,8 +239,8 @@
 
 .saved-city-chip.is-active,
 .saved-city-chip[aria-pressed="true"] {
-  color: #061026;
-  background: linear-gradient(145deg, #f8fbff, #dbe9ff);
+  color: var(--active-pill-color);
+  background: var(--active-pill-bg);
 }
 
 .saved-city-chip:active,
@@ -244,6 +252,7 @@
   /* 32 desktop / 40 mobile (see media query below). The remove button
      sits next to the chip in a single wrapper shell — close-cluster
      targets that need WCAG 2.5.5 distinct hit areas. */
+  position: relative;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -258,11 +267,14 @@
     background var(--motion-fast) var(--ease-standard);
 }
 
-@media (pointer: coarse) {
-  .saved-city-remove {
-    width: 36px;
-    height: 36px;
-  }
+/* Bump touch area above/below so the X stays comfortable to tap
+ * without growing the visible chip. Vertical-only extension avoids
+ * overlapping the adjacent saved-city-chip in the same wrap. */
+.saved-city-remove::before {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+  border-radius: inherit;
 }
 
 .saved-city-remove:hover {
@@ -292,9 +304,9 @@
   align-items: center;
   gap: 8px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(185, 211, 250, 0.24);
-  background: rgba(7, 16, 35, 0.48);
-  box-shadow: inset 0 1px 0 rgba(228, 240, 255, 0.08);
+  border: var(--border-default);
+  background: var(--surface-2);
+  box-shadow: var(--subcard-shadow);
   text-align: left;
   transition:
     border-color var(--motion-fast) var(--ease-standard),
@@ -304,8 +316,8 @@
 
 .sync-account-toggle:hover {
   border-color: rgba(166, 227, 255, 0.42);
-  background: rgba(9, 20, 42, 0.62);
-  transform: translateY(-1px);
+  background: var(--surface-3);
+  transform: translateY(var(--lift-1));
 }
 
 .sync-account-toggle-copy {
@@ -320,12 +332,12 @@
   min-height: 22px;
   padding: 0 8px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(178, 209, 252, 0.28);
-  background: rgba(8, 18, 39, 0.62);
+  border: var(--border-default);
+  background: var(--surface-3);
   color: rgba(210, 227, 252, 0.9);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
@@ -342,11 +354,11 @@
   display: grid;
   gap: 6px;
   width: 100%;
-  padding: 10px 11px;
+  padding: var(--subcard-padding);
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(185, 211, 250, 0.24);
-  background: rgba(7, 16, 35, 0.56);
-  box-shadow: inset 0 1px 0 rgba(228, 240, 255, 0.08);
+  border: var(--border-default);
+  background: var(--surface-2);
+  box-shadow: var(--subcard-shadow);
 }
 
 .sync-account-title {
@@ -357,7 +369,7 @@
   color: rgba(212, 227, 252, 0.92);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.11em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
@@ -380,7 +392,7 @@
   color: rgba(184, 208, 245, 0.88);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--track-tight);
   text-transform: uppercase;
 }
 
@@ -401,8 +413,8 @@
   min-height: 36px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(186, 214, 252, 0.28);
-  background: rgba(8, 17, 38, 0.58);
+  border: var(--border-strong);
+  background: var(--surface-2);
   color: #e3efff;
   font-size: 11px;
   font-weight: 700;
@@ -415,8 +427,8 @@
 
 .sync-account-btn:hover {
   border-color: rgba(166, 227, 255, 0.5);
-  background: rgba(10, 22, 48, 0.72);
-  transform: translateY(-1px);
+  background: var(--surface-strong);
+  transform: translateY(var(--lift-1));
 }
 
 .sync-account-btn:active,
@@ -431,8 +443,8 @@
 }
 
 .sync-account-btn:disabled:hover {
-  border-color: rgba(186, 214, 252, 0.28);
-  background: rgba(8, 17, 38, 0.58);
+  border-color: rgba(var(--border-base), 0.34);
+  background: var(--surface-2);
   transform: none;
 }
 
@@ -447,8 +459,8 @@
   min-width: 0;
   padding: 0 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(180, 209, 249, 0.28);
-  background: rgba(6, 14, 31, 0.64);
+  border: var(--border-default);
+  background: var(--surface-3);
   color: #eef6ff;
   font-size: 12px;
   font-weight: 600;
@@ -459,7 +471,7 @@
 }
 
 .sync-account-input:focus-visible {
-  border-color: rgba(130, 228, 255, 0.66);
+  border-color: var(--focus-outline);
   box-shadow: 0 0 0 3px rgba(64, 196, 255, 0.2);
 }
 
@@ -493,7 +505,7 @@
   color: rgba(205, 221, 251, 0.9);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.13em;
+  letter-spacing: var(--track-loose);
   line-height: 1;
   text-transform: uppercase;
 }
@@ -502,8 +514,8 @@
 .toggle-pill,
 .current-location-btn,
 .header-secondary-action {
-  background: rgba(8, 17, 38, 0.56);
-  border: 1px solid rgba(198, 218, 255, 0.24);
+  background: var(--surface-2);
+  border: var(--border-default);
   box-shadow: inset 0 1px 0 rgba(226, 238, 255, 0.08);
 }
 
@@ -511,7 +523,7 @@
   display: flex;
   gap: 4px;
   padding: 4px 5px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 
 .unit-btn,
@@ -520,7 +532,7 @@
 .header-secondary-action {
   min-height: var(--header-control-height);
   min-width: 44px;
-  border-radius: 11px;
+  border-radius: var(--radius-control);
   font-size: 12px;
   letter-spacing: 0.03em;
   font-weight: 700;
@@ -540,16 +552,16 @@
 .current-location-btn {
   min-width: 122px;
   padding: 0 18px;
-  border-radius: 14px;
-  letter-spacing: 0.05em;
+  border-radius: var(--radius-md);
+  letter-spacing: var(--track-tight);
   text-transform: uppercase;
 }
 
 .header-secondary-action {
   min-width: 122px;
   padding: 0 14px;
-  border-radius: 14px;
-  letter-spacing: 0.06em;
+  border-radius: var(--radius-md);
+  letter-spacing: var(--track-tight);
   text-transform: uppercase;
   font-size: 11px;
 }
@@ -578,11 +590,9 @@
 .toggle-pill-btn.is-active,
 .unit-btn[aria-pressed="true"],
 .toggle-pill-btn[aria-pressed="true"] {
-  color: #021127;
-  background: linear-gradient(145deg, #f9fcff, #d9eaff);
-  box-shadow:
-    0 6px 14px rgba(4, 12, 28, 0.26),
-    inset 0 1px 0 rgba(255, 255, 255, 0.52);
+  color: var(--active-pill-color);
+  background: var(--active-pill-bg);
+  box-shadow: var(--active-pill-shadow);
 }
 
 .toggle-pill {
@@ -590,7 +600,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 5px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 
 .toggle-pill-btn {
@@ -598,7 +608,7 @@
   padding: 0 14px;
   border: 1px solid transparent;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-default);
 }
 
 .current-location-btn:hover,
@@ -606,7 +616,7 @@
 .toggle-pill-btn:hover,
 .header-secondary-action:hover {
   color: #f8fbff;
-  transform: translateY(-1px);
+  transform: translateY(var(--lift-1));
   border-color: rgba(174, 227, 255, 0.44);
   box-shadow:
     0 8px 18px rgba(4, 12, 28, 0.26),
@@ -680,14 +690,14 @@
     flex: 0 0 auto;
     min-height: 44px;
     padding: 0 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(198, 218, 255, 0.24);
-    background: rgba(8, 17, 38, 0.56);
+    border-radius: var(--radius-md);
+    border: var(--border-default);
+    background: var(--surface-2);
     box-shadow: inset 0 1px 0 rgba(226, 238, 255, 0.08);
     color: var(--text-muted);
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: var(--track-tight);
     text-transform: uppercase;
     transition:
       background var(--motion-fast) var(--ease-standard),
@@ -698,11 +708,11 @@
   .mobile-settings-toggle.is-open {
     color: #f8fbff;
     border-color: rgba(174, 227, 255, 0.5);
-    background: rgba(13, 26, 53, 0.7);
+    background: var(--surface-strong);
   }
 
   .mobile-settings-toggle:focus-visible {
-    border-color: rgba(130, 228, 255, 0.66);
+    border-color: var(--focus-outline);
     box-shadow:
       0 0 0 3px rgba(64, 196, 255, 0.2),
       inset 0 1px 0 rgba(229, 241, 255, 0.16);
@@ -722,9 +732,9 @@
     margin-top: 4px;
     padding: 12px;
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(188, 214, 252, 0.2);
-    background: rgba(7, 16, 35, 0.5);
-    box-shadow: inset 0 1px 0 rgba(228, 240, 255, 0.08);
+    border: var(--border-default);
+    background: var(--surface-2);
+    box-shadow: var(--subcard-shadow);
     animation: settings-reveal var(--motion-medium) var(--ease-standard);
   }
 

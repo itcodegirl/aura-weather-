@@ -6,14 +6,19 @@
 }
 
 .info-drawer-trigger {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  /*
+   * Slightly larger trigger so the ‘i’ help button is comfortable to
+   * tap. Visual button stays compact via padding inside.
+   */
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  border: 1px solid rgba(174, 206, 248, 0.42);
-  background: rgba(8, 18, 39, 0.62);
+  border: var(--border-strong);
+  background: var(--surface-3);
   color: rgba(218, 233, 255, 0.96);
   font-size: 12px;
   font-weight: 700;
@@ -24,23 +29,20 @@
     transform var(--motion-fast) var(--ease-standard);
 }
 
-/*
- * On touch devices the visible 28px circle stays the same but the
- * hit area widens to 44px via padding so the help affordance is
- * actually tappable next to a metric label without misfires.
- */
-@media (pointer: coarse) {
-  .info-drawer-trigger {
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
-  }
+/* Invisible hit-area extender — keeps the dainty 28px glyph visually
+ * but lifts the touch target to ~44x44 (WCAG 2.5.5). Important on
+ * cards where InfoDrawer sits in tight header rows. */
+.info-drawer-trigger::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
 }
 
 .info-drawer-trigger:hover {
   border-color: rgba(139, 230, 255, 0.62);
-  background: rgba(13, 30, 59, 0.76);
-  transform: translateY(-1px);
+  background: var(--surface-strong);
+  transform: translateY(var(--lift-1));
 }
 
 .info-drawer-trigger:active {
@@ -50,8 +52,8 @@
 .info-drawer-panel {
   width: min(260px, 72vw);
   padding: 9px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(182, 212, 252, 0.3);
+  border-radius: var(--radius-xs);
+  border: var(--border-default);
   background: rgba(7, 17, 37, 0.9);
   box-shadow:
     0 10px 22px rgba(3, 10, 24, 0.32),
@@ -64,7 +66,7 @@
   color: #e9f3ff;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: var(--track-tight);
   text-transform: uppercase;
 }
 
@@ -89,9 +91,20 @@
    * area was unreliable.
    */
   .info-drawer-trigger {
+    /*
+     * Keeps a 28x28 minimum at the smallest viewport so the help
+     * trigger stays tappable on a phone. Earlier 24x24 missed the
+     * mark for one-handed touch.
+     */
     width: 28px;
     height: 28px;
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  /* Keep the touch target at ~44x44 even when the visible glyph
+   * shrinks to 24px on compact phones. */
+  .info-drawer-trigger::before {
+    inset: -10px;
   }
 
   .info-drawer-panel {

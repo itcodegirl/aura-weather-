@@ -25,21 +25,25 @@
 }
 
 .alerts-subtitle {
+  /*
+   * Alerts subtitle keeps a warm warn tint (vs the neutral .eyebrow-pill)
+   * because its presence in the header IS the alert signal.
+   */
   display: inline-flex;
   align-items: center;
-  padding: 4px 9px;
+  padding: 5px 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(250, 204, 21, 0.34);
-  background: rgba(126, 52, 11, 0.22);
-  color: #fde68a;
+  border: 1px solid var(--severity-warn-border);
+  background: var(--severity-warn-bg);
+  color: var(--severity-warn-fg);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
 .alerts-empty {
-  padding: 10px 12px;
+  padding: var(--subcard-padding);
   border-radius: var(--radius-sm);
   border: var(--subcard-border);
   background: var(--subcard-bg);
@@ -74,25 +78,25 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 12px;
+  padding: var(--subcard-padding);
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(186, 212, 252, 0.22);
+  border: var(--border-default);
   background: var(--subcard-bg);
   box-shadow: var(--subcard-shadow);
 }
 
 .alerts-item--critical {
-  border-color: rgba(248, 113, 113, 0.52);
+  border-color: var(--severity-critical-border);
   background: linear-gradient(165deg, rgba(84, 20, 20, 0.44), rgba(24, 7, 7, 0.4));
 }
 
 .alerts-item--high {
-  border-color: rgba(251, 146, 60, 0.48);
+  border-color: var(--severity-high-border);
   background: linear-gradient(165deg, rgba(93, 45, 14, 0.42), rgba(26, 13, 6, 0.38));
 }
 
 .alerts-item--moderate {
-  border-color: rgba(250, 204, 21, 0.42);
+  border-color: var(--severity-warn-border);
   background: linear-gradient(165deg, rgba(82, 62, 11, 0.34), rgba(20, 15, 5, 0.34));
 }
 
@@ -131,32 +135,32 @@
   border-radius: var(--radius-pill);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.11em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
 .alerts-priority--critical {
-  color: #fee2e2;
-  border: 1px solid rgba(248, 113, 113, 0.6);
-  background: rgba(127, 29, 29, 0.34);
+  color: var(--severity-critical-fg);
+  border: 1px solid var(--severity-critical-border);
+  background: var(--severity-critical-bg);
 }
 
 .alerts-priority--high {
-  color: #ffedd5;
-  border: 1px solid rgba(249, 115, 22, 0.56);
-  background: rgba(124, 45, 18, 0.3);
+  color: var(--severity-high-fg);
+  border: 1px solid var(--severity-high-border);
+  background: var(--severity-high-bg);
 }
 
 .alerts-priority--moderate {
-  color: #fef9c3;
-  border: 1px solid rgba(234, 179, 8, 0.52);
-  background: rgba(113, 63, 18, 0.3);
+  color: var(--severity-warn-fg);
+  border: 1px solid var(--severity-warn-border);
+  background: var(--severity-warn-bg);
 }
 
 .alerts-priority--low {
-  color: #dcfce7;
-  border: 1px solid rgba(74, 222, 128, 0.5);
-  background: rgba(20, 83, 45, 0.26);
+  color: var(--severity-ok-fg);
+  border: 1px solid var(--severity-ok-border);
+  background: var(--severity-ok-bg);
 }
 
 .alerts-window {
@@ -170,8 +174,8 @@
   margin: 6px 0 0;
   padding: 8px 10px;
   border-radius: var(--radius-sm);
-  border: 1px dashed rgba(186, 212, 252, 0.28);
-  background: rgba(8, 17, 36, 0.4);
+  border: 1px dashed rgba(var(--border-base), 0.28);
+  background: var(--surface-1);
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 600;
