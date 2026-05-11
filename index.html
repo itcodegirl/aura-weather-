@@ -7,7 +7,14 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <meta name="theme-color" content="#0b1c3f" />
-    <meta name="color-scheme" content="dark" />
+    <!--
+      Aura is dark-only by design: cards are frosted surfaces engineered
+      to sit on a colourful weather-scene gradient. Half-light support
+      (light body, dark cards) read as a UI bug per the design audit.
+      "dark only" tells the UA to skip light-mode form-widget and scrollbar
+      adaptations rather than mixing the two.
+    -->
+    <meta name="color-scheme" content="dark only" />
     <meta name="application-name" content="Aura Weather" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Aura Weather" />

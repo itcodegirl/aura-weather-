@@ -304,11 +304,17 @@ function ForecastCard({
           icon={<CalendarDays size={16} />}
           leftClassName="forecast-heading"
           subtitle="Upcoming week"
-          subtitleClassName="forecast-subtitle"
+          subtitleClassName="forecast-subtitle eyebrow-pill"
         />
-        <p className="loader-text" role="status" aria-live="polite">
-          {FORECAST_EMPTY_MESSAGE}
-        </p>
+        <div className="card-empty" role="status">
+          <div className="card-empty__icon">
+            <CalendarDays size={36} aria-hidden="true" />
+          </div>
+          <p className="card-empty__title">7-day outlook unavailable</p>
+          <p className="card-empty__copy">
+            Current conditions are still live above.
+          </p>
+        </div>
       </section>
     );
   }

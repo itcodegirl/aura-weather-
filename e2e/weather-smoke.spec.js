@@ -23,10 +23,10 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
 
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(
-    page.getByText("Chicago is loaded for now. Use your location or search any city.")
+    page.getByRole("heading", { name: "Pick a location to make Aura yours" })
   ).toBeVisible();
   await expect(
-    page.getByLabel("Location onboarding").getByRole("button", { name: "Allow location access" })
+    page.getByLabel("Location onboarding").getByRole("button", { name: "Use my location" })
   ).toBeVisible();
   await expect(page.locator(".location-notice")).toHaveCount(0);
   await expect(page.getByText("Cloud Sync")).toHaveCount(0);
@@ -70,7 +70,7 @@ test("labels granted browser coordinates as current location", async ({ page }) 
 
   await page
     .getByLabel("Location onboarding")
-    .getByRole("button", { name: "Allow location access" })
+    .getByRole("button", { name: "Use my location" })
     .click();
 
   await expect(page.locator(".hero-location")).toContainText("Current location");

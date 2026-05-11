@@ -55,6 +55,21 @@ function HeroCard({
   );
 
   if (!heroData) {
+    // The global AppLoadingState screen handles cold-start loading, but
+    // this fallback still fires in the rare window where the location
+    // is known but the weather payload has not resolved yet (e.g. a
+    // mid-flight retry). When that happens, show the user the location
+    // we already have so the card does not lie about it.
+    const fallbackLocationName =
+      typeof location?.name === "string" ? location.name.trim() : "";
+    const fallbackLocationCountry =
+      typeof location?.country === "string" ? location.country.trim() : "";
+    const isFallbackLocationKnown = Boolean(fallbackLocationName);
+    const fallbackLocationLabel = isFallbackLocationKnown
+      ? `${fallbackLocationName}${
+          fallbackLocationCountry ? `, ${fallbackLocationCountry}` : ""
+        }`
+      : "Location unavailable";
     return (
       <section
         className="bento-hero hero-card glass"
@@ -67,11 +82,22 @@ function HeroCard({
           Current weather
         </h3>
         <header className="hero-meta">
-          <div className="hero-location" aria-label="Location unavailable">
+          <div
+            className="hero-location"
+            aria-label={
+              isFallbackLocationKnown
+                ? `Location: ${fallbackLocationLabel}`
+                : "Location unavailable"
+            }
+          >
             <MapPin size={14} aria-hidden="true" />
-            <span>Location unavailable</span>
+            <span>{fallbackLocationLabel}</span>
           </div>
-          <p className="hero-date">Loading weather</p>
+          <p className="hero-date">
+            {isFallbackLocationKnown
+              ? "Loading current conditions…"
+              : "Loading weather…"}
+          </p>
         </header>
       </section>
     );
@@ -105,12 +131,14 @@ function HeroCard({
     today,
     tempUnit,
   } = heroData;
-  const climateFallbackMessage =
-    climateStatus === "loading"
-      ? "Comparing today's conditions with the historical average..."
-      : climateStatus === "unavailable"
-        ? "Historical comparison is temporarily unavailable."
-        : "";
+
+  // Climate-context loading and unavailable states used to render a
+  // placeholder sentence between the temperature and the bottom block,
+  // talking to itself while the historical comparison resolved. The
+  // audit flagged this as the hero "talking to itself" — supplemental
+  // context should be silent when absent, not announce its absence.
+  // Suppress fallback copy; only render the resolved insight.
+  void climateStatus;
 
   const isHighMissing = isMissingPlaceholder(todayHighDisplay);
   const isLowMissing = isMissingPlaceholder(todayLowDisplay);
@@ -193,14 +221,6 @@ function HeroCard({
           </div>
         </div>
       </header>
-      {atmosphereReading && (
-        <p
-          className={`hero-reading hero-reading--${atmosphereReading.tone}`}
-          role="status"
-        >
-          {atmosphereReading.text}
-        </p>
-      )}
       <div className="hero-main">
         <div className="hero-temp-block">
           <div className="hero-temp-row">
@@ -231,11 +251,24 @@ function HeroCard({
             <span className="hero-condition-separator" aria-hidden="true">·</span>
             <span className="hero-feels">Feels like {feelsLikeDisplay}</span>
           </p>
+          {/*
+           * Editorial atmosphere reading sits below the temperature
+           * block instead of above it. The user lands on the gestalt
+           * (number + condition + feels-like) first; the synthesised
+           * sentence becomes context, not gating copy. Earned: only
+           * renders when buildAtmosphereReading found a signal worth
+           * the line; baseline returns null so we render nothing.
+           */}
+          {atmosphereReading && (
+            <p
+              className={`hero-reading hero-reading--${atmosphereReading.tone}`}
+              role="status"
+            >
+              {atmosphereReading.text}
+            </p>
+          )}
           {hasClimateComparison && (
             <p className="hero-insight">{climateMessage}</p>
-          )}
-          {!hasClimateComparison && climateFallbackMessage && (
-            <p className="hero-insight">{climateFallbackMessage}</p>
           )}
         </div>
       </div>
