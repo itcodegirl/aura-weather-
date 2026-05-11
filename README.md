@@ -35,9 +35,9 @@ It is designed as a portfolio project with real frontend concerns in scope:
 - Per-card `Try again` button on lazy-chunk failures so a flaky StormWatch / HourlyChart fetch can recover without a page reload
 - Dynamic `theme-color` meta tag that mirrors the active scene gradient so the iOS / Android browser chrome bar blends with the app
 - `viewport-fit=cover` plus `env(safe-area-inset-*)` padding so notched iPhones do not overlap the home indicator
-- Mobile-only Settings drawer collapses the secondary controls (climate context, unit, clear startup) behind one button, keeping search, my-location, and saved cities reachable in one row
-- StormWatch shows storm risk + pressure trend by default; wind compass + comfort dewpoint moved behind a `More: wind and comfort` disclosure
-- Source Health (provider freshness across forecast / AQI / alerts / archive) lives in a closed-by-default `<details>` disclosure below the bento
+- Narrow-viewport Settings drawer (≤1200px) collapses the secondary controls (climate context, unit, clear startup) behind one button, keeping search, my-location, and saved cities reachable in one row
+- StormWatch is dynamically titled: reads `Atmosphere` with a calm icon when CAPE is below the storm-risk threshold, promotes to `Storm watch` only when there's an actual signal — the four detail modules (storm risk, pressure trend, wind, comfort) sit below in a single grid with no duplicate snapshot row
+- Source Health (provider freshness across forecast, air quality, alerts, and historical comparison) lives in a closed-by-default `Where this data comes from` disclosure below the bento
 - Climate-context line is suppressed when the historical delta is under 5°F so a 1-degree noise day does not get a paragraph
 - Storm Risk panel reads `All clear` with no meter and no CAPE jargon when the score is 0
 - Temperature-unit changes stay local to the UI instead of forcing fresh forecast/climate requests
@@ -201,7 +201,7 @@ npm run test:lighthouse
 - Saved cities appear as search suggestions on focus, so repeat switching does not require typing.
 - Search shows a loading state before empty results, so users do not get a premature "No matching cities" response.
 - Startup-city controls stay hidden until a startup preference actually exists.
-- Cloud sync stays out of the header until a saved city exists, while existing connected/error states still remain recoverable.
+- Cloud sync stays out of the header until a saved city exists, and stays collapsed by default on every page load — the body of the panel (connect / disconnect / manual sync) only renders when the user opens it or when sync needs the user's attention (active syncing or live error).
 - Failed cloud sync connection attempts surface an error and stay disconnected instead of leaving a stale connected-looking state.
 - Cloud sync is optional and intentionally secondary to the main forecast workflow.
 - After a successful production visit, the service worker can serve the app shell offline and acknowledges when the shell is ready; live weather API failures still surface through the saved-forecast trust state instead of pretending fresh data exists.
@@ -216,8 +216,9 @@ npm run test:lighthouse
 - Climate-context buttons read "Show / Hide historical climate comparison" — describing the user-visible effect, not the internal flag
 - Live status messaging for loading, refresh, install, service-worker, and offline-ready states; the global update pill is keyboard-actionable as a manual refresh
 - Reduced-motion-safe card visibility, particle suppression, and refresh-spin disable
-- Updated mobile touch targets — saved-city remove (28px), saved-city chips (36px on mobile), status-stack actions (36px), location-setup (44px), error retry (44px); meets the iOS HIG comfort line
-- Mobile Settings drawer is `display: none` while collapsed so the controls are absent from the AT tree until the user requests them; the toggle exposes `aria-expanded` + `aria-controls`
+- WCAG 2.5.5 AA tap targets across the saved-cities cluster — chip is 36×desktop / 44×mobile, remove button 32 / 40, undo dismiss 32 / 40; location-setup CTAs are 44 across; error retry is 44. Meets the iOS HIG comfort line.
+- Settings drawer (≤1200px) is `display: none` while collapsed so the controls are absent from the AT tree until the user requests them; the toggle exposes `aria-expanded` + `aria-controls`
+- Refresh completion is announced to screen readers — the global update pill drops a polite `Forecast updated.` live-region message on the `isRefreshing` true→false transition, but only when the fetch timestamp actually advanced (a failed refresh stays silent)
 
 ## Architecture Decisions
 
@@ -236,6 +237,7 @@ Short notes on the non-obvious choices a reviewer might question.
 - **Strict numeric coercion at every layer.** `Number(null) === 0` would surface as a fake 0°F humidity / 0% rain chance / 0°F historical sample whenever Open-Meteo returns a missing data point. A single shared `toFiniteNumber` helper rejects nullish, empty-string, boolean, array, and object inputs explicitly, and is now applied at the API boundary, every formatter, every domain classifier, and every chart slot parser. Eight unit tests lock the core helper; additional assertions pin the null contract for each formatter and domain function.
 - **Lazy supplemental panels.** The hero, exposure cards, and rain card render synchronously. Hourly chart, storm watch, alerts, forecast, and nowcast are mounted via `Suspense` after a `requestIdleCallback` (or 180ms fallback) so the first paint is just the data the user sees first.
 - **CSS lives next to its component.** App.css holds only global tokens, resets, animations, and one shared focus-visible rule used across header buttons and retry buttons. Every feature's CSS is imported by its owning component.
+- **Dark-only by design.** Cards are frosted surfaces engineered to sit on the colourful weather-scene gradient. An earlier half-light handler (light body, dark cards) read as a UI bug rather than a design choice during the audit; the disciplined alternative is `color-scheme: dark only` on both `:root` and the meta tag so the user agent styles scrollbars, form controls, and autofill overlays for a dark surface even when the OS is in light mode.
 
 ## Data Trust Contract
 
