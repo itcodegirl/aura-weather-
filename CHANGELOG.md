@@ -122,7 +122,7 @@ portfolio-grade product. Format roughly follows
   `useThemeColor` overrides at runtime; the meta tag itself remains
   for browsers that load HTML before JS.
 
-## [Unreleased] — Audit pass (2026-05)
+## [Audit pass] — 2026-05-04
 
 ### Added
 
