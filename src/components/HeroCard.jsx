@@ -12,10 +12,16 @@ import {
   Sun,
 } from "lucide-react";
 import { isMissingPlaceholder } from "../utils/numbers";
+import { useTimeNow } from "../hooks/useTimeNow";
 import WeatherIcon from "./WeatherIcon";
 import { Stat } from "./ui";
 import { buildHeroData } from "./heroCard/buildHeroData";
 import "./HeroCard.css";
+
+// Sunlight phase + day-name label only change a few times per day.
+// A 5-minute bucket keeps the hero useMemo stable for most ticks
+// while still rolling over at midnight and around sunrise/sunset.
+const HERO_NOW_BUCKET_MS = 5 * 60_000;
 
 const GUIDANCE_ICONS = {
   rain: Droplets,
@@ -31,17 +37,17 @@ function HeroCard({
   climateStatus = "idle",
   style,
   isRefreshing = false,
-  nowMs,
 }) {
-  // Bucket the timestamp to one-minute granularity so the memo only
-  // recomputes when the day actually rolls over (or when the user
-  // crosses a minute boundary that affects sun-clock labels). The
-  // hero "today" string would otherwise stay frozen at first render
-  // and silently show yesterday's day name across midnight. nowMs is
-  // sourced from useTimeNow in the parent, so a missing value is a
-  // programming error rather than a runtime concern.
+  // Subscribe directly at the 5-minute cadence so the dashboard does
+  // not have to thread nowMs through every card. Sunlight phase, the
+  // date label, and sunrise/sunset all transition slowly enough that
+  // a 5-minute interval rolls over reliably across midnight without
+  // re-rendering the hero every minute for an unchanged display.
+  const nowMs = useTimeNow(HERO_NOW_BUCKET_MS);
   const headingId = useId();
-  const nowBucket = Number.isFinite(nowMs) ? Math.floor(nowMs / 60_000) : null;
+  const nowBucket = Number.isFinite(nowMs)
+    ? Math.floor(nowMs / HERO_NOW_BUCKET_MS)
+    : null;
   const heroData = useMemo(
     () =>
       buildHeroData({
@@ -49,30 +55,44 @@ function HeroCard({
         location,
         unit,
         climateComparison,
-        nowMs: nowBucket === null ? null : nowBucket * 60_000,
+        nowMs: nowBucket === null ? null : nowBucket * HERO_NOW_BUCKET_MS,
       }),
     [weather, location, unit, climateComparison, nowBucket]
   );
 
   if (!heroData) {
-    // The global AppLoadingState screen handles cold-start loading, but
-    // this fallback still fires in the rare window where the location
-    // is known but the weather payload has not resolved yet (e.g. a
-    // mid-flight retry). When that happens, show the user the location
-    // we already have so the card does not lie about it.
+    /*
+     * buildHeroData returns null when weather.current is missing or
+     * location is missing. HeroCard only renders after the app-level
+     * AppLoadingState screen clears, so a null heroData at this
+     * point is not a cold-start loading state — it's either a real
+     * data-shape issue or a mid-flight retry where the prior payload
+     * was cleared. Either way the trust contract says: name what's
+     * missing, don't pretend to be loading. The body copy explicitly
+     * mentions retry-on-next-refresh so the user understands this is
+     * a transient state we'll recover from.
+     */
     const fallbackLocationName =
-      typeof location?.name === "string" ? location.name.trim() : "";
+      typeof location?.name === "string" && location.name.trim()
+        ? location.name.trim()
+        : "";
     const fallbackLocationCountry =
-      typeof location?.country === "string" ? location.country.trim() : "";
-    const isFallbackLocationKnown = Boolean(fallbackLocationName);
-    const fallbackLocationLabel = isFallbackLocationKnown
+      typeof location?.country === "string" && location.country.trim()
+        ? location.country.trim()
+        : "";
+    const hasResolvedLocation = Boolean(fallbackLocationName);
+    const locationLabel = hasResolvedLocation
       ? `${fallbackLocationName}${
           fallbackLocationCountry ? `, ${fallbackLocationCountry}` : ""
         }`
-      : "Location unavailable";
+      : "No location selected";
+    const bodyCopy = hasResolvedLocation
+      ? "Current readings aren’t available right now. Aura will retry on the next refresh."
+      : "Pick a location to see live conditions. Use the search above or grant device location.";
+
     return (
       <section
-        className="bento-hero hero-card glass"
+        className="bento-hero hero-card glass hero-card--placeholder"
         style={style}
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
@@ -85,20 +105,23 @@ function HeroCard({
           <div
             className="hero-location"
             aria-label={
-              isFallbackLocationKnown
-                ? `Location: ${fallbackLocationLabel}`
-                : "Location unavailable"
+              hasResolvedLocation
+                ? `Location: ${locationLabel}`
+                : "No location selected"
             }
           >
             <MapPin size={14} aria-hidden="true" />
-            <span>{fallbackLocationLabel}</span>
+            <span>{locationLabel}</span>
           </div>
           <p className="hero-date">
-            {isFallbackLocationKnown
-              ? "Loading current conditions…"
-              : "Loading weather…"}
+            {hasResolvedLocation
+              ? "Readings unavailable"
+              : "Choose a place to begin"}
           </p>
         </header>
+        <p className="hero-placeholder-copy" role="status">
+          {bodyCopy}
+        </p>
       </section>
     );
   }

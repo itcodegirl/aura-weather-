@@ -238,7 +238,7 @@
 }
 
 .saved-city-chip.is-active,
-.saved-city-chip[aria-pressed="true"] {
+.saved-city-chip[aria-current="true"] {
   color: var(--active-pill-color);
   background: var(--active-pill-bg);
 }

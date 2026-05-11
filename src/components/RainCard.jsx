@@ -379,27 +379,40 @@ function RainCard({
 
         {timelineBars.length ? (
           <div className="rain-touch-explorer" aria-label="Rain samples">
+            {/*
+             * Same announcement-quality fix as the HourlyCard touch
+             * explorer: drop aria-live from this paragraph (the button
+             * activation already announces the change via its own
+             * aria-label + aria-current toggle), and use aria-current
+             * rather than aria-pressed since the user is showing a
+             * sample, not toggling a state on. aria-current only fires
+             * after the user has actually tapped a sample.
+             */}
             {selectedSample ? (
-              <p className="rain-selected-sample" aria-live="polite">
+              <p className="rain-selected-sample">
                 <span>{selectedSample.timeLabel}</span>
                 <strong>{selectedSample.valueLabel}</strong>
                 <span>{mode === "chance" ? "Rain confidence" : "Rain amount"}</span>
               </p>
             ) : null}
             <div className="rain-touch-strip" role="list" aria-label="Hourly rain samples">
-              {timelineBars.map((bar) => (
-                <button
-                  key={`sample-${bar.key}`}
-                  type="button"
-                  className={`rain-touch-sample ${selectedSample?.key === bar.key ? "is-selected" : ""}`.trim()}
-                  aria-pressed={selectedSample?.key === bar.key}
-                  aria-label={`Select ${bar.tooltip}`}
-                  onClick={() => setSelectedSampleKey(bar.key)}
-                >
-                  <span>{bar.timeLabel}</span>
-                  <strong>{bar.valueLabel}</strong>
-                </button>
-              ))}
+              {timelineBars.map((bar) => {
+                const isUserSelection = selectedSampleKey === bar.key;
+                const isShown = selectedSample?.key === bar.key;
+                return (
+                  <button
+                    key={`sample-${bar.key}`}
+                    type="button"
+                    className={`rain-touch-sample ${isShown ? "is-selected" : ""}`.trim()}
+                    aria-current={isUserSelection ? "true" : undefined}
+                    aria-label={`Show ${bar.tooltip}`}
+                    onClick={() => setSelectedSampleKey(bar.key)}
+                  >
+                    <span>{bar.timeLabel}</span>
+                    <strong>{bar.valueLabel}</strong>
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : null}
