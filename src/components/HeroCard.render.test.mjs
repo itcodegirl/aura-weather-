@@ -274,7 +274,7 @@ describe("HeroCard placeholder path (buildHeroData returned null)", () => {
       "date slot names the missing piece honestly"
     );
     assert.ok(
-      screen.getByText(/Current readings aren't available right now/),
+      screen.getByText(/Current readings aren.t available right now/),
       "body copy explains the state in the trust-contract voice"
     );
     assert.equal(
