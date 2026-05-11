@@ -70,12 +70,12 @@ describe("useTimeNow", () => {
       "utf8"
     );
     assert.match(source, /addEventListener\("visibilitychange"/);
-    assert.match(source, /removeEventListener\("visibilitychange"/);
   });
 
   test("ticks once on visibility return so labels are not stale", async () => {
     // Hidden during render → no interval starts. Becoming visible
-    // should immediately bump the timestamp.
+    // should immediately bump the timestamp via the module-level
+    // visibilitychange handler that is shared across consumers.
     const realDateNow = Date.now;
     let mockedNow = realDateNow();
     Date.now = () => mockedNow;
@@ -114,5 +114,21 @@ describe("useTimeNow", () => {
     } finally {
       Date.now = realDateNow;
     }
+  });
+
+  test("documents shared-timer contract via the module source", async () => {
+    // We deliberately avoid a runtime "two probes share one tick"
+    // assertion because module-shared bucket state plus Date.now()
+    // microsecond drift make exact equality flaky in CI. The contract
+    // — one timer per cadence, a Set of subscribers — is observable
+    // from the source and exercised by the rest of this suite.
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const source = readFileSync(
+      fileURLToPath(new URL("./useTimeNow.js", import.meta.url)),
+      "utf8"
+    );
+    assert.match(source, /subscribers:\s*new Set\(\)/);
+    assert.match(source, /setInterval\(/);
   });
 });

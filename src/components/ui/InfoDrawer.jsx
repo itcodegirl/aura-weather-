@@ -10,9 +10,9 @@ function InfoDrawer({
 }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
-  const triggerLabel = typeof label === "string" && label.trim() ? label : "More info";
   const containerRef = useRef(null);
   const triggerRef = useRef(null);
+  const triggerLabel = typeof label === "string" && label.trim() ? label : "More info";
 
   const close = useCallback(() => {
     setOpen(false);

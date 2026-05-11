@@ -17,7 +17,6 @@ import {
   WeatherDashboard,
 } from "./components/layout";
 import { GlobalUpdateIndicator } from "./components/ui";
-import { useTimeNow } from "./hooks/useTimeNow";
 
 const LOCATION_ONBOARDING_KEY = "aura-weather-location-onboarding-v1";
 
@@ -125,12 +124,6 @@ function App() {
     wasInterruptedRef.current = isInterrupted;
   }, [showGlobalLoading, showGlobalError]);
 
-  // Single source of truth for the "Updated X ago" pill that lives
-  // between the header and the dashboard. We pull nowMs at the App
-  // level instead of via WeatherDashboard's hook so the relative
-  // label updates without re-rendering the bento on every minute.
-  const indicatorNowMs = useTimeNow();
-
   if (showGlobalLoading) {
     return <AppLoadingState />;
   }
@@ -201,7 +194,6 @@ function App() {
 
       <GlobalUpdateIndicator
         trustMeta={trustMeta}
-        nowMs={indicatorNowMs}
         onRefresh={retryWeather}
         isRefreshing={isBackgroundLoading}
       />

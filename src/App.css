@@ -7,8 +7,8 @@
      bug; this is the disciplined alternative. */
   color-scheme: dark only;
 
-  --font-sans: "Manrope", "Segoe UI", sans-serif;
-  --font-display: "Space Grotesk", "Manrope", sans-serif;
+  --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Space Grotesk", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
   --text: #f5f8ff;
   --text-muted: rgba(230, 236, 255, 0.82);
@@ -184,13 +184,20 @@ html::-webkit-scrollbar-track {
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--text);
+  /*
+   * Include robust system fallbacks in the font stack so text renders
+   * immediately while Manrope/Space Grotesk are still loading. Once
+   * the web fonts arrive, they can swap in over the fallback fonts.
+   */
   font-family: var(--font-sans);
   background:
     radial-gradient(1200px 760px at 14% -10%, #3d4d8a 0%, #1a2550 34%, transparent 70%),
     radial-gradient(980px 650px at 84% -14%, #49598f 0%, #1a2348 34%, transparent 68%),
     linear-gradient(180deg, #0b1023 0%, #070c1b 56%, #050911 100%);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
@@ -649,6 +656,16 @@ a:focus-visible,
     --hero-temp-size: 58px;
     --hero-unit-size: 22px;
     --card-padding: 20px;
+    /*
+     * Compress card-enter animation on phones. The 9-card staggered
+     * reveal totals 1.15s on desktop (520ms duration + 8 × 70ms
+     * stagger), which feels deliberate on a wide bento but reads
+     * as 'still loading' on a single-column phone where each card
+     * is below the fold of its predecessor. Halving the values
+     * keeps the polish without the wait.
+     */
+    --card-enter-duration: 360ms;
+    --card-enter-stagger: 35ms;
   }
 }
 
@@ -656,11 +673,24 @@ a:focus-visible,
   :root {
     --content-gutter: 0.78rem;
     --card-padding: 18px;
+    /*
+     * Last blur step. 18px (desktop) → 10px (560) → 6px (420).
+     * Each backdrop-filter pass is a per-pixel screen-space blur on
+     * mobile GPUs, and at this tier the cards already mostly cover
+     * each other so the blur effect contributes very little
+     * perceptual depth.
+     */
+    --card-backdrop-blur: 6px;
   }
 
   .app-inner {
-    padding-top: 12px;
-    padding-bottom: 20px;
+    /*
+     * Honour the safe-area on phones with a home indicator. Without
+     * env() the bottom of the dashboard would tuck behind the
+     * indicator on iPhone X+ in PWA mode.
+     */
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
   }
 }
 
@@ -713,6 +743,19 @@ a:focus-visible,
   }
 
   .app::before,
+  .app::after {
+    display: none;
+  }
+}
+
+/*
+ * Drop the secondary background overlay on the narrowest phones.
+ * .app::after is a 4-layer radial-gradient stack that contributes
+ * a full-screen compositor pass for ~5% of perceptual polish — a
+ * straight win on low-end devices where every fill costs frame budget.
+ * The underlying body gradient already sets the colour scene.
+ */
+@media (max-width: 560px) {
   .app::after {
     display: none;
   }

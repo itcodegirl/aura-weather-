@@ -4,7 +4,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  min-height: 32px;
+  min-height: 36px;
   border-radius: var(--radius-pill);
   border: var(--border-default);
   background: var(--surface-2);
@@ -14,6 +14,23 @@
   letter-spacing: 0.02em;
   white-space: nowrap;
   user-select: none;
+}
+
+@media (pointer: coarse) {
+  .global-update-indicator {
+    min-height: 44px;
+    padding: 8px 14px;
+  }
+}
+
+/* Reserves the indicator slot before trustMeta arrives so the bento
+   does not shift down when the live label first appears. The empty
+   placeholder is invisible but occupies the same min-height. */
+.global-update-indicator--placeholder {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
 }
 
 .global-update-indicator--button {
@@ -112,7 +129,7 @@
 
 @media (max-width: 420px) {
   .global-update-indicator {
-    padding: 5px 10px;
+    padding: 6px 10px;
     font-size: 10px;
   }
 

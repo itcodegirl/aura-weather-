@@ -84,6 +84,12 @@
 }
 
 @media (max-width: 420px) {
+  /*
+   * Even at the narrowest tier, keep the help triggers at 28px so
+   * they remain reachable next to the metric labels. The visual
+   * footprint stayed small in the previous 24px design but the hit
+   * area was unreliable.
+   */
   .info-drawer-trigger {
     /*
      * Keeps a 28x28 minimum at the smallest viewport so the help

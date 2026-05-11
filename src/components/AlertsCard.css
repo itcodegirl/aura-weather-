@@ -188,8 +188,21 @@
     align-items: flex-start;
   }
 
+  /*
+   * On phones the priority pill + window timestamp form a single
+   * inline meta row beneath the alert event, so the user reads
+   *   [PRIORITY] · 2:00 PM – 8:00 PM
+   * in one scan instead of stacking them vertically.
+   */
   .alerts-item-meta {
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .alerts-window {
+    white-space: normal;
   }
 }
 

@@ -70,6 +70,7 @@ function ExposureSection({
           id={METRIC_LABEL_IDS.airQuality}
           title="Air Quality"
           context={hasAqiData ? "AQI" : "Unavailable"}
+          titleTag="h4"
           value={aqiValue}
           max={AQI_SCALE_MAX}
           status={aqiHealthStatus}
@@ -82,6 +83,7 @@ function ExposureSection({
           id={METRIC_LABEL_IDS.uvIndex}
           title="UV Index"
           context={hasUvData ? "Today" : "Unavailable"}
+          titleTag="h4"
           value={uvValue}
           max={11}
           status={uvStatus}

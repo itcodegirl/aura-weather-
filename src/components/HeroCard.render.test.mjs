@@ -185,6 +185,71 @@ describe("HeroCard with missing readings", () => {
   });
 });
 
+describe("HeroCard accessibility scaffolding", () => {
+  test("emits a visually-hidden h3 that names the section by location", () => {
+    const { container } = render(
+      React.createElement(HeroCard, {
+        weather: buildWeather(),
+        location: baseLocation,
+        unit: "F",
+      })
+    );
+
+    const heading = container.querySelector("h3.sr-only");
+    assert.ok(heading, "hero card emits a heading element for SR navigation");
+    assert.match(
+      heading.textContent,
+      /Current weather/,
+      "heading announces the section role"
+    );
+    assert.match(
+      heading.textContent,
+      /Chicago/,
+      "heading mentions the location so SR users hear which city"
+    );
+    assert.ok(
+      heading.classList.contains("sr-only"),
+      "heading is visually hidden so the visible layout stays unchanged"
+    );
+  });
+
+  test("section is labelled by the heading id so SR users hear the section name", () => {
+    const { container } = render(
+      React.createElement(HeroCard, {
+        weather: buildWeather(),
+        location: baseLocation,
+        unit: "F",
+      })
+    );
+
+    const section = container.querySelector("section.bento-hero");
+    const heading = container.querySelector("h3.sr-only");
+    assert.ok(heading?.id, "heading carries a useId-generated id");
+    assert.equal(
+      section?.getAttribute("aria-labelledby"),
+      heading.id,
+      "section is wired to the heading via aria-labelledby"
+    );
+  });
+
+  test("loading-fallback (no heroData) still emits the heading", () => {
+    // Passing weather without `current` triggers the early-return
+    // placeholder branch — it should still expose a heading so SR
+    // users learn this card is loading.
+    const { container } = render(
+      React.createElement(HeroCard, {
+        weather: { current: null, daily: null },
+        location: baseLocation,
+        unit: "F",
+      })
+    );
+
+    const heading = container.querySelector("h3.sr-only");
+    assert.ok(heading, "fallback branch emits a heading too");
+    assert.equal(heading.textContent, "Current weather");
+  });
+});
+
 describe("HeroCard placeholder path (buildHeroData returned null)", () => {
   test("with a resolved location, surfaces the location name and names the missing piece", () => {
     // weather.current is missing — we know where the user is but the
@@ -209,7 +274,7 @@ describe("HeroCard placeholder path (buildHeroData returned null)", () => {
       "date slot names the missing piece honestly"
     );
     assert.ok(
-      screen.getByText(/Current readings aren’t available right now/),
+      screen.getByText(/Current readings aren't available right now/),
       "body copy explains the state in the trust-contract voice"
     );
     assert.equal(

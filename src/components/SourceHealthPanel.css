@@ -209,8 +209,15 @@
     text-align: left;
   }
 
+  /*
+   * Two-column on phones for the four data sources — parallel
+   * status indicators benefit from the row-comparison shape, and
+   * stacking 1-col adds noticeable scroll inside an already
+   * disclosure-collapsed section.
+   */
   .source-health-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .source-health-state {
@@ -219,6 +226,10 @@
 }
 
 @media (max-width: 420px) {
+  .source-health-list {
+    grid-template-columns: 1fr;
+  }
+
   .source-health-item {
     padding: 10px;
   }

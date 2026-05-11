@@ -153,7 +153,7 @@
 .storm-detail-value[data-state="missing"],
 .storm-detail[data-state="missing"] .storm-detail-value {
   color: rgba(226, 232, 240, 0.6);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .storm-risk-meter {
@@ -294,8 +294,14 @@
     align-items: flex-start;
   }
 
+  /*
+   * Two-column tablet/phone layout for the storm modules. A single
+   * column would stack 4 cards × ~200px = ~800px of solid scroll
+   * inside one section; a 2x2 keeps the section coherent and short.
+   * Mobile single-column kicks in at 560 below.
+   */
   .storm-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
 

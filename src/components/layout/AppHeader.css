@@ -208,8 +208,8 @@
 .saved-city-chip-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px 3px;
+  gap: 4px;
+  padding: 3px 4px;
   border-radius: var(--radius-pill);
   border: var(--border-default);
   background: var(--surface-2);
