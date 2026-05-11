@@ -13,22 +13,52 @@ describe("getAqiStatus", () => {
     assert.equal(undefinedStatus.label, "");
   });
 
-  test("classifies the AQI bands correctly", () => {
+  test("classifies the AQI bands across the real EPA 6-tier scale", () => {
+    // EPA standard tier breakpoints. The previous 3-bucket model
+    // collapsed everything above 100 into one 'Unhealthy' bin; the
+    // refined model preserves the actionable distinctions sensitive-
+    // group and asthma-aware readers need.
     assert.equal(getAqiStatus(0).label, "Good");
     assert.equal(getAqiStatus(50).label, "Good");
     assert.equal(getAqiStatus(51).label, "Moderate");
     assert.equal(getAqiStatus(100).label, "Moderate");
-    assert.equal(getAqiStatus(101).label, "Unhealthy");
-    assert.equal(getAqiStatus(300).label, "Unhealthy");
+    assert.equal(getAqiStatus(101).label, "Sensitive");
+    assert.equal(getAqiStatus(150).label, "Sensitive");
+    assert.equal(getAqiStatus(151).label, "Unhealthy");
+    assert.equal(getAqiStatus(200).label, "Unhealthy");
+    assert.equal(getAqiStatus(201).label, "Very Unhealthy");
+    assert.equal(getAqiStatus(300).label, "Very Unhealthy");
+    assert.equal(getAqiStatus(301).label, "Hazardous");
+    assert.equal(getAqiStatus(450).label, "Hazardous");
+    assert.equal(getAqiStatus(500).label, "Hazardous");
   });
 
-  test("returns distinct colors per band", () => {
+  test("returns distinct colors across every tier", () => {
+    // Six distinct colors — one per tier — so a sighted user can
+    // visually identify the severity from the gauge fill alone.
     const colors = new Set([
       getAqiStatus(25).color,
       getAqiStatus(75).color,
-      getAqiStatus(150).color,
+      getAqiStatus(125).color,
+      getAqiStatus(175).color,
+      getAqiStatus(250).color,
+      getAqiStatus(400).color,
     ]);
-    assert.equal(colors.size, 3);
+    assert.equal(colors.size, 6);
+  });
+
+  test("returns a label string short enough to render in the metric pill without wrapping", () => {
+    // Pill width is constrained on narrow viewports. The pill text on
+    // every tier should stay short (one or two words). 'Unhealthy for
+    // Sensitive Groups' (the EPA full label) is shortened to
+    // 'Sensitive' here; the full explanation lives in the InfoDrawer.
+    for (const aqi of [25, 75, 125, 175, 250, 400]) {
+      const label = getAqiStatus(aqi).label;
+      assert.ok(
+        label.length <= 14,
+        `tier label ${JSON.stringify(label)} must fit the pill (≤14 chars)`
+      );
+    }
   });
 });
 

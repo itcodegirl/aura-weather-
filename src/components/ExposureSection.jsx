@@ -76,7 +76,7 @@ function ExposureSection({
           gaugeLabel="Air quality index"
           supportText={aqiSupportText}
           helpTitle="AQI scale explained"
-          helpText="AQI summarizes air pollution levels. 0 to 50 is generally good, 51 to 100 is moderate, and values above 100 indicate less healthy air."
+          helpText="AQI summarizes air pollution levels. 0–50 is good, 51–100 moderate, 101–150 unhealthy for sensitive groups, 151–200 unhealthy for everyone, 201–300 very unhealthy, and 301+ hazardous."
         />
         <MetricCard
           id={METRIC_LABEL_IDS.uvIndex}
