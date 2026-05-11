@@ -195,7 +195,7 @@ describe("HeroCard accessibility scaffolding", () => {
       })
     );
 
-    const heading = container.querySelector("h3#hero-card-heading");
+    const heading = container.querySelector("h3.sr-only");
     assert.ok(heading, "hero card emits a heading element for SR navigation");
     assert.match(
       heading.textContent,
@@ -223,9 +223,11 @@ describe("HeroCard accessibility scaffolding", () => {
     );
 
     const section = container.querySelector("section.bento-hero");
+    const heading = container.querySelector("h3.sr-only");
+    assert.ok(heading?.id, "heading carries a useId-generated id");
     assert.equal(
       section?.getAttribute("aria-labelledby"),
-      "hero-card-heading",
+      heading.id,
       "section is wired to the heading via aria-labelledby"
     );
   });
@@ -242,7 +244,7 @@ describe("HeroCard accessibility scaffolding", () => {
       })
     );
 
-    const heading = container.querySelector("h3#hero-card-heading");
+    const heading = container.querySelector("h3.sr-only");
     assert.ok(heading, "fallback branch emits a heading too");
     assert.equal(heading.textContent, "Current weather");
   });
