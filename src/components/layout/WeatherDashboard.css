@@ -141,9 +141,10 @@
 }
 
 /*
- * Data status disclosure lives outside the bento so the four data
- * sources (forecast, AQI, alerts, archive) stay accessible without
- * hogging a full grid card on every page load. Default closed.
+ * "Where this data comes from" disclosure lives outside the bento
+ * so the four data sources (forecast, air quality, alerts,
+ * historical comparison) stay accessible without hogging a full
+ * grid card on every page load. Default closed.
  */
 .data-status-disclosure {
   grid-column: 1 / -1;

@@ -155,15 +155,17 @@ function StatusStack({
       )}
       {showSetupPrompts && showPermissionOnboarding && (
         <section className="permission-onboarding" aria-label="Location onboarding">
-          <p className="permission-onboarding-kicker">First-time setup</p>
-          <h2 className="permission-onboarding-title">Set your forecast once</h2>
+          <p className="permission-onboarding-kicker">Welcome</p>
+          <h2 className="permission-onboarding-title">
+            Pick a location to make Aura yours
+          </h2>
           <p className="permission-onboarding-copy">
-            {isGeolocationSupported
-              ? "Chicago is loaded for now. Use your location or search any city."
-              : "Chicago is loaded for now. Location sharing is unavailable here, so search any city."}
+            Real-time conditions, hourly outlook, 7-day forecast, and storm
+            context — built around the place you actually live. Showing
+            Chicago in the meantime.
           </p>
           <div className="permission-onboarding-actions">
-            {isGeolocationSupported ? (
+            {isGeolocationSupported && (
               <button
                 type="button"
                 className="location-setup-btn location-setup-btn--primary"
@@ -171,23 +173,24 @@ function StatusStack({
                 disabled={isLocatingCurrent}
                 aria-busy={isLocatingCurrent || undefined}
               >
-                {isLocatingCurrent ? "Requesting permission..." : "Allow location access"}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="location-setup-btn location-setup-btn--primary"
-                onClick={onFocusCitySearch}
-              >
-                Search a city
+                {isLocatingCurrent ? "Requesting permission…" : "Use my location"}
               </button>
             )}
             <button
               type="button"
-              className="location-setup-btn"
+              className={`location-setup-btn ${
+                isGeolocationSupported ? "" : "location-setup-btn--primary"
+              }`.trim()}
+              onClick={onFocusCitySearch}
+            >
+              Search a city
+            </button>
+            <button
+              type="button"
+              className="location-setup-btn location-setup-btn--ghost"
               onClick={onDismissPermissionOnboarding}
             >
-              Keep Chicago for now
+              Keep showing Chicago
             </button>
           </div>
         </section>
