@@ -76,7 +76,7 @@
 .hero-date {
   color: var(--text-dim);
   font-size: 13px;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--track-tight);
   text-transform: uppercase;
 }
 
@@ -85,10 +85,10 @@
   align-items: stretch;
   gap: 14px;
   padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(188, 212, 252, 0.24);
-  background: rgba(8, 18, 39, 0.52);
-  box-shadow: inset 0 1px 0 rgba(233, 242, 255, 0.08);
+  border-radius: var(--radius-md);
+  border: var(--border-default);
+  background: var(--surface-2);
+  box-shadow: var(--subcard-shadow);
 }
 
 .hero-high-low-item {
@@ -101,7 +101,7 @@
   color: var(--text-dim);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--track-loose);
   text-transform: uppercase;
 }
 
@@ -141,8 +141,8 @@
   position: relative;
   padding: 8px 14px 8px 18px;
   border-radius: var(--radius-sm);
-  background: rgba(8, 17, 36, 0.5);
-  border: 1px solid rgba(186, 212, 252, 0.18);
+  background: var(--surface-2);
+  border: var(--border-soft);
   color: var(--text-muted);
   font-size: 14px;
   font-weight: 600;
@@ -286,8 +286,8 @@
   max-width: 620px;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  background: rgba(10, 19, 40, 0.64);
-  border: 1px solid rgba(193, 217, 255, 0.2);
+  background: var(--surface-3);
+  border: var(--border-default);
   color: rgba(227, 236, 255, 0.95);
   font-size: 14px;
   line-height: 1.5;
@@ -310,11 +310,11 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: 9px;
   align-items: flex-start;
-  padding: 11px 12px;
+  padding: var(--subcard-padding);
   min-height: 96px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(190, 214, 252, 0.18);
-  background: rgba(7, 16, 34, 0.42);
+  border: var(--subcard-border);
+  background: var(--subcard-bg);
   box-shadow: var(--subcard-shadow);
 }
 
@@ -323,7 +323,7 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   color: #e8f6ff;
   background: rgba(160, 190, 240, 0.16);
 }
@@ -337,8 +337,8 @@
 .hero-guidance-label {
   color: var(--text-dim);
   font-size: 10px;
-  font-weight: 760;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
@@ -347,7 +347,7 @@
   color: #f4f9ff;
   font-size: 14px;
   line-height: 1.2;
-  font-weight: 780;
+  font-weight: 700;
 }
 
 .hero-guidance-detail {
@@ -355,7 +355,7 @@
   color: rgba(211, 226, 250, 0.78);
   font-size: 12px;
   line-height: 1.35;
-  font-weight: 620;
+  font-weight: 600;
 }
 
 .hero-guidance-item--calm {
@@ -451,7 +451,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px;
+  padding: var(--subcard-padding);
   border-radius: var(--radius-sm);
   background: var(--subcard-bg);
   border: var(--subcard-border);
@@ -464,7 +464,7 @@
   height: 34px;
   display: grid;
   place-items: center;
-  border-radius: 10px;
+  border-radius: var(--radius-xs);
   color: #dcf7ff;
   background: linear-gradient(160deg, rgba(110, 231, 255, 0.26), rgba(72, 103, 214, 0.12));
 }
@@ -474,7 +474,7 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.11em;
+  letter-spacing: var(--track-default);
 }
 
 .stat-value {
@@ -497,8 +497,8 @@
   margin: 12px 0 0;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  border: 1px dashed rgba(186, 212, 252, 0.34);
-  background: rgba(8, 17, 36, 0.4);
+  border: 1px dashed rgba(var(--border-base), 0.34);
+  background: var(--surface-1);
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 600;

@@ -10,11 +10,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  /*
+   * Slightly larger trigger so the ‘i’ help button is comfortable to
+   * tap. Visual button stays compact via padding inside.
+   */
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  border: 1px solid rgba(174, 206, 248, 0.42);
-  background: rgba(8, 18, 39, 0.62);
+  border: var(--border-strong);
+  background: var(--surface-3);
   color: rgba(218, 233, 255, 0.96);
   font-size: 12px;
   font-weight: 700;
@@ -37,8 +41,8 @@
 
 .info-drawer-trigger:hover {
   border-color: rgba(139, 230, 255, 0.62);
-  background: rgba(13, 30, 59, 0.76);
-  transform: translateY(-1px);
+  background: var(--surface-strong);
+  transform: translateY(var(--lift-1));
 }
 
 .info-drawer-trigger:active {
@@ -48,8 +52,8 @@
 .info-drawer-panel {
   width: min(260px, 72vw);
   padding: 9px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(182, 212, 252, 0.3);
+  border-radius: var(--radius-xs);
+  border: var(--border-default);
   background: rgba(7, 17, 37, 0.9);
   box-shadow:
     0 10px 22px rgba(3, 10, 24, 0.32),
@@ -62,7 +66,7 @@
   color: #e9f3ff;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: var(--track-tight);
   text-transform: uppercase;
 }
 
@@ -81,8 +85,13 @@
 
 @media (max-width: 420px) {
   .info-drawer-trigger {
-    width: 24px;
-    height: 24px;
+    /*
+     * Keeps a 28x28 minimum at the smallest viewport so the help
+     * trigger stays tappable on a phone. Earlier 24x24 missed the
+     * mark for one-handed touch.
+     */
+    width: 28px;
+    height: 28px;
     font-size: 11px;
   }
 

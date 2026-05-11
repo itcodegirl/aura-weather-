@@ -441,7 +441,7 @@ function StormWatch({
           </h3>
           <p className="storm-lede">{ledeText}</p>
         </div>
-        <span className="storm-subtitle">{eyebrowText}</span>
+        <span className="storm-subtitle eyebrow-pill">{eyebrowText}</span>
       </header>
 
       <div className="storm-grid">

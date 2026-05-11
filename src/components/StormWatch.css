@@ -38,26 +38,16 @@
   line-height: 1.35;
 }
 
-.storm-subtitle {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 10px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(179, 206, 245, 0.24);
-  background: rgba(8, 17, 35, 0.44);
-  color: rgba(224, 236, 255, 0.9);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+/*
+ * `.storm-subtitle` is rendered with the shared `.eyebrow-pill` class
+ * in StormWatch.jsx. Visual rule lives in App.css.
+ */
 
 .storm-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
-
 
 .storm-module {
   position: relative;
@@ -88,7 +78,7 @@
   color: #d5e8ff;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
   margin: 0;
 }
@@ -98,12 +88,12 @@
   align-items: center;
   padding: 3px 8px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(176, 201, 240, 0.2);
-  background: rgba(6, 14, 31, 0.42);
+  border: var(--border-soft);
+  background: var(--surface-1);
   color: var(--text-dim);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
@@ -197,9 +187,9 @@
   height: 46px;
   margin: 0;
   padding: 4px;
-  border-radius: 10px;
-  background: rgba(6, 14, 31, 0.34);
-  border: 1px solid rgba(174, 199, 240, 0.12);
+  border-radius: var(--radius-xs);
+  background: var(--surface-1);
+  border: var(--border-soft);
 }
 
 .wind-compass {
@@ -213,7 +203,7 @@
   width: 74px;
   height: 74px;
   border-radius: 50%;
-  border: 1.5px solid rgba(191, 214, 255, 0.26);
+  border: 1.5px solid rgba(var(--border-base), 0.26);
   background: radial-gradient(circle at 30% 30%, rgba(107, 230, 255, 0.12), rgba(7, 14, 32, 0.18));
 }
 
@@ -222,7 +212,7 @@
   color: var(--text-dim);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--track-tight);
 }
 
 .wind-compass-n {
@@ -354,6 +344,5 @@
     font-size: 12px;
   }
 }
-
 
 

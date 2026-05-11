@@ -26,11 +26,36 @@
 
   --radius: 24px;
   --radius-sm: 16px;
+  --radius-md: 14px;
+  --radius-control: 12px;
+  --radius-xs: 10px;
   --radius-pill: 999px;
   --card-radius: 24px;
   --card-padding: 24px;
 
-  --border: 1px solid rgba(196, 220, 255, 0.24);
+  /*
+   * Surface alpha scale. Earlier the codebase used ~12 ad-hoc alphas
+   * of the same near-black blue (0.34 → 0.62) for chips, sub-cards,
+   * inputs, and rails. The eye reads "many slightly different
+   * surfaces" instead of one calm system. These four steps cover
+   * every previous use without visual change at most resolutions.
+   */
+  --surface-base: 8, 17, 36;
+  --surface-1: rgba(var(--surface-base), 0.40);
+  --surface-2: rgba(var(--surface-base), 0.50);
+  --surface-3: rgba(var(--surface-base), 0.60);
+  --surface-strong: rgba(var(--surface-base), 0.78);
+
+  /*
+   * Border alpha scale. Same idea: every "blue-tinted thin border" in
+   * the codebase resolves to one of three rungs.
+   */
+  --border-base: 187, 213, 252;
+  --border-soft: 1px solid rgba(var(--border-base), 0.18);
+  --border-default: 1px solid rgba(var(--border-base), 0.24);
+  --border-strong: 1px solid rgba(var(--border-base), 0.34);
+
+  --border: var(--border-default);
   --card-border: 1px solid rgba(187, 214, 255, 0.28);
   --shadow: 0 24px 60px rgba(3, 8, 25, 0.32);
   --card-shadow:
@@ -43,9 +68,22 @@
   --bg-card-hover: rgba(16, 30, 64, 0.48);
   --panel: rgba(9, 17, 36, 0.66);
   --panel-soft: rgba(10, 20, 44, 0.52);
-  --subcard-bg: rgba(8, 17, 36, 0.44);
-  --subcard-border: 1px solid rgba(184, 208, 248, 0.16);
+  --subcard-bg: var(--surface-1);
+  --subcard-border: var(--border-soft);
   --subcard-shadow: inset 0 1px 0 rgba(228, 241, 255, 0.08);
+  --subcard-padding: 11px 12px;
+
+  /*
+   * Selected "white pill" treatment. Used by every active toggle —
+   * the unit toggle, the climate-context pill, the saved-city chip,
+   * and the rain mode buttons all converge here so a future palette
+   * tweak only edits one place.
+   */
+  --active-pill-bg: linear-gradient(145deg, #f9fcff, #d9eaff);
+  --active-pill-color: #021127;
+  --active-pill-shadow:
+    0 6px 14px rgba(4, 12, 28, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 
   --accent: #6ee7ff;
   --accent-strong: #22d3ee;
@@ -54,15 +92,47 @@
   --atmo-sky: rgba(118, 196, 255, 0.2);
   --atmo-haze: rgba(193, 222, 255, 0.11);
 
+  /*
+   * Severity / risk colors. Single source of truth for the 5-rung
+   * badge family used by alerts, rain risk, nowcast risk, and forecast
+   * temperature signals. Components vary the surface (badge vs item)
+   * but the foreground/border/fill swatches stay locked together.
+   */
+  --severity-critical-fg: #fee2e2;
+  --severity-critical-border: rgba(248, 113, 113, 0.5);
+  --severity-critical-bg: rgba(127, 29, 29, 0.32);
+  --severity-high-fg: #ffedd5;
+  --severity-high-border: rgba(249, 115, 22, 0.45);
+  --severity-high-bg: rgba(124, 45, 18, 0.26);
+  --severity-warn-fg: #fef3c7;
+  --severity-warn-border: rgba(234, 179, 8, 0.4);
+  --severity-warn-bg: rgba(113, 63, 18, 0.24);
+  --severity-ok-fg: #dcfce7;
+  --severity-ok-border: rgba(34, 197, 94, 0.45);
+  --severity-ok-bg: rgba(20, 83, 45, 0.24);
+  --severity-info-fg: #dbeafe;
+  --severity-info-border: rgba(147, 197, 253, 0.42);
+  --severity-info-bg: rgba(30, 64, 175, 0.22);
+
   --hero-temp-size: 92px;
   --hero-unit-size: 28px;
   --header-control-height: 48px;
   --section-title-size: clamp(18px, 1.2vw, 20px);
   --section-title-lg-size: clamp(19px, 1.3vw, 21px);
 
+  /*
+   * Uppercase microcopy tracking. Three rungs replace the previous
+   * 0.06 / 0.08 / 0.09 / 0.10 / 0.11 / 0.12 / 0.13 / 0.16em variations
+   * that accreted across components.
+   */
+  --track-tight: 0.06em;
+  --track-default: 0.1em;
+  --track-loose: 0.12em;
+
   --card-enter-duration: 520ms;
   --card-enter-stagger: 70ms;
   --card-hover-shift: -4px;
+  --lift-1: -1px;
   --motion-fast: 160ms;
   --motion-medium: 240ms;
   --motion-slow: 420ms;
@@ -79,7 +149,9 @@
   --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
   --press-scale: 0.985;
+  --press-scale-firm: 0.97;
   --focus-ring: 0 0 0 4px rgba(34, 211, 238, 0.4);
+  --focus-outline: rgba(130, 228, 255, 0.66);
 }
 
 * {
@@ -352,7 +424,7 @@ a:focus-visible,
 .header-secondary-action:focus-visible,
 .error-retry:focus-visible,
 .app-status-retry:focus-visible {
-  border-color: rgba(130, 228, 255, 0.66);
+  border-color: var(--focus-outline);
   box-shadow:
     0 0 0 3px rgba(64, 196, 255, 0.2),
     0 8px 18px rgba(4, 12, 28, 0.24),
@@ -372,7 +444,7 @@ a:focus-visible,
 .storm-module-header {
   color: var(--text-dim);
   font-size: 12px;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--track-loose);
   text-transform: uppercase;
   font-weight: 700;
   margin: 0;
@@ -381,6 +453,121 @@ a:focus-visible,
 .storm-level {
   font-family: var(--font-display);
   letter-spacing: 0;
+}
+
+/*
+ * Shared "eyebrow pill" — the small uppercase pill used as a
+ * contextual subtitle next to card titles (forecast, hourly chart,
+ * stormwatch, alerts, etc.). Card CSS files used to redeclare this
+ * pattern with subtle differences in padding, border alpha, and
+ * letter-spacing. Now they all reach for one rule.
+ */
+.eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  border: var(--border-default);
+  background: var(--surface-1);
+  color: rgba(224, 236, 255, 0.9);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--track-loose);
+  text-transform: uppercase;
+}
+
+/*
+ * Severity badge family — single rule with 5 modifiers replaces the
+ * previously duplicated rain-risk-badge / nowcast-risk-badge sets
+ * (and the parallel alerts-priority styling).
+ */
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 22px;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--severity-info-border);
+  background: var(--severity-info-bg);
+  color: var(--severity-info-fg);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--track-default);
+  text-transform: uppercase;
+}
+
+.severity-badge--critical,
+.severity-badge--high {
+  border-color: var(--severity-critical-border);
+  background: var(--severity-critical-bg);
+  color: var(--severity-critical-fg);
+}
+
+.severity-badge--moderate {
+  border-color: var(--severity-high-border);
+  background: var(--severity-high-bg);
+  color: var(--severity-high-fg);
+}
+
+.severity-badge--low {
+  border-color: var(--severity-warn-border);
+  background: var(--severity-warn-bg);
+  color: var(--severity-warn-fg);
+}
+
+.severity-badge--minimal {
+  border-color: var(--severity-ok-border);
+  background: var(--severity-ok-bg);
+  color: var(--severity-ok-fg);
+}
+
+.severity-badge--partial,
+.severity-badge--missing {
+  /* default = info; explicit so JSX modifier classes always win */
+  border-color: var(--severity-info-border);
+  background: var(--severity-info-bg);
+  color: var(--severity-info-fg);
+}
+
+/*
+ * Shared empty state. Forecast and Hourly previously rendered their
+ * "data unavailable" copy in the uppercase letter-spaced .loader-text
+ * style, which read as a shouted heading rather than a calm note.
+ * Rain and Alerts had bespoke per-component versions. One pattern,
+ * used everywhere a card has no data to show.
+ */
+.card-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px 8px;
+  text-align: center;
+}
+
+.card-empty__icon {
+  margin-bottom: 4px;
+  color: rgba(190, 215, 250, 0.78);
+}
+
+.card-empty__title {
+  margin: 0;
+  color: #f5f9ff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.card-empty__copy {
+  margin: 0;
+  max-width: 36ch;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 /*

@@ -229,7 +229,7 @@ function RainCard({
         icon={<CloudRain size={16} />}
         leftClassName="rain-title-wrap"
         subtitle={
-          <span className={`rain-risk-badge rain-risk-badge--${rainRiskTone}`}>
+          <span className={`severity-badge severity-badge--${rainRiskTone}`}>
             {rainRiskLabel}
           </span>
         }
@@ -254,25 +254,25 @@ function RainCard({
         </div>
 
       {!hasData ? (
-        <div className="rain-empty rain-empty--missing" role="status">
-          <div className="rain-empty-icon">
-            <CloudRain size={44} aria-hidden="true" />
+        <div className="card-empty" role="status">
+          <div className="card-empty__icon">
+            <CloudRain size={36} aria-hidden="true" />
           </div>
-          <div className="rain-empty-title">Rain guidance unavailable</div>
-          <div className="rain-empty-sub">
+          <p className="card-empty__title">Rain guidance unavailable</p>
+          <p className="card-empty__copy">
             Precipitation readings are unavailable right now.
-          </div>
+          </p>
         </div>
       ) : isDry ? (
-        <div className="rain-empty">
-          <div className="rain-empty-icon">
-            <WeatherIcon code={0} size={44} />
+        <div className="card-empty">
+          <div className="card-empty__icon">
+            <WeatherIcon code={0} size={36} />
           </div>
-        <div className="rain-empty-title">No meaningful rain expected</div>
-        <div className="rain-empty-sub">
+          <p className="card-empty__title">No meaningful rain expected</p>
+          <p className="card-empty__copy">
             Highest chance is {peakProbability}% around {peakTimeLabel}
+          </p>
         </div>
-      </div>
       ) : (
         <div className="rain-details">
           <div className="rain-primary">
