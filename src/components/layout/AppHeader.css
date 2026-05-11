@@ -136,6 +136,7 @@
 }
 
 .saved-city-undo-action {
+  position: relative;
   min-height: 28px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
@@ -150,6 +151,15 @@
     border-color var(--motion-fast) var(--ease-standard);
 }
 
+/* Vertical hit-area extender to reach a comfortable 40px tap height
+ * while the pill keeps its dense 28px presence inline. */
+.saved-city-undo-action::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+  border-radius: inherit;
+}
+
 .saved-city-undo-action:hover {
   background: rgba(20, 38, 70, 0.7);
   border-color: rgba(174, 227, 255, 0.6);
@@ -160,13 +170,34 @@
   outline-offset: 2px;
 }
 
+.saved-city-undo-action:active,
+.saved-city-undo-dismiss:active {
+  transform: scale(var(--press-scale));
+}
+
 .saved-city-undo-dismiss {
-  width: 24px;
-  height: 24px;
+  /* 32×32 keeps the dismiss control above the WCAG 2.5.5 spaced-target
+     equivalent (≥24, with sibling spacing) on desktop and we lift it to
+     a full 44 at the mobile breakpoint where targets cluster on touch. */
+  position: relative;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: rgba(186, 212, 252, 0.7);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hit-area extender to lift the small dismiss glyph to a 40px touch
+ * target without bleeding into the adjacent Undo button. */
+.saved-city-undo-dismiss::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
 }
 
 .saved-city-undo-dismiss:hover {
@@ -185,24 +216,25 @@
 }
 
 .saved-city-chip {
-  /*
-   * Saved-city chips are the primary "switch city" action in the
-   * header. 32px was below the comfortable hit floor even on desktop
-   * with a mouse — bump to 36px so it lines up with the saved-city-
-   * remove sibling without changing the visual hierarchy.
-   */
+  /* Touch targets: 36 baseline for desktop density, 44 at mobile to meet
+     WCAG 2.5.5 AA. The chip + adjacent remove button live in a wrapper
+     shell, so the chip body alone is what receives the city-selection
+     tap — it has to be the full size. */
   min-height: 36px;
-  padding: 0 10px;
+  padding: 0 12px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   color: rgba(224, 237, 255, 0.92);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: var(--track-tight);
+  display: inline-flex;
+  align-items: center;
   transition:
     background var(--motion-fast) var(--ease-standard),
     color var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard);
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
 }
 
 .saved-city-chip.is-active,
@@ -211,16 +243,38 @@
   background: var(--active-pill-bg);
 }
 
+.saved-city-chip:active,
+.saved-city-remove:active {
+  transform: scale(var(--press-scale));
+}
+
 .saved-city-remove {
-  width: 28px;
-  height: 28px;
+  /* 32 desktop / 40 mobile (see media query below). The remove button
+     sits next to the chip in a single wrapper shell — close-cluster
+     targets that need WCAG 2.5.5 distinct hit areas. */
+  position: relative;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   color: rgba(237, 201, 201, 0.9);
   font-size: 14px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     color var(--motion-fast) var(--ease-standard),
     background var(--motion-fast) var(--ease-standard);
+}
+
+/* Bump touch area above/below so the X stays comfortable to tap
+ * without growing the visible chip. Vertical-only extension avoids
+ * overlapping the adjacent saved-city-chip in the same wrap. */
+.saved-city-remove::before {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+  border-radius: inherit;
 }
 
 .saved-city-remove:hover {
@@ -375,6 +429,11 @@
   border-color: rgba(166, 227, 255, 0.5);
   background: var(--surface-strong);
   transform: translateY(var(--lift-1));
+}
+
+.sync-account-btn:active,
+.sync-account-toggle:active {
+  transform: scale(var(--press-scale));
 }
 
 .sync-account-btn:disabled,
@@ -600,73 +659,27 @@
 }
 
 /*
- * At narrow-desktop widths (980-1200) the header was rendering primary
- * (search + cities + sync) and secondary (climate ctx, unit, clear)
- * side-by-side, so the search row got squeezed and the "MY LOCATION"
- * button label wrapped to two lines. Stack secondary below primary
- * at this tier so each block gets the full row width.
+ * Drawer pattern for narrow-desktop and below. The audit flagged
+ * the 980–1200 range: secondary controls (climate ctx, unit toggle,
+ * clear-startup) stacked into a full-width second row, giving the
+ * header three rows total (brand + primary + secondary) and pushing
+ * the hero close to the fold on common 1280×720 / 1366×768 laptops.
+ *
+ * Solution: reuse the same Settings-drawer pattern that already runs
+ * on mobile, but trigger it earlier — at ≤1200 — so narrow desktops
+ * get a single-row primary plus a tucked-away secondary the user can
+ * open on demand. Wide desktops (>1200) keep the inline secondary
+ * row where there's actual horizontal room for it.
  */
 @media (max-width: 1200px) {
   .app-header-actions {
     flex-wrap: wrap;
-  }
-
-  .app-header-primary {
-    flex: 1 1 100%;
-  }
-
-  .app-header-secondary {
-    flex: 1 1 100%;
-    align-items: stretch;
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 980px) {
-  .app-header {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 14px 16px;
-  }
-
-  .app-header-actions {
-    width: 100%;
-  }
-
-  .app-header-primary {
-    flex: 1 1 100%;
-    gap: 8px;
-  }
-}
-
-@media (max-width: 760px) {
-  .app-header {
-    padding: 12px;
-  }
-
-  .tagline {
-    display: none;
-  }
-
-  .brand-wrap {
-    grid-template-areas: "mark brand";
-  }
-
-  .app-header-actions {
-    flex-wrap: wrap;
-    width: 100%;
-    gap: 8px;
-    justify-content: flex-start;
-  }
-
-  .app-header-primary {
     width: 100%;
     gap: 8px;
   }
 
-  .app-header-primary-row {
-    width: 100%;
-    flex-wrap: wrap;
+  .app-header-primary {
+    flex: 1 1 100%;
   }
 
   .mobile-settings-toggle {
@@ -705,11 +718,16 @@
       inset 0 1px 0 rgba(229, 241, 255, 0.16);
   }
 
+  .mobile-settings-toggle:active {
+    transform: scale(var(--press-scale));
+  }
+
   .app-header-secondary {
     display: none;
     flex-wrap: wrap;
     align-items: stretch;
     width: 100%;
+    flex: 1 1 100%;
     gap: 10px;
     margin-top: 4px;
     padding: 12px;
@@ -749,6 +767,46 @@
   }
 }
 
+@media (max-width: 980px) {
+  .app-header {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .app-header-primary {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-header {
+    padding: 12px;
+  }
+
+  .tagline {
+    display: none;
+  }
+
+  .brand-wrap {
+    grid-template-areas: "mark brand";
+  }
+
+  .app-header-actions {
+    justify-content: flex-start;
+  }
+
+  .app-header-primary {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .app-header-primary-row {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 560px) {
   .app-header-actions {
     gap: 8px;
@@ -762,14 +820,14 @@
   }
 
   .saved-city-chip {
-    /*
-     * Mobile chip target: 40px is the practical compromise between
-     * the WCAG 2.5.5 floor of 44px and keeping the strip from
-     * forcing extra wraps when several cities are saved. The chip
-     * sits inside a wrap with 2-3px padding, so total touch surface
-     * is ~44px including the wrap halo.
-     */
-    min-height: 40px;
+    min-height: 44px;
+    padding: 0 14px;
+  }
+
+  .saved-city-remove,
+  .saved-city-undo-dismiss {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -807,14 +865,15 @@
   }
 
   .saved-city-chip {
-    min-height: 40px;
-    padding: 0 10px;
+    /* The 560px rule above lifts to 44 for WCAG 2.5.5; we keep that
+       through the 420 tier rather than regressing. Trim padding only. */
+    padding: 0 12px;
     font-size: 11px;
   }
 
   .saved-city-remove {
-    width: 28px;
-    height: 28px;
+    /* 40×40 retained from 560 rule — touch ergonomics matter more
+       than horizontal density on a 4" phone. */
     font-size: 13px;
   }
 

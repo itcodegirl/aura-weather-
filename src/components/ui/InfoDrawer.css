@@ -6,6 +6,7 @@
 }
 
 .info-drawer-trigger {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -26,6 +27,16 @@
     border-color var(--motion-fast) var(--ease-standard),
     background var(--motion-fast) var(--ease-standard),
     transform var(--motion-fast) var(--ease-standard);
+}
+
+/* Invisible hit-area extender — keeps the dainty 28px glyph visually
+ * but lifts the touch target to ~44x44 (WCAG 2.5.5). Important on
+ * cards where InfoDrawer sits in tight header rows. */
+.info-drawer-trigger::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
 }
 
 .info-drawer-trigger:hover {
@@ -82,6 +93,12 @@
     width: 28px;
     height: 28px;
     font-size: 11px;
+  }
+
+  /* Keep the touch target at ~44x44 even when the visible glyph
+   * shrinks to 24px on compact phones. */
+  .info-drawer-trigger::before {
+    inset: -10px;
   }
 
   .info-drawer-panel {

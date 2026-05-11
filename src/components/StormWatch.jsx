@@ -9,6 +9,7 @@ import {
   Wind,
   Droplets,
   ArrowUp,
+  CloudSun,
 } from "lucide-react";
 import {
   classifyStormRisk,
@@ -62,7 +63,7 @@ function StormRisk({ risk, cape, summaryId }) {
       <CardHeader
         headerClassName="storm-module-top"
         title="Storm Risk"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Zap size={14} />}
         subtitle={(
@@ -108,19 +109,40 @@ function StormRisk({ risk, cape, summaryId }) {
           CAPE estimates atmospheric storm energy. Higher values can support stronger storms.
         </p>
       )}
-      <Stat
-        className="storm-detail"
-        labelClassName="storm-detail-label"
-        valueClassName="storm-detail-value"
-        label={(
-          <abbr title="Convective available potential energy">
-            CAPE
-          </abbr>
-        )}
-        value={hasCape ? `${safeCape} J/kg` : MISSING_VALUE_PLACEHOLDER}
-        missing={!hasCape}
-        title="CAPE reading is temporarily unavailable."
-      />
+      {/*
+       * The CAPE J/kg readout is meteorologist vocabulary. Surface it
+       * only when the risk is non-trivial — otherwise the module's
+       * whole job is the "All clear" headline above. CAPE detail still
+       * lives in the InfoDrawer for the curious.
+       */}
+      {hasCape && !isAllClear && (
+        <Stat
+          className="storm-detail"
+          labelClassName="storm-detail-label"
+          valueClassName="storm-detail-value"
+          label={(
+            <abbr
+              title="Convective available potential energy"
+              aria-label="CAPE, convective available potential energy"
+            >
+              CAPE
+            </abbr>
+          )}
+          value={`${safeCape} J/kg`}
+          title="Convective available potential energy in joules per kilogram."
+        />
+      )}
+      {!hasCape && (
+        <Stat
+          className="storm-detail"
+          labelClassName="storm-detail-label"
+          valueClassName="storm-detail-value"
+          label="Storm energy"
+          value={MISSING_VALUE_PLACEHOLDER}
+          missing
+          title="Storm energy reading is temporarily unavailable."
+        />
+      )}
     </div>
   );
 }
@@ -167,7 +189,7 @@ function PressureTrend({ trend }) {
       <CardHeader
         headerClassName="storm-module-top"
         title="Pressure"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Icon size={14} style={{ color: trendColor }} />}
         subtitle={(
@@ -263,7 +285,7 @@ function WindIntelligence({
       <CardHeader
         headerClassName="storm-module-top"
         title="Wind"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Wind size={14} />}
         subtitle="Surface flow"
@@ -328,7 +350,7 @@ function ComfortIndex({ weather, unit }) {
       <CardHeader
         headerClassName="storm-module-top"
         title="Comfort"
-        titleTag="h3"
+        titleTag="h4"
         titleClassName="storm-module-header"
         icon={<Droplets size={14} />}
         subtitle="Moisture"
@@ -387,51 +409,40 @@ function StormWatch({
     () => calculatePressureTrend(weather?.hourly?.pressure, weather?.hourly?.time),
     [weather?.hourly?.pressure, weather?.hourly?.time]
   );
-  const overviewWindSpeed = toFiniteNumber(weather?.current?.windSpeed);
-  const hasOverviewWind = overviewWindSpeed !== null;
-  const overviewWind = hasOverviewWind
-    ? classifyWind(overviewWindSpeed, "F")
-    : MISSING_VALUE_PLACEHOLDER;
+
+  /*
+   * Earned vocabulary: the card is "Atmosphere" by default and only
+   * promotes itself to "Storm watch" when there's an actual risk
+   * signal. Title, icon, lede, and the eyebrow chip all switch as one
+   * unit so the user reads the whole module's emotional tone at a
+   * glance instead of parsing four pieces of copy.
+   */
+  const hasActiveStormSignal = hasOverviewCape && overviewRisk.score > 0;
+  const titleText = hasActiveStormSignal ? "Storm watch" : "Atmosphere";
+  const TitleIcon = hasActiveStormSignal ? Zap : CloudSun;
+  const ledeText = hasActiveStormSignal
+    ? "Storm risk, pressure trend, wind, and comfort signals in one panel."
+    : "Pressure, wind, and comfort signals at a glance.";
+  const eyebrowText = hasActiveStormSignal ? "Storm watch" : "Conditions";
 
   return (
     <section
       className="bento-storm storm-watch glass"
       style={style}
       data-refreshing={isRefreshing ? "true" : undefined}
+      data-storm-active={hasActiveStormSignal ? "true" : undefined}
       aria-busy={isRefreshing || undefined}
     >
       <header className="storm-header">
         <div className="storm-header-main">
           <h3 className="storm-title">
-            <Zap size={16} />
-            <span>Risk & Conditions</span>
+            <TitleIcon size={16} aria-hidden="true" />
+            <span>{titleText}</span>
           </h3>
-          <p className="storm-lede">
-            Storm risk, pressure trend, wind, and comfort signals in one panel.
-          </p>
+          <p className="storm-lede">{ledeText}</p>
         </div>
-        <span className="storm-subtitle eyebrow-pill">Storm watch</span>
+        <span className="storm-subtitle eyebrow-pill">{eyebrowText}</span>
       </header>
-      <div className="storm-snapshot" role="list" aria-label="Storm snapshot">
-        <span
-          className="storm-snapshot-chip"
-          role="listitem"
-          style={{ "--chip-accent": hasOverviewCape ? overviewRisk.color : "#94a3b8" }}
-        >
-          <span className="storm-snapshot-label">Storm risk</span>
-          <span className="storm-snapshot-value">
-            {hasOverviewCape ? overviewRisk.level : MISSING_VALUE_PLACEHOLDER}
-          </span>
-        </span>
-        <span className="storm-snapshot-chip" role="listitem">
-          <span className="storm-snapshot-label">Pressure trend</span>
-          <span className="storm-snapshot-value">{overviewPressure.interpretation}</span>
-        </span>
-        <span className="storm-snapshot-chip" role="listitem">
-          <span className="storm-snapshot-label">Wind profile</span>
-          <span className="storm-snapshot-value">{overviewWind}</span>
-        </span>
-      </div>
 
       <div className="storm-grid">
         <MemoizedStormRisk

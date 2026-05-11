@@ -53,13 +53,43 @@ function StatusStack({
   const [isRetryCoolingDown, setIsRetryCoolingDown] = useState(false);
   const retryTimerRef = useRef(null);
 
+  // SR-only confirmation when a background refresh completes. Without
+  // this, a screen reader user hears "Updating weather…" and then
+  // silence — no signal that the new data has arrived. The pill-shaped
+  // GlobalUpdateIndicator already confirms refresh visually for sighted
+  // users; this adds the same beat for assistive tech.
+  const [refreshCompletedMessage, setRefreshCompletedMessage] = useState("");
+  const wasBackgroundLoadingRef = useRef(isBackgroundLoading);
+  const refreshCompletedTimerRef = useRef(null);
+
   useEffect(() => {
     return () => {
       if (retryTimerRef.current) {
         clearTimeout(retryTimerRef.current);
       }
+      if (refreshCompletedTimerRef.current) {
+        clearTimeout(refreshCompletedTimerRef.current);
+      }
     };
   }, []);
+
+  useEffect(() => {
+    const wasLoading = wasBackgroundLoadingRef.current;
+    wasBackgroundLoadingRef.current = isBackgroundLoading;
+
+    if (!wasLoading || isBackgroundLoading || showRefreshError) {
+      return;
+    }
+
+    setRefreshCompletedMessage("Weather updated.");
+    if (refreshCompletedTimerRef.current) {
+      clearTimeout(refreshCompletedTimerRef.current);
+    }
+    refreshCompletedTimerRef.current = setTimeout(() => {
+      setRefreshCompletedMessage("");
+      refreshCompletedTimerRef.current = null;
+    }, 4000);
+  }, [isBackgroundLoading, showRefreshError]);
 
   const handleRetry = useCallback(() => {
     if (isRetryCoolingDown || typeof onRetry !== "function") {
@@ -86,7 +116,14 @@ function StatusStack({
   const hasSetupPrompts = showSetupPrompts && Boolean(
     showLocationSetupPrompt || showPermissionOnboarding
   );
-  const hasStatusStack = hasRuntimeStatus || hasSetupPrompts;
+  // Keep the wrapper mounted while a "Weather updated" message is
+  // in flight so the polite live region inside it can fire even when
+  // no other status row is visible. Otherwise the unmount would race
+  // the announcement.
+  const hasPendingAnnouncement =
+    showRuntimeStatus && Boolean(refreshCompletedMessage);
+  const hasStatusStack =
+    hasRuntimeStatus || hasSetupPrompts || hasPendingAnnouncement;
   const isShowingCachedForecast = cacheStatus === "restored";
   const refreshErrorBase = normalizeSentence(
     error,
@@ -105,6 +142,11 @@ function StatusStack({
 
   return (
     <div className={`status-stack ${className}`.trim()}>
+      {showRuntimeStatus && (
+        <p className="sr-only" role="status" aria-live="polite">
+          {refreshCompletedMessage}
+        </p>
+      )}
       {showRuntimeStatus && locationNotice && !showPermissionOnboarding && !showLocationSetupPrompt && (
         <p className="location-notice" role="status" aria-live="polite">
           <span className="location-notice-label">Location</span>
@@ -113,15 +155,17 @@ function StatusStack({
       )}
       {showSetupPrompts && showPermissionOnboarding && (
         <section className="permission-onboarding" aria-label="Location onboarding">
-          <p className="permission-onboarding-kicker">First-time setup</p>
-          <h2 className="permission-onboarding-title">Set your forecast once</h2>
+          <p className="permission-onboarding-kicker">Welcome</p>
+          <h2 className="permission-onboarding-title">
+            Pick a location to make Aura yours
+          </h2>
           <p className="permission-onboarding-copy">
-            {isGeolocationSupported
-              ? "Chicago is loaded for now. Use your location or search any city."
-              : "Chicago is loaded for now. Location sharing is unavailable here, so search any city."}
+            Real-time conditions, hourly outlook, 7-day forecast, and storm
+            context — built around the place you actually live. Showing
+            Chicago in the meantime.
           </p>
           <div className="permission-onboarding-actions">
-            {isGeolocationSupported ? (
+            {isGeolocationSupported && (
               <button
                 type="button"
                 className="location-setup-btn location-setup-btn--primary"
@@ -129,23 +173,24 @@ function StatusStack({
                 disabled={isLocatingCurrent}
                 aria-busy={isLocatingCurrent || undefined}
               >
-                {isLocatingCurrent ? "Requesting permission..." : "Allow location access"}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="location-setup-btn location-setup-btn--primary"
-                onClick={onFocusCitySearch}
-              >
-                Search a city
+                {isLocatingCurrent ? "Requesting permission…" : "Use my location"}
               </button>
             )}
             <button
               type="button"
-              className="location-setup-btn"
+              className={`location-setup-btn ${
+                isGeolocationSupported ? "" : "location-setup-btn--primary"
+              }`.trim()}
+              onClick={onFocusCitySearch}
+            >
+              Search a city
+            </button>
+            <button
+              type="button"
+              className="location-setup-btn location-setup-btn--ghost"
               onClick={onDismissPermissionOnboarding}
             >
-              Keep Chicago for now
+              Keep showing Chicago
             </button>
           </div>
         </section>
