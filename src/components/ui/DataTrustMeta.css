@@ -39,7 +39,7 @@
 
 .data-trust-meta.is-stale .data-source-badge {
   border-color: var(--severity-critical-border);
-  background: rgba(73, 13, 13, 0.4);
+  background: rgba(235, 90, 90, 0.26);
 }
 
 @media (max-width: 640px) {
