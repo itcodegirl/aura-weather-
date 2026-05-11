@@ -18,6 +18,18 @@ const STALE_AFTER_MINUTES = 25;
  * a single status dot. The pill is also a manual refresh button —
  * tapping it re-fetches the current location's forecast.
  */
+// Empty-state placeholder so the slot's height is always present in
+// the layout. Without it the indicator "pops in" when the first
+// fetch lands and shoves the bento down by ~36px — a measurable CLS.
+function IndicatorPlaceholder() {
+  return (
+    <span
+      className="global-update-indicator global-update-indicator--placeholder"
+      aria-hidden="true"
+    />
+  );
+}
+
 function GlobalUpdateIndicator({ trustMeta, onRefresh, isRefreshing }) {
   // Subscribe to the shared minute ticker directly so the parent
   // does not have to thread nowMs through; only this leaf re-renders
@@ -60,7 +72,7 @@ function GlobalUpdateIndicator({ trustMeta, onRefresh, isRefreshing }) {
   }, [isRefreshing, trustMeta?.weatherFetchedAt]);
 
   if (!trustMeta) {
-    return null;
+    return <IndicatorPlaceholder />;
   }
 
   const cacheStatus = trustMeta.cacheStatus ?? "idle";
@@ -77,7 +89,7 @@ function GlobalUpdateIndicator({ trustMeta, onRefresh, isRefreshing }) {
     Number.isFinite(ageMinutes) && ageMinutes >= STALE_AFTER_MINUTES;
 
   if (toFiniteNumber(lastUpdatedAt) === null) {
-    return null;
+    return <IndicatorPlaceholder />;
   }
 
   const updatedLabel = formatLastUpdatedLabel(lastUpdatedAt, effectiveNowMs);

@@ -152,6 +152,12 @@
   border-radius: var(--radius-sm);
   border: 1px dashed rgba(var(--border-base), 0.22);
   background: var(--surface-1);
+  /* Diagnostic disclosure lives below the bento and is collapsed by
+     default; skip rendering its subtree until scrolled into view so
+     it does not pay layout cost during the first paint of the live
+     dashboard above it. */
+  content-visibility: auto;
+  contain-intrinsic-size: 56px;
 }
 
 .data-status-disclosure[open] {
