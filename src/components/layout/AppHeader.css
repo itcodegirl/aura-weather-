@@ -181,9 +181,9 @@
 }
 
 /*
- * Coarse-pointer (touch) devices need a 44px hit area on interactive
- * controls per Apple HIG / Material guidance. The visual size stays
- * compact via padding-only, but the click target widens.
+ * On coarse-pointer devices, slightly increase the dismiss control's
+ * interactive size from 28px to 36px for easier tapping while keeping
+ * the control visually compact.
  */
 @media (pointer: coarse) {
   .saved-city-undo-dismiss {
