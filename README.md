@@ -54,14 +54,15 @@ It is designed as a portfolio project with real frontend concerns in scope:
 - Lucide React
 - Plain CSS
 - Playwright + axe-core
-- Open-Meteo APIs
+- Open-Meteo APIs (forecast, archive, air quality, geocoding); NOAA / NWS alerts; BigDataCloud reverse geocoding
 
 ## Project Structure
 
 ```text
 src/
-  api/                       # Open-Meteo + NWS fetch adapters
+  api/                       # Open-Meteo + NWS + reverse-geocode adapters
     openMeteo.js             #   forecast, archive, AQI, geocode, alerts
+    reverseGeocode.js        #   device GPS → place name (BigDataCloud)
     transforms.js            #   raw → AppWeatherModel normalization
     types.js                 #   model schema + skeleton factory
   domain/                    # Pure weather classification logic
@@ -194,7 +195,7 @@ npm run test:lighthouse
 - First load opens to a usable Chicago forecast immediately instead of stalling on a geolocation permission prompt.
 - Initial loading uses a lightweight dashboard skeleton and provider status copy rather than fake forecast values.
 - Browser location is opt-in. Users can keep the fallback city, search manually, or grant location access.
-- Device-location success is labelled "Current location" unless the user selects a named city from search.
+- Device-location success renders immediately as "Current location", then upgrades to the resolved city/region once a best-effort reverse geocode returns; the dashboard never waits on that lookup.
 - Core weather data loads first. Air quality, alerts, and climate context can recover independently if a secondary API is slow or unavailable.
 - The hero summarizes daily decisions from real forecast data: rain gear, UV exposure, and wind comfort. Missing source data is labelled unavailable, not guessed.
 - Mobile rain and hourly cards expose touch-friendly sample controls so users can inspect dense timelines without relying on hover.
@@ -351,7 +352,7 @@ bug, the contract, and the test pyramid.
 - **PWA runtime prompts** - the status stack now acknowledges first-install offline readiness and captures the browser install prompt with explicit Install/Later actions.
 - **CI quality gates** - Pull requests now run lint, Node tests, render tests, production build, serial Playwright, visual checks, and Lighthouse budgets in GitHub Actions, with build and failure artifacts retained for review.
 - **Deterministic portfolio demo** - the labelled `?mock=missing` route no longer starts live weather provider requests, which keeps trust-contract demos and Lighthouse budget checks stable.
-- **Honest GPS label** - successful browser geolocation now renders as "Current location" with no country label unless the user picks a named city. Aura no longer lets device coordinates inherit the Chicago fallback label.
+- **Honest GPS label, then a real name** - successful browser geolocation renders immediately as "Current location" (no inherited Chicago label), and a best-effort reverse geocode (BigDataCloud's key-less `reverse-geocode-client` endpoint) then upgrades it to the resolved city/region. The lookup is off the critical path: it has a short timeout, is superseded by any newer location request via a request-id guard, and on any failure the generic label simply stays. `useWeatherData` keys its forecast request on coordinates only, so the name-only re-resolve does not re-hit the weather API.
 - **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard, ForecastCard, RainCard, and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.
 - **`?mock=missing` demo state** — `/?mock=missing` is a labelled portfolio demo route for the trust contract. It shows a clear demo notice and serves a local missing-data model without live provider calls.
 - **Hero helper note** — when any hero stat is missing the card appends a short "Some readings are unavailable from the provider" line with `role="status"` so the user understands *why* a value is shown as `—`.
@@ -380,7 +381,7 @@ bug, the contract, and the test pyramid.
 
 - **U.S.-only severe alerts.** NOAA / NWS coverage stops at the U.S. border; non-U.S. locations fall back to explanatory messaging instead of a false all-clear.
 - **Lightweight cloud sync.** The optional sync flow uses a public jsonblob.com store and expects either a full sync URL or a configured `VITE_AURA_SYNC_API_BASE`. It is not encrypted at rest and is not a substitute for an account system.
-- **Geolocation falls back fast.** If the browser's geolocation prompt does not resolve in 5 seconds the app drops to the Chicago default rather than blocking the dashboard. Successful device GPS is labelled "Current location"; Aura does not reverse-geocode raw GPS coordinates yet.
+- **Geolocation falls back fast.** If the browser's geolocation prompt does not resolve in 5 seconds the app drops to the Chicago default rather than blocking the dashboard. Successful device GPS shows "Current location" instantly and then a reverse-geocoded city/region name; if the reverse-geocode provider is unreachable or returns no usable name, the generic label stays — there is no critical-path dependency on it.
 - **Historical archive lag.** The Open-Meteo archive is updated daily and may not include the most recent week; on those days the climate-context panel shows "Climate context unavailable" instead of a stale comparison.
 - **Service worker is shell-only.** After one successful production visit, Aura can restore same-origin app-shell/build assets offline. Live weather providers remain network truth sources and still degrade through the saved-forecast banner.
 - **Lighthouse budget passes locally** against the deterministic `?mock=missing` app shell, but real-world performance varies with live provider latency. The CSS and JS footprint shrunk substantially during the audit (App.css 2,067 → ~500 lines), but image pre-caching and paint-cost tuning would still be useful next wins.
@@ -390,11 +391,11 @@ bug, the contract, and the test pyramid.
 
 Honest, prioritised next steps — none of these are implemented yet:
 
-1. **Reverse-geocode device GPS** so a "Current location" reading shows the real place name instead of the generic label.
-2. **Non-U.S. severe-alert coverage** via a secondary provider (e.g. MeteoAlarm for Europe), keeping the explicit "no coverage" fallback everywhere a provider is silent.
-3. **Image/paint-cost pass** — pre-cache the static scene assets in the service worker and profile backdrop-filter cost on low-end mobile GPUs.
-4. **Account-backed sync** to replace the lightweight public-blob sync flow with something encrypted and authenticated.
-5. **Per-card refresh** so a single failing provider can be retried in place instead of through the global refresh-error banner.
+1. **Non-U.S. severe-alert coverage** via a secondary provider (e.g. MeteoAlarm for Europe), keeping the explicit "no coverage" fallback everywhere a provider is silent.
+2. **Image/paint-cost pass** — pre-cache the static scene assets in the service worker and profile backdrop-filter cost on low-end mobile GPUs.
+3. **Account-backed sync** to replace the lightweight public-blob sync flow with something encrypted and authenticated.
+4. **Per-card refresh** so a single failing provider can be retried in place instead of through the global refresh-error banner.
+5. **Content-Security-Policy** in `public/_headers` once it can be validated in a browser (the inline font-link `onload` handler and the third-party API/font origins make a blind policy risky).
 
 ## Portfolio / Case Study Notes
 

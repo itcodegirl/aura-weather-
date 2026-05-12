@@ -4,9 +4,10 @@
 # Content-Security-Policy is worth adding, but it needs browser
 # validation first: index.html uses an inline `onload` attribute on
 # the deferred-font <link>, and the app talks to several third-party
-# weather origins (open-meteo.com family, api.weather.gov) plus Google
-# Fonts — a too-strict policy would silently break those. That's a
-# follow-up, not a blind change.
+# origins — connect-src would need the open-meteo.com family,
+# api.weather.gov, api.bigdatacloud.net (reverse geocoding), plus
+# Google Fonts for style/font-src. A too-strict policy would silently
+# break those. That's a follow-up, not a blind change.
 
 /*
   X-Content-Type-Options: nosniff

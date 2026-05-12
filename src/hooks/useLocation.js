@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { parseCoordinates } from "../utils/weatherUnits.js";
+import { reverseGeocode } from "../api/reverseGeocode.js";
 
 export const DEFAULT_LOCATION = {
   lat: 41.8781,
@@ -277,6 +278,50 @@ export function useLocation(onResolved) {
       typeof onResolved === "function" ? onResolved : null;
   }, [onResolved]);
 
+  // After a successful GPS fix the dashboard renders straight away
+  // under the generic "Current location" label (the app deliberately
+  // never blocks on geolocation). This runs afterwards, off the
+  // critical path, to upgrade that label to a real place name via the
+  // reverse geocoder. Any failure — network, timeout, abort, or simply
+  // no usable name — leaves the generic label untouched. The requestId
+  // guard means a newer location request (search, saved city, another
+  // GPS press) wins and a stale enrichment is dropped on the floor.
+  const enrichResolvedLocationWithName = useCallback(
+    async ({ requestId, latitude, longitude }) => {
+      const coordinates = parseCoordinates(latitude, longitude);
+      if (!coordinates) {
+        return;
+      }
+
+      let place = null;
+      try {
+        place = await reverseGeocode(coordinates.latitude, coordinates.longitude);
+      } catch {
+        // Aborted or transient — keep "Current location" rather than
+        // retrying; the forecast is already on screen.
+        return;
+      }
+
+      if (!place?.name) {
+        return;
+      }
+
+      if (requestId !== activeRequestRef.current || !isMountedRef.current) {
+        return;
+      }
+
+      notifyResolvedLocation(
+        onResolvedRef.current,
+        coordinates.latitude,
+        coordinates.longitude,
+        place.name,
+        place.country,
+        CURRENT_LOCATION_NOTICE
+      );
+    },
+    []
+  );
+
   const requestCurrentPositionWithFallback = useCallback(
     ({
       fallbackNotice = LOCATION_FALLBACK_NOTICE,
@@ -357,6 +402,12 @@ export function useLocation(onResolved) {
               "",
               CURRENT_LOCATION_NOTICE
             );
+
+            void enrichResolvedLocationWithName({
+              requestId,
+              latitude: position?.coords?.latitude,
+              longitude: position?.coords?.longitude,
+            });
           },
           () => {
             if (requestId !== activeRequestRef.current || !isMountedRef.current) {
@@ -373,7 +424,7 @@ export function useLocation(onResolved) {
         }
       }
     },
-    [clearFallbackTimer]
+    [clearFallbackTimer, enrichResolvedLocationWithName]
   );
 
   const loadCurrentLocation = useCallback(
