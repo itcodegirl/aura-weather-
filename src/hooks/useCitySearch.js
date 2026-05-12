@@ -171,6 +171,33 @@ export function useCitySearch({ onSelect, idleResults = [] } = {}) {
     [setQuery]
   );
 
+  /*
+   * Close the dropdown when focus leaves the combobox subtree entirely
+   * (e.g. the user pressed Tab to move on). The pointerdown click-
+   * outside handler covers mouse / touch dismissal, but a keyboard
+   * Tab doesn't fire pointerdown — without this onBlur the dropdown
+   * was orphaned visually and in the AT tree after Tab. Use
+   * event.relatedTarget to keep the dropdown open when focus moves
+   * to a result option inside the container (e.g. SR users navigating
+   * the listbox with virtual cursor).
+   */
+  const handleBlur = useCallback(
+    (event) => {
+      const container = containerRef.current;
+      const nextFocus = event.relatedTarget;
+      if (
+        container &&
+        nextFocus instanceof Element &&
+        container.contains(nextFocus)
+      ) {
+        return;
+      }
+      setOpen(false);
+      setActiveIndex(-1);
+    },
+    []
+  );
+
   const handleSelect = useCallback(
     (city) => {
       if (typeof onSelect !== "function") {
@@ -280,6 +307,7 @@ export function useCitySearch({ onSelect, idleResults = [] } = {}) {
     handleChange,
     handleSelect,
     handleKeyDown,
+    handleBlur,
     handleClear: clear,
   };
 }

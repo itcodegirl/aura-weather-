@@ -24,14 +24,30 @@ function ExposureSection({
   const hasFullExposureData = hasAqiData && hasUvData;
   const aqiHealthStatus = getAqiStatus(aqiValue);
   const uvStatus = getUvStatus(uvValue);
+  /*
+   * AQI scale uses the real EPA range (0–500). The previous cap of 300
+   * meant a reading of 400 (wildfire territory) filled the gauge to
+   * 100% and the supportText read as "400 out of 300" — mathematically
+   * broken and visually misleading because the density-bar's upper
+   * scale label said "300". A 0–500 scale fills proportionally and
+   * matches the official AQI ceiling.
+   */
+  const AQI_SCALE_MAX = 500;
   const aqiSupportText = hasAqiData
-    ? `Current AQI is ${Math.round(aqiValue)} out of 300.`
+    ? `Current AQI is ${Math.round(aqiValue)} on a 0–${AQI_SCALE_MAX} scale.`
     : aqiStatus === "unavailable"
       ? "Air quality is unavailable right now. The rest of the dashboard is still live."
     : "Air quality is loading. Check back after the next refresh.";
   const uvSupportText = hasUvData
     ? `Peak UV is ${uvValue.toFixed(1)} on an 11+ scale.`
     : "Today's UV index is unavailable right now. Current conditions are still live.";
+  /*
+   * Section header status: when both readings are present, the gauges
+   * + status pills already convey the data state — no badge needed.
+   * Only surface a header indicator when ONE reading is missing, so
+   * the user knows the section is partially populated.
+   */
+  const sectionStatusText = hasFullExposureData ? "" : "One reading missing";
 
   return (
     <section
@@ -45,27 +61,29 @@ function ExposureSection({
         <h3 id={METRIC_LABEL_IDS.exposure} className="metric-label">
           Environmental Exposure
         </h3>
-        <span className="metric-context">{hasFullExposureData ? "Live" : "Partial data"}</span>
+        {sectionStatusText ? (
+          <span className="metric-context">{sectionStatusText}</span>
+        ) : null}
       </div>
       <div className="exposure-grid">
         <MetricCard
           id={METRIC_LABEL_IDS.airQuality}
           title="Air Quality"
+          context={hasAqiData ? "AQI" : "Unavailable"}
           titleTag="h4"
-          context={hasAqiData ? "AQI" : "AQI offline"}
           value={aqiValue}
-          max={300}
+          max={AQI_SCALE_MAX}
           status={aqiHealthStatus}
           gaugeLabel="Air quality index"
           supportText={aqiSupportText}
           helpTitle="AQI scale explained"
-          helpText="AQI summarizes air pollution levels. 0 to 50 is generally good, 51 to 100 is moderate, and values above 100 indicate less healthy air."
+          helpText="AQI summarizes air pollution levels. 0–50 is good, 51–100 moderate, 101–150 unhealthy for sensitive groups, 151–200 unhealthy for everyone, 201–300 very unhealthy, and 301+ hazardous."
         />
         <MetricCard
           id={METRIC_LABEL_IDS.uvIndex}
           title="UV Index"
+          context={hasUvData ? "Today" : "Unavailable"}
           titleTag="h4"
-          context={hasUvData ? "Today" : "UV offline"}
           value={uvValue}
           max={11}
           status={uvStatus}

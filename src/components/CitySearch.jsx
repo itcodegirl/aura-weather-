@@ -79,6 +79,7 @@ function CitySearch({ onSelect, savedCities }, ref) {
     handleChange,
     handleSelect,
     handleKeyDown,
+    handleBlur,
     handleClear,
   } = useCitySearch({ onSelect, idleResults: savedCitySuggestions });
 
@@ -159,6 +160,7 @@ function CitySearch({ onSelect, savedCities }, ref) {
           value={query}
           onChange={handleChange}
           onFocus={handleInputFocus}
+          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           placeholder="Search city or region..."
           className="city-search-input"
