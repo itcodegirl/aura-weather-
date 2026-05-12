@@ -14,7 +14,15 @@ export default defineConfig({
   expect: {
     timeout: 10_000,
   },
-  reporter: [["list"]],
+  reporter: [
+    ["list"],
+    // Also write the HTML report (to playwright-report/, which is
+    // gitignored). CI uploads that directory as an artifact on failure;
+    // without this reporter the directory never exists and the artifact
+    // is always empty, so a browser-quality failure is harder to triage.
+    // `open: "never"` keeps the run non-interactive.
+    ["html", { open: "never" }],
+  ],
   use: {
     baseURL: `http://127.0.0.1:${previewPort}`,
     trace: "on-first-retry",
