@@ -1,0 +1,6 @@
+# Aura Weather — static portfolio PWA. Crawling is welcome.
+User-agent: *
+Allow: /
+
+# Mock/demo query states (?mock=...) are not separate pages; they
+# render the same SPA shell, so there is nothing extra to disallow.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function readStorageValue(key, defaultValue) {
   try {
@@ -44,11 +44,28 @@ export function useLocalStorageState(
     }
   });
 
+  const hasRunWriteEffectRef = useRef(false);
+
   useEffect(() => {
     try {
       const serializeFn = typeof serialize === "function"
         ? serialize
         : (rawValue) => String(rawValue);
+
+      // On the first run the state was derived from storage (or is the
+      // untouched default). If nothing is persisted under this key yet,
+      // don't write the default — that would turn an "the user has not
+      // chosen" state into a stored value, masking first-run detection
+      // and writing to localStorage for a visitor who never interacted.
+      // Real changes (and any legacy-format normalisation when storage
+      // *did* have a value) still write through normally.
+      if (!hasRunWriteEffectRef.current) {
+        hasRunWriteEffectRef.current = true;
+        if (readStorageValue(key, null) === null) {
+          return;
+        }
+      }
+
       writeStorageValue(key, serializeFn(value));
     } catch {
       // localStorage may be unavailable or serialization may fail.

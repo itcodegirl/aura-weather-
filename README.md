@@ -384,6 +384,17 @@ bug, the contract, and the test pyramid.
 - **Historical archive lag.** The Open-Meteo archive is updated daily and may not include the most recent week; on those days the climate-context panel shows "Climate context unavailable" instead of a stale comparison.
 - **Service worker is shell-only.** After one successful production visit, Aura can restore same-origin app-shell/build assets offline. Live weather providers remain network truth sources and still degrade through the saved-forecast banner.
 - **Lighthouse budget passes locally** against the deterministic `?mock=missing` app shell, but real-world performance varies with live provider latency. The CSS and JS footprint shrunk substantially during the audit (App.css 2,067 → ~500 lines), but image pre-caching and paint-cost tuning would still be useful next wins.
+- **No JavaScript, no app.** The dashboard is fully client-rendered; with JS disabled the page shows a short `<noscript>` notice rather than any weather data. Server-side rendering is out of scope for a static-hosted portfolio build.
+
+## Roadmap
+
+Honest, prioritised next steps — none of these are implemented yet:
+
+1. **Reverse-geocode device GPS** so a "Current location" reading shows the real place name instead of the generic label.
+2. **Non-U.S. severe-alert coverage** via a secondary provider (e.g. MeteoAlarm for Europe), keeping the explicit "no coverage" fallback everywhere a provider is silent.
+3. **Image/paint-cost pass** — pre-cache the static scene assets in the service worker and profile backdrop-filter cost on low-end mobile GPUs.
+4. **Account-backed sync** to replace the lightweight public-blob sync flow with something encrypted and authenticated.
+5. **Per-card refresh** so a single failing provider can be retried in place instead of through the global refresh-error banner.
 
 ## Portfolio / Case Study Notes
 
