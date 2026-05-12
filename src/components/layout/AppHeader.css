@@ -7,14 +7,13 @@
   padding: 16px 22px;
   border-radius: var(--radius);
   border: var(--card-border);
+  backdrop-filter: blur(var(--card-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
   background:
-    linear-gradient(180deg, rgba(18, 30, 58, 0.62), rgba(8, 16, 34, 0.56)),
-    linear-gradient(130deg, rgba(186, 170, 255, 0.11), rgba(120, 195, 255, 0.06) 56%, transparent 84%),
-    rgba(6, 14, 31, 0.44);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.10));
   box-shadow:
-    0 24px 56px rgba(3, 10, 25, 0.34),
-    0 8px 20px rgba(17, 29, 59, 0.2),
-    inset 0 1px 0 rgba(228, 240, 255, 0.12);
+    0 18px 40px rgba(30, 70, 120, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
   animation: header-settle var(--motion-slow) var(--ease-emphasis) both;
 }
 
@@ -141,7 +140,7 @@
   padding: 0 10px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(174, 227, 255, 0.4);
-  background: rgba(13, 26, 53, 0.6);
+  background: rgba(255, 255, 255, 0.16);
   color: #e3efff;
   font-size: 11px;
   font-weight: 700;
@@ -161,7 +160,7 @@
 }
 
 .saved-city-undo-action:hover {
-  background: rgba(20, 38, 70, 0.7);
+  background: rgba(255, 255, 255, 0.24);
   border-color: rgba(174, 227, 255, 0.6);
 }
 
@@ -450,7 +449,7 @@
 
 .sync-account-btn--subtle {
   color: rgba(212, 226, 248, 0.92);
-  background: rgba(8, 17, 37, 0.44);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .sync-account-input {
@@ -911,6 +910,6 @@
 
 @media (prefers-contrast: more) {
   .app-header {
-    background: rgba(4, 11, 25, 0.9);
+    background: rgba(20, 44, 72, 0.95);
   }
 }

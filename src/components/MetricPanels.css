@@ -222,7 +222,7 @@
 
 .metric-pill--missing {
   border-color: rgba(176, 195, 230, 0.34);
-  background: rgba(9, 18, 36, 0.68);
+  background: rgba(255, 255, 255, 0.16);
   color: rgba(214, 225, 242, 0.94);
 }
 
