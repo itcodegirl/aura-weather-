@@ -1,18 +1,17 @@
 ﻿:root {
-  /* Dark-only commitment. The CSS color-scheme property (alongside the
-     <meta name="color-scheme" content="dark only">) tells the UA to
-     style scrollbars, form controls, and autofill overlays for a dark
-     surface even when the OS is in light mode. The audit found the
-     previous half-light handler (light body, dark cards) read as a UI
-     bug; this is the disciplined alternative. */
-  color-scheme: dark only;
+  /* The UI lives as white text + frosted-glass cards over a vivid,
+     daylight sky gradient (à la the Samsung Weather look). We keep a
+     dark color-scheme hint so the UA paints scrollbars / form controls
+     light-on-translucent, which still reads correctly against the
+     saturated background. */
+  color-scheme: dark;
 
   --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-display: "Space Grotesk", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
-  --text: #f5f8ff;
-  --text-muted: rgba(230, 236, 255, 0.82);
-  --text-dim: rgba(211, 223, 248, 0.86);
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.88);
+  --text-dim: rgba(255, 255, 255, 0.74);
 
   --content-max-width: 1460px;
   --content-gutter: 2.4rem;
@@ -24,54 +23,51 @@
   --bp-mobile-small: 560px;
   --bp-compact: 420px;
 
-  --radius: 24px;
-  --radius-sm: 16px;
-  --radius-md: 14px;
-  --radius-control: 12px;
-  --radius-xs: 10px;
+  --radius: 28px;
+  --radius-sm: 22px;
+  --radius-md: 18px;
+  --radius-control: 14px;
+  --radius-xs: 12px;
   --radius-pill: 999px;
-  --card-radius: 24px;
-  --card-padding: 24px;
+  --card-radius: 30px;
+  --card-padding: 22px;
 
   /*
-   * Surface alpha scale. Earlier the codebase used ~12 ad-hoc alphas
-   * of the same near-black blue (0.34 → 0.62) for chips, sub-cards,
-   * inputs, and rails. The eye reads "many slightly different
-   * surfaces" instead of one calm system. These four steps cover
-   * every previous use without visual change at most resolutions.
+   * Surface alpha scale — frosted-white translucency over the sky
+   * gradient. Every chip, sub-card, input, and rail resolves to one
+   * of these four rungs so the UI reads as one calm frosted system.
    */
-  --surface-base: 8, 17, 36;
-  --surface-1: rgba(var(--surface-base), 0.40);
-  --surface-2: rgba(var(--surface-base), 0.50);
-  --surface-3: rgba(var(--surface-base), 0.60);
-  --surface-strong: rgba(var(--surface-base), 0.78);
+  --surface-base: 255, 255, 255;
+  --surface-1: rgba(var(--surface-base), 0.10);
+  --surface-2: rgba(var(--surface-base), 0.16);
+  --surface-3: rgba(var(--surface-base), 0.24);
+  --surface-strong: rgba(var(--surface-base), 0.34);
 
   /*
-   * Border alpha scale. Same idea: every "blue-tinted thin border" in
-   * the codebase resolves to one of three rungs.
+   * Border alpha scale — thin white hairlines on the frosted glass.
    */
-  --border-base: 187, 213, 252;
-  --border-soft: 1px solid rgba(var(--border-base), 0.18);
+  --border-base: 255, 255, 255;
+  --border-soft: 1px solid rgba(var(--border-base), 0.16);
   --border-default: 1px solid rgba(var(--border-base), 0.24);
-  --border-strong: 1px solid rgba(var(--border-base), 0.34);
+  --border-strong: 1px solid rgba(var(--border-base), 0.36);
 
   --border: var(--border-default);
-  --card-border: 1px solid rgba(187, 214, 255, 0.28);
-  --shadow: 0 24px 60px rgba(3, 8, 25, 0.32);
+  --card-border: 1px solid rgba(255, 255, 255, 0.24);
+  --shadow: 0 20px 48px rgba(28, 64, 110, 0.20);
   --card-shadow:
-    0 30px 72px rgba(2, 8, 24, 0.42),
-    0 6px 18px rgba(7, 20, 46, 0.24),
-    inset 0 1px 0 rgba(229, 240, 255, 0.14);
-  --card-backdrop-blur: 18px;
+    0 22px 50px rgba(30, 70, 120, 0.20),
+    0 6px 18px rgba(30, 70, 120, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  --card-backdrop-blur: 26px;
 
-  --bg-card: rgba(10, 20, 44, 0.36);
-  --bg-card-hover: rgba(16, 30, 64, 0.48);
-  --panel: rgba(9, 17, 36, 0.66);
-  --panel-soft: rgba(10, 20, 44, 0.52);
-  --subcard-bg: var(--surface-1);
-  --subcard-border: var(--border-soft);
-  --subcard-shadow: inset 0 1px 0 rgba(228, 241, 255, 0.08);
-  --subcard-padding: 11px 12px;
+  --bg-card: rgba(255, 255, 255, 0.14);
+  --bg-card-hover: rgba(255, 255, 255, 0.22);
+  --panel: rgba(255, 255, 255, 0.16);
+  --panel-soft: rgba(255, 255, 255, 0.12);
+  --subcard-bg: rgba(255, 255, 255, 0.13);
+  --subcard-border: 1px solid rgba(255, 255, 255, 0.16);
+  --subcard-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  --subcard-padding: 12px 13px;
 
   /*
    * Selected "white pill" treatment. Used by every active toggle —
@@ -79,18 +75,18 @@
    * and the rain mode buttons all converge here so a future palette
    * tweak only edits one place.
    */
-  --active-pill-bg: linear-gradient(145deg, #f9fcff, #d9eaff);
-  --active-pill-color: #021127;
+  --active-pill-bg: rgba(255, 255, 255, 0.94);
+  --active-pill-color: #1c4c78;
   --active-pill-shadow:
-    0 6px 14px rgba(4, 12, 28, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 6px 14px rgba(28, 64, 110, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 
-  --accent: #6ee7ff;
-  --accent-strong: #22d3ee;
-  --accent-warm: #f8b84e;
-  --atmo-lavender: rgba(185, 166, 255, 0.24);
-  --atmo-sky: rgba(118, 196, 255, 0.2);
-  --atmo-haze: rgba(193, 222, 255, 0.11);
+  --accent: #ffffff;
+  --accent-strong: #eaf6ff;
+  --accent-warm: #ffd27a;
+  --atmo-lavender: rgba(255, 255, 255, 0.22);
+  --atmo-sky: rgba(255, 255, 255, 0.20);
+  --atmo-haze: rgba(255, 255, 255, 0.12);
 
   /*
    * Severity / risk colors. Single source of truth for the 5-rung
@@ -98,24 +94,24 @@
    * temperature signals. Components vary the surface (badge vs item)
    * but the foreground/border/fill swatches stay locked together.
    */
-  --severity-critical-fg: #fee2e2;
-  --severity-critical-border: rgba(248, 113, 113, 0.5);
-  --severity-critical-bg: rgba(127, 29, 29, 0.32);
-  --severity-high-fg: #ffedd5;
-  --severity-high-border: rgba(249, 115, 22, 0.45);
-  --severity-high-bg: rgba(124, 45, 18, 0.26);
-  --severity-warn-fg: #fef3c7;
-  --severity-warn-border: rgba(234, 179, 8, 0.4);
-  --severity-warn-bg: rgba(113, 63, 18, 0.24);
-  --severity-ok-fg: #dcfce7;
-  --severity-ok-border: rgba(34, 197, 94, 0.45);
-  --severity-ok-bg: rgba(20, 83, 45, 0.24);
-  --severity-info-fg: #dbeafe;
-  --severity-info-border: rgba(147, 197, 253, 0.42);
-  --severity-info-bg: rgba(30, 64, 175, 0.22);
+  --severity-critical-fg: #fff1f1;
+  --severity-critical-border: rgba(255, 130, 130, 0.62);
+  --severity-critical-bg: rgba(225, 70, 70, 0.34);
+  --severity-high-fg: #fff3e6;
+  --severity-high-border: rgba(255, 165, 90, 0.58);
+  --severity-high-bg: rgba(235, 130, 50, 0.32);
+  --severity-warn-fg: #fff8e6;
+  --severity-warn-border: rgba(250, 205, 90, 0.58);
+  --severity-warn-bg: rgba(225, 175, 55, 0.32);
+  --severity-ok-fg: #ecffe9;
+  --severity-ok-border: rgba(120, 220, 130, 0.58);
+  --severity-ok-bg: rgba(70, 190, 100, 0.30);
+  --severity-info-fg: #eef5ff;
+  --severity-info-border: rgba(160, 205, 255, 0.6);
+  --severity-info-bg: rgba(95, 165, 235, 0.30);
 
-  --hero-temp-size: 92px;
-  --hero-unit-size: 28px;
+  --hero-temp-size: 108px;
+  --hero-unit-size: 30px;
   --header-control-height: 48px;
   --section-title-size: clamp(18px, 1.2vw, 20px);
   --section-title-lg-size: clamp(19px, 1.3vw, 21px);
@@ -149,8 +145,8 @@
   --ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
   --press-scale: 0.985;
   --press-scale-firm: 0.97;
-  --focus-ring: 0 0 0 4px rgba(34, 211, 238, 0.4);
-  --focus-outline: rgba(130, 228, 255, 0.66);
+  --focus-ring: 0 0 0 4px rgba(255, 255, 255, 0.55);
+  --focus-outline: rgba(255, 255, 255, 0.85);
 }
 
 * {
@@ -162,7 +158,7 @@
 html {
   scroll-behavior: smooth;
   scrollbar-width: thin;
-  scrollbar-color: rgba(183, 208, 255, 0.35) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
 }
 
 html::-webkit-scrollbar {
@@ -170,7 +166,7 @@ html::-webkit-scrollbar {
 }
 
 html::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(153, 185, 255, 0.7), rgba(110, 231, 255, 0.7));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.45));
   border-radius: var(--radius-pill);
 }
 
@@ -179,7 +175,8 @@ html::-webkit-scrollbar-track {
 }
 
 ::selection {
-  background: rgba(110, 231, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
+  color: #16456f;
 }
 
 body {
@@ -193,9 +190,8 @@ body {
    */
   font-family: var(--font-sans);
   background:
-    radial-gradient(1200px 760px at 14% -10%, #3d4d8a 0%, #1a2550 34%, transparent 70%),
-    radial-gradient(980px 650px at 84% -14%, #49598f 0%, #1a2348 34%, transparent 68%),
-    linear-gradient(180deg, #0b1023 0%, #070c1b 56%, #050911 100%);
+    radial-gradient(680px 460px at 78% -6%, rgba(255, 255, 255, 0.65) 0%, rgba(255, 250, 235, 0.28) 32%, transparent 60%),
+    linear-gradient(180deg, #4f97d6 0%, #5fa1d8 24%, #82b785 50%, #5fa0d5 74%, #4d92d3 100%);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -302,22 +298,21 @@ a:focus-visible,
   inset: 0;
   z-index: -2;
   background: inherit;
-  filter: saturate(1.02) brightness(0.94);
-  transform: scale(1.015);
+  filter: saturate(1.04) brightness(1.02);
+  transform: scale(1.02);
 }
 
 .app::after {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 14% 16%, rgba(188, 166, 255, 0.22), transparent 44%),
-    radial-gradient(circle at 84% 12%, rgba(123, 199, 255, 0.2), transparent 46%),
-    radial-gradient(circle at 74% 82%, rgba(110, 171, 255, 0.14), transparent 43%),
-    linear-gradient(180deg, rgba(222, 236, 255, 0.08) 0%, rgba(17, 26, 50, 0.06) 42%, rgba(5, 10, 23, 0.28) 100%);
-  opacity: 0.92;
+    radial-gradient(420px 320px at 78% 4%, rgba(255, 255, 255, 0.7), transparent 58%),
+    radial-gradient(760px 520px at 78% 4%, rgba(255, 246, 224, 0.32), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 38%, rgba(36, 86, 134, 0.12) 100%);
+  opacity: 1;
 }
 
 .app-inner {
@@ -340,8 +335,8 @@ a:focus-visible,
   border-radius: calc(var(--radius) + 14px);
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 2%, rgba(188, 214, 255, 0.16), rgba(123, 156, 224, 0.08) 38%, transparent 72%),
-    linear-gradient(180deg, rgba(171, 198, 255, 0.06), rgba(171, 198, 255, 0));
+    radial-gradient(ellipse at 50% 2%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08) 38%, transparent 72%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0));
   filter: blur(2px);
 }
 
@@ -696,13 +691,13 @@ a:focus-visible,
 
 @media (prefers-contrast: more) {
   :root {
-    --text-muted: #eef5ff;
-    --text-dim: #dce8ff;
-    --border: 1px solid rgba(236, 243, 255, 0.6);
+    --text-muted: #ffffff;
+    --text-dim: #ffffff;
+    --border: 1px solid rgba(255, 255, 255, 0.7);
   }
 
   .city-search-dropdown {
-    background: rgba(4, 11, 25, 0.9);
+    background: rgba(20, 44, 72, 0.96);
   }
 }
 
@@ -726,11 +721,15 @@ a:focus-visible,
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --card-backdrop-blur: 0px;
-    --bg-card: rgba(8, 16, 33, 0.96);
-    --bg-card-hover: rgba(12, 22, 44, 0.98);
-    --panel: rgba(7, 14, 30, 0.98);
-    --panel-soft: rgba(8, 16, 33, 0.96);
-    --subcard-bg: rgba(6, 13, 28, 0.96);
+    --bg-card: rgba(36, 78, 122, 0.96);
+    --bg-card-hover: rgba(44, 90, 138, 0.98);
+    --panel: rgba(30, 70, 112, 0.98);
+    --panel-soft: rgba(36, 78, 122, 0.96);
+    --subcard-bg: rgba(28, 66, 106, 0.96);
+    --surface-1: rgba(28, 66, 106, 0.94);
+    --surface-2: rgba(36, 78, 122, 0.96);
+    --surface-3: rgba(44, 90, 138, 0.97);
+    --surface-strong: rgba(52, 100, 150, 0.98);
   }
 
   .glass {
@@ -739,7 +738,7 @@ a:focus-visible,
   }
 
   body {
-    background: linear-gradient(180deg, #0b1023 0%, #070c1b 56%, #050911 100%);
+    background: linear-gradient(180deg, #2a6aa8 0%, #2f6fa6 56%, #275f96 100%);
   }
 
   .app::before,
@@ -749,15 +748,14 @@ a:focus-visible,
 }
 
 /*
- * Drop the secondary background overlay on the narrowest phones.
- * .app::after is a 4-layer radial-gradient stack that contributes
- * a full-screen compositor pass for ~5% of perceptual polish — a
- * straight win on low-end devices where every fill costs frame budget.
- * The underlying body gradient already sets the colour scene.
+ * Trim the secondary overlay's blur cost on the narrowest phones — the
+ * sun-glow radial still reads, just with one fewer soft layer.
  */
 @media (max-width: 560px) {
   .app::after {
-    display: none;
+    background:
+      radial-gradient(360px 280px at 78% 4%, rgba(255, 255, 255, 0.7), transparent 58%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 38%, rgba(36, 86, 134, 0.12) 100%);
   }
 }
 

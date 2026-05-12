@@ -69,7 +69,7 @@
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   border: var(--border-strong);
-  background: linear-gradient(165deg, rgba(15, 30, 60, 0.7), rgba(8, 18, 38, 0.64));
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.12));
   box-shadow:
     inset 0 1px 0 rgba(230, 242, 255, 0.14),
     0 12px 24px rgba(3, 10, 24, 0.24);
@@ -165,7 +165,7 @@
 }
 
 .location-setup-btn--ghost:hover {
-  background: rgba(8, 17, 38, 0.4);
+  background: rgba(255, 255, 255, 0.12);
   color: #f0f6ff;
 }
 

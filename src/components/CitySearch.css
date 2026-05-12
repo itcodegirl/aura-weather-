@@ -157,7 +157,7 @@
   list-style: none;
   border-radius: var(--radius-md);
   border: var(--border-default);
-  background: linear-gradient(180deg, rgba(7, 14, 31, 0.94), rgba(6, 11, 26, 0.94));
+  background: linear-gradient(180deg, rgba(34, 70, 108, 0.92), rgba(28, 62, 98, 0.92));
   box-shadow: 0 26px 52px rgba(2, 6, 19, 0.6);
   transform-origin: top center;
   animation: dropdown-reveal var(--motion-subtle) var(--ease-standard);

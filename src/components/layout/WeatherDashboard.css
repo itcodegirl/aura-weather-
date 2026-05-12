@@ -55,11 +55,12 @@
   border-radius: var(--card-radius);
   border: var(--card-border);
   opacity: 1;
+  backdrop-filter: blur(var(--card-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
   animation: card-slide-up var(--card-enter-duration) cubic-bezier(0.25, 0.95, 0.3, 1) forwards;
   animation-delay: calc(var(--i, 0) * var(--card-enter-stagger));
   background:
-    linear-gradient(168deg, rgba(13, 24, 49, 0.68), rgba(8, 15, 33, 0.56)),
-    linear-gradient(132deg, rgba(184, 167, 255, 0.08), rgba(111, 188, 255, 0.05) 58%, transparent 84%);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.10));
   box-shadow: var(--card-shadow);
   transition:
     transform var(--motion-medium) var(--ease-emphasis),
@@ -74,7 +75,7 @@
   inset: 1px;
   border-radius: calc(var(--card-radius) - 1px);
   pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .bento > section::before {
@@ -84,7 +85,7 @@
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(circle at 24% 0%, rgba(231, 241, 255, 0.18), transparent 62%);
+  background: radial-gradient(circle at 24% 0%, rgba(255, 255, 255, 0.22), transparent 62%);
   transition: opacity var(--motion-medium) var(--ease-standard);
 }
 
@@ -102,30 +103,27 @@
  */
 .bento > section[data-refreshing="true"] {
   box-shadow:
-    0 30px 72px rgba(2, 8, 24, 0.42),
-    0 6px 18px rgba(7, 20, 46, 0.24),
-    inset 0 0 0 1px rgba(128, 226, 255, 0.18);
+    var(--card-shadow),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.32);
 }
 
 .bento > section:focus-within {
-  border-color: rgba(133, 230, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.7);
   box-shadow:
-    0 28px 62px rgba(3, 9, 24, 0.42),
-    0 0 0 2px rgba(133, 230, 255, 0.45),
-    inset 0 1px 0 rgba(243, 248, 255, 0.18);
+    var(--card-shadow),
+    0 0 0 2px rgba(255, 255, 255, 0.55);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bento > section:hover {
     transform: translateY(var(--card-hover-shift));
-    border-color: rgba(182, 220, 255, 0.44);
+    border-color: rgba(255, 255, 255, 0.42);
     background:
-      linear-gradient(165deg, rgba(16, 31, 63, 0.76), rgba(8, 16, 34, 0.6)),
-      linear-gradient(130deg, rgba(191, 175, 255, 0.1), rgba(120, 198, 255, 0.06) 60%, transparent 86%);
+      linear-gradient(165deg, rgba(255, 255, 255, 0.27), rgba(255, 255, 255, 0.14));
     box-shadow:
-      0 32px 80px rgba(3, 9, 24, 0.46),
-      0 14px 34px rgba(129, 160, 240, 0.16),
-      inset 0 1px 0 rgba(243, 248, 255, 0.18);
+      0 26px 56px rgba(30, 70, 120, 0.24),
+      0 12px 28px rgba(30, 70, 120, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.32);
   }
 
   .bento > section:hover::before {
@@ -384,7 +382,7 @@
 
 @media (prefers-contrast: more) {
   .bento > section {
-    background: rgba(4, 11, 25, 0.9);
+    background: rgba(20, 44, 72, 0.95);
   }
 }
 

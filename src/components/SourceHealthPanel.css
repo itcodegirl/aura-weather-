@@ -142,7 +142,7 @@
 
 .source-health-item--ready {
   border-color: rgba(110, 231, 183, 0.26);
-  background: linear-gradient(160deg, rgba(11, 44, 42, 0.36), rgba(5, 14, 31, 0.3));
+  background: linear-gradient(160deg, rgba(110, 220, 170, 0.20), rgba(255, 255, 255, 0.10));
 }
 
 .source-health-item--ready .source-health-pill {
@@ -154,7 +154,7 @@
 .source-health-item--cached,
 .source-health-item--limited {
   border-color: rgba(251, 191, 36, 0.28);
-  background: linear-gradient(160deg, rgba(62, 45, 10, 0.28), rgba(5, 14, 31, 0.3));
+  background: linear-gradient(160deg, rgba(245, 200, 90, 0.20), rgba(255, 255, 255, 0.10));
 }
 
 .source-health-item--cached .source-health-pill,
@@ -166,7 +166,7 @@
 
 .source-health-item--unavailable {
   border-color: rgba(248, 113, 113, 0.3);
-  background: linear-gradient(160deg, rgba(69, 20, 27, 0.28), rgba(5, 14, 31, 0.3));
+  background: linear-gradient(160deg, rgba(245, 120, 110, 0.22), rgba(255, 255, 255, 0.10));
 }
 
 .source-health-item--unavailable .source-health-pill {
