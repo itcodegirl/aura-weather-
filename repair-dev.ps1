@@ -2,7 +2,9 @@ param(
   [switch]$ResetDeps = $false
 )
 
-$projectRoot = "C:\Users\Jenna\OneDrive\Playground\aura-weather"
+# Resolve the repo root from the script's own location so this works
+# from any clone, on any machine — not a single author's path.
+$projectRoot = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 Set-Location $projectRoot
 
 Write-Host "=== Aura Weather dev environment repair ===" -ForegroundColor Cyan

@@ -115,7 +115,8 @@ npm ci
 2. Copy the optional env file if you want key-based sync URLs:
 
 ```bash
-Copy-Item .env.example .env
+cp .env.example .env          # macOS / Linux
+# Copy-Item .env.example .env # Windows PowerShell
 ```
 
 3. Start the dev server:
