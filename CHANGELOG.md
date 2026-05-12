@@ -9,6 +9,25 @@ portfolio-grade product. Format roughly follows
 
 ### Added
 
+- **No-JS fallback.** `index.html` now renders a short, styled
+  `<noscript>` notice explaining the dashboard needs JavaScript,
+  instead of leaving a blank `<div id="root">`.
+- **Edge headers and SPA fallback.** `public/_headers` ships the
+  non-breaking security set (`X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`,
+  `Permissions-Policy` scoped to geolocation) plus a caching policy —
+  immutable for content-hashed `/assets/*`, forced revalidation for
+  `sw.js` and `manifest.webmanifest` so a deploy is never pinned by a
+  stale cache. `public/_redirects` adds the SPA fallback so deep links
+  resolve to the app shell. `public/robots.txt` gives crawlers an
+  explicit policy.
+- **PWA manifest hardening.** `manifest.webmanifest` gained `id`,
+  `lang`, and `dir` for a stable installed-app identity and correct
+  localisation hints.
+- **Project metadata + LICENSE.** `package.json` now declares
+  `description`, `keywords`, `homepage`, `repository`, `bugs`,
+  `license`, and `engines.node` (>=20); a `.nvmrc` pins Node 20; and
+  the repo ships an MIT `LICENSE`.
 - **`useDocumentTitle` hook.** Mirrors the active forecast location
   into `<title>` (`Tokyo, Japan · Aura Weather`) once a location is
   known, and restores the static index.html title on unmount so cold
@@ -47,6 +66,15 @@ portfolio-grade product. Format roughly follows
 
 ### Changed
 
+- **Build chunking.** `vite.config.js` now splits `react` /
+  `react-dom` / `scheduler` into a `react-vendor` chunk and
+  `lucide-react` into its own. The app entry chunk drops from ~311 kB
+  to ~128 kB, so a deploy that only touches app code re-downloads just
+  that and keeps the rarely-changing vendor chunks cached.
+- **localStorage write hygiene.** `useLocalStorageState` no longer
+  re-writes the current value to `localStorage` on mount, so a visitor
+  who never interacts doesn't get default flag values persisted; real
+  state changes still write through.
 - **Mobile hero density.** The four hero readings (Wind, Humidity,
   Pressure, Dew Point) used to collapse to a single column at 560px,
   producing four full-width rows that pushed the rest of the
@@ -97,6 +125,10 @@ portfolio-grade product. Format roughly follows
 
 ### Fixed
 
+- **HeroCard placeholder test.** The render-test assertion for the
+  no-data body copy used a straight apostrophe while the component
+  uses a typographic one, so it never matched and quietly failed the
+  `code-quality` job; the regex now accepts either form.
 - **HeroCard fallback honours known location.** The no-data fallback
   hardcoded "Location unavailable" / "Loading weather", which lied to
   the user during the rare window where the location was already set
