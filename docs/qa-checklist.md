@@ -21,8 +21,9 @@ CI runs the same gate serially for Playwright with
       provider status copy and no fake weather values
 - [ ] Granting browser location shows "Current location" rather than a
       guessed city/country label
-- [ ] Permission-onboarding card reads "Set your forecast once" with
-      short setup copy and two buttons
+- [ ] Permission-onboarding card reads "Pick a location to make Aura
+      yours" with a "Welcome" kicker, value-preview copy, and three
+      CTAs (Use my location · Search a city · Keep showing Chicago)
 - [ ] Bento groups render in order: Current Conditions → Near-Term
       Outlook → Risk Signals → Week Ahead
 
@@ -62,8 +63,9 @@ CI runs the same gate serially for Playwright with
       UV, or wind inputs instead of inventing advice
 - [ ] The hero stats helper note appears: "Some readings are
       unavailable from the provider..."
-- [ ] AQI / UV cards read "AQI offline" / "UV offline" with a "No live
-      data" pill (not a 0 gauge)
+- [ ] AQI / UV cards read "Unavailable" with a "No live data" pill (not
+      a 0 gauge); supportText explains the missing reading without
+      claiming a fake zero value
 - [ ] Daily forecast rows with null highs/lows render "—" not "0°"
 - [ ] Switch back to live data and confirm every value reappears as a
       real reading

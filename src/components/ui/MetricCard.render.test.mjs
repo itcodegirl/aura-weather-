@@ -24,7 +24,7 @@ describe("MetricCard", () => {
         max: 300,
         status: baseStatus,
         gaugeLabel: "Air quality index",
-        supportText: "Current AQI is 42 out of 300.",
+        supportText: "Current AQI is 42 on a 0–500 scale.",
       })
     );
 
@@ -43,9 +43,9 @@ describe("MetricCard", () => {
       React.createElement(MetricCard, {
         id: "metric-aqi",
         title: "Air Quality",
-        context: "AQI offline",
+        context: "Unavailable",
         value: null,
-        max: 300,
+        max: 500,
         status: baseStatus,
         gaugeLabel: "Air quality index",
         supportText: "Air quality data is temporarily unavailable.",
@@ -76,7 +76,7 @@ describe("MetricCard", () => {
         React.createElement(MetricCard, {
           id: "metric-uv",
           title: "UV Index",
-          context: "UV offline",
+          context: "Unavailable",
           value,
           max: 11,
           status: baseStatus,
@@ -97,10 +97,10 @@ describe("MetricCard", () => {
         title: "Air Quality",
         context: "AQI",
         value: 42,
-        max: 300,
+        max: 500,
         status: baseStatus,
         gaugeLabel: "Air quality index",
-        supportText: "Current AQI is 42 out of 300.",
+        supportText: "Current AQI is 42 on a 0–500 scale.",
         helpTitle: "AQI scale explained",
         helpText: "AQI summarises air pollution levels.",
       })

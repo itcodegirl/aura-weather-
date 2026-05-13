@@ -83,11 +83,40 @@ describe("NowcastCard", () => {
       })
     );
 
-    assert.equal(screen.getAllByText("Nowcast offline").length, 2);
+    // Badge: now reads "Reading unavailable" in the user-honest voice
+    // (was "Nowcast offline"). The trailing meta line that previously
+    // re-stated the offline status has been removed because the badge
+    // + the analyzer's explanatory copy already convey the state.
+    assert.equal(screen.getAllByText("Reading unavailable").length, 1);
+    assert.equal(
+      screen.queryByText("Nowcast offline"),
+      null,
+      "engineering phrase must not appear anywhere"
+    );
     assert.ok(screen.getByText("Nowcast data is unavailable."));
     assert.ok(screen.getByText("15-minute precipitation readings are missing from the provider."));
     assert.ok(screen.getAllByText("\u2014").length >= 2);
     assert.equal(screen.queryByText("0%"), null);
+  });
+
+  test("does not render a redundant 'Short-range precipitation guidance' meta line on the populated path", () => {
+    // Phase 18 cleanup: the explainer at the top of the card already
+    // says "15-minute rain guidance over the next 2 hours.", so a
+    // trailing meta line repeating the same idea was visual noise.
+    const { container } = render(
+      React.createElement(NowcastCard, {
+        weather: { nowcast: buildNowcast() },
+      })
+    );
+    assert.equal(
+      container.querySelector(".nowcast-meta"),
+      null,
+      "no .nowcast-meta element should render \u2014 the trailing meta line is removed"
+    );
+    assert.equal(
+      screen.queryByText("Short-range precipitation guidance"),
+      null
+    );
   });
 
   test("renders dry weather-code nowcast with unknown peak chance instead of 0%", () => {

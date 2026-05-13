@@ -36,6 +36,40 @@ export function formatSunClock(value, options = {}) {
   });
 }
 
+/*
+ * Returns "sunrise" or "sunset" if the current moment falls within
+ * +/- toleranceMinutes of the given sunrise / sunset timestamp; null
+ * otherwise. Used by HeroCard to apply an earned warm wash that only
+ * surfaces during the actual golden-hour windows of the day —
+ * deliberately quiet during the rest.
+ */
+export function getSunlightPhase(sunrise, sunset, nowMs, options = {}) {
+  const { toleranceMinutes = 30 } = options;
+  const tolerance = toFiniteNumber(toleranceMinutes);
+  if (tolerance === null || tolerance <= 0) {
+    return null;
+  }
+
+  const now = toFiniteNumber(nowMs);
+  if (now === null) {
+    return null;
+  }
+
+  const toleranceMs = tolerance * 60_000;
+
+  const sunriseDate = toValidDate(sunrise);
+  if (sunriseDate && Math.abs(now - sunriseDate.getTime()) <= toleranceMs) {
+    return "sunrise";
+  }
+
+  const sunsetDate = toValidDate(sunset);
+  if (sunsetDate && Math.abs(now - sunsetDate.getTime()) <= toleranceMs) {
+    return "sunset";
+  }
+
+  return null;
+}
+
 export function formatDaylightLengthLabel(
   sunrise,
   sunset,

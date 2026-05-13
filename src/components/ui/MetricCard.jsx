@@ -122,6 +122,7 @@ function MetricDensityBar({ value, max, statusColor, hasData }) {
 function MetricCard({
   id,
   title,
+  titleTag = "h3",
   context,
   value,
   max,
@@ -133,6 +134,11 @@ function MetricCard({
   decimals = 0,
 }) {
   const hasData = toFiniteNumber(value) !== null;
+  // Card title element is configurable so the metric heading slots
+  // correctly under whatever section header wraps it. ExposureSection
+  // renders its own h3 for the section, so its child metrics pass h4
+  // to keep heading hierarchy linear for screen-reader navigation.
+  const TitleTag = titleTag;
 
   return (
     <article
@@ -140,9 +146,9 @@ function MetricCard({
       aria-labelledby={id}
     >
       <div className="metric-head exposure-panel-head">
-        <h3 id={id} className="metric-label">
+        <TitleTag id={id} className="metric-label">
           {title}
-        </h3>
+        </TitleTag>
         <div className="metric-head-side">
           <span className="metric-context">{context}</span>
           {helpText && (

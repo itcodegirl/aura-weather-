@@ -1,6 +1,5 @@
 import { memo, useMemo } from "react";
 import { Siren } from "lucide-react";
-import { DataTrustMeta } from "./ui";
 import "./AlertsCard.css";
 
 function formatAlertTime(value) {
@@ -23,8 +22,6 @@ function AlertsCard({
   alertsStatus = "idle",
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const totalAlertCount = Array.isArray(alerts) ? alerts.length : 0;
   const visibleAlerts = useMemo(() => {
@@ -73,6 +70,18 @@ function AlertsCard({
     };
   }, [alertsStatus, visibleAlerts.length]);
 
+  // Don't render the panel at all when there are no alerts AND the
+  // feed reported a successful empty list (or is still pending). The
+  // audit's principle: do not narrate a non-event in tense vocabulary.
+  // "Unsupported" and "unavailable" still render because those are
+  // information the user needs (no coverage, or a feed outage).
+  const hasActiveAlerts = visibleAlerts.length > 0;
+  const isInformationalStatus =
+    alertsStatus === "unsupported" || alertsStatus === "unavailable";
+  if (!hasActiveAlerts && !isInformationalStatus) {
+    return null;
+  }
+
   return (
     <section
       className="bento-alerts alerts-card glass"
@@ -87,15 +96,6 @@ function AlertsCard({
         </h3>
         <span className="alerts-subtitle">{emptyState.subtitle}</span>
       </header>
-
-      <DataTrustMeta
-        sourceLabel="NOAA / NWS Alerts"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-        staleAfterMinutes={12}
-        statusLabel={lastUpdatedAt ? "" : emptyState.trustLabel}
-        titleOverride={lastUpdatedAt ? "" : emptyState.trustTitle}
-      />
 
       {visibleAlerts.length === 0 ? (
         <div className="alerts-empty" role="status" aria-live="polite">
@@ -120,8 +120,21 @@ function AlertsCard({
                   </p>
                 </div>
                 <div className="alerts-item-meta">
-                  <span className={`alerts-priority alerts-priority--${alert.priority || "low"}`}>
-                    {(alert.priority || "low").toUpperCase()}
+                  {/*
+                   * Priority badge: text content stays in normal case so
+                   * (a) copy-paste produces a readable word, (b) screen-
+                   * reader engines that spell out short all-caps strings
+                   * letter-by-letter read it as "high" / "extreme" /
+                   * "moderate". CSS text-transform: uppercase handles the
+                   * visual presentation. aria-label ties the floating
+                   * badge text to its semantic meaning ("Priority: high")
+                   * so a SR user hears context, not just an adjective.
+                   */}
+                  <span
+                    className={`alerts-priority alerts-priority--${alert.priority || "low"}`}
+                    aria-label={`Priority: ${alert.priority || "low"}`}
+                  >
+                    {alert.priority || "low"}
                   </span>
                   <span className="alerts-window">
                     Until {formatAlertTime(alert.endsAt)}

@@ -6,7 +6,7 @@ import { getWeather } from "../domain/weatherCodes";
 import { convertTemp } from "../utils/temperature";
 import { findWindowStartIndex } from "../utils/timeSeries";
 import { toFiniteNumber } from "../utils/numbers";
-import { CardHeader, DataTrustMeta } from "./ui";
+import { CardHeader } from "./ui";
 import "./HourlyCard.css";
 
 function toDisplayTemperature(value, unit) {
@@ -148,9 +148,12 @@ function buildChartGeometry(data, minTemp, maxTemp) {
   };
 }
 
+const HOURLY_EMPTY_MESSAGE =
+  "Hourly temperatures aren't available right now. Current conditions are still live above.";
+
 function getHourlySummary(data, unit) {
   if (!Array.isArray(data) || data.length === 0) {
-    return "Hourly temperature data is temporarily unavailable.";
+    return HOURLY_EMPTY_MESSAGE;
   }
 
   // Strict coercion: a null entry.temp would silently land as 0 and
@@ -159,7 +162,7 @@ function getHourlySummary(data, unit) {
     .map((entry) => toFiniteNumber(entry?.temp))
     .filter((value) => value !== null);
   if (validTemps.length === 0) {
-    return "Hourly temperature data is temporarily unavailable.";
+    return HOURLY_EMPTY_MESSAGE;
   }
 
   const firstLabel = data[0]?.label || "now";
@@ -178,8 +181,6 @@ function HourlyCard({
   chartBottomColor,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const currentWeatherCode = weather?.current?.conditionCode;
   const currentTemperature = weather?.current?.temperature;
@@ -238,7 +239,6 @@ function HourlyCard({
         className="bento-chart hourly-chart glass"
         style={style}
         aria-labelledby={chartTitleId}
-        aria-describedby={chartSummaryId}
         data-refreshing={isRefreshing ? "true" : undefined}
         aria-busy={isRefreshing || undefined}
       >
@@ -250,17 +250,16 @@ function HourlyCard({
           titleClassName="chart-title"
           icon={<LineIcon size={16} />}
           subtitle="Next 24h"
-          subtitleClassName="chart-subtitle"
-        />
-        <DataTrustMeta
-          sourceLabel="Open-Meteo Hourly"
-          lastUpdatedAt={lastUpdatedAt}
-          nowMs={nowMs}
+          subtitleClassName="chart-subtitle eyebrow-pill"
         />
 
-        <div className="chart-body" style={{ display: "grid", placeItems: "center" }}>
-          <p className="loader-text" role="status" aria-live="polite">
-            Hourly temperature data is temporarily unavailable.
+        <div className="card-empty" role="status">
+          <div className="card-empty__icon">
+            <LineIcon size={36} aria-hidden="true" />
+          </div>
+          <p className="card-empty__title">Hourly chart unavailable</p>
+          <p className="card-empty__copy">
+            Current conditions are still live above.
           </p>
         </div>
       </section>
@@ -297,12 +296,7 @@ function HourlyCard({
         titleClassName="chart-title"
         icon={<LineIcon size={16} />}
         subtitle="Next 24h"
-        subtitleClassName="chart-subtitle"
-      />
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Hourly"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
+        subtitleClassName="chart-subtitle eyebrow-pill"
       />
       <p className="chart-lede">{chartLede}</p>
 
@@ -393,7 +387,11 @@ function HourlyCard({
 
             {geometry.points.map((point) => {
               const info = getWeather(point.code);
-              const tooltip = `${point.label} - ${point.temp}\u00B0${unit} - ${info.label}`;
+              // Separator is a middle dot rather than an ASCII hyphen so
+              // screen-reader engines do not pronounce it as "minus" /
+              // "dash". Matches the separator the rest of the app uses
+              // for inline metadata (see HeroCard sunlight line).
+              const tooltip = `${point.label} \u00B7 ${point.temp}\u00B0${unit} \u00B7 ${info.label}`;
               return (
                 <g
                   key={`point-${point.time.getTime()}`}
@@ -430,8 +428,17 @@ function HourlyCard({
 
       {hourlySamples.length ? (
         <div className="hourly-touch-explorer" aria-label="Hourly samples">
+          {/*
+           * The selected-sample card displays the currently-shown
+           * sample. Previously this paragraph had aria-live=polite
+           * AND each sample button had aria-pressed + a verbose
+           * aria-label — so a screen-reader user tapping a sample
+           * heard the same info twice (button pressed state change
+           * + live region update). Live region removed; the button
+           * own state change carries the announcement.
+           */}
           {selectedSample ? (
-            <p className="hourly-selected-sample" aria-live="polite">
+            <p className="hourly-selected-sample">
               <span>{selectedSample.label}</span>
               <strong>{selectedSample.temp}&deg;{unit}</strong>
               <span>{selectedSampleWeather?.label || "Weather sample"}</span>
@@ -444,13 +451,20 @@ function HourlyCard({
               const isSelected = selectedSample
                 ? key === String(selectedSample.time.getTime())
                 : false;
+              // aria-current rather than aria-pressed: the highlighted
+              // sample is "the one being displayed right now", not "a
+              // toggle the user has switched on". aria-pressed=true
+              // before the user has tapped anything announced as if a
+              // selection had been made. aria-current=true only fires
+              // once the user has actually selected a sample.
+              const isUserSelection = selectedSampleKey === key;
               return (
                 <button
                   key={`sample-${key}`}
                   type="button"
                   className={`hourly-touch-sample ${isSelected ? "is-selected" : ""}`.trim()}
-                  aria-pressed={isSelected}
-                  aria-label={`Select ${point.label}, ${point.temp} degrees ${unit}, ${info.label}`}
+                  aria-current={isUserSelection ? "true" : undefined}
+                  aria-label={`Show ${point.label}, ${point.temp} degrees ${unit}, ${info.label}`}
                   onClick={() => setSelectedSampleKey(key)}
                 >
                   <span>{point.label}</span>

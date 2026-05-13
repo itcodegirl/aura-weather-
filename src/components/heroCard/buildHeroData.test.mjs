@@ -73,6 +73,58 @@ describe("buildHeroData", () => {
     assert.equal(data.heroStatsHaveAnyMissing, false);
   });
 
+  test("renders the today label in the forecast's timezone, not the device's", () => {
+    // 2026-04-21 23:00 UTC is 2026-04-22 08:00 in Tokyo (UTC+9) and
+    // 2026-04-21 18:00 in Chicago (UTC-5). With Tokyo's tz, the label
+    // should read Wednesday; with Chicago's, Tuesday.
+    const ts = Date.UTC(2026, 3, 21, 23, 0, 0);
+    const tokyoWeather = {
+      ...baseWeather,
+      meta: { timezone: "Asia/Tokyo" },
+    };
+    const chicagoWeather = {
+      ...baseWeather,
+      meta: { timezone: "America/Chicago" },
+    };
+    const tokyo = buildHeroData({
+      weather: tokyoWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: ts,
+    });
+    const chicago = buildHeroData({
+      weather: chicagoWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: ts,
+    });
+    assert.match(tokyo.today, /Wednesday/);
+    assert.match(chicago.today, /Tuesday/);
+  });
+
+  test("derives the today label from the supplied nowMs so midnight rollover refreshes", () => {
+    // 2026-04-20 23:50 UTC and 2026-04-21 00:10 UTC straddle midnight
+    // depending on TZ, so use noon in two different days to keep the
+    // assertion timezone-independent.
+    const dayOne = Date.UTC(2026, 3, 20, 18, 0, 0);
+    const dayTwo = Date.UTC(2026, 3, 21, 18, 0, 0);
+
+    const monday = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: dayOne,
+    });
+    const tuesday = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      nowMs: dayTwo,
+    });
+
+    assert.notEqual(monday.today, tuesday.today);
+  });
+
   test("builds practical daily guidance from forecast readings", () => {
     const data = buildHeroData({
       weather: {
@@ -97,6 +149,57 @@ describe("buildHeroData", () => {
       data.dailyGuidance.map((item) => item.value),
       ["Bring rain gear", "Very high exposure", "Gusty conditions"]
     );
+  });
+
+  test("hides calm-tone guidance pills so non-events do not narrate", () => {
+    // Mild, dry, low-UV, low-wind day — every guidance item resolves
+    // to "calm". The hero should render no guidance pills at all.
+    const data = buildHeroData({
+      weather: {
+        ...baseWeather,
+        current: {
+          ...baseWeather.current,
+          windSpeed: 4,
+          windGust: 6,
+        },
+        daily: {
+          ...baseWeather.daily,
+          rainChanceMax: [3],
+          rainAmountTotal: [0],
+          uvIndexMax: [1.2],
+        },
+      },
+      location: baseLocation,
+      unit: "F",
+    });
+
+    assert.equal(data.dailyGuidance.length, 0);
+  });
+
+  test("retains a mix of notice + calm by hiding only the calm ones", () => {
+    // Rain is "watch" (>=55%), UV is calm (<3), wind is calm (<18).
+    // Only the rain guidance should make it through the filter.
+    const data = buildHeroData({
+      weather: {
+        ...baseWeather,
+        current: {
+          ...baseWeather.current,
+          windSpeed: 4,
+          windGust: 6,
+        },
+        daily: {
+          ...baseWeather.daily,
+          rainChanceMax: [70],
+          rainAmountTotal: [0.4],
+          uvIndexMax: [1.5],
+        },
+      },
+      location: baseLocation,
+      unit: "F",
+    });
+
+    assert.equal(data.dailyGuidance.length, 1);
+    assert.equal(data.dailyGuidance[0].kind, "rain");
   });
 
   test("marks daily guidance unavailable instead of inventing readings", () => {
@@ -219,7 +322,7 @@ describe("buildHeroData", () => {
       location: baseLocation,
       unit: "F",
       climateComparison: {
-        difference: 4,
+        difference: 7,
         // sampleYears intentionally omitted
         referenceDateLabel: "April 21",
       },
@@ -236,6 +339,25 @@ describe("buildHeroData", () => {
     });
     assert.equal(data.hasClimateComparison, false);
     assert.equal(data.climateMessage, "");
+  });
+
+  test("hides the climate line when the delta is small (statistical noise)", () => {
+    const small = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      climateComparison: { difference: 2, sampleYears: 30 },
+    });
+    assert.equal(small.hasClimateComparison, false);
+    assert.equal(small.climateMessage, "");
+
+    const negativeSmall = buildHeroData({
+      weather: baseWeather,
+      location: baseLocation,
+      unit: "F",
+      climateComparison: { difference: -3, sampleYears: 30 },
+    });
+    assert.equal(negativeSmall.hasClimateComparison, false);
   });
 
   test("flags any missing hero stat via heroStatsHaveAnyMissing", () => {

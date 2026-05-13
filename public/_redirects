@@ -1,0 +1,5 @@
+# Single-page-app fallback: serve the built shell for any path so deep
+# links (and the PWA scope at "/") resolve to the app instead of a
+# host 404. App state lives in query params, not path segments, so the
+# rewritten path is simply ignored by the client.
+/*  /index.html  200

@@ -9,7 +9,7 @@ import {
   MISSING_VALUE_PLACEHOLDER,
   toFiniteNumber as toStrictFiniteNumber,
 } from "../utils/numbers";
-import { CardHeader, DataTrustMeta } from "./ui";
+import { CardHeader } from "./ui";
 import WeatherIcon from "./WeatherIcon";
 import "./ForecastCard.css";
 
@@ -372,9 +372,12 @@ function DayRow({
   );
 }
 
+const FORECAST_EMPTY_MESSAGE =
+  "The 7-day outlook isn't available right now. Current conditions are still live above.";
+
 function buildWeekSummary(days, weekMin, weekMax, unit) {
   if (!Array.isArray(days) || days.length === 0) {
-    return "7-day forecast is temporarily unavailable.";
+    return FORECAST_EMPTY_MESSAGE;
   }
 
   const firstMax = days[0]?.temperatureMax;
@@ -406,8 +409,6 @@ function ForecastCard({
   unit,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const [expandedDate, setExpandedDate] = useState(null);
   const days = useMemo(
@@ -456,16 +457,17 @@ function ForecastCard({
           icon={<CalendarDays size={16} />}
           leftClassName="forecast-heading"
           subtitle="Upcoming week"
-          subtitleClassName="forecast-subtitle"
+          subtitleClassName="forecast-subtitle eyebrow-pill"
         />
-        <DataTrustMeta
-          sourceLabel="Open-Meteo Daily"
-          lastUpdatedAt={lastUpdatedAt}
-          nowMs={nowMs}
-        />
-        <p className="loader-text" role="status" aria-live="polite">
-          7-day forecast is temporarily unavailable.
-        </p>
+        <div className="card-empty" role="status">
+          <div className="card-empty__icon">
+            <CalendarDays size={36} aria-hidden="true" />
+          </div>
+          <p className="card-empty__title">7-day outlook unavailable</p>
+          <p className="card-empty__copy">
+            Current conditions are still live above.
+          </p>
+        </div>
       </section>
     );
   }
@@ -489,12 +491,6 @@ function ForecastCard({
         subtitle="Upcoming week"
         subtitleClassName="forecast-subtitle"
       />
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Daily"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-
       <ul className="forecast-list" role="list">
         {days.map((day) => (
           <MemoizedDayRow
@@ -541,7 +537,5 @@ export default memo(
     prevProps.weather?.daily === nextProps.weather?.daily &&
     prevProps.unit === nextProps.unit &&
     prevProps.style === nextProps.style &&
-    prevProps.isRefreshing === nextProps.isRefreshing &&
-    prevProps.lastUpdatedAt === nextProps.lastUpdatedAt &&
-    prevProps.nowMs === nextProps.nowMs
+    prevProps.isRefreshing === nextProps.isRefreshing
 );

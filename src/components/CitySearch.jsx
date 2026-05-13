@@ -130,6 +130,7 @@ function CitySearch({ onSelect, savedCities, recentCities }, ref) {
     handleChange,
     handleSelect,
     handleKeyDown,
+    handleBlur,
     handleClear,
   } = useCitySearch({ onSelect, idleResults: idleSuggestions });
 
@@ -217,6 +218,7 @@ function CitySearch({ onSelect, savedCities, recentCities }, ref) {
           value={query}
           onChange={handleChange}
           onFocus={handleInputFocus}
+          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           placeholder="Search city or region..."
           className="city-search-input"
@@ -231,6 +233,10 @@ function CitySearch({ onSelect, savedCities, recentCities }, ref) {
           role="combobox"
           aria-activedescendant={activeDescendant}
           autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="words"
+          spellCheck="false"
+          inputMode="search"
           enterKeyHint="search"
         />
         {!query && (

@@ -68,6 +68,17 @@ function readCachePayload() {
   }
 }
 
+function isQuotaExceededError(error) {
+  if (!error) {
+    return false;
+  }
+  if (error.name === "QuotaExceededError") {
+    return true;
+  }
+  // Firefox legacy code; some browsers set only the numeric code.
+  return error.code === 22 || error.code === 1014;
+}
+
 function writeCachePayload(payload) {
   const storage = getStorage();
   if (!storage) {
@@ -76,8 +87,35 @@ function writeCachePayload(payload) {
 
   try {
     storage.setItem(CACHE_KEY, JSON.stringify(payload));
+    return;
+  } catch (error) {
+    if (!isQuotaExceededError(error)) {
+      // Storage can fail in private browsing or locked-down embeds for
+      // reasons other than quota; nothing we can do, drop silently.
+      return;
+    }
+  }
+
+  // Quota pressure: drop the oldest snapshot (the existing eviction
+  // sort already keeps newest-first, so the tail entry is the one to
+  // evict) and try once more. If that still fails, give up rather
+  // than loop — repeated quota errors mean a foreign actor is
+  // saturating localStorage and we should yield gracefully.
+  const entries = Object.entries(payload?.snapshots ?? {});
+  if (entries.length <= 1) {
+    return;
+  }
+
+  const trimmed = {
+    ...payload,
+    snapshots: Object.fromEntries(entries.slice(0, -1)),
+  };
+
+  try {
+    storage.setItem(CACHE_KEY, JSON.stringify(trimmed));
   } catch {
-    // Storage can fail in private browsing, quota pressure, or locked-down embeds.
+    // Best-effort. A second failure means the cache is unrecoverable
+    // for now; the next write attempt will retry.
   }
 }
 

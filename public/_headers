@@ -1,0 +1,30 @@
+# Netlify (and most static hosts) edge headers.
+#
+# Security headers kept to the non-breaking set on purpose. A real
+# Content-Security-Policy is worth adding, but it needs browser
+# validation first: index.html uses an inline `onload` attribute on
+# the deferred-font <link>, and the app talks to several third-party
+# origins — connect-src would need the open-meteo.com family,
+# api.weather.gov, api.bigdatacloud.net (reverse geocoding), plus
+# Google Fonts for style/font-src. A too-strict policy would silently
+# break those. That's a follow-up, not a blind change.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=()
+  X-DNS-Prefetch-Control: on
+
+# Vite emits content-hashed asset filenames, so they can be cached
+# aggressively and immutably.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The service worker and the app manifest must stay revalidated so a
+# new deploy is picked up promptly instead of being pinned by a stale
+# cache entry.
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate
