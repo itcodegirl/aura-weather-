@@ -4,7 +4,9 @@ import { toFiniteNumber } from "../../utils/numbers";
 function SavedCitiesStrip({
   savedCities,
   location,
+  startupLocation,
   loadSavedCity,
+  setStartupCity,
   forgetSavedCity,
 }) {
   const safeSavedCities = Array.isArray(savedCities) ? savedCities : [];
@@ -28,6 +30,16 @@ function SavedCitiesStrip({
     [forgetSavedCity]
   );
 
+  const handleSetStartupCity = useCallback(
+    (event, city) => {
+      event.stopPropagation();
+      if (typeof setStartupCity === "function") {
+        setStartupCity(city);
+      }
+    },
+    [setStartupCity]
+  );
+
   if (safeSavedCities.length === 0) {
     return null;
   }
@@ -41,6 +53,8 @@ function SavedCitiesStrip({
         // saved city with null lat/lon.
         const activeLat = toFiniteNumber(location?.lat);
         const activeLon = toFiniteNumber(location?.lon);
+        const startupLat = toFiniteNumber(startupLocation?.lat);
+        const startupLon = toFiniteNumber(startupLocation?.lon);
         const cityLat = toFiniteNumber(city.lat);
         const cityLon = toFiniteNumber(city.lon);
         const isActive =
@@ -48,21 +62,39 @@ function SavedCitiesStrip({
           activeLon !== null &&
           activeLat === cityLat &&
           activeLon === cityLon;
+        const isStartup =
+          startupLat !== null &&
+          startupLon !== null &&
+          startupLat === cityLat &&
+          startupLon === cityLon;
 
         return (
           <div
             key={key}
-            className={`saved-city-chip-wrap ${isActive ? "is-active" : ""}`}
+            className={`saved-city-chip-wrap ${isActive ? "is-active" : ""} ${isStartup ? "is-startup" : ""}`.trim()}
             role="listitem"
           >
             <button
               type="button"
-              className={`saved-city-chip ${isActive ? "is-active" : ""}`}
+              className={`saved-city-chip ${isActive ? "is-active" : ""} ${isStartup ? "is-startup" : ""}`.trim()}
               onClick={() => handleLoadSavedCity(city)}
               aria-pressed={isActive}
             >
               {city.name}
             </button>
+            {isStartup ? (
+              <span className="saved-city-startup-badge">Startup</span>
+            ) : (
+              <button
+                type="button"
+                className="saved-city-startup"
+                onClick={(event) => handleSetStartupCity(event, city)}
+                aria-label={`Make ${city.name} your startup city`}
+                title={`Make ${city.name} your startup city`}
+              >
+                Start
+              </button>
+            )}
             <button
               type="button"
               className="saved-city-remove"

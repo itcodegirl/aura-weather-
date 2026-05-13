@@ -14,6 +14,7 @@ function HeaderControls({
   recentCities,
   location,
   loadSavedCity,
+  setStartupCity,
   forgetSavedCity,
   syncConnected,
   syncAccount,
@@ -29,6 +30,7 @@ function HeaderControls({
   unit,
   setUnit,
   hasPersistedLocation,
+  startupLocation,
 }) {
   const safeSavedCities = Array.isArray(savedCities) ? savedCities : [];
   const syncNeedsAttention =
@@ -61,6 +63,15 @@ function HeaderControls({
       clearSavedLocation();
     }
   }, [clearSavedLocation]);
+
+  const handleSetStartupCity = useCallback(
+    (city) => {
+      if (typeof setStartupCity === "function") {
+        setStartupCity(city);
+      }
+    },
+    [setStartupCity]
+  );
 
   const handleSetClimateContext = useCallback(
     (nextValue) => {
@@ -151,7 +162,9 @@ function HeaderControls({
         <SavedCitiesStrip
           savedCities={safeSavedCities}
           location={location}
+          startupLocation={startupLocation}
           loadSavedCity={loadSavedCity}
+          setStartupCity={handleSetStartupCity}
           forgetSavedCity={forgetSavedCity}
         />
         {shouldShowSyncPanel ? (

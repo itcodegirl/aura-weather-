@@ -37,6 +37,7 @@ function getInitialLocationState() {
   if (persistedLocation) {
     return {
       location: persistedLocation,
+      startupLocation: persistedLocation,
       notice: SAVED_LOCATION_NOTICE,
       hasPersistedLocation: true,
     };
@@ -44,6 +45,7 @@ function getInitialLocationState() {
 
   return {
     location: DEFAULT_LOCATION,
+    startupLocation: null,
     notice: LOCATION_FALLBACK_NOTICE,
     hasPersistedLocation: false,
   };
@@ -53,6 +55,9 @@ export function useWeather(options = {}) {
   const { climateEnabled = true, weatherEnabled = true } = options;
   const [initialLocationState] = useState(() => getInitialLocationState());
   const [location, setLocation] = useState(initialLocationState.location);
+  const [startupLocation, setStartupLocation] = useState(
+    initialLocationState.startupLocation
+  );
   const [locationNotice, setLocationNotice] = useState(initialLocationState.notice);
   const [hasPersistedLocation, setHasPersistedLocation] = useState(
     initialLocationState.hasPersistedLocation
@@ -77,6 +82,7 @@ export function useWeather(options = {}) {
       nextLocation.name,
       nextLocation.country
     );
+    setStartupLocation(nextLocation);
     setHasPersistedLocation(true);
   }, []);
 
@@ -179,12 +185,10 @@ export function useWeather(options = {}) {
     enabled: weatherEnabled,
   });
 
-  // Shared entrypoint used by both the search bar (loadWeather, called
-  // with positional args) and the saved-cities strip (loadSavedCity,
-  // called with a city object). Both flows resolve to the same
-  // applyLocation invocation; keeping a single body makes it impossible
-  // for the two to drift.
-  const applyResolvedLocation = useCallback(
+  // Shared entrypoint used by the search bar (loadWeather, called with
+  // positional args). Search/manual picks remain intentional enough to
+  // refresh the startup city preference automatically.
+  const applyResolvedSearchLocation = useCallback(
     (lat, lon, name, country) => {
       const nextLocation = toLocationPayload(lat, lon, name, country);
       if (!nextLocation) {
@@ -201,15 +205,53 @@ export function useWeather(options = {}) {
   );
 
   const loadWeather = useCallback(
-    (lat, lon, name, country) => applyResolvedLocation(lat, lon, name, country),
-    [applyResolvedLocation]
+    (lat, lon, name, country) =>
+      applyResolvedSearchLocation(lat, lon, name, country),
+    [applyResolvedSearchLocation]
   );
 
   const loadSavedCity = useCallback(
-    (city) =>
-      applyResolvedLocation(city?.lat, city?.lon, city?.name, city?.country),
-    [applyResolvedLocation]
+    (city) => {
+      const nextLocation = toLocationPayload(
+        city?.lat,
+        city?.lon,
+        city?.name,
+        city?.country
+      );
+      if (!nextLocation) {
+        return;
+      }
+
+      cancelCurrentLocationLookup();
+      applyLocation(nextLocation, null, {
+        saveCity: true,
+        persistLocation: false,
+        saveRecent: true,
+      });
+    },
+    [applyLocation, cancelCurrentLocationLookup]
   );
+
+  const setStartupCity = useCallback((city) => {
+    const nextLocation = toLocationPayload(
+      city?.lat,
+      city?.lon,
+      city?.name,
+      city?.country
+    );
+    if (!nextLocation) {
+      return;
+    }
+
+    persistLocationPayload(nextLocation);
+    const isCurrentCity =
+      hasMatchingCoordinates(locationRef.current, nextLocation);
+    const startupNotice = isCurrentCity
+      ? `${nextLocation.name} is now your startup city.`
+      : `${nextLocation.name} will open when Aura starts.`;
+    setLocationNotice(startupNotice);
+    locationNoticeRef.current = startupNotice;
+  }, [persistLocationPayload]);
 
   const forgetSavedCity = useCallback((city) => {
     const updatedSavedCities = removeSavedCity(city?.lat, city?.lon);
@@ -221,6 +263,7 @@ export function useWeather(options = {}) {
     }
 
     clearPersistedLocation();
+    setStartupLocation(null);
     setHasPersistedLocation(false);
     const removedSavedLocationNotice =
       "Saved startup location removed. Aura will open to Chicago next time.";
@@ -239,6 +282,7 @@ export function useWeather(options = {}) {
 
   const clearSavedLocation = useCallback(() => {
     clearPersistedLocation();
+    setStartupLocation(null);
     setHasPersistedLocation(false);
     setLocationNotice("Saved location removed for future sessions.");
     locationNoticeRef.current = "Saved location removed for future sessions.";
@@ -259,10 +303,12 @@ export function useWeather(options = {}) {
     isLocatingCurrent,
     isGeolocationSupported,
     hasPersistedLocation,
+    startupLocation,
     clearSavedLocation,
     savedCities,
     recentCities,
     loadSavedCity,
+    setStartupCity,
     forgetSavedCity,
     syncConnected,
     syncAccount,

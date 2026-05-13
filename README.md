@@ -20,7 +20,7 @@ The portfolio story is simple: **Aura never turns missing provider data into fak
 - Compare today's temperature against historical Open-Meteo archive context when available.
 - See NOAA/NWS severe-alert coverage with explicit unsupported-region messaging.
 - Restore a last-known forecast on offline starts without pretending stale data is fresh.
-- Save cities, persist a startup location, and optionally sync saved locations.
+- Save cities, switch between them quickly, set any saved city as startup, and optionally sync saved locations.
 - Toggle Fahrenheit/Celsius locally without refetching forecast data.
 - Install the app shell as a PWA after a first successful production visit.
 
@@ -143,7 +143,7 @@ If `VITE_AURA_SYNC_API_BASE` is not set, sync still works when the stored accoun
 
 ## Future Improvements
 
-- Add richer favorite controls such as pinning or reordering saved cities.
+- Add richer saved-city controls such as drag reordering once usage patterns justify the extra UI weight.
 - Tune production performance against live provider latency, not only the deterministic demo route.
 - Expand the case study with side-by-side mobile/desktop annotations of the trust-contract state.
 
@@ -209,6 +209,7 @@ npm run test:lighthouse
 - The hero summarizes daily decisions from real forecast data: rain gear, UV exposure, and wind comfort. Missing source data is labelled unavailable, not guessed.
 - Mobile rain and hourly cards expose touch-friendly sample controls so users can inspect dense timelines without relying on hover.
 - Saved cities appear as search suggestions on focus, so repeat switching does not require typing.
+- Switching to a saved city does not silently rewrite the startup preference; startup remains an explicit choice.
 - Search shows a loading state before empty results, so users do not get a premature "No matching cities" response.
 - Startup-city controls stay hidden until a startup preference actually exists.
 - Cloud sync stays out of the header until a saved city exists, while existing connected/error states still remain recoverable.

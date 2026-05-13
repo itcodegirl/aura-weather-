@@ -11,6 +11,7 @@ function AppHeader({
   recentCities,
   location,
   loadSavedCity,
+  setStartupCity,
   forgetSavedCity,
   syncConnected,
   syncAccount,
@@ -26,6 +27,7 @@ function AppHeader({
   unit,
   setUnit,
   hasPersistedLocation,
+  startupLocation,
 }) {
   return (
     <header className="app-header glass">
@@ -50,6 +52,7 @@ function AppHeader({
         recentCities={recentCities}
         location={location}
         loadSavedCity={loadSavedCity}
+        setStartupCity={setStartupCity}
         forgetSavedCity={forgetSavedCity}
         syncConnected={syncConnected}
         syncAccount={syncAccount}
@@ -65,6 +68,7 @@ function AppHeader({
         unit={unit}
         setUnit={setUnit}
         hasPersistedLocation={hasPersistedLocation}
+        startupLocation={startupLocation}
       />
     </header>
   );
