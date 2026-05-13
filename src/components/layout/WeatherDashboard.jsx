@@ -1,15 +1,18 @@
-import { lazy, memo, Suspense } from "react";
+import { lazy, memo, Suspense, useCallback, useState } from "react";
 import HeroCard from "../HeroCard";
 import RainCard from "../RainCard";
 import ExposureSection from "../ExposureSection";
-import SourceHealthPanel from "../SourceHealthPanel";
+import PanelErrorBoundary from "../PanelErrorBoundary";
 import { CardFallback } from "../ui";
 import { useDeferredMount } from "../../hooks/useDeferredMount";
 import { usePanelPreload } from "../../hooks/useAppShellEffects";
-import { useTimeNow } from "../../hooks/useTimeNow";
 import { PRELOAD_HEAVY_PANELS } from "../lazyPanels";
 import "./WeatherDashboard.css";
 const SupplementalWeatherPanels = lazy(() => import("./SupplementalWeatherPanels"));
+// Data-status is a diagnostic surface most users never open. Defer
+// the JS + CSS into its own chunk so the bento's first paint does
+// not pay for a panel collapsed behind <details> by default.
+const SourceHealthPanel = lazy(() => import("../SourceHealthPanel"));
 
 const CARD_STYLE_VARIABLES = [
   { "--i": 0 },
@@ -36,7 +39,6 @@ const GROUP_LABEL_IDS = {
   nearTermOutlook: "group-near-term-outlook",
   riskSignals: "group-risk-signals",
   weekAhead: "group-week-ahead",
-  dataSources: "group-data-sources",
 };
 
 function WeatherDashboard({
@@ -45,24 +47,43 @@ function WeatherDashboard({
   unit,
   weatherDataUnit,
   climateComparison,
-  showClimateContext,
   isBackgroundLoading,
   weatherInfo,
   trustMeta,
   prefersReducedData = false,
 }) {
-  const nowMs = useTimeNow();
   const showSupplementalPanels = useDeferredMount(Boolean(weather));
+  // Once a user opens data-status we keep the panel mounted so the
+  // toggle no longer pays for a network round-trip; the chunk is
+  // cached after first reveal.
+  const [hasOpenedSourceHealth, setHasOpenedSourceHealth] = useState(false);
+  const handleSourceHealthToggle = useCallback((event) => {
+    if (event.currentTarget?.open) {
+      setHasOpenedSourceHealth(true);
+    }
+  }, []);
 
   usePanelPreload(PRELOAD_HEAVY_PANELS, {
     enabled: !prefersReducedData,
   });
 
-  const weatherFetchedAt = trustMeta?.weatherFetchedAt ?? null;
-  const aqiFetchedAt = trustMeta?.aqiFetchedAt ?? null;
   const aqiStatus = trustMeta?.aqiStatus ?? "idle";
-  const climateFetchedAt = trustMeta?.climateFetchedAt ?? null;
   const climateStatus = trustMeta?.climateStatus ?? "idle";
+
+  // Append the active location to the first heading for assistive
+  // tech only. Sighted users read "Current Conditions" as a visual
+  // eyebrow; screen-reader users hear "Current Conditions in Tokyo,
+  // Japan" so the heading list actually tells them where the weather
+  // is for instead of four generic group labels in a row.
+  const dashboardLocationName =
+    typeof location?.name === "string" ? location.name.trim() : "";
+  const dashboardLocationCountry =
+    typeof location?.country === "string" ? location.country.trim() : "";
+  const accessibleLocationSuffix = dashboardLocationName
+    ? ` in ${dashboardLocationName}${
+        dashboardLocationCountry ? `, ${dashboardLocationCountry}` : ""
+      }`
+    : "";
 
   return (
     <main
@@ -77,30 +98,39 @@ function WeatherDashboard({
         style={GROUP_LABEL_STYLE_VARIABLES[0]}
       >
         Current Conditions
+        {accessibleLocationSuffix && (
+          <span className="sr-only">{accessibleLocationSuffix}</span>
+        )}
       </h2>
-      <HeroCard
-        weather={weather}
-        location={location}
-        unit={unit}
-        climateComparison={climateComparison}
-        showClimateContext={showClimateContext}
-        climateStatus={climateStatus}
+      <PanelErrorBoundary
+        label="Current weather"
+        className="bento-hero"
         style={CARD_STYLE_VARIABLES[0]}
-        isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
-        nowMs={nowMs}
-        climateLastUpdatedAt={climateFetchedAt}
-      />
+      >
+        <HeroCard
+          weather={weather}
+          location={location}
+          unit={unit}
+          climateComparison={climateComparison}
+          climateStatus={climateStatus}
+          style={CARD_STYLE_VARIABLES[0]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
 
-      <ExposureSection
-        aqi={weather?.aqi}
-        aqiStatus={aqiStatus}
-        uvIndex={weather?.daily?.uvIndexMax?.[0]}
+      <PanelErrorBoundary
+        label="Environmental exposure"
+        className="bento-exposure"
         style={CARD_STYLE_VARIABLES[1]}
-        isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={aqiFetchedAt ?? weatherFetchedAt}
-        nowMs={nowMs}
-      />
+      >
+        <ExposureSection
+          aqi={weather?.aqi}
+          aqiStatus={aqiStatus}
+          uvIndex={weather?.daily?.uvIndexMax?.[0]}
+          style={CARD_STYLE_VARIABLES[1]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
 
       <h2
         id={GROUP_LABEL_IDS.nearTermOutlook}
@@ -109,15 +139,19 @@ function WeatherDashboard({
       >
         Near-Term Outlook
       </h2>
-      <RainCard
-        weather={weather}
-        unit={unit}
-        dataUnit={weatherDataUnit}
+      <PanelErrorBoundary
+        label="Rain outlook"
+        className="bento-rain"
         style={CARD_STYLE_VARIABLES[2]}
-        isRefreshing={isBackgroundLoading}
-        lastUpdatedAt={weatherFetchedAt}
-        nowMs={nowMs}
-      />
+      >
+        <RainCard
+          weather={weather}
+          unit={unit}
+          dataUnit={weatherDataUnit}
+          style={CARD_STYLE_VARIABLES[2]}
+          isRefreshing={isBackgroundLoading}
+        />
+      </PanelErrorBoundary>
       {showSupplementalPanels ? (
         <Suspense
           fallback={(
@@ -137,7 +171,6 @@ function WeatherDashboard({
             cardStyleVariables={CARD_STYLE_VARIABLES}
             groupLabelStyleVariables={GROUP_LABEL_STYLE_VARIABLES}
             groupLabelIds={GROUP_LABEL_IDS}
-            nowMs={nowMs}
             isBackgroundLoading={isBackgroundLoading}
           />
         </Suspense>
@@ -149,19 +182,35 @@ function WeatherDashboard({
           isRefreshing={isBackgroundLoading}
         />
       )}
-      <h2
-        id={GROUP_LABEL_IDS.dataSources}
-        className="bento-group-label"
-        style={GROUP_LABEL_STYLE_VARIABLES[4]}
+      <details
+        className="data-status-disclosure"
+        onToggle={handleSourceHealthToggle}
       >
-        Data Sources
-      </h2>
-      <SourceHealthPanel
-        trustMeta={trustMeta}
-        nowMs={nowMs}
-        style={CARD_STYLE_VARIABLES[8]}
-        isRefreshing={isBackgroundLoading}
-      />
+        <summary className="data-status-summary">
+          <span className="data-status-summary-label">Where this data comes from</span>
+          <span className="data-status-summary-hint">
+            Forecast, air quality, alerts, historical comparison
+          </span>
+        </summary>
+        {hasOpenedSourceHealth ? (
+          <Suspense
+            fallback={(
+              <CardFallback
+                className="bento-source-health"
+                style={CARD_STYLE_VARIABLES[8]}
+                title="Loading data status..."
+                isRefreshing={isBackgroundLoading}
+              />
+            )}
+          >
+            <SourceHealthPanel
+              trustMeta={trustMeta}
+              style={CARD_STYLE_VARIABLES[8]}
+              isRefreshing={isBackgroundLoading}
+            />
+          </Suspense>
+        ) : null}
+      </details>
     </main>
   );
 }
@@ -173,7 +222,6 @@ function areWeatherDashboardPropsEqual(prevProps, nextProps) {
     prevProps.unit === nextProps.unit &&
     prevProps.weatherDataUnit === nextProps.weatherDataUnit &&
     prevProps.climateComparison === nextProps.climateComparison &&
-    prevProps.showClimateContext === nextProps.showClimateContext &&
     prevProps.isBackgroundLoading === nextProps.isBackgroundLoading &&
     prevProps.weatherInfo === nextProps.weatherInfo &&
     prevProps.trustMeta === nextProps.trustMeta &&

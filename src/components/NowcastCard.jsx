@@ -2,15 +2,13 @@ import { memo, useMemo } from "react";
 import { CloudRain } from "lucide-react";
 import { toFiniteNumber as toStrictFiniteNumber } from "../utils/numbers";
 import { analyzeNowcast } from "./nowcast/analyzeNowcast.js";
-import { DataTrustMeta, InfoDrawer } from "./ui";
+import { InfoDrawer } from "./ui";
 import "./NowcastCard.css";
 
 function NowcastCard({
   weather,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const nowcast = useMemo(() => analyzeNowcast(weather?.nowcast), [weather?.nowcast]);
   const {
@@ -33,8 +31,15 @@ function NowcastCard({
         : peakProbability >= 40
           ? "moderate"
           : "low";
+    /*
+     * Risk-label voice ladder: stays in user vocabulary on every
+     * branch. The previous "Nowcast offline" string treated the panel
+     * as a system that could be online/offline — engineering talk.
+     * "Reading unavailable" matches the trust contract used elsewhere
+     * (HeroCard placeholder, AlertsCard unavailable state).
+     */
     const riskLabel = !nowcast.hasData
-      ? "Nowcast offline"
+      ? "Reading unavailable"
       : !nowcast.hasRain
       ? "Dry window"
       : peakProbability === null
@@ -93,17 +98,11 @@ function NowcastCard({
           <p className="nowcast-explainer">
             15-minute rain guidance over the next 2 hours.
           </p>
-          <span className={`nowcast-risk-badge nowcast-risk-badge--${nowcastRiskTone}`}>
+          <span className={`severity-badge severity-badge--${nowcastRiskTone}`}>
             {nowcastRiskLabel}
           </span>
         </div>
       </header>
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Minutely"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
-      />
-
       <div className="nowcast-primary">
         <p className="nowcast-summary">{nowcast.summary}</p>
         <p className="nowcast-details">{nowcast.details}</p>
@@ -123,10 +122,13 @@ function NowcastCard({
           <span className="nowcast-chip-value">{peakValue}</span>
         </li>
       </ul>
-
-      <p className="nowcast-meta">
-        {nowcast.hasData ? "Short-range precipitation guidance" : "Nowcast offline"}
-      </p>
+      {/*
+       * The trailing meta line ("Short-range precipitation guidance" /
+       * "Nowcast offline") used to render here. Both copies were
+       * redundant with content the user already saw: the explainer at
+       * the top says "15-minute rain guidance over the next 2 hours."
+       * and the badge already announces the unavailable state. Removed.
+       */}
     </section>
   );
 }

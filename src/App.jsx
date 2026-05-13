@@ -1,9 +1,12 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import "./App.css";
 import { LOCATION_FALLBACK_NOTICE } from "./hooks/useLocation";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
 import { usePwaInstallPrompt } from "./hooks/usePwaInstallPrompt";
 import { useServiceWorkerUpdate } from "./hooks/useServiceWorkerUpdate";
+import { useDocumentTitle } from "./hooks/useDocumentTitle";
+import { useThemeColor } from "./hooks/useThemeColor";
+import { useUrlLocationSync } from "./hooks/useUrlLocationSync";
 import { useWeatherDashboardViewModel } from "./hooks/useWeatherDashboardViewModel";
 import {
   AppShell,
@@ -13,6 +16,7 @@ import {
   StatusStack,
   WeatherDashboard,
 } from "./components/layout";
+import { GlobalUpdateIndicator } from "./components/ui";
 
 const LOCATION_ONBOARDING_KEY = "aura-weather-location-onboarding-v1";
 
@@ -51,6 +55,7 @@ function App() {
     recentCities,
     loadSavedCity,
     setStartupCity,
+    restoreSavedCity,
     forgetSavedCity,
     syncConnected,
     syncAccount,
@@ -91,6 +96,9 @@ function App() {
   const isFallbackLocation = locationNotice === LOCATION_FALLBACK_NOTICE;
   const shouldShowPermissionOnboarding = isFallbackLocation && showPermissionOnboarding;
   const showLocationSetupPrompt = isFallbackLocation && !shouldShowPermissionOnboarding;
+  useThemeColor(weatherInfo?.gradient);
+  useUrlLocationSync(location);
+  useDocumentTitle(location);
 
   useEffect(() => {
     if (!isFallbackLocation && showPermissionOnboarding) {
@@ -105,6 +113,20 @@ function App() {
     setShowPermissionOnboarding(false);
   }, [setShowPermissionOnboarding]);
 
+  // When recovering from a global loader or error screen, focus the
+  // main content so screen-reader users land in the weather dashboard
+  // instead of being silently dropped on document.body. We only fire on
+  // the transition out of those states, not on every dashboard render.
+  const wasInterruptedRef = useRef(showGlobalLoading || showGlobalError);
+  useEffect(() => {
+    const isInterrupted = showGlobalLoading || showGlobalError;
+    if (wasInterruptedRef.current && !isInterrupted) {
+      const main = document.getElementById("main-content");
+      main?.focus?.({ preventScroll: true });
+    }
+    wasInterruptedRef.current = isInterrupted;
+  }, [showGlobalLoading, showGlobalError]);
+
   if (showGlobalLoading) {
     return <AppLoadingState />;
   }
@@ -114,7 +136,11 @@ function App() {
   }
 
   return (
-    <AppShell background={background}>
+    <AppShell
+      background={background}
+      conditionCode={weather?.current?.conditionCode}
+      prefersReducedData={prefersReducedData}
+    >
       <AppHeader
         citySearchRef={citySearchRef}
         loadWeather={loadWeather}
@@ -125,6 +151,7 @@ function App() {
         location={location}
         loadSavedCity={loadSavedCity}
         setStartupCity={setStartupCity}
+        restoreSavedCity={restoreSavedCity}
         forgetSavedCity={forgetSavedCity}
         syncConnected={syncConnected}
         syncAccount={syncAccount}
@@ -171,13 +198,18 @@ function App() {
         className="status-stack--runtime"
       />
 
+      <GlobalUpdateIndicator
+        trustMeta={trustMeta}
+        onRefresh={retryWeather}
+        isRefreshing={isBackgroundLoading}
+      />
+
       <WeatherDashboard
         weather={weather}
         location={location}
         unit={unit}
         weatherDataUnit={weatherDataUnit}
         climateComparison={climateComparison}
-        showClimateContext={showClimateContext}
         isBackgroundLoading={isBackgroundLoading}
         weatherInfo={weatherInfo}
         trustMeta={trustMeta}

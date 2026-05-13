@@ -7,14 +7,14 @@ import { useRainAnalysis } from "../hooks/useRainAnalysis";
 import { formatPrecipitation, getPrecipUnitLabel } from "../utils/weatherUnits";
 import { formatHour } from "../utils/dates";
 import { toFiniteNumber } from "../utils/numbers";
-import { CardHeader, DataTrustMeta } from "./ui";
+import { CardHeader } from "./ui";
 import "./RainCard.css";
 
 const MISSING_PLACEHOLDER = "\u2014";
 
 function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
   if (!Array.isArray(hours) || hours.length === 0) {
-    return "Hourly precipitation timeline is temporarily unavailable.";
+    return "Hourly precipitation isn't available right now. Other forecast panels are still live.";
   }
 
   const peakTime = peak?.time instanceof Date ? formatHour(peak.time) : "later";
@@ -31,7 +31,7 @@ function getRainTimelineSummary(hours, nextRain, peak, total, unit, dataUnit) {
       : "";
 
   if (parsedPeakProbability === null && projectedTotal === MISSING_PLACEHOLDER) {
-    return `Hourly precipitation guidance is temporarily unavailable.${missingNote}`;
+    return `Not enough precipitation samples to summarise the next 24 hours.${missingNote}`;
   }
 
   if (nextRain?.time instanceof Date) {
@@ -47,8 +47,6 @@ function RainCard({
   dataUnit = unit,
   style,
   isRefreshing = false,
-  lastUpdatedAt,
-  nowMs,
 }) {
   const timelineId = useId();
   const timelineSummaryId = `${timelineId}-summary`;
@@ -171,7 +169,7 @@ function RainCard({
     });
     const accessibleText = bars.length
       ? bars.map((bar) => bar.tooltip).join(". ")
-      : "Hourly precipitation timeline is temporarily unavailable.";
+      : "Hourly precipitation isn't available right now. Other forecast panels are still live.";
 
     return {
       isDry:
@@ -231,15 +229,10 @@ function RainCard({
         icon={<CloudRain size={16} />}
         leftClassName="rain-title-wrap"
         subtitle={
-          <span className={`rain-risk-badge rain-risk-badge--${rainRiskTone}`}>
+          <span className={`severity-badge severity-badge--${rainRiskTone}`}>
             {rainRiskLabel}
           </span>
         }
-      />
-      <DataTrustMeta
-        sourceLabel="Open-Meteo Forecast"
-        lastUpdatedAt={lastUpdatedAt}
-        nowMs={nowMs}
       />
       <div className="rain-mode-toggle" role="group" aria-label="Chart mode">
           <button
@@ -261,25 +254,25 @@ function RainCard({
         </div>
 
       {!hasData ? (
-        <div className="rain-empty rain-empty--missing" role="status">
-          <div className="rain-empty-icon">
-            <CloudRain size={44} aria-hidden="true" />
+        <div className="card-empty" role="status">
+          <div className="card-empty__icon">
+            <CloudRain size={36} aria-hidden="true" />
           </div>
-          <div className="rain-empty-title">Rain guidance unavailable</div>
-          <div className="rain-empty-sub">
-            Open-Meteo did not return usable precipitation readings.
-          </div>
+          <p className="card-empty__title">Rain guidance unavailable</p>
+          <p className="card-empty__copy">
+            Precipitation readings are unavailable right now.
+          </p>
         </div>
       ) : isDry ? (
-        <div className="rain-empty">
-          <div className="rain-empty-icon">
-            <WeatherIcon code={0} size={44} />
+        <div className="card-empty">
+          <div className="card-empty__icon">
+            <WeatherIcon code={0} size={36} />
           </div>
-        <div className="rain-empty-title">No meaningful rain expected</div>
-        <div className="rain-empty-sub">
+          <p className="card-empty__title">No meaningful rain expected</p>
+          <p className="card-empty__copy">
             Highest chance is {peakProbability}% around {peakTimeLabel}
+          </p>
         </div>
-      </div>
       ) : (
         <div className="rain-details">
           <div className="rain-primary">
@@ -386,27 +379,40 @@ function RainCard({
 
         {timelineBars.length ? (
           <div className="rain-touch-explorer" aria-label="Rain samples">
+            {/*
+             * Same announcement-quality fix as the HourlyCard touch
+             * explorer: drop aria-live from this paragraph (the button
+             * activation already announces the change via its own
+             * aria-label + aria-current toggle), and use aria-current
+             * rather than aria-pressed since the user is showing a
+             * sample, not toggling a state on. aria-current only fires
+             * after the user has actually tapped a sample.
+             */}
             {selectedSample ? (
-              <p className="rain-selected-sample" aria-live="polite">
+              <p className="rain-selected-sample">
                 <span>{selectedSample.timeLabel}</span>
                 <strong>{selectedSample.valueLabel}</strong>
                 <span>{mode === "chance" ? "Rain confidence" : "Rain amount"}</span>
               </p>
             ) : null}
             <div className="rain-touch-strip" role="list" aria-label="Hourly rain samples">
-              {timelineBars.map((bar) => (
-                <button
-                  key={`sample-${bar.key}`}
-                  type="button"
-                  className={`rain-touch-sample ${selectedSample?.key === bar.key ? "is-selected" : ""}`.trim()}
-                  aria-pressed={selectedSample?.key === bar.key}
-                  aria-label={`Select ${bar.tooltip}`}
-                  onClick={() => setSelectedSampleKey(bar.key)}
-                >
-                  <span>{bar.timeLabel}</span>
-                  <strong>{bar.valueLabel}</strong>
-                </button>
-              ))}
+              {timelineBars.map((bar) => {
+                const isUserSelection = selectedSampleKey === bar.key;
+                const isShown = selectedSample?.key === bar.key;
+                return (
+                  <button
+                    key={`sample-${bar.key}`}
+                    type="button"
+                    className={`rain-touch-sample ${isShown ? "is-selected" : ""}`.trim()}
+                    aria-current={isUserSelection ? "true" : undefined}
+                    aria-label={`Show ${bar.tooltip}`}
+                    onClick={() => setSelectedSampleKey(bar.key)}
+                  >
+                    <span>{bar.timeLabel}</span>
+                    <strong>{bar.valueLabel}</strong>
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : null}

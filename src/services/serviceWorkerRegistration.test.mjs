@@ -92,6 +92,25 @@ describe("service worker registration", () => {
     );
   });
 
+  test("rejects override values that Number() would silently coerce to 0 or 1", () => {
+    // Number(null) === 0, Number("") === 0, Number(false) === 0, and
+    // Number(true) === 1 would all silently install a fake delay
+    // override (registering with 0ms or 1ms instead of the configured
+    // default). toFiniteNumber rejects nullish, empty-string, and
+    // boolean values explicitly so a stale or accidentally-set
+    // window override key still falls through to the real default.
+    for (const fakeOverride of [null, undefined, "", "  ", true, false, [], {}]) {
+      assert.equal(
+        getServiceWorkerRegistrationDelay({
+          delayMs: 1200,
+          windowRef: { __AURA_SW_REGISTRATION_DELAY_MS__: fakeOverride },
+        }),
+        1200,
+        `expected fallback to default for override value: ${String(fakeOverride)}`
+      );
+    }
+  });
+
   test("registers after load when the document is still loading", async () => {
     const windowRef = createWindowStub();
     const registeredUrls = [];

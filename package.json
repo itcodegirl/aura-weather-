@@ -3,6 +3,29 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "A resilient, accessible React weather dashboard — live forecast, hourly outlook, air quality, severe-weather alerts, and source-aware data-trust cues, with offline restore and a PWA shell.",
+  "keywords": [
+    "weather",
+    "weather-dashboard",
+    "react",
+    "vite",
+    "pwa",
+    "open-meteo",
+    "accessibility",
+    "portfolio"
+  ],
+  "homepage": "https://aura-weather-platform.netlify.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itcodegirl/aura-weather.git"
+  },
+  "bugs": {
+    "url": "https://github.com/itcodegirl/aura-weather/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite --configLoader runner",
     "dev:safe": "vite --configLoader runner --host 127.0.0.1 --port 5173 --strictPort false",

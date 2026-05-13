@@ -25,7 +25,16 @@ function SyncAccountPanel({
       : "";
   const isSyncing = syncState?.status === "syncing";
   const panelId = useId();
-  const [isExpanded, setIsExpanded] = useState(() => Boolean(syncConnected));
+  /*
+   * Cloud Sync stays collapsed by default. The audit flagged the
+   * always-expanded body (when connected) as an outsized header
+   * footprint for a feature most users never touch. The toggle
+   * itself is enough on every page load — the user expands it
+   * intentionally when they need to manage the connection. A
+   * syncing state or live error still force-opens the panel so
+   * the user can act on the situation.
+   */
+  const [isExpanded, setIsExpanded] = useState(false);
   const isPanelVisible = isExpanded || isSyncing || Boolean(syncErrorText);
   const syncSummaryHint = useMemo(() => {
     if (syncConnected) {
@@ -73,6 +82,11 @@ function SyncAccountPanel({
         className={`sync-account-toggle ${isPanelVisible ? "is-expanded" : ""}`.trim()}
         aria-expanded={isPanelVisible}
         aria-controls={panelId}
+        aria-label={
+          isPanelVisible
+            ? "Collapse cloud sync controls"
+            : "Expand cloud sync controls"
+        }
         onClick={() => setIsExpanded((currentValue) => !currentValue)}
       >
         <span className="sync-account-toggle-copy">

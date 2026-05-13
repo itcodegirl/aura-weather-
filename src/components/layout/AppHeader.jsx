@@ -12,6 +12,7 @@ function AppHeader({
   location,
   loadSavedCity,
   setStartupCity,
+  restoreSavedCity,
   forgetSavedCity,
   syncConnected,
   syncAccount,
@@ -53,6 +54,7 @@ function AppHeader({
         location={location}
         loadSavedCity={loadSavedCity}
         setStartupCity={setStartupCity}
+        restoreSavedCity={restoreSavedCity}
         forgetSavedCity={forgetSavedCity}
         syncConnected={syncConnected}
         syncAccount={syncAccount}

@@ -109,4 +109,107 @@ describe("InfoDrawer", () => {
     assert.ok(panel, "aria-controls points at the rendered panel id");
     assert.equal(panel.getAttribute("role"), "note");
   });
+
+  test("Escape closes the open panel and returns focus to the trigger", () => {
+    render(
+      React.createElement(
+        InfoDrawer,
+        { label: "About wind" },
+        "Body."
+      )
+    );
+
+    const trigger = screen.getByRole("button", { name: "About wind" });
+    fireEvent.click(trigger);
+    assert.ok(screen.getByRole("note"), "panel is open after click");
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    assert.equal(
+      screen.queryByRole("note"),
+      null,
+      "panel closes on Escape"
+    );
+    assert.equal(
+      trigger.getAttribute("aria-expanded"),
+      "false",
+      "trigger reflects the closed state"
+    );
+    assert.equal(
+      document.activeElement,
+      trigger,
+      "focus returns to the trigger so keyboard users do not get stranded"
+    );
+  });
+
+  test("Escape is a no-op when the panel is already closed", () => {
+    render(
+      React.createElement(
+        InfoDrawer,
+        { label: "About wind" },
+        "Body."
+      )
+    );
+
+    const trigger = screen.getByRole("button", { name: "About wind" });
+    assert.equal(trigger.getAttribute("aria-expanded"), "false");
+
+    // Should not throw or change focus when the listener is not active.
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    assert.equal(trigger.getAttribute("aria-expanded"), "false");
+    assert.equal(screen.queryByRole("note"), null);
+  });
+
+  test("pointerdown outside the drawer closes the open panel", () => {
+    const outside = document.createElement("button");
+    outside.textContent = "Outside";
+    document.body.appendChild(outside);
+
+    try {
+      render(
+        React.createElement(
+          InfoDrawer,
+          { label: "About wind" },
+          "Body."
+        )
+      );
+
+      const trigger = screen.getByRole("button", { name: "About wind" });
+      fireEvent.click(trigger);
+      assert.ok(screen.getByRole("note"));
+
+      fireEvent.pointerDown(outside);
+
+      assert.equal(
+        screen.queryByRole("note"),
+        null,
+        "click outside closes the panel"
+      );
+      assert.equal(trigger.getAttribute("aria-expanded"), "false");
+    } finally {
+      outside.remove();
+    }
+  });
+
+  test("pointerdown inside the drawer keeps the panel open", () => {
+    render(
+      React.createElement(
+        InfoDrawer,
+        { label: "About wind", title: "What wind speed means" },
+        "Body."
+      )
+    );
+
+    const trigger = screen.getByRole("button", { name: "About wind" });
+    fireEvent.click(trigger);
+    const note = screen.getByRole("note");
+
+    fireEvent.pointerDown(note);
+
+    assert.ok(
+      screen.queryByRole("note"),
+      "panel stays open when the user clicks inside its body (e.g. to select text)"
+    );
+  });
 });

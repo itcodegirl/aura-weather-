@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
@@ -57,10 +57,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
@@ -108,10 +108,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
@@ -133,3 +133,63 @@ jobs:
           path: .lighthouseci/
           if-no-files-found: ignore
           retention-days: 14
+
+  refresh-visual-baselines:
+    # Manual only: trigger from the Actions tab ("Run workflow") after a
+    # UI change has intentionally moved the rendered output and the
+    # committed Playwright screenshots need re-recording. It re-records
+    # the baselines in the same environment `browser-quality` runs in
+    # (Chromium + fonts-liberation) and uploads them as the
+    # `visual-baselines` artifact. Download it, copy the PNGs over
+    # `e2e/visual-regression.spec.js-snapshots/`, and commit on a branch
+    # / PR. Committing by hand keeps a human reviewing the new
+    # screenshots — and means this job needs no write permissions and
+    # no "Actions may create PRs" repo setting.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser and system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Install fonts for visual baselines
+        run: sudo apt-get install -y fonts-liberation
+
+      - name: Re-record visual baselines
+        run: npm run test:visual:update
+
+      - name: Summarise what changed
+        if: always()
+        run: |
+          {
+            echo "### Visual baselines re-recorded"
+            echo ""
+            echo "Download the **\`visual-baselines\`** artifact below, copy its contents over \`e2e/visual-regression.spec.js-snapshots/\`, and commit (review the screenshots first). \`browser-quality\` goes green once those land on the target branch."
+            echo ""
+            echo "Snapshot files touched by this run:"
+            echo '```'
+            git status --porcelain -- e2e/visual-regression.spec.js-snapshots || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload regenerated baselines
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: e2e/visual-regression.spec.js-snapshots/
+          if-no-files-found: error
+          retention-days: 14
+

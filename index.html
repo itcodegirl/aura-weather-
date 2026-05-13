@@ -2,9 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#0b1c3f" />
-    <meta name="color-scheme" content="dark" />
+    <!--
+      Aura is dark-only by design: cards are frosted surfaces engineered
+      to sit on a colourful weather-scene gradient. Half-light support
+      (light body, dark cards) read as a UI bug per the design audit.
+      "dark only" tells the UA to skip light-mode form-widget and scrollbar
+      adaptations rather than mixing the two.
+    -->
+    <meta name="color-scheme" content="dark only" />
     <meta name="application-name" content="Aura Weather" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Aura Weather" />
@@ -34,29 +44,41 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.open-meteo.com" crossorigin />
+    <link rel="preconnect" href="https://geocoding-api.open-meteo.com" crossorigin />
+    <link rel="dns-prefetch" href="https://archive-api.open-meteo.com" />
+    <link rel="dns-prefetch" href="https://air-quality-api.open-meteo.com" />
+    <link rel="dns-prefetch" href="https://api.weather.gov" />
+    <link rel="dns-prefetch" href="https://api.bigdatacloud.net" />
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
       />
     </noscript>
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="/og-image.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:34rem;margin:18vh auto 0;padding:24px;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#e8eefc;text-align:center;line-height:1.5;">
+        <h1 style="font-size:1.4rem;margin:0 0 8px;">Aura Weather needs JavaScript</h1>
+        <p style="margin:0;color:#aebbd8;">This dashboard renders live forecast, air-quality, and severe-weather data in the browser. Please enable JavaScript to continue.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

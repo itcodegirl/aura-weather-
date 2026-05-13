@@ -1,3 +1,5 @@
+import { toFiniteNumber } from "../utils/numbers.js";
+
 const SERVICE_WORKER_URL = "/sw.js";
 const DEFAULT_REGISTRATION_DELAY_MS = 8000;
 const REGISTRATION_DELAY_OVERRIDE_KEY = "__AURA_SW_REGISTRATION_DELAY_MS__";
@@ -31,9 +33,17 @@ export function getServiceWorkerRegistrationDelay({
   windowRef = getBrowserWindow(),
   delayMs = DEFAULT_REGISTRATION_DELAY_MS,
 } = {}) {
-  const overrideDelayMs = Number(windowRef?.[REGISTRATION_DELAY_OVERRIDE_KEY]);
+  // Strict coercion: a Number()-based check would silently treat null,
+  // empty string, false, and true as 0/1, registering the service
+  // worker with a fake-zero or fake-one millisecond delay. Reject all
+  // of those at the boundary so the override slot only honors a real
+  // numeric value (the same trust-contract pattern enforced at the
+  // API layer).
+  const overrideDelayMs = toFiniteNumber(
+    windowRef?.[REGISTRATION_DELAY_OVERRIDE_KEY]
+  );
 
-  if (Number.isFinite(overrideDelayMs) && overrideDelayMs >= 0) {
+  if (overrideDelayMs !== null && overrideDelayMs >= 0) {
     return overrideDelayMs;
   }
 

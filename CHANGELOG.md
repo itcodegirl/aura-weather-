@@ -5,7 +5,156 @@ work that hardened the dashboard from a polished demo into a
 portfolio-grade product. Format roughly follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] — Audit pass (2026-05)
+## [Unreleased] — Production polish pass (2026-05)
+
+### Added
+
+- **No-JS fallback.** `index.html` now renders a short, styled
+  `<noscript>` notice explaining the dashboard needs JavaScript,
+  instead of leaving a blank `<div id="root">`.
+- **Edge headers and SPA fallback.** `public/_headers` ships the
+  non-breaking security set (`X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`,
+  `Permissions-Policy` scoped to geolocation) plus a caching policy —
+  immutable for content-hashed `/assets/*`, forced revalidation for
+  `sw.js` and `manifest.webmanifest` so a deploy is never pinned by a
+  stale cache. `public/_redirects` adds the SPA fallback so deep links
+  resolve to the app shell. `public/robots.txt` gives crawlers an
+  explicit policy.
+- **PWA manifest hardening.** `manifest.webmanifest` gained `id`,
+  `lang`, and `dir` for a stable installed-app identity and correct
+  localisation hints.
+- **Project metadata + LICENSE.** `package.json` now declares
+  `description`, `keywords`, `homepage`, `repository`, `bugs`,
+  `license`, and `engines.node` (>=20); a `.nvmrc` pins Node 20; and
+  the repo ships an MIT `LICENSE`.
+- **`useDocumentTitle` hook.** Mirrors the active forecast location
+  into `<title>` (`Tokyo, Japan · Aura Weather`) once a location is
+  known, and restores the static index.html title on unmount so cold
+  starts still look branded. Five render tests pin the contract:
+  preserves the static title until a name is known, includes the
+  country when present, restores on unmount, and ignores non-string
+  fields without crashing.
+- **Screen-reader location landmark.** The first dashboard heading
+  now appends an sr-only `in {location}` suffix (`Current Conditions
+  in Tokyo, Japan`) so the heading list anchors to where the data is
+  for instead of four generic group labels in a row. Sighted layout
+  is unchanged.
+- **Mobile settings drawer.** `HeaderControls.jsx` exposes a
+  mobile-only "Settings" toggle that collapses the climate context,
+  unit, and clear-startup controls behind one button on phones. The
+  panel sets `display: none` while collapsed so it stays out of the AT
+  tree until requested. Desktop layout unchanged.
+- **Per-card retry on lazy-chunk failures.** `PanelErrorBoundary` now
+  renders a "Try again" button that bumps an internal `resetKey` and
+  remounts children via an identity wrapper, letting React re-evaluate
+  the lazy import without taking the dashboard down.
+- **`useThemeColor` hook.** Updates `<meta name="theme-color">` (with
+  prior-value restore on unmount) so the iOS / Android browser chrome
+  blends with the active scene gradient. Runs in a layout effect so
+  the chrome bar settles before paint.
+- **Layout-aware loading skeleton.** Hero meta + temp + row stripes,
+  a circular gauge stub, and eight breathing precip-bar stubs that
+  visually pre-figure the bento layout. Reduced-motion path holds the
+  bars still.
+- **Storage quota guard.** `weatherSnapshotCache` now catches
+  `QuotaExceededError`, evicts the oldest snapshot, and retries once
+  before yielding gracefully. Test coverage in `weatherSnapshotCache.test.mjs`.
+- **Render tests for new code.** `useThemeColor.render.test.mjs`,
+  `PanelErrorBoundary.render.test.mjs`,
+  `HeaderControls.render.test.mjs`.
+
+### Changed
+
+- **Build chunking.** `vite.config.js` now splits `react` /
+  `react-dom` / `scheduler` into a `react-vendor` chunk and
+  `lucide-react` into its own. The app entry chunk drops from ~311 kB
+  to ~128 kB, so a deploy that only touches app code re-downloads just
+  that and keeps the rarely-changing vendor chunks cached.
+- **localStorage write hygiene.** `useLocalStorageState` no longer
+  re-writes the current value to `localStorage` on mount, so a visitor
+  who never interacts doesn't get default flag values persisted; real
+  state changes still write through.
+- **Mobile hero density.** The four hero readings (Wind, Humidity,
+  Pressure, Dew Point) used to collapse to a single column at 560px,
+  producing four full-width rows that pushed the rest of the
+  dashboard ~240px below the fold on phones. Keep the 2x2 grid down
+  to 421px and tighten the per-stat padding so each cell fits
+  comfortably; single-column still kicks in at the narrowest tier
+  (≤420px) where individual cells would otherwise crush.
+- **Mobile interaction polish.** Killed the default iOS gray
+  tap-highlight on every interactive element via a global
+  `-webkit-tap-highlight-color: transparent` rule; turned on
+  `touch-action: manipulation` to eliminate the legacy 300ms
+  double-tap delay on Safari; and normalised `:active` press feedback
+  (`scale(var(--press-scale))`) on saved-city chips, the saved-city
+  remove + undo actions, the mobile settings toggle, and sync
+  buttons + toggle so every tap signals consistently.
+- **Keyboard-aware city dropdown.** `100vh` on iOS Safari is the
+  largest possible viewport — it does not shrink when the on-screen
+  keyboard pops up — so a 320px-tall dropdown could end up entirely
+  behind the keyboard on a 375x812 phone. Switch the dropdown's
+  `max-height` to `dvh` and keep the `vh` declaration as a fallback
+  for engines that do not yet support it.
+- **Mobile touch targets.** Saved-city remove (24 → 28px), saved-city
+  chips (28 → 36px), status-stack actions and retry (26-28 → 36px),
+  location setup (36 → 44px), AppShell error retry (42 → 44px).
+- **Safe-area support.** `<meta name="viewport">` adds
+  `viewport-fit=cover`; `.app-inner` honours `env(safe-area-inset-*)`
+  on every breakpoint. The previous safe-area work was a no-op on
+  iOS without `viewport-fit`; this pair makes it actually work.
+- **Hero icon position on mobile.** Replaced
+  `flex-direction: column-reverse` with a centred horizontal row at
+  <640px so the WeatherIcon stays beside (not below) the temperature.
+- **Empty-state copy.** Hourly chart, 7-day forecast, and rain
+  timeline now name the provider (Open-Meteo) and reassure that other
+  panels remain live, instead of a generic "X is temporarily
+  unavailable."
+- **Accessible button copy.** Climate-context toggle reads "Show /
+  Hide historical climate comparison." Cloud Sync chevron exposes
+  "Expand / Collapse cloud sync controls" as its accessible name.
+- **City search keyboard hints.** `inputMode="search"`,
+  `autoCorrect="off"`, `autoCapitalize="words"`, `spellCheck="false"`.
+- **Hero "today" rollover.** `buildHeroData` now derives the date
+  label from a passed `nowMs`, bucketed to one minute. The label
+  refreshes correctly across midnight on long-running tabs.
+- **Critical-path preconnects.** Added `preconnect` for the two API
+  origins hit on cold start (`api.open-meteo.com`,
+  `geocoding-api.open-meteo.com`) and `dns-prefetch` for archive,
+  air-quality, and NWS alerts.
+
+### Fixed
+
+- **HeroCard placeholder test.** The render-test assertion for the
+  no-data body copy used a straight apostrophe while the component
+  uses a typographic one, so it never matched and quietly failed the
+  `code-quality` job; the regex now accepts either form.
+- **HeroCard fallback honours known location.** The no-data fallback
+  hardcoded "Location unavailable" / "Loading weather", which lied to
+  the user during the rare window where the location was already set
+  but a weather refetch was still in flight (e.g. during a transient
+  retry). Use the known location name when we have one and switch
+  the status line to "Loading current conditions…" accordingly.
+- **`prefers-reduced-transparency`.** When the OS preference is on,
+  drop `backdrop-filter`, lift card opacity to ~96%, simplify the body
+  gradient, and disable the wash overlays. Layout and color story
+  stay identical.
+- **Focus management on global error recovery.** When transitioning
+  out of `AppLoadingState` or `AppErrorState`, focus moves to
+  `#main-content` so screen-reader users land back in the dashboard
+  instead of `document.body`.
+- **Hero location aria-label.** A single `aria-label="Location: Tokyo,
+  Japan"` replaces the disjoint MapPin + text reading order.
+- **Dead `.settings-toggle` CSS.** Removed CSS rules that targeted an
+  element with no JSX counterpart.
+
+### Removed
+
+- Static `theme-color="#0b1c3f"` is now a default that
+  `useThemeColor` overrides at runtime; the meta tag itself remains
+  for browsers that load HTML before JS.
+
+## [Audit pass] — 2026-05-04
 
 ### Added
 

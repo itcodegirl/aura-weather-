@@ -30,6 +30,7 @@ function buildMissingMockViewModel() {
     startupLocation: null,
     loadSavedCity: NOOP,
     setStartupCity: NOOP,
+    restoreSavedCity: NOOP,
     forgetSavedCity: NOOP,
     syncConnected: false,
     syncAccount: null,

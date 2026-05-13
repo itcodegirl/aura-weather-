@@ -14,8 +14,24 @@ export default defineConfig({
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
-        manualChunks: {
-          lucide: ["lucide-react"],
+        // Split the rarely-changing dependencies into their own
+        // long-cache chunks. A deploy that only touches app code then
+        // re-downloads just the app bundle; React, the scheduler, and
+        // the icon set keep their content hashes (and the browser's
+        // cache entry).
+        manualChunks(id) {
+          if (!id.includes("node_modules")) {
+            return undefined;
+          }
+          if (
+            /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)
+          ) {
+            return "react-vendor";
+          }
+          if (id.includes("node_modules/lucide-react/")) {
+            return "lucide";
+          }
+          return undefined;
         },
       },
     },

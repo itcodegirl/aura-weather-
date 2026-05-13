@@ -18,6 +18,51 @@
   contain-intrinsic-size: 216px;
 }
 
+.panel-boundary-fallback {
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.panel-boundary-retry {
+  margin-top: 4px;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: var(--border-strong);
+  background: var(--surface-3);
+  color: #e3efff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: var(--track-tight);
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.panel-boundary-retry:hover {
+  border-color: rgba(174, 227, 255, 0.6);
+  background: var(--surface-strong);
+  transform: translateY(var(--lift-1));
+}
+
+.panel-boundary-retry:focus-visible {
+  border-color: var(--focus-outline);
+  box-shadow: 0 0 0 3px rgba(64, 196, 255, 0.2);
+}
+
+.panel-boundary-retry:active {
+  transform: scale(var(--press-scale));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-boundary-retry:hover,
+  .panel-boundary-retry:active {
+    transform: none;
+  }
+}
+
 .loading-card-title {
   position: relative;
   overflow: hidden;
@@ -26,15 +71,15 @@
   justify-content: center;
   padding: 8px 12px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(188, 214, 252, 0.26);
-  background: rgba(8, 17, 36, 0.54);
+  border: var(--border-default);
+  background: var(--surface-2);
   box-shadow:
     inset 0 1px 0 rgba(232, 242, 255, 0.12),
     0 8px 18px rgba(3, 8, 22, 0.2);
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
 }
 
@@ -57,9 +102,9 @@
   padding: 18px;
   border-radius: var(--radius);
   border: var(--card-border);
-  background:
-    linear-gradient(165deg, rgba(14, 27, 54, 0.72), rgba(8, 16, 34, 0.62)),
-    linear-gradient(130deg, rgba(189, 172, 255, 0.08), rgba(123, 198, 255, 0.05) 58%, transparent 84%);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.12));
+  backdrop-filter: blur(var(--card-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
   box-shadow: var(--card-shadow);
 }
 
@@ -93,12 +138,16 @@
 .loading-skeleton {
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
   min-height: 128px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(188, 214, 252, 0.18);
+  border: var(--subcard-border);
   background:
-    linear-gradient(160deg, rgba(21, 38, 72, 0.52), rgba(9, 18, 38, 0.48)),
-    rgba(8, 17, 36, 0.44);
+    linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
+    var(--surface-1);
 }
 
 .loading-skeleton::after {
@@ -113,15 +162,86 @@
   );
   transform: translateX(-120%);
   animation: loading-sheen 1.8s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .loading-skeleton--hero {
   min-height: 240px;
+  justify-content: space-between;
 }
 
 .loading-skeleton--wide {
   grid-column: 1 / -1;
-  min-height: 104px;
+  min-height: 116px;
+}
+
+.loading-skeleton-block {
+  border-radius: var(--radius-xs);
+  background: rgba(208, 226, 255, 0.12);
+}
+
+.loading-skeleton-block--meta {
+  width: 40%;
+  height: 12px;
+}
+
+.loading-skeleton-block--temp {
+  width: 70%;
+  height: 56px;
+  border-radius: var(--radius-control);
+  background: linear-gradient(
+    90deg,
+    rgba(208, 226, 255, 0.16),
+    rgba(188, 226, 255, 0.22) 50%,
+    rgba(208, 226, 255, 0.16)
+  );
+}
+
+.loading-skeleton-block--row {
+  width: 90%;
+  height: 16px;
+}
+
+.loading-skeleton-block--gauge {
+  width: 86px;
+  height: 86px;
+  align-self: flex-start;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 32%, rgba(232, 246, 255, 0.18), rgba(123, 199, 255, 0.06) 64%),
+    rgba(208, 226, 255, 0.1);
+}
+
+.loading-skeleton-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 56px;
+}
+
+.loading-skeleton-bar {
+  flex: 1 1 0;
+  height: 100%;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(188, 226, 255, 0.06),
+    rgba(123, 199, 255, 0.16)
+  );
+  animation: skeleton-bar-pulse 1.6s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+@keyframes skeleton-bar-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.5);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
 }
 
 @keyframes weather-icon-breathe {
@@ -147,7 +267,7 @@
   margin: 0;
   color: var(--text-muted);
   font-size: 13px;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-default);
   text-transform: uppercase;
   font-weight: 700;
 }
@@ -158,7 +278,7 @@
   text-align: center;
   border-radius: var(--radius);
   border: var(--border);
-  background: linear-gradient(165deg, rgba(13, 26, 53, 0.76), rgba(8, 16, 34, 0.72));
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.12));
   box-shadow: var(--shadow);
 }
 
@@ -180,21 +300,46 @@
   font-size: 14px;
 }
 
+.error-card-actions {
+  margin-top: 18px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
 .error-retry {
-  margin-top: 16px;
-  min-height: 42px;
-  min-width: 116px;
-  padding: 0 16px;
+  min-height: 44px;
+  min-width: 124px;
+  padding: 0 18px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(145deg, #f9fcff, #dce9ff);
-  color: #081126;
+  background: var(--active-pill-bg);
+  color: var(--active-pill-color);
   font-size: 14px;
   font-weight: 700;
   transition: transform var(--motion-fast) var(--ease-standard), box-shadow var(--motion-medium) var(--ease-standard);
 }
 
+.error-card > .error-retry {
+  margin-top: 18px;
+}
+
+/* Secondary "Reload app" style — visually subordinate to the primary
+ * "Try again" pill so the user reaches for the cheap soft retry first.
+ * The hard reload is still one tap away when soft retry can't recover. */
+.error-retry--subtle {
+  background: transparent;
+  color: rgba(229, 240, 255, 0.92);
+  border: 1px solid rgba(196, 220, 255, 0.34);
+}
+
+.error-retry--subtle:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(174, 227, 255, 0.5);
+}
+
 .error-retry:hover {
-  transform: translateY(-1px);
+  transform: translateY(var(--lift-1));
   box-shadow: 0 10px 20px rgba(4, 12, 30, 0.34);
 }
 
@@ -210,6 +355,10 @@
 
   .loading-dashboard-grid {
     grid-template-columns: 1fr;
+  }
+
+  .loading-skeleton {
+    padding: 16px;
   }
 
   .loading-skeleton--hero {
@@ -238,10 +387,19 @@
 
   .loading-skeleton {
     min-height: 108px;
+    padding: 14px;
   }
 
   .loading-skeleton--hero {
     min-height: 170px;
+  }
+
+  .loading-skeleton-block--temp {
+    height: 44px;
+  }
+
+  .loading-skeleton-bars {
+    height: 44px;
   }
 }
 
@@ -251,7 +409,22 @@
     display: none;
   }
 
+  .loading-skeleton-bar {
+    animation: none;
+    transform: scaleY(0.7);
+    opacity: 0.7;
+  }
+
   .error-retry:hover {
     transform: none;
   }
 }
+
+/*
+ * Aura is dark-only (see App.css and the `color-scheme: dark only`
+ * meta declaration). The prior light-mode loading-skeleton handler
+ * has been removed — it painted the cold-start skeleton + error
+ * card in light colors that contradicted the dark dashboard the
+ * user lands on a moment later, which is exactly the half-light
+ * inconsistency the audit flagged.
+ */

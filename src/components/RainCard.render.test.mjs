@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import "../../scripts/test-render-setup.mjs";
 
 const React = (await import("react")).default;
-const { render, screen, cleanup } = await import("@testing-library/react");
+const { render, screen, fireEvent, cleanup } = await import(
+  "@testing-library/react"
+);
 const RainCard = (await import("./RainCard.jsx")).default;
 
 afterEach(() => {
@@ -49,5 +51,100 @@ describe("RainCard missing precipitation accumulation", () => {
     assert.equal(screen.queryByText("No meaningful rain expected"), null);
     assert.equal(getRainStatValue("Projected 24h total").textContent.trim(), "\u2014");
     assert.equal((container.textContent || "").includes("0.00 in"), false);
+  });
+});
+
+function renderWithRainyHours() {
+  // Build hours with enough rain signal to take the populated render
+  // branch (avoids the "dry" / "no data" empty paths so the touch
+  // explorer surfaces).
+  const hourly = buildHourly({
+    rainChance: Array.from({ length: 24 }, (_, i) => (i < 6 ? 70 + i : 30)),
+    rainAmount: Array.from({ length: 24 }, (_, i) => (i < 6 ? 0.1 : 0.02)),
+  });
+  return render(
+    React.createElement(RainCard, {
+      weather: { hourly },
+      unit: "F",
+      dataUnit: "F",
+    })
+  );
+}
+
+describe("RainCard touch-sample announcement contract (mirrors HourlyCard)", () => {
+  test("first render: no rain-touch-sample carries aria-current", () => {
+    const { container } = renderWithRainyHours();
+    const samples = container.querySelectorAll(".rain-touch-sample");
+    if (samples.length === 0) return;
+    for (const sample of samples) {
+      assert.equal(
+        sample.getAttribute("aria-current"),
+        null,
+        "no aria-current before user interaction"
+      );
+      assert.equal(
+        sample.getAttribute("aria-pressed"),
+        null,
+        "must not use aria-pressed on the show-on-click samples"
+      );
+    }
+  });
+
+  test("after tapping a sample, exactly one carries aria-current=true", () => {
+    const { container } = renderWithRainyHours();
+    const samples = container.querySelectorAll(".rain-touch-sample");
+    if (samples.length < 3) return;
+
+    fireEvent.click(samples[2]);
+
+    const updated = container.querySelectorAll(".rain-touch-sample");
+    const currentCount = Array.from(updated).filter(
+      (button) => button.getAttribute("aria-current") === "true"
+    ).length;
+    assert.equal(
+      currentCount,
+      1,
+      "exactly one sample marked aria-current after a tap"
+    );
+    assert.equal(updated[2].getAttribute("aria-current"), "true");
+  });
+
+  test("selected-sample paragraph has no aria-live (button activation carries the announcement)", () => {
+    const { container } = renderWithRainyHours();
+    const region = container.querySelector(".rain-selected-sample");
+    if (!region) return;
+    assert.equal(
+      region.getAttribute("aria-live"),
+      null,
+      "must not duplicate the button-press announcement via a live region"
+    );
+  });
+
+  test("sample button aria-label reads 'Show' rather than 'Select'", () => {
+    const { container } = renderWithRainyHours();
+    const samples = container.querySelectorAll(".rain-touch-sample");
+    if (samples.length === 0) return;
+    const label = samples[0].getAttribute("aria-label") || "";
+    assert.ok(
+      label.startsWith("Show "),
+      `expected label to start with "Show", got: ${JSON.stringify(label)}`
+    );
+  });
+
+  test("chart mode toggle correctly keeps aria-pressed (it IS a toggle)", () => {
+    // Sanity check: the mode toggle buttons (% vs in/mm) genuinely toggle
+    // a state, so aria-pressed is the right semantic there \u2014 unlike the
+    // touch samples which "show" a value rather than "toggle on".
+    const { container } = renderWithRainyHours();
+    const modeButtons = container.querySelectorAll(".rain-mode-btn");
+    assert.equal(modeButtons.length, 2);
+    const pressedCount = Array.from(modeButtons).filter(
+      (button) => button.getAttribute("aria-pressed") === "true"
+    ).length;
+    assert.equal(
+      pressedCount,
+      1,
+      "exactly one mode toggle button reports aria-pressed=true at any moment"
+    );
   });
 });

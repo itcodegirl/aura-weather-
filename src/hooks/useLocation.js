@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { reverseGeocodeCoordinates } from "../api/index.js";
+import { reverseGeocode } from "../api/index.js";
 import { parseCoordinates } from "../utils/weatherUnits.js";
 
 export const DEFAULT_LOCATION = {
@@ -497,7 +497,7 @@ export function useLocation(onResolved) {
             reverseGeocodeRequestRef.current = controller;
 
             try {
-              const reverseResult = await reverseGeocodeCoordinates(
+              const reverseResult = await reverseGeocode(
                 latitude,
                 longitude,
                 {

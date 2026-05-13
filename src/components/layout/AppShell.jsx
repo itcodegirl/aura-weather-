@@ -1,9 +1,27 @@
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import { CloudOff } from "lucide-react";
+import AtmosphereParticles from "../AtmosphereParticles";
 import WeatherIcon from "../WeatherIcon";
 import "./AppShell.css";
 
+const SLOW_LOAD_MS = 7000;
+
 const AppLoadingState = memo(() => {
+  // Hold the upbeat "Connecting\u2026" for the first 7s \u2014 that's the
+  // happy-path window for a healthy network. After that the user
+  // deserves a reassurance beat so they don't think the app is frozen.
+  // The live region is polite, so this drops in without interrupting
+  // assistive tech mid-utterance.
+  const [isSlow, setIsSlow] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsSlow(true), SLOW_LOAD_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const loaderText = isSlow
+    ? "Still working\u2026 your network may be slow."
+    : "Connecting to weather providers\u2026";
+
   return (
     <div className="app app--loading">
       <div
@@ -21,13 +39,31 @@ const AppLoadingState = memo(() => {
           />
           <div>
             <p className="loading-dashboard-brand">Aura</p>
-            <p className="loader-text">Connecting to weather providers{"\u2026"}</p>
+            <p className="loader-text">{loaderText}</p>
           </div>
         </div>
         <div className="loading-dashboard-grid" aria-hidden="true">
-          <div className="loading-skeleton loading-skeleton--hero" />
-          <div className="loading-skeleton loading-skeleton--panel" />
-          <div className="loading-skeleton loading-skeleton--wide" />
+          <div className="loading-skeleton loading-skeleton--hero">
+            <div className="loading-skeleton-block loading-skeleton-block--meta" />
+            <div className="loading-skeleton-block loading-skeleton-block--temp" />
+            <div className="loading-skeleton-block loading-skeleton-block--row" />
+          </div>
+          <div className="loading-skeleton loading-skeleton--panel">
+            <div className="loading-skeleton-block loading-skeleton-block--meta" />
+            <div className="loading-skeleton-block loading-skeleton-block--gauge" />
+          </div>
+          <div className="loading-skeleton loading-skeleton--wide">
+            <div className="loading-skeleton-block loading-skeleton-block--meta" />
+            <div className="loading-skeleton-bars" aria-hidden="true">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <span
+                  key={index}
+                  className="loading-skeleton-bar"
+                  style={{ animationDelay: `${index * 60}ms` }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -53,12 +89,22 @@ const AppErrorState = memo(({ error, onRetry }) => {
   );
 });
 
-function AppShell({ background, children }) {
+function AppShell({
+  background,
+  conditionCode,
+  prefersReducedData = false,
+  children,
+}) {
   return (
     <div className="app" style={{ background }}>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
+
+      <AtmosphereParticles
+        conditionCode={conditionCode}
+        prefersReducedData={prefersReducedData}
+      />
 
       <div className="app-inner">{children}</div>
     </div>

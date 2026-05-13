@@ -1,0 +1,139 @@
+.global-update-indicator {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  min-height: 36px;
+  border-radius: var(--radius-pill);
+  border: var(--border-default);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+@media (pointer: coarse) {
+  .global-update-indicator {
+    min-height: 44px;
+    padding: 8px 14px;
+  }
+}
+
+/* Reserves the indicator slot before trustMeta arrives so the bento
+   does not shift down when the live label first appears. The empty
+   placeholder is invisible but occupies the same min-height. */
+.global-update-indicator--placeholder {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.global-update-indicator--button {
+  cursor: pointer;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.global-update-indicator--button:hover {
+  border-color: rgba(174, 227, 255, 0.42);
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+.global-update-indicator--button:active {
+  transform: scale(var(--press-scale));
+}
+
+.global-update-indicator--button:focus-visible {
+  outline: 2px solid var(--focus-outline);
+  outline-offset: 2px;
+}
+
+.global-update-indicator--button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.global-update-refresh {
+  margin-left: 2px;
+  color: rgba(186, 212, 252, 0.7);
+  flex-shrink: 0;
+}
+
+.global-update-refresh.is-spinning {
+  animation: global-update-refresh-spin var(--motion-spinner) linear infinite;
+}
+
+@keyframes global-update-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-update-refresh.is-spinning {
+    animation: none;
+  }
+
+  .global-update-indicator--button:active {
+    transform: none;
+  }
+}
+
+.global-update-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(149, 217, 175, 0.9);
+  box-shadow: 0 0 0 2px rgba(149, 217, 175, 0.16);
+  flex-shrink: 0;
+}
+
+.global-update-indicator--stale .global-update-dot {
+  background: rgba(251, 191, 36, 0.92);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.18);
+}
+
+.global-update-indicator--saved .global-update-dot {
+  background: rgba(148, 163, 184, 0.85);
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.18);
+}
+
+.global-update-text {
+  color: var(--text-muted);
+}
+
+.global-update-state {
+  color: var(--text-dim);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: var(--track-loose);
+  text-transform: uppercase;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  border: var(--border-soft);
+  background: var(--surface-2);
+}
+
+.global-update-indicator--stale .global-update-state {
+  color: rgba(251, 191, 36, 0.92);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+@media (max-width: 420px) {
+  .global-update-indicator {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .global-update-state {
+    display: none;
+  }
+}

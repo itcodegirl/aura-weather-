@@ -4,7 +4,12 @@ import { CloudOff } from "lucide-react";
 class AppErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    // resetKey lets a soft retry remount the subtree without losing
+    // saved-city / sync / settings state in localStorage and without
+    // the full page reload cost. The boundary will catch again if the
+    // error re-throws, so a flaky transient (network blip, race) gets
+    // a cheap second chance.
+    this.state = { hasError: false, resetKey: 0 };
   }
 
   static getDerivedStateFromError() {
@@ -16,6 +21,13 @@ class AppErrorBoundary extends Component {
     console.error("Aura runtime error:", error, errorInfo);
   }
 
+  handleSoftRetry = () => {
+    this.setState((current) => ({
+      hasError: false,
+      resetKey: current.resetKey + 1,
+    }));
+  };
+
   handleReload = () => {
     if (typeof window !== "undefined") {
       window.location.reload();
@@ -24,7 +36,11 @@ class AppErrorBoundary extends Component {
 
   render() {
     if (!this.state.hasError) {
-      return this.props.children;
+      return (
+        <AppBoundaryReset key={this.state.resetKey}>
+          {this.props.children}
+        </AppBoundaryReset>
+      );
     }
 
     return (
@@ -33,17 +49,33 @@ class AppErrorBoundary extends Component {
           <CloudOff size={42} className="error-card-icon" aria-hidden="true" />
           <h1>Something went wrong</h1>
           <p>We hit an unexpected issue while rendering the dashboard.</p>
-          <button
-            type="button"
-            className="error-retry"
-            onClick={this.handleReload}
-          >
-            Reload app
-          </button>
+          <div className="error-card-actions">
+            <button
+              type="button"
+              className="error-retry"
+              onClick={this.handleSoftRetry}
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              className="error-retry error-retry--subtle"
+              onClick={this.handleReload}
+            >
+              Reload app
+            </button>
+          </div>
         </div>
       </div>
     );
   }
+}
+
+// Identity wrapper whose only job is to remount the subtree when its
+// key changes. Matches the pattern in PanelErrorBoundary so that a
+// soft retry actually re-runs the child render.
+function AppBoundaryReset({ children }) {
+  return children;
 }
 
 export default AppErrorBoundary;

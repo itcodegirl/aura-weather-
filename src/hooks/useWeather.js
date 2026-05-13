@@ -253,6 +253,33 @@ export function useWeather(options = {}) {
     locationNoticeRef.current = startupNotice;
   }, [persistLocationPayload]);
 
+  const restoreSavedCity = useCallback((city, options = {}) => {
+    const nextLocation = toLocationPayload(
+      city?.lat,
+      city?.lon,
+      city?.name,
+      city?.country
+    );
+    if (!nextLocation) {
+      return;
+    }
+
+    const updatedSavedCities = upsertSavedCity(
+      nextLocation.lat,
+      nextLocation.lon,
+      nextLocation.name,
+      nextLocation.country
+    );
+    setSavedCities(updatedSavedCities);
+
+    if (options?.makeStartup) {
+      persistLocationPayload(nextLocation);
+      const restoredNotice = `${nextLocation.name} is your startup city again.`;
+      setLocationNotice(restoredNotice);
+      locationNoticeRef.current = restoredNotice;
+    }
+  }, [persistLocationPayload]);
+
   const forgetSavedCity = useCallback((city) => {
     const updatedSavedCities = removeSavedCity(city?.lat, city?.lon);
     setSavedCities(updatedSavedCities);
@@ -309,6 +336,7 @@ export function useWeather(options = {}) {
     recentCities,
     loadSavedCity,
     setStartupCity,
+    restoreSavedCity,
     forgetSavedCity,
     syncConnected,
     syncAccount,
