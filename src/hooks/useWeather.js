@@ -17,7 +17,6 @@ import {
 } from "./useLocation";
 import { useSavedLocationsSync } from "./useSavedLocationsSync";
 import { useWeatherData } from "./useWeatherData";
-import { reverseGeocodeCoordinates } from "../api";
 import {
   hasMatchingCoordinates,
   toLocationPayload,
@@ -62,8 +61,6 @@ export function useWeather(options = {}) {
   const [recentCities, setRecentCities] = useState(() => getRecentCities());
   const locationRef = useRef(location);
   const locationNoticeRef = useRef(locationNotice);
-  const reverseGeocodeAbortRef = useRef(null);
-  const reverseGeocodeRequestIdRef = useRef(0);
 
   useEffect(() => {
     locationRef.current = location;
@@ -72,21 +69,6 @@ export function useWeather(options = {}) {
   useEffect(() => {
     locationNoticeRef.current = locationNotice;
   }, [locationNotice]);
-
-  const abortReverseGeocode = useCallback(() => {
-    if (!reverseGeocodeAbortRef.current) {
-      return;
-    }
-
-    reverseGeocodeAbortRef.current.abort();
-    reverseGeocodeAbortRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      abortReverseGeocode();
-    };
-  }, [abortReverseGeocode]);
 
   const persistLocationPayload = useCallback((nextLocation) => {
     persistLocation(
@@ -103,7 +85,7 @@ export function useWeather(options = {}) {
       const {
         saveCity = true,
         persistLocation: shouldPersistLocation = true,
-        saveRecent = false,
+        saveRecent = saveCity,
       } = options;
       const currentLocation = locationRef.current;
       const hasSameLocation =
@@ -155,99 +137,34 @@ export function useWeather(options = {}) {
     [persistLocationPayload]
   );
 
-  const resolveFriendlyCurrentLocation = useCallback(
-    async (lat, lon) => {
-      abortReverseGeocode();
-
-      const requestId = reverseGeocodeRequestIdRef.current + 1;
-      reverseGeocodeRequestIdRef.current = requestId;
-      const controller = new AbortController();
-      reverseGeocodeAbortRef.current = controller;
-
-      try {
-        const language =
-          typeof navigator !== "undefined" &&
-          typeof navigator.language === "string"
-            ? navigator.language
-            : "";
-        const resolvedPlace = await reverseGeocodeCoordinates(lat, lon, {
-          signal: controller.signal,
-          language,
-        });
-
-        if (requestId !== reverseGeocodeRequestIdRef.current) {
-          return;
-        }
-
-        const nextLocation = toLocationPayload(
-          lat,
-          lon,
-          resolvedPlace?.name,
-          resolvedPlace?.country
-        );
-        if (!nextLocation || !nextLocation.name) {
-          return;
-        }
-
-        const activeLocation = locationRef.current;
-        if (
-          !activeLocation ||
-          activeLocation.lat !== nextLocation.lat ||
-          activeLocation.lon !== nextLocation.lon
-        ) {
-          return;
-        }
-
-        applyLocation(nextLocation, buildCurrentLocationNotice(nextLocation.name), {
-          saveCity: true,
-          persistLocation: true,
-          saveRecent: true,
-        });
-      } catch (error) {
-        if (error?.name !== "AbortError") {
-          return;
-        }
-      } finally {
-        if (
-          reverseGeocodeRequestIdRef.current === requestId &&
-          reverseGeocodeAbortRef.current === controller
-        ) {
-          reverseGeocodeAbortRef.current = null;
-        }
-      }
-    },
-    [abortReverseGeocode, applyLocation]
-  );
-
   const handleLocationResolved = useCallback(
-    (lat, lon, name, country, notice = null) => {
+    (lat, lon, name, country, notice = null, metadata = null) => {
       const nextLocation = toLocationPayload(lat, lon, name, country);
       if (!nextLocation) {
         return;
       }
 
-      if (notice === CURRENT_LOCATION_NOTICE) {
-        applyLocation(nextLocation, buildCurrentLocationNotice(nextLocation.name), {
-          saveCity: true,
-          persistLocation: true,
-          saveRecent: true,
-        });
-        void resolveFriendlyCurrentLocation(nextLocation.lat, nextLocation.lon);
-        return;
-      }
-
-      applyLocation(nextLocation, notice, {
-        saveCity: false,
-        persistLocation: false,
-        saveRecent: false,
+      const nextNotice =
+        notice === CURRENT_LOCATION_NOTICE
+          ? buildCurrentLocationNotice(nextLocation.name)
+          : notice;
+      const isUserDrivenSelection = notice === null;
+      applyLocation(nextLocation, nextNotice, {
+        saveCity: metadata?.saveCity ?? isUserDrivenSelection,
+        persistLocation:
+          metadata?.persistLocation ?? isUserDrivenSelection,
+        saveRecent: metadata?.trackRecent ?? isUserDrivenSelection,
       });
     },
-    [applyLocation, resolveFriendlyCurrentLocation]
+    [applyLocation]
   );
 
-  const { isLocatingCurrent, isGeolocationSupported, loadCurrentLocation } = useLocation(
-    handleLocationResolved
-  );
+  const {
+    isLocatingCurrent,
+    isGeolocationSupported,
+    loadCurrentLocation,
+    cancelCurrentLocationLookup,
+  } = useLocation(handleLocationResolved);
 
   const {
     weather,
@@ -273,14 +190,14 @@ export function useWeather(options = {}) {
       if (!nextLocation) {
         return;
       }
-      abortReverseGeocode();
+      cancelCurrentLocationLookup();
       applyLocation(nextLocation, null, {
         saveCity: true,
         persistLocation: true,
         saveRecent: true,
       });
     },
-    [abortReverseGeocode, applyLocation]
+    [applyLocation, cancelCurrentLocationLookup]
   );
 
   const loadWeather = useCallback(
