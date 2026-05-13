@@ -12,6 +12,7 @@ function HeaderControls({
   loadCurrentLocation,
   clearSavedLocation,
   savedCities,
+  recentCities,
   location,
   loadSavedCity,
   restoreSavedCity,
@@ -156,6 +157,7 @@ function HeaderControls({
             ref={citySearchRef}
             onSelect={handleCitySelect}
             savedCities={safeSavedCities}
+            recentCities={recentCities}
           />
           <button
             type="button"

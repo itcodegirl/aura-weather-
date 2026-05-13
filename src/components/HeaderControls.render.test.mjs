@@ -81,9 +81,7 @@ describe("HeaderControls mobile settings drawer", () => {
     const controlsId = toggle.getAttribute("aria-controls");
 
     assert.notEqual(controlsId, null);
-    const panel = view.container.querySelector(
-      `[id="${controlsId.replace(/"/g, '\\"')}"]`
-    );
+    const panel = view.container.ownerDocument.getElementById(controlsId);
     assert.notEqual(panel, null);
     assert.equal(panel.getAttribute("role"), "region");
     assert.equal(panel.getAttribute("aria-label"), "Display settings");

@@ -4,12 +4,15 @@ import assert from "node:assert/strict";
 import {
   clearPersistedLocation,
   getPersistedLocation,
+  getRecentCities,
   getSavedCities,
+  MAX_RECENT_CITIES,
   MAX_SAVED_CITIES,
   normalizeLocationName,
   persistLocation,
   removeSavedCity,
   replaceSavedCities,
+  upsertRecentCity,
   upsertSavedCity,
 } from "./useLocation.js";
 
@@ -81,6 +84,19 @@ describe("location persistence helpers", () => {
     assert.equal(savedCities.length, 2);
     assert.equal(savedCities[0].name, "London");
     assert.equal(savedCities[1].name, "Tokyo");
+  });
+
+  test("stores recent cities separately from saved favorites", () => {
+    installWindow();
+
+    upsertRecentCity(35.6762, 139.6503, "Tokyo", "Japan");
+    upsertRecentCity(34.0522, -118.2437, "Los Angeles", "United States");
+
+    const recentCities = getRecentCities();
+    assert.equal(recentCities.length, 2);
+    assert.equal(recentCities[0].name, "Los Angeles");
+    assert.equal(recentCities[1].name, "Tokyo");
+    assert.deepEqual(getSavedCities(), []);
   });
 
   test("removes a saved city by coordinates", () => {
@@ -159,6 +175,18 @@ describe("location persistence helpers", () => {
       savedCities[0].name,
       `City ${MAX_SAVED_CITIES + 2}`
     );
+  });
+
+  test("upsertRecentCity caps recents independently", () => {
+    installWindow();
+
+    for (let i = 0; i < MAX_RECENT_CITIES + 2; i += 1) {
+      upsertRecentCity(i, i, `Recent ${i}`, "");
+    }
+
+    const recentCities = getRecentCities();
+    assert.equal(recentCities.length, MAX_RECENT_CITIES);
+    assert.equal(recentCities[0].name, `Recent ${MAX_RECENT_CITIES + 1}`);
   });
 
   test("ignores invalid coordinates on upsert", () => {

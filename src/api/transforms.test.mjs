@@ -105,6 +105,28 @@ describe("normalizeWeatherResponse", () => {
     assert.equal(model.hourly.temperature[1], 70);
   });
 
+  test("preserves daily detail arrays used by the expandable forecast view", () => {
+    const model = normalizeWeatherResponse({
+      daily: {
+        time: ["2026-05-02"],
+        temperature_2m_max: [72],
+        temperature_2m_min: [54],
+        sunrise: ["2026-05-02T05:52:00-05:00"],
+        sunset: ["2026-05-02T19:48:00-05:00"],
+        uv_index_max: [7.4],
+        precipitation_probability_max: [58],
+        wind_speed_10m_max: [18],
+        wind_gusts_10m_max: [27],
+        wind_direction_10m_dominant: [235],
+      },
+    });
+
+    assert.deepEqual(model.daily.windSpeedMax, [18]);
+    assert.deepEqual(model.daily.windGustMax, [27]);
+    assert.deepEqual(model.daily.windDirectionDominant, [235]);
+    assert.deepEqual(model.daily.sunrise, ["2026-05-02T05:52:00-05:00"]);
+  });
+
   test("normalizes timezone fallback when missing or whitespace", () => {
     assert.equal(normalizeWeatherResponse({}).meta.timezone, "UTC");
     assert.equal(

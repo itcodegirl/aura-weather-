@@ -201,3 +201,23 @@ A future contributor who adds a new card or a new metric automatically
 inherits the strict-coercion contract because every helper they will
 reach for already enforces it. The tests will fail before the
 regression ships.
+
+## Latest product pass
+
+The next Aura pass made that trust story more visible in the day-to-day
+product experience instead of leaving it buried in implementation notes:
+
+- successful geolocation now upgrades from a generic "Current location"
+  label into a friendly nearby place name via reverse geocoding
+- the city picker now separates `Recent` switches from long-term `Saved`
+  places, which makes the app feel more like a daily tool than a demo
+- each daily forecast row now opens richer inline details for rain
+  chance, UV, wind, and sunrise/sunset without adding charting weight
+- the README now includes committed desktop/mobile screenshots plus a
+  simple architecture diagram so hiring managers can parse the product
+  and code story quickly
+
+That is a useful interview signal on its own: the project is not just
+"more features." It shows the ability to identify which changes make an
+already-solid app easier to trust, easier to navigate, and easier to
+evaluate as a piece of product engineering.

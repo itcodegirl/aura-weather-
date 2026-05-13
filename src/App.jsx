@@ -52,6 +52,7 @@ function App() {
     loadCurrentLocation,
     clearSavedLocation,
     savedCities,
+    recentCities,
     loadSavedCity,
     restoreSavedCity,
     forgetSavedCity,
@@ -144,6 +145,7 @@ function App() {
         loadCurrentLocation={loadCurrentLocation}
         clearSavedLocation={clearSavedLocation}
         savedCities={savedCities}
+        recentCities={recentCities}
         location={location}
         loadSavedCity={loadSavedCity}
         restoreSavedCity={restoreSavedCity}

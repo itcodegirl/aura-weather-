@@ -4,16 +4,17 @@
   align-items: center;
   gap: 14px 28px;
   margin-bottom: 28px;
-  padding: 16px 22px;
+  padding: 14px 18px;
   border-radius: var(--radius);
   border: var(--card-border);
-  backdrop-filter: blur(var(--card-backdrop-blur));
-  -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
   background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.10));
+    linear-gradient(180deg, rgba(18, 30, 54, 0.78), rgba(8, 16, 32, 0.72)),
+    linear-gradient(130deg, rgba(139, 211, 255, 0.06), rgba(246, 196, 83, 0.035) 58%, transparent 84%),
+    rgba(6, 14, 31, 0.58);
   box-shadow:
-    0 18px 40px rgba(30, 70, 120, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    0 18px 42px rgba(3, 10, 25, 0.3),
+    0 6px 16px rgba(17, 29, 59, 0.16),
+    inset 0 1px 0 rgba(228, 240, 255, 0.1);
   animation: header-settle var(--motion-slow) var(--ease-emphasis) both;
 }
 
@@ -34,7 +35,7 @@
   grid-area: brand;
   margin: 0;
   font-family: var(--font-display);
-  font-size: 33px;
+  font-size: 31px;
   font-weight: 680;
   line-height: 1;
   letter-spacing: 0;
@@ -50,11 +51,11 @@
 
 .tagline {
   grid-area: tag;
-  color: rgba(193, 207, 237, 0.85);
+  color: rgba(205, 218, 239, 0.88);
   font-size: 10px;
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: var(--track-loose);
+  letter-spacing: 0.13em;
   text-transform: uppercase;
 }
 
@@ -95,16 +96,6 @@
   align-items: flex-end;
 }
 
-/*
- * The Settings toggle is the entry point for mobile users to reveal
- * the secondary display controls (climate context, unit, clear startup).
- * On desktop the secondary controls stay inline and this button is
- * hidden — see the @media (min-width: 761px) rule below.
- */
-.mobile-settings-toggle {
-  display: none;
-}
-
 .saved-cities-strip {
   display: flex;
   align-items: center;
@@ -112,168 +103,47 @@
   flex-wrap: wrap;
 }
 
-.saved-city-undo {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  align-self: flex-start;
-  padding: 6px 10px 6px 12px;
-  border-radius: var(--radius-pill);
-  border: var(--border-strong);
-  background: var(--surface-3);
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  animation: settings-reveal var(--motion-medium) var(--ease-standard);
-}
-
-.saved-city-undo-text strong {
-  color: #f2f7ff;
-  font-weight: 700;
-  margin-left: 2px;
-}
-
-.saved-city-undo-action {
-  position: relative;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(174, 227, 255, 0.4);
-  background: rgba(255, 255, 255, 0.16);
-  color: #e3efff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  transition:
-    background var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard);
-}
-
-/* Vertical hit-area extender to reach a comfortable 40px tap height
- * while the pill keeps its dense 28px presence inline. */
-.saved-city-undo-action::before {
-  content: "";
-  position: absolute;
-  inset: -6px 0;
-  border-radius: inherit;
-}
-
-.saved-city-undo-action:hover {
-  background: rgba(255, 255, 255, 0.24);
-  border-color: rgba(174, 227, 255, 0.6);
-}
-
-.saved-city-undo-action:focus-visible {
-  outline: 2px solid var(--focus-outline);
-  outline-offset: 2px;
-}
-
-.saved-city-undo-action:active,
-.saved-city-undo-dismiss:active {
-  transform: scale(var(--press-scale));
-}
-
-.saved-city-undo-dismiss {
-  /* 32×32 keeps the dismiss control above the WCAG 2.5.5 spaced-target
-     equivalent (≥24, with sibling spacing) on desktop and we lift it to
-     a full 44 at the mobile breakpoint where targets cluster on touch. */
-  position: relative;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  color: rgba(186, 212, 252, 0.7);
-  font-size: 14px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Hit-area extender to lift the small dismiss glyph to a 40px touch
- * target without bleeding into the adjacent Undo button. */
-.saved-city-undo-dismiss::before {
-  content: "";
-  position: absolute;
-  inset: -8px;
-  border-radius: inherit;
-}
-
-.saved-city-undo-dismiss:hover {
-  color: #f2f7ff;
-  background: rgba(186, 212, 252, 0.16);
-}
-
 .saved-city-chip-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 4px;
+  gap: 3px;
+  padding: 2px 3px;
   border-radius: var(--radius-pill);
-  border: var(--border-default);
-  background: var(--surface-2);
+  border: 1px solid rgba(181, 210, 252, 0.26);
+  background: rgba(8, 17, 36, 0.5);
 }
 
 .saved-city-chip {
-  /* Touch targets: 36 baseline for desktop density, 44 at mobile to meet
-     WCAG 2.5.5 AA. The chip + adjacent remove button live in a wrapper
-     shell, so the chip body alone is what receives the city-selection
-     tap — it has to be the full size. */
-  min-height: 36px;
-  padding: 0 12px;
+  min-height: 32px;
+  padding: 0 10px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   color: rgba(224, 237, 255, 0.92);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: var(--track-tight);
-  display: inline-flex;
-  align-items: center;
+  letter-spacing: 0.04em;
   transition:
     background var(--motion-fast) var(--ease-standard),
     color var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard),
-    transform var(--motion-fast) var(--ease-standard);
+    border-color var(--motion-fast) var(--ease-standard);
 }
 
 .saved-city-chip.is-active,
-.saved-city-chip[aria-current="true"] {
-  color: var(--active-pill-color);
-  background: var(--active-pill-bg);
-}
-
-.saved-city-chip:active,
-.saved-city-remove:active {
-  transform: scale(var(--press-scale));
+.saved-city-chip[aria-pressed="true"] {
+  color: #061026;
+  background: linear-gradient(145deg, #f8fbff, #dbe9ff);
 }
 
 .saved-city-remove {
-  /* 32 desktop / 40 mobile (see media query below). The remove button
-     sits next to the chip in a single wrapper shell — close-cluster
-     targets that need WCAG 2.5.5 distinct hit areas. */
-  position: relative;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   color: rgba(237, 201, 201, 0.9);
   font-size: 14px;
   line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   transition:
     color var(--motion-fast) var(--ease-standard),
     background var(--motion-fast) var(--ease-standard);
-}
-
-/* Bump touch area above/below so the X stays comfortable to tap
- * without growing the visible chip. Vertical-only extension avoids
- * overlapping the adjacent saved-city-chip in the same wrap. */
-.saved-city-remove::before {
-  content: "";
-  position: absolute;
-  inset: -6px -2px;
-  border-radius: inherit;
 }
 
 .saved-city-remove:hover {
@@ -303,9 +173,9 @@
   align-items: center;
   gap: 8px;
   border-radius: var(--radius-sm);
-  border: var(--border-default);
-  background: var(--surface-2);
-  box-shadow: var(--subcard-shadow);
+  border: 1px solid rgba(185, 211, 250, 0.24);
+  background: rgba(7, 16, 35, 0.48);
+  box-shadow: inset 0 1px 0 rgba(228, 240, 255, 0.08);
   text-align: left;
   transition:
     border-color var(--motion-fast) var(--ease-standard),
@@ -315,8 +185,8 @@
 
 .sync-account-toggle:hover {
   border-color: rgba(166, 227, 255, 0.42);
-  background: var(--surface-3);
-  transform: translateY(var(--lift-1));
+  background: rgba(9, 20, 42, 0.62);
+  transform: translateY(-1px);
 }
 
 .sync-account-toggle-copy {
@@ -331,12 +201,12 @@
   min-height: 22px;
   padding: 0 8px;
   border-radius: var(--radius-pill);
-  border: var(--border-default);
-  background: var(--surface-3);
+  border: 1px solid rgba(178, 209, 252, 0.28);
+  background: rgba(8, 18, 39, 0.62);
   color: rgba(210, 227, 252, 0.9);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: var(--track-default);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -353,11 +223,11 @@
   display: grid;
   gap: 6px;
   width: 100%;
-  padding: var(--subcard-padding);
+  padding: 10px 11px;
   border-radius: var(--radius-sm);
-  border: var(--border-default);
-  background: var(--surface-2);
-  box-shadow: var(--subcard-shadow);
+  border: 1px solid rgba(185, 211, 250, 0.24);
+  background: rgba(7, 16, 35, 0.56);
+  box-shadow: inset 0 1px 0 rgba(228, 240, 255, 0.08);
 }
 
 .sync-account-title {
@@ -368,7 +238,7 @@
   color: rgba(212, 227, 252, 0.92);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: var(--track-default);
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
@@ -391,7 +261,7 @@
   color: rgba(184, 208, 245, 0.88);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: var(--track-tight);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -412,8 +282,8 @@
   min-height: 36px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
-  border: var(--border-strong);
-  background: var(--surface-2);
+  border: 1px solid rgba(186, 214, 252, 0.28);
+  background: rgba(8, 17, 38, 0.58);
   color: #e3efff;
   font-size: 11px;
   font-weight: 700;
@@ -426,13 +296,8 @@
 
 .sync-account-btn:hover {
   border-color: rgba(166, 227, 255, 0.5);
-  background: var(--surface-strong);
-  transform: translateY(var(--lift-1));
-}
-
-.sync-account-btn:active,
-.sync-account-toggle:active {
-  transform: scale(var(--press-scale));
+  background: rgba(10, 22, 48, 0.72);
+  transform: translateY(-1px);
 }
 
 .sync-account-btn:disabled,
@@ -442,14 +307,14 @@
 }
 
 .sync-account-btn:disabled:hover {
-  border-color: rgba(var(--border-base), 0.34);
-  background: var(--surface-2);
+  border-color: rgba(186, 214, 252, 0.28);
+  background: rgba(8, 17, 38, 0.58);
   transform: none;
 }
 
 .sync-account-btn--subtle {
   color: rgba(212, 226, 248, 0.92);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(8, 17, 37, 0.44);
 }
 
 .sync-account-input {
@@ -458,8 +323,8 @@
   min-width: 0;
   padding: 0 10px;
   border-radius: var(--radius-pill);
-  border: var(--border-default);
-  background: var(--surface-3);
+  border: 1px solid rgba(180, 209, 249, 0.28);
+  background: rgba(6, 14, 31, 0.64);
   color: #eef6ff;
   font-size: 12px;
   font-weight: 600;
@@ -470,7 +335,7 @@
 }
 
 .sync-account-input:focus-visible {
-  border-color: var(--focus-outline);
+  border-color: rgba(130, 228, 255, 0.66);
   box-shadow: 0 0 0 3px rgba(64, 196, 255, 0.2);
 }
 
@@ -504,7 +369,7 @@
   color: rgba(205, 221, 251, 0.9);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: var(--track-loose);
+  letter-spacing: 0.13em;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -512,9 +377,10 @@
 .unit-toggle,
 .toggle-pill,
 .current-location-btn,
+.settings-toggle,
 .header-secondary-action {
-  background: var(--surface-2);
-  border: var(--border-default);
+  background: rgba(8, 17, 38, 0.56);
+  border: 1px solid rgba(198, 218, 255, 0.24);
   box-shadow: inset 0 1px 0 rgba(226, 238, 255, 0.08);
 }
 
@@ -522,7 +388,7 @@
   display: flex;
   gap: 4px;
   padding: 4px 5px;
-  border-radius: var(--radius-md);
+  border-radius: 14px;
 }
 
 .unit-btn,
@@ -531,12 +397,11 @@
 .header-secondary-action {
   min-height: var(--header-control-height);
   min-width: 44px;
-  border-radius: var(--radius-control);
+  border-radius: 11px;
   font-size: 12px;
   letter-spacing: 0.03em;
   font-weight: 700;
   color: var(--text-muted);
-  white-space: nowrap;
   transition:
     background var(--motion-fast) var(--ease-standard),
     color var(--motion-fast) var(--ease-standard),
@@ -551,16 +416,16 @@
 .current-location-btn {
   min-width: 122px;
   padding: 0 18px;
-  border-radius: var(--radius-md);
-  letter-spacing: var(--track-tight);
+  border-radius: 14px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .header-secondary-action {
   min-width: 122px;
   padding: 0 14px;
-  border-radius: var(--radius-md);
-  letter-spacing: var(--track-tight);
+  border-radius: 14px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   font-size: 11px;
 }
@@ -589,9 +454,11 @@
 .toggle-pill-btn.is-active,
 .unit-btn[aria-pressed="true"],
 .toggle-pill-btn[aria-pressed="true"] {
-  color: var(--active-pill-color);
-  background: var(--active-pill-bg);
-  box-shadow: var(--active-pill-shadow);
+  color: #021127;
+  background: linear-gradient(145deg, #f9fcff, #d9eaff);
+  box-shadow:
+    0 6px 14px rgba(4, 12, 28, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52);
 }
 
 .toggle-pill {
@@ -599,7 +466,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 5px;
-  border-radius: var(--radius-md);
+  border-radius: 14px;
 }
 
 .toggle-pill-btn {
@@ -607,15 +474,16 @@
   padding: 0 14px;
   border: 1px solid transparent;
   text-transform: uppercase;
-  letter-spacing: var(--track-default);
+  letter-spacing: 0.08em;
 }
 
 .current-location-btn:hover,
 .unit-btn:hover,
 .toggle-pill-btn:hover,
+.settings-toggle:hover,
 .header-secondary-action:hover {
   color: #f8fbff;
-  transform: translateY(var(--lift-1));
+  transform: translateY(-1px);
   border-color: rgba(174, 227, 255, 0.44);
   box-shadow:
     0 8px 18px rgba(4, 12, 28, 0.26),
@@ -632,6 +500,7 @@
 .current-location-btn:active,
 .unit-btn:active,
 .toggle-pill-btn:active,
+.settings-toggle:active,
 .header-secondary-action:active {
   transform: scale(var(--press-scale));
 }
@@ -657,88 +526,55 @@
   box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.16);
 }
 
-/*
- * Drawer pattern for narrow-desktop and below. The audit flagged
- * the 980–1200 range: secondary controls (climate ctx, unit toggle,
- * clear-startup) stacked into a full-width second row, giving the
- * header three rows total (brand + primary + secondary) and pushing
- * the hero close to the fold on common 1280×720 / 1366×768 laptops.
- *
- * Solution: reuse the same Settings-drawer pattern that already runs
- * on mobile, but trigger it earlier — at ≤1200 — so narrow desktops
- * get a single-row primary plus a tucked-away secondary the user can
- * open on demand. Wide desktops (>1200) keep the inline secondary
- * row where there's actual horizontal room for it.
- */
-@media (max-width: 1200px) {
+@media (max-width: 980px) {
+  .app-header {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
   .app-header-actions {
-    flex-wrap: wrap;
     width: 100%;
-    gap: 8px;
   }
 
   .app-header-primary {
     flex: 1 1 100%;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-header {
+    padding: 12px;
   }
 
-  .mobile-settings-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    flex: 0 0 auto;
-    min-height: 44px;
-    padding: 0 14px;
-    border-radius: var(--radius-md);
-    border: var(--border-default);
-    background: var(--surface-2);
-    box-shadow: inset 0 1px 0 rgba(226, 238, 255, 0.08);
-    color: var(--text-muted);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: var(--track-tight);
-    text-transform: uppercase;
-    transition:
-      background var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard);
+  .app-header-actions {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+    justify-content: flex-start;
   }
 
-  .mobile-settings-toggle.is-open {
-    color: #f8fbff;
-    border-color: rgba(174, 227, 255, 0.5);
-    background: var(--surface-strong);
+  .app-header-primary {
+    width: 100%;
+    gap: 8px;
   }
 
-  .mobile-settings-toggle:focus-visible {
-    border-color: var(--focus-outline);
-    box-shadow:
-      0 0 0 3px rgba(64, 196, 255, 0.2),
-      inset 0 1px 0 rgba(229, 241, 255, 0.16);
-  }
-
-  .mobile-settings-toggle:active {
-    transform: scale(var(--press-scale));
+  .app-header-primary-row {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
   .app-header-secondary {
-    display: none;
+    display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     width: 100%;
-    flex: 1 1 100%;
-    gap: 10px;
-    margin-top: 4px;
-    padding: 12px;
-    border-radius: var(--radius-sm);
-    border: var(--border-default);
-    background: var(--surface-2);
-    box-shadow: var(--subcard-shadow);
-    animation: settings-reveal var(--motion-medium) var(--ease-standard);
+    gap: 8px;
   }
 
-  .app-header-secondary.is-mobile-open {
-    display: flex;
+  .settings-toggle {
+    display: none;
   }
 
   .app-header-secondary .toggle-pill,
@@ -766,46 +602,6 @@
   }
 }
 
-@media (max-width: 980px) {
-  .app-header {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 14px 16px;
-  }
-
-  .app-header-primary {
-    gap: 8px;
-  }
-}
-
-@media (max-width: 760px) {
-  .app-header {
-    padding: 12px;
-  }
-
-  .tagline {
-    display: none;
-  }
-
-  .brand-wrap {
-    grid-template-areas: "mark brand";
-  }
-
-  .app-header-actions {
-    justify-content: flex-start;
-  }
-
-  .app-header-primary {
-    width: 100%;
-    gap: 8px;
-  }
-
-  .app-header-primary-row {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-}
-
 @media (max-width: 560px) {
   .app-header-actions {
     gap: 8px;
@@ -813,20 +609,10 @@
 
   .current-location-btn,
   .toggle-pill-btn,
+  .settings-toggle,
   .unit-btn,
   .header-secondary-action {
-    min-height: 44px;
-  }
-
-  .saved-city-chip {
-    min-height: 44px;
-    padding: 0 14px;
-  }
-
-  .saved-city-remove,
-  .saved-city-undo-dismiss {
-    width: 40px;
-    height: 40px;
+    min-height: 40px;
   }
 }
 
@@ -855,6 +641,12 @@
     padding: 0 12px;
   }
 
+  .settings-toggle {
+    min-width: 82px;
+    padding: 0 12px;
+    margin-left: 0;
+  }
+
   .app-header-secondary {
     gap: 6px;
   }
@@ -864,16 +656,15 @@
   }
 
   .saved-city-chip {
-    /* The 560px rule above lifts to 44 for WCAG 2.5.5; we keep that
-       through the 420 tier rather than regressing. Trim padding only. */
-    padding: 0 12px;
-    font-size: 11px;
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 10px;
   }
 
   .saved-city-remove {
-    /* 40×40 retained from 560 rule — touch ergonomics matter more
-       than horizontal density on a 4" phone. */
-    font-size: 13px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
   }
 
   .sync-account-panel {
@@ -903,6 +694,7 @@
   .current-location-btn:hover,
   .unit-btn:hover,
   .toggle-pill-btn:hover,
+  .settings-toggle:hover,
   .header-secondary-action:hover {
     transform: none;
   }
@@ -910,6 +702,6 @@
 
 @media (prefers-contrast: more) {
   .app-header {
-    background: rgba(20, 44, 72, 0.95);
+    background: rgba(4, 11, 25, 0.9);
   }
 }

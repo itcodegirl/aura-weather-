@@ -1,7 +1,9 @@
-import { CalendarDays, Droplets } from "lucide-react";
-import { memo, useMemo } from "react";
+import { CalendarDays, ChevronDown, Droplets } from "lucide-react";
+import { memo, useCallback, useMemo, useState } from "react";
+import { formatWindSpeed, windDirectionName } from "../domain/wind";
 import { getWeather } from "../domain/weatherCodes";
 import { formatDayLabel, parseLocalDate } from "../utils/dates";
+import { formatSunClock } from "../utils/sunlight";
 import { convertTemp } from "../utils/temperature";
 import {
   MISSING_VALUE_PLACEHOLDER,
@@ -83,6 +85,22 @@ function buildForecastDays(weatherDaily) {
   const precipProbabilities = Array.isArray(weatherDaily.rainChanceMax)
     ? weatherDaily.rainChanceMax
     : [];
+  const sunrises = Array.isArray(weatherDaily.sunrise) ? weatherDaily.sunrise : [];
+  const sunsets = Array.isArray(weatherDaily.sunset) ? weatherDaily.sunset : [];
+  const uvIndexMaxValues = Array.isArray(weatherDaily.uvIndexMax)
+    ? weatherDaily.uvIndexMax
+    : [];
+  const windSpeedMaxValues = Array.isArray(weatherDaily.windSpeedMax)
+    ? weatherDaily.windSpeedMax
+    : [];
+  const windGustMaxValues = Array.isArray(weatherDaily.windGustMax)
+    ? weatherDaily.windGustMax
+    : [];
+  const windDirectionDominantValues = Array.isArray(
+    weatherDaily.windDirectionDominant
+  )
+    ? weatherDaily.windDirectionDominant
+    : [];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -96,6 +114,12 @@ function buildForecastDays(weatherDaily) {
       rainChanceMax: clampPercent(
         toFiniteNumber(precipProbabilities[index])
       ),
+      sunrise: typeof sunrises[index] === "string" ? sunrises[index] : "",
+      sunset: typeof sunsets[index] === "string" ? sunsets[index] : "",
+      uvIndexMax: toFiniteNumber(uvIndexMaxValues[index]),
+      windSpeedMax: toFiniteNumber(windSpeedMaxValues[index]),
+      windGustMax: toFiniteNumber(windGustMaxValues[index]),
+      windDirectionDominant: toFiniteNumber(windDirectionDominantValues[index]),
     }))
     .filter((day) => Number.isFinite(day.temperatureMax) || Number.isFinite(day.temperatureMin))
     .filter((day) => {
@@ -114,7 +138,57 @@ function getForecastRangeGradient(weekMin, weekMax) {
   return `linear-gradient(to right, ${rangeGradientStart}, ${rangeGradientEnd})`;
 }
 
-function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
+function formatUvIndex(value) {
+  if (!Number.isFinite(value)) {
+    return MISSING_VALUE_PLACEHOLDER;
+  }
+
+  return value >= 10 ? String(Math.round(value)) : value.toFixed(1);
+}
+
+function formatWindSummary(day, unit) {
+  const speed = toFiniteNumber(day.windSpeedMax);
+  if (!Number.isFinite(speed)) {
+    return {
+      value: MISSING_VALUE_PLACEHOLDER,
+      detail: "",
+      isMissing: true,
+    };
+  }
+
+  const direction = windDirectionName(day.windDirectionDominant);
+  const gust = toFiniteNumber(day.windGustMax);
+
+  return {
+    value: `${direction} ${formatWindSpeed(speed, unit)}`,
+    detail: Number.isFinite(gust) ? `Gusts ${formatWindSpeed(gust, unit)}` : "",
+    isMissing: false,
+  };
+}
+
+function DetailMetric({ label, value, detail = "", isMissing = false }) {
+  return (
+    <div className="forecast-detail-metric">
+      <dt className="forecast-detail-label">{label}</dt>
+      <dd
+        className={`forecast-detail-value${isMissing ? " is-missing" : ""}`}
+      >
+        {value}
+      </dd>
+      {detail ? <span className="forecast-detail-note">{detail}</span> : null}
+    </div>
+  );
+}
+
+function DayRow({
+  day,
+  weekMin,
+  weekMax,
+  unit,
+  rangeGradient,
+  isExpanded,
+  onToggle,
+}) {
   const info = getWeather(day.conditionCode);
   const label = formatDayLabel(day.date);
   const high = formatForecastTemp(day.temperatureMax, unit);
@@ -133,92 +207,167 @@ function DayRow({ day, weekMin, weekMax, unit, rangeGradient }) {
   const endPct = Number.isFinite(day.temperatureMax)
     ? clamp(((day.temperatureMax - weekMin) / weekRange) * 100, 0, 100)
     : 0;
+  const detailPanelId = `forecast-detail-${day.date}`;
+  const windSummary = formatWindSummary(day, unit);
+  const sunriseLabel = formatSunClock(day.sunrise);
+  const sunsetLabel = formatSunClock(day.sunset);
 
   return (
-    <li className="forecast-row" role="listitem">
-      <div className="forecast-day-wrap">
-        <div className="forecast-day">{label}</div>
-        <div className="forecast-day-meta">
-          <div className="forecast-condition">{info.label}</div>
-          <span className={`forecast-signal-chip forecast-signal-chip--${daySignal.tone}`}>
-            {daySignal.label}
-          </span>
-        </div>
-      </div>
-
-      <div className="forecast-icon" role="img" aria-label={info.label}>
-        <WeatherIcon code={day.conditionCode} size={22} />
-      </div>
-
-      <div
-        className="forecast-temps"
-        role="group"
-        aria-label={`High ${high.ariaText}, low ${low.ariaText}`}
+    <li
+      className={`forecast-row${isExpanded ? " is-expanded" : ""}`}
+      role="listitem"
+    >
+      <button
+        type="button"
+        className="forecast-row-trigger"
+        aria-expanded={isExpanded}
+        aria-controls={detailPanelId}
+        aria-label={`${isExpanded ? "Hide" : "Show"} forecast details for ${label}`}
+        onClick={() => onToggle(day.date)}
       >
-        <div className="forecast-temp forecast-temp--high">
-          <span className="forecast-temp-label">High</span>
-          <span
-            className={`forecast-temp-value ${high.isMissing ? "is-missing" : ""}`.trim()}
-            aria-label={high.isMissing ? "High unavailable" : undefined}
-          >
-            {high.text}
-          </span>
-        </div>
-        <span className="forecast-temp-divider" aria-hidden="true" />
-        <div className="forecast-temp forecast-temp--low">
-          <span className="forecast-temp-label">Low</span>
-          <span
-            className={`forecast-temp-value ${low.isMissing ? "is-missing" : ""}`.trim()}
-            aria-label={low.isMissing ? "Low unavailable" : undefined}
-          >
-            {low.text}
-          </span>
-        </div>
-      </div>
-
-      <div
-        className={`forecast-range ${hasTemperatureRange ? "" : "forecast-range--missing"}`.trim()}
-        aria-hidden="true"
-      >
-        {hasTemperatureRange ? (
-          <div
-            className="forecast-range-bar"
-            style={{
-              left: `${startPct}%`,
-              width: `${Math.max(endPct - startPct, 3)}%`,
-              background: rangeGradient,
-            }}
-          />
-        ) : null}
-      </div>
-
-      <div
-        className="forecast-precip"
-        aria-label={
-          hasNotableRainChance
-            ? `Rain chance ${rainChance} percent`
-            : !hasRainChance
-              ? "Rain chance unavailable"
-            : "Low rain chance"
-        }
-      >
-        {hasNotableRainChance ? (
-          <>
-            <Droplets size={11} aria-hidden="true" />
-            <span className="forecast-precip-value" aria-hidden="true">
-              {rainChance}%
+        <div className="forecast-day-wrap">
+          <div className="forecast-day">{label}</div>
+          <div className="forecast-day-meta">
+            <div className="forecast-condition">{info.label}</div>
+            <span className={`forecast-signal-chip forecast-signal-chip--${daySignal.tone}`}>
+              {daySignal.label}
             </span>
-          </>
-        ) : !hasRainChance ? (
-          <span className="forecast-precip-empty is-missing" aria-hidden="true">
-            {MISSING_VALUE_PLACEHOLDER}
-          </span>
-        ) : (
-          <span className="forecast-precip-empty" aria-hidden="true">
-            Low
-          </span>
-        )}
-      </div>
+          </div>
+        </div>
+
+        <div className="forecast-icon" role="img" aria-label={info.label}>
+          <WeatherIcon code={day.conditionCode} size={22} />
+        </div>
+
+        <div
+          className="forecast-temps"
+          role="group"
+          aria-label={`High ${high.ariaText}, low ${low.ariaText}`}
+        >
+          <div className="forecast-temp forecast-temp--high">
+            <span className="forecast-temp-label">High</span>
+            <span
+              className={`forecast-temp-value ${high.isMissing ? "is-missing" : ""}`.trim()}
+              aria-label={high.isMissing ? "High unavailable" : undefined}
+            >
+              {high.text}
+            </span>
+          </div>
+          <span className="forecast-temp-divider" aria-hidden="true" />
+          <div className="forecast-temp forecast-temp--low">
+            <span className="forecast-temp-label">Low</span>
+            <span
+              className={`forecast-temp-value ${low.isMissing ? "is-missing" : ""}`.trim()}
+              aria-label={low.isMissing ? "Low unavailable" : undefined}
+            >
+              {low.text}
+            </span>
+          </div>
+        </div>
+
+        <div
+          className={`forecast-range ${hasTemperatureRange ? "" : "forecast-range--missing"}`.trim()}
+          aria-hidden="true"
+        >
+          {hasTemperatureRange ? (
+            <div
+              className="forecast-range-bar"
+              style={{
+                left: `${startPct}%`,
+                width: `${Math.max(endPct - startPct, 3)}%`,
+                background: rangeGradient,
+              }}
+            />
+          ) : null}
+        </div>
+
+        <div
+          className="forecast-precip"
+          aria-label={
+            hasNotableRainChance
+              ? `Rain chance ${rainChance} percent`
+              : !hasRainChance
+                ? "Rain chance unavailable"
+              : "Low rain chance"
+          }
+        >
+          {hasNotableRainChance ? (
+            <>
+              <Droplets size={11} aria-hidden="true" />
+              <span className="forecast-precip-value" aria-hidden="true">
+                {rainChance}%
+              </span>
+            </>
+          ) : !hasRainChance ? (
+            <span className="forecast-precip-empty is-missing" aria-hidden="true">
+              {MISSING_VALUE_PLACEHOLDER}
+            </span>
+          ) : (
+            <span className="forecast-precip-empty" aria-hidden="true">
+              Low
+            </span>
+          )}
+        </div>
+
+        <span
+          className={`forecast-row-chevron${isExpanded ? " is-expanded" : ""}`}
+          aria-hidden="true"
+        >
+          <ChevronDown size={16} />
+        </span>
+      </button>
+
+      {isExpanded ? (
+        <div
+          id={detailPanelId}
+          className="forecast-detail-panel"
+          role="region"
+          aria-label={`${label} forecast details`}
+        >
+          <dl className="forecast-detail-grid">
+            <DetailMetric
+              label="Rain chance"
+              value={
+                hasRainChance ? `${rainChance}%` : MISSING_VALUE_PLACEHOLDER
+              }
+              detail={hasRainChance && rainChance >= 50 ? "Bring rain gear" : ""}
+              isMissing={!hasRainChance}
+            />
+            <DetailMetric
+              label="Peak UV"
+              value={formatUvIndex(day.uvIndexMax)}
+              detail={
+                Number.isFinite(day.uvIndexMax) && day.uvIndexMax >= 6
+                  ? "Sun protection recommended"
+                  : ""
+              }
+              isMissing={!Number.isFinite(day.uvIndexMax)}
+            />
+            <DetailMetric
+              label="Wind"
+              value={windSummary.value}
+              detail={windSummary.detail}
+              isMissing={windSummary.isMissing}
+            />
+            <DetailMetric
+              label="Sunrise"
+              value={sunriseLabel}
+              isMissing={sunriseLabel === MISSING_VALUE_PLACEHOLDER}
+            />
+            <DetailMetric
+              label="Sunset"
+              value={sunsetLabel}
+              isMissing={sunsetLabel === MISSING_VALUE_PLACEHOLDER}
+            />
+            <DetailMetric
+              label="Range"
+              value={`${high.text} / ${low.text}`}
+              detail="Daytime high and overnight low"
+              isMissing={high.isMissing && low.isMissing}
+            />
+          </dl>
+        </div>
+      ) : null}
     </li>
   );
 }
@@ -261,6 +410,7 @@ function ForecastCard({
   style,
   isRefreshing = false,
 }) {
+  const [expandedDate, setExpandedDate] = useState(null);
   const days = useMemo(
     () => buildForecastDays(weather?.daily),
     [weather?.daily]
@@ -287,6 +437,9 @@ function ForecastCard({
     () => buildWeekSummary(days, weekMin, weekMax, unit),
     [days, weekMin, weekMax, unit]
   );
+  const handleToggleDay = useCallback((date) => {
+    setExpandedDate((currentDate) => (currentDate === date ? null : date));
+  }, []);
 
   if (!days.length) {
     return (
@@ -347,6 +500,8 @@ function ForecastCard({
             weekMax={weekMax}
             unit={unit}
             rangeGradient={rangeGradient}
+            isExpanded={expandedDate === day.date}
+            onToggle={handleToggleDay}
           />
         ))}
       </ul>
@@ -361,11 +516,19 @@ const MemoizedDayRow = memo(
     prevProps.weekMin === nextProps.weekMin &&
     prevProps.weekMax === nextProps.weekMax &&
     prevProps.rangeGradient === nextProps.rangeGradient &&
+    prevProps.isExpanded === nextProps.isExpanded &&
+    prevProps.onToggle === nextProps.onToggle &&
     prevProps.day.date === nextProps.day.date &&
     prevProps.day.conditionCode === nextProps.day.conditionCode &&
     prevProps.day.temperatureMax === nextProps.day.temperatureMax &&
     prevProps.day.temperatureMin === nextProps.day.temperatureMin &&
-    prevProps.day.rainChanceMax === nextProps.day.rainChanceMax
+    prevProps.day.rainChanceMax === nextProps.day.rainChanceMax &&
+    prevProps.day.sunrise === nextProps.day.sunrise &&
+    prevProps.day.sunset === nextProps.day.sunset &&
+    prevProps.day.uvIndexMax === nextProps.day.uvIndexMax &&
+    prevProps.day.windSpeedMax === nextProps.day.windSpeedMax &&
+    prevProps.day.windGustMax === nextProps.day.windGustMax &&
+    prevProps.day.windDirectionDominant === nextProps.day.windDirectionDominant
 );
 
 export default memo(

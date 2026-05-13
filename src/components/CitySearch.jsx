@@ -1,6 +1,7 @@
 // src/components/CitySearch.jsx
 
 import {
+  Fragment,
   useId,
   forwardRef,
   useImperativeHandle,
@@ -29,43 +30,93 @@ function getCityKey(city, index) {
   return `${safeLat}:${safeLon}:${cityId}:${index}`;
 }
 
-function CitySearch({ onSelect, savedCities }, ref) {
+function toSuggestionCity(city, index, options = {}) {
+  const lat = toFiniteNumber(city?.lat);
+  const lon = toFiniteNumber(city?.lon);
+  if (lat === null || lon === null) {
+    return null;
+  }
+
+  const fallbackName =
+    typeof options.fallbackName === "string" && options.fallbackName.trim()
+      ? options.fallbackName.trim()
+      : "Saved place";
+  const name =
+    typeof city?.name === "string" && city.name.trim()
+      ? city.name.trim()
+      : fallbackName;
+  const country =
+    typeof city?.country === "string" ? city.country.trim() : "";
+
+  return {
+    id: `${options.idPrefix ?? "saved"}-${lat}:${lon}:${index}`,
+    name,
+    country,
+    latitude: lat,
+    longitude: lon,
+    sourceGroup: options.sourceGroup ?? "",
+    sourceLabel: options.sourceLabel ?? "",
+  };
+}
+
+function getSuggestionCoordsKey(city) {
+  const lat = toFiniteNumber(city?.lat ?? city?.latitude);
+  const lon = toFiniteNumber(city?.lon ?? city?.longitude);
+  if (lat === null || lon === null) {
+    return null;
+  }
+
+  return `${lat.toFixed(4)}:${lon.toFixed(4)}`;
+}
+
+function CitySearch({ onSelect, savedCities, recentCities }, ref) {
   const id = useId();
   const dropdownId = `${id}-dropdown`;
   const resultsId = `${id}-results`;
   const statusId = `${id}-status`;
   const optionIdPrefix = `${id}-option`;
-  const savedCitySuggestions = useMemo(
-    () =>
-      (Array.isArray(savedCities) ? savedCities : [])
-        .map((city, index) => {
-          const lat = toFiniteNumber(city?.lat);
-          const lon = toFiniteNumber(city?.lon);
-          if (lat === null || lon === null) {
-            return null;
+  const idleSuggestions = useMemo(
+    () => {
+      const nextSuggestions = [];
+      const seen = new Set();
+
+      function appendSuggestions(cities, options) {
+        (Array.isArray(cities) ? cities : []).forEach((city, index) => {
+          const suggestion = toSuggestionCity(city, index, options);
+          if (!suggestion) {
+            return;
           }
 
-          const name =
-            typeof city?.name === "string" && city.name.trim()
-              ? city.name.trim()
-              : "Saved place";
-          const country =
-            typeof city?.country === "string" ? city.country.trim() : "";
+          const coordsKey = getSuggestionCoordsKey(suggestion);
+          if (!coordsKey || seen.has(coordsKey)) {
+            return;
+          }
 
-          return {
-            id: `saved-${lat}:${lon}:${index}`,
-            name,
-            country,
-            latitude: lat,
-            longitude: lon,
-            sourceLabel: "Saved city",
-          };
-        })
-        .filter(Boolean),
-    [savedCities]
+          seen.add(coordsKey);
+          nextSuggestions.push(suggestion);
+        });
+      }
+
+      appendSuggestions(recentCities, {
+        idPrefix: "recent",
+        sourceGroup: "Recent",
+        sourceLabel: "Recent search",
+        fallbackName: "Recent place",
+      });
+      appendSuggestions(savedCities, {
+        idPrefix: "saved",
+        sourceGroup: "Saved",
+        sourceLabel: "Saved city",
+        fallbackName: "Saved place",
+      });
+
+      return nextSuggestions;
+    },
+    [recentCities, savedCities]
   );
   const {
     query,
+    normalizedQuery,
     results,
     loading,
     error,
@@ -81,7 +132,7 @@ function CitySearch({ onSelect, savedCities }, ref) {
     handleKeyDown,
     handleBlur,
     handleClear,
-  } = useCitySearch({ onSelect, idleResults: savedCitySuggestions });
+  } = useCitySearch({ onSelect, idleResults: idleSuggestions });
 
   const activeDescendant =
     showDropdown && activeIndexSafe >= 0
@@ -89,6 +140,13 @@ function CitySearch({ onSelect, savedCities }, ref) {
       : undefined;
   const hasResultOptions = results.length > 0;
   const shouldShowStatus = loading || Boolean(error) || canShowNoResults;
+  const shouldShowIdleGroups = normalizedQuery.length === 0;
+  const shouldShowIdleEmptyState =
+    showDropdown &&
+    !loading &&
+    !error &&
+    normalizedQuery.length === 0 &&
+    !hasResultOptions;
 
   const handleInputFocus = useCallback(() => {
     setOpen(true);
@@ -235,40 +293,75 @@ function CitySearch({ onSelect, savedCities }, ref) {
               onMouseDown={handleResultListMouseDown}
             >
               {results.map((city, index) => {
-              const name = typeof city?.name === "string" ? city.name : "Unnamed location";
-              const admin1 = typeof city?.admin1 === "string" ? city.admin1 : "";
-              const country = typeof city?.country === "string" ? city.country : "";
-              const sourceLabel =
-                typeof city?.sourceLabel === "string" ? city.sourceLabel : "";
-              const meta = [sourceLabel, admin1, country]
-                .filter(Boolean)
-                .join(" \u00B7 ");
-              const optionLabel = `${name}${meta ? `, ${meta}` : ""}`;
+                const name =
+                  typeof city?.name === "string" ? city.name : "Unnamed location";
+                const admin1 =
+                  typeof city?.admin1 === "string" ? city.admin1 : "";
+                const country =
+                  typeof city?.country === "string" ? city.country : "";
+                const sourceLabel =
+                  typeof city?.sourceLabel === "string" ? city.sourceLabel : "";
+                const sourceGroup =
+                  typeof city?.sourceGroup === "string" ? city.sourceGroup : "";
+                const showGroupLabel =
+                  shouldShowIdleGroups &&
+                  Boolean(sourceGroup) &&
+                  sourceGroup !==
+                    (typeof results[index - 1]?.sourceGroup === "string"
+                      ? results[index - 1].sourceGroup
+                      : "");
+                const meta = [
+                  shouldShowIdleGroups ? "" : sourceLabel,
+                  admin1,
+                  country,
+                ]
+                  .filter(Boolean)
+                  .join(" \u00B7 ");
+                const accessibleMeta = [sourceGroup || sourceLabel, admin1, country]
+                  .filter(Boolean)
+                  .join(" \u00B7 ");
+                const optionLabel = `${name}${accessibleMeta ? `, ${accessibleMeta}` : ""}`;
 
-              return (
-                <li
-                  key={getCityKey(city, index)}
-                  id={`${optionIdPrefix}-${index}`}
-                  className={`city-search-result${index === activeIndexSafe ? " is-active" : ""}`}
-                  data-index={index}
-                  aria-label={optionLabel}
-                  aria-selected={index === activeIndexSafe}
-                  role="option"
-                  onMouseEnter={handleRowMouseEnter}
-                  onMouseDown={handleRowMouseDown}
-                  onClick={handleRowSelect}
-                >
-                  <MapPin size={14} className="city-search-result-icon" />
-                  <div className="city-search-result-text">
-                    <div className="city-search-result-name">{name}</div>
-                    <div className="city-search-result-meta">
-                      {meta && <span>{meta}</span>}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
+                return (
+                  <Fragment key={getCityKey(city, index)}>
+                    {showGroupLabel && (
+                      <li className="city-search-group" role="presentation">
+                        <span className="city-search-group-label">{sourceGroup}</span>
+                      </li>
+                    )}
+                    <li
+                      id={`${optionIdPrefix}-${index}`}
+                      className={`city-search-result${index === activeIndexSafe ? " is-active" : ""}`}
+                      data-index={index}
+                      aria-label={optionLabel}
+                      aria-selected={index === activeIndexSafe}
+                      role="option"
+                      onMouseEnter={handleRowMouseEnter}
+                      onMouseDown={handleRowMouseDown}
+                      onClick={handleRowSelect}
+                    >
+                      <MapPin size={14} className="city-search-result-icon" />
+                      <div className="city-search-result-text">
+                        <div className="city-search-result-name">{name}</div>
+                        <div className="city-search-result-meta">
+                          {meta && <span>{meta}</span>}
+                        </div>
+                      </div>
+                    </li>
+                  </Fragment>
+                );
+              })}
             </ul>
+          )}
+
+          {shouldShowIdleEmptyState && (
+            <div
+              className="city-search-empty-hint"
+              role="status"
+              aria-live="polite"
+            >
+              Recent and saved places will show up here after you switch cities.
+            </div>
           )}
         </div>
       )}

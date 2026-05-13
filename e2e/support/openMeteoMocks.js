@@ -114,6 +114,9 @@ function buildWeatherPayload(latitude, longitude) {
       uv_index_max: [7.2, 6.8, 7.4, 6.2, 5.9, 6.1, 7.0],
       precipitation_probability_max: [22, 30, 68, 44, 20, 18, 28],
       precipitation_sum: [0.02, 0.04, 0.31, 0.12, 0.01, 0.0, 0.05],
+      wind_speed_10m_max: [14, 16, 22, 18, 13, 12, 15],
+      wind_gusts_10m_max: [21, 24, 31, 27, 20, 18, 22],
+      wind_direction_10m_dominant: [220, 235, 250, 210, 185, 170, 205],
     },
     minutely_15: {
       time: nowcastTime,
@@ -255,6 +258,37 @@ export async function installOpenMeteoMocks(page) {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ results }),
+    });
+  });
+
+  await page.route("https://nominatim.openstreetmap.org/reverse**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+    const latitude = Number(requestUrl.searchParams.get("lat"));
+    const longitude = Number(requestUrl.searchParams.get("lon"));
+
+    let city = "Current location";
+    let country = "";
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      if (latitude > 40 && longitude < -70) {
+        city = "Crystal Lake";
+        country = "United States";
+      } else if (latitude > 30 && longitude > 100) {
+        city = "Tokyo";
+        country = "Japan";
+      }
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        name: city,
+        display_name: `${city}, ${country}`.trim(),
+        address: {
+          city,
+          country,
+        },
+      }),
     });
   });
 }

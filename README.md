@@ -1,51 +1,41 @@
 # Aura Weather
 
-Aura Weather is a React weather dashboard built around fast scanning, atmospheric context, and resilient client-side API handling.
+Aura Weather is a polished React weather dashboard built for fast scanning, resilient data handling, and a calm day-planning experience.
 
-It is designed as a portfolio project with real frontend concerns in scope:
-
-- live weather, geocoding, air quality, and optional climate context
-- responsive dashboard behavior from desktop down to small mobile screens
-- accessible search, controls, and status messaging
-- defensive API fallbacks for unsupported or degraded data sources
-- automated smoke, visual regression, and unit coverage
+The portfolio story is simple: **Aura never turns missing provider data into fake certainty.** If Open-Meteo returns a missing reading, the UI shows that value as unavailable, explains why, and keeps the rest of the forecast usable.
 
 ## Live Demo
 
 - Production: [aura-weather-platform.netlify.app](https://aura-weather-platform.netlify.app/)
 - Local dev: `npm run dev`
+- Trust-contract demo: open `/?mock=missing`
 
-## Product Highlights
+## Feature Snapshot
 
-- Immediate fallback forecast for Chicago on first load, with optional location permission instead of a stalled geolocation wait
-- Current conditions, hourly outlook, rain guidance, risk signals, and 7-day forecast in one surface
-- One-line atmospheric reading above the temperature that surfaces only when something specific is worth saying — severe alerts, imminent rain with clock + probability, high UV, gusts, temp extremes, golden hour. Returns silent on a calm dry day instead of generic filler
-- URL-shareable forecasts via `?lat=&lon=&name=&country=` — open the app at any saved or shared coordinate; the active location mirrors back to the URL via `history.replaceState` for a refresh-and-share workflow
-- Earned sunrise/sunset wash on the hero card within ±30 minutes of the day's golden hours; invisible the rest of the day
-- Earned precipitation particle layer that drifts behind the bento only when the current code is rain or snow; suppressed under reduced motion, reduced transparency, or reduced data
-- Single global `Updated · live` pill that doubles as a manual refresh button — no per-card freshness clutter, one source of truth
-- Six-second `Removed Tokyo · Undo` banner on saved-city deletion that restores the chip without switching the active forecast
-- Open-Meteo powered weather, air quality, geocoding, and archive data
-- NOAA / NWS severe alerts with explicit unsupported-region fallback messaging
-- Transient retries for forecast, geocoding, AQI, alerts, and archive requests without blocking the core forecast
-- Last-known forecast restore for offline starts, capped to a daily freshness window so stale weather is not presented as useful guidance
-- Storage quota guard that evicts the oldest cached forecast and retries once on `QuotaExceededError`
-- Saved cities, persisted location preference, and optional cloud sync that appears once there is something to sync
-- Installable PWA metadata, install prompt handling, and a service worker that restores the app shell after a first online visit
-- Per-card `Try again` button on lazy-chunk failures so a flaky StormWatch / HourlyChart fetch can recover without a page reload
-- Dynamic `theme-color` meta tag that mirrors the active scene gradient so the iOS / Android browser chrome bar blends with the app
-- `viewport-fit=cover` plus `env(safe-area-inset-*)` padding so notched iPhones do not overlap the home indicator
-- Narrow-viewport Settings drawer (≤1200px) collapses the secondary controls (climate context, unit, clear startup) behind one button, keeping search, my-location, and saved cities reachable in one row
-- StormWatch is dynamically titled: reads `Atmosphere` with a calm icon when CAPE is below the storm-risk threshold, promotes to `Storm watch` only when there's an actual signal — the four detail modules (storm risk, pressure trend, wind, comfort) sit below in a single grid with no duplicate snapshot row
-- Source Health (provider freshness across forecast, air quality, alerts, and historical comparison) lives in a closed-by-default `Where this data comes from` disclosure below the bento
-- Climate-context line is suppressed when the historical delta is under 5°F so a 1-degree noise day does not get a paragraph
-- Storm Risk panel reads `All clear` with no meter and no CAPE jargon when the score is 0
-- Temperature-unit changes stay local to the UI instead of forcing fresh forecast/climate requests
-- Keyboard-friendly city search with async cancellation, combobox/listbox behavior, and mobile keyboard hints (`inputmode="search"`, `autoCapitalize="words"`)
-- Saved cities appear inside the search dropdown on focus for quick repeat switching
-- Search feedback shows a real loading state before any empty-result messaging appears
-- Startup-city controls only appear when a startup preference actually exists, reducing first-load clutter
-- Reduced-motion-safe card rendering, `prefers-reduced-transparency` honored on the frosted glass surfaces, and deferred loading for lower-priority dashboard panels
+- Search any city with an abortable, keyboard-friendly combobox.
+- Resolve browser GPS into a friendly place label instead of a generic "Current location" tag.
+- Show `Recent` and `Saved` locations as distinct sections in the search dropdown.
+- View current conditions, hourly outlook, rain guidance, risk signals, and a 7-day forecast.
+- Expand any forecast day for high/low, rain chance, UV, wind, and sunrise/sunset details.
+- Compare today's temperature against historical Open-Meteo archive context when available.
+- See NOAA/NWS severe-alert coverage with explicit unsupported-region messaging.
+- Restore a last-known forecast on offline starts without pretending stale data is fresh.
+- Save cities, persist a startup location, and optionally sync saved locations.
+- Toggle Fahrenheit/Celsius locally without refetching forecast data.
+- Install the app shell as a PWA after a first successful production visit.
+
+## Screenshots
+
+Screenshots are committed and regenerated by Playwright instead of hand-captured so the portfolio images stay reproducible.
+
+![Aura Weather desktop dashboard](docs/screenshots/dashboard-desktop.png)
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-mobile.png" alt="Aura Weather mobile dashboard" width="31%" />
+  <img src="docs/screenshots/trust-contract-desktop.png" alt="Aura Weather trust contract state" width="66%" />
+</p>
+
+Regenerate with `npm run screenshots`.
 
 ## Tech Stack
 
@@ -54,15 +44,28 @@ It is designed as a portfolio project with real frontend concerns in scope:
 - Lucide React
 - Plain CSS
 - Playwright + axe-core
-- Open-Meteo APIs (forecast, archive, air quality, geocoding); NOAA / NWS alerts; BigDataCloud reverse geocoding
+- Open-Meteo APIs
 
-## Project Structure
+## Technical Highlights
+
+- **Data trust contract:** strict numeric parsing prevents `Number(null) === 0` bugs from becoming fake weather readings.
+- **Independent fetch lifecycles:** forecast, AQI/alerts, and climate archive requests can succeed or fail separately.
+- **Accessible dashboard states:** loading, cached, unavailable, unsupported, and missing-data states are visible and announced.
+- **Portfolio-grade QA:** unit, render, E2E, visual regression, axe, and Lighthouse checks cover the core experience.
+
+## Architecture at a Glance
+
+```mermaid
+flowchart LR
+  A["components<br/>HeroCard, ForecastCard, CitySearch"] --> B["hooks<br/>useWeather, useLocation, useCitySearch"]
+  B --> C["api / services<br/>openMeteo, weatherSnapshotCache, savedLocationsSync"]
+  C --> D["utils / domain<br/>dates, units, trust parsing, weather rules"]
+```
 
 ```text
 src/
-  api/                       # Open-Meteo + NWS + reverse-geocode adapters
+  api/                       # Open-Meteo + NWS fetch adapters
     openMeteo.js             #   forecast, archive, AQI, geocode, alerts
-    reverseGeocode.js        #   device GPS → place name (BigDataCloud)
     transforms.js            #   raw → AppWeatherModel normalization
     types.js                 #   model schema + skeleton factory
   domain/                    # Pure weather classification logic
@@ -99,7 +102,7 @@ src/
     sunlight.js  timeSeries.js  weatherCodes.js  temperature.js
 ```
 
-Each layer has a strict dependency direction:
+The app keeps UI, orchestration, provider access, and pure weather logic separated. Each layer has a strict dependency direction:
 `components → hooks → api/services → utils/domain`. Components never
 fetch directly; hooks never compute UI gradients; the API layer
 never imports a React module.
@@ -115,8 +118,7 @@ npm ci
 2. Copy the optional env file if you want key-based sync URLs:
 
 ```bash
-cp .env.example .env          # macOS / Linux
-# Copy-Item .env.example .env # Windows PowerShell
+Copy-Item .env.example .env
 ```
 
 3. Start the dev server:
@@ -139,7 +141,13 @@ Optional variables:
 
 If `VITE_AURA_SYNC_API_BASE` is not set, sync still works when the stored account value is a full URL.
 
-## Quality Checks
+## Future Improvements
+
+- Add richer favorite controls such as pinning or reordering saved cities.
+- Tune production performance against live provider latency, not only the deterministic demo route.
+- Expand the case study with side-by-side mobile/desktop annotations of the trust-contract state.
+
+## Validation
 
 ```bash
 npm run lint
@@ -153,10 +161,9 @@ npm run test:lighthouse
 ### Latest local QA snapshot
 
 - `npm run lint` passes
-- `npm test` passes (`300+` tests across 60+ suites, including React render tests via `jsdom` + `esbuild` and the new atmosphere-reading / sunlight-phase / URL-share / document-title parsers)
-- `npm run test:render` passes (`70+` render tests covering hero rendering, useThemeColor, useDocumentTitle, PanelErrorBoundary retry, and the mobile Settings drawer toggle)
-- `npm run build` passes (~95 KB gzipped JS, ~13 KB gzipped CSS)
-- `npm run test:e2e -- --workers=1` runs the Playwright smoke, screenshot, visual-baseline, cached offline restore, offline app-shell reload, GPS labelling, missing-data placeholder, demo-provider guard, unicode-escape leak, and axe-core a11y suites. Note: visual snapshots will need a one-time refresh after this branch lands because of the layout edits — re-run `npm run test:visual:update` and commit the new baselines
+- `npm test` passes (`249` tests across 55 suites, including React render tests via `jsdom` + `esbuild`)
+- `npm run build` passes
+- `npm run test:e2e -- --workers=1` passes (`28` Playwright checks, including smoke, screenshots, visual baselines, cached offline restore, offline app-shell reload, honest GPS labels, missing-data placeholder guard, demo-provider guard, unicode-escape leak guard, and axe-core a11y)
 - `npm run test:lighthouse` passes the local app-shell budget gate against the labelled `?mock=missing` demo route
 - GitHub Actions runs lint, tests, render tests, build, serial Playwright, and Lighthouse budgets on pull requests
 
@@ -172,9 +179,10 @@ npm run test:lighthouse
   - weather domain utilities and formatters
 - Playwright smoke coverage for:
   - dashboard boot
-  - granted browser coordinates labelled as "Current location"
+  - granted browser coordinates reverse-geocoded into a friendly place label
   - city search and location switching
-  - saved-city suggestions on empty search focus
+  - recent and saved location sections on empty search focus
+  - expandable forecast-day details
   - cloud sync staying hidden until a saved city exists
   - search loading feedback before empty-result states resolve
   - unit switching without refetching forecast/climate data
@@ -196,14 +204,14 @@ npm run test:lighthouse
 - First load opens to a usable Chicago forecast immediately instead of stalling on a geolocation permission prompt.
 - Initial loading uses a lightweight dashboard skeleton and provider status copy rather than fake forecast values.
 - Browser location is opt-in. Users can keep the fallback city, search manually, or grant location access.
-- Device-location success renders immediately as "Current location", then upgrades to the resolved city/region once a best-effort reverse geocode returns; the dashboard never waits on that lookup.
+- Device-location success upgrades to a friendly nearby place label when reverse geocoding succeeds.
 - Core weather data loads first. Air quality, alerts, and climate context can recover independently if a secondary API is slow or unavailable.
 - The hero summarizes daily decisions from real forecast data: rain gear, UV exposure, and wind comfort. Missing source data is labelled unavailable, not guessed.
 - Mobile rain and hourly cards expose touch-friendly sample controls so users can inspect dense timelines without relying on hover.
 - Saved cities appear as search suggestions on focus, so repeat switching does not require typing.
 - Search shows a loading state before empty results, so users do not get a premature "No matching cities" response.
 - Startup-city controls stay hidden until a startup preference actually exists.
-- Cloud sync stays out of the header until a saved city exists, and stays collapsed by default on every page load — the body of the panel (connect / disconnect / manual sync) only renders when the user opens it or when sync needs the user's attention (active syncing or live error).
+- Cloud sync stays out of the header until a saved city exists, while existing connected/error states still remain recoverable.
 - Failed cloud sync connection attempts surface an error and stay disconnected instead of leaving a stale connected-looking state.
 - Cloud sync is optional and intentionally secondary to the main forecast workflow.
 - After a successful production visit, the service worker can serve the app shell offline and acknowledges when the shell is ready; live weather API failures still surface through the saved-forecast trust state instead of pretending fresh data exists.
@@ -211,16 +219,12 @@ npm run test:lighthouse
 
 ## Accessibility Notes
 
-- Skip link to main content; focus moves to `#main-content` after recovering from the loading or error screen so screen-reader users land in the dashboard, not on `document.body`
-- Visible focus states with consistent `2px` outline + ring; `prefers-reduced-transparency` opaques the frosted-glass surfaces for users who request less translucency at the OS level
-- Keyboard-searchable city combobox with `aria-activedescendant`, `aria-expanded`, mobile keyboard hints (`inputmode="search"`, `spellCheck="false"`)
-- Hero location reads as one phrase ("Location: Tokyo, Japan") via a single `aria-label`; decorative `MapPin` is `aria-hidden`
-- Climate-context buttons read "Show / Hide historical climate comparison" — describing the user-visible effect, not the internal flag
-- Live status messaging for loading, refresh, install, service-worker, and offline-ready states; the global update pill is keyboard-actionable as a manual refresh
-- Reduced-motion-safe card visibility, particle suppression, and refresh-spin disable
-- WCAG 2.5.5 AA tap targets across the saved-cities cluster — chip is 36×desktop / 44×mobile, remove button 32 / 40, undo dismiss 32 / 40; location-setup CTAs are 44 across; error retry is 44. Meets the iOS HIG comfort line.
-- Settings drawer (≤1200px) is `display: none` while collapsed so the controls are absent from the AT tree until the user requests them; the toggle exposes `aria-expanded` + `aria-controls`
-- Refresh completion is announced to screen readers — the global update pill drops a polite `Forecast updated.` live-region message on the `isRefreshing` true→false transition, but only when the fetch timestamp actually advanced (a failed refresh stays silent)
+- Skip link to main content
+- Visible focus states
+- Keyboard-searchable city combobox
+- Live status messaging for loading and refresh states
+- Reduced-motion-safe card visibility and transitions
+- Updated mobile touch targets for smaller utility controls and dense rain/hourly timelines
 
 ## Architecture Decisions
 
@@ -228,18 +232,12 @@ Short notes on the non-obvious choices a reviewer might question.
 
 - **Forecast is always fetched in Fahrenheit / inch units; conversion is client-side.** Switching the °F/°C toggle must not trigger a refetch — it would invalidate the displayed timestamp and confuse users. A Playwright test asserts that toggling units does not refetch.
 - **Three independent fetch tracks.** Forecast, supplemental (AQI + alerts), and climate-archive run concurrently with separate AbortController + request-id pairs. A slow archive call cannot delay the hero card; an alerts feed outage cannot wipe the AQI reading.
-- **One global update pill instead of eight per-card freshness lines.** Earlier iterations rendered a `DataTrustMeta` line on every card. The audit found this over-precision: the user does not need eight separate freshness signals when the timestamp is shared across panels. The single pill above the dashboard is the only routine freshness surface; per-source detail moves to the closed-by-default `Where this data comes from` disclosure (renamed from `Data status` so the summary tells the user what they’ll learn by opening it).
-- **Voice is user-honest, not engineer-honest.** Empty-state copy used to read "Open-Meteo did not return..." in primary panels. The audit flagged this as fragility-inducing. Provider attribution now lives only in the trust disclosure; primary copy reads in plain language ("Hourly precipitation isn't available right now").
-- **The atmospheric reading sentence is heuristic, not LLM-driven.** A priority ladder (severe alert → imminent rain → high UV → gusts → temp extreme → golden hour → silent) picks one signal. No NLG layer, no copy table to maintain across locales beyond the strings in `buildAtmosphereReading.js`.
-- **URL-share state is read-once and replace-only.** `parseLocationFromUrl` runs once at `useWeather` init; subsequent location changes mirror back via `history.replaceState` (not `push`), so refreshing the page or sharing the URL behaves predictably without polluting the back stack.
-- **Particles are pure CSS with deterministic seeding.** Each particle's left position, animation duration, and delay are derived from `Math.sin(index * 1234.567)` so the layout stays visually stable across renders. No `requestAnimationFrame` loop, no canvas — `prefers-reduced-motion` simply hides the layer.
 - **Retries stay source-scoped.** Forecast, geocoding, AQI, alerts, and archive calls retry transient failures on their own clocks, while known coverage misses such as NWS 400/404 responses stay explicit unsupported-region states.
 - **Cached forecasts have a daily freshness window.** Aura can restore a last-known snapshot when the browser starts offline, but snapshots older than 12 hours are ignored so the app does not present stale weather as daily guidance.
 - **NWS alerts are U.S.-only by design.** A 400/404 from `api.weather.gov/alerts/active` is mapped to an explicit `unsupported` status (not `unavailable`) so the UI can say "Alerts unavailable for this region" instead of an ambiguous "no alerts".
 - **Strict numeric coercion at every layer.** `Number(null) === 0` would surface as a fake 0°F humidity / 0% rain chance / 0°F historical sample whenever Open-Meteo returns a missing data point. A single shared `toFiniteNumber` helper rejects nullish, empty-string, boolean, array, and object inputs explicitly, and is now applied at the API boundary, every formatter, every domain classifier, and every chart slot parser. Eight unit tests lock the core helper; additional assertions pin the null contract for each formatter and domain function.
 - **Lazy supplemental panels.** The hero, exposure cards, and rain card render synchronously. Hourly chart, storm watch, alerts, forecast, and nowcast are mounted via `Suspense` after a `requestIdleCallback` (or 180ms fallback) so the first paint is just the data the user sees first.
 - **CSS lives next to its component.** App.css holds only global tokens, resets, animations, and one shared focus-visible rule used across header buttons and retry buttons. Every feature's CSS is imported by its owning component.
-- **Dark-only by design.** Cards are frosted surfaces engineered to sit on the colourful weather-scene gradient. An earlier half-light handler (light body, dark cards) read as a UI bug rather than a design choice during the audit; the disciplined alternative is `color-scheme: dark only` on both `:root` and the meta tag so the user agent styles scrollbars, form controls, and autofill overlays for a dark surface even when the OS is in light mode.
 
 ## Data Trust Contract
 
@@ -353,7 +351,9 @@ bug, the contract, and the test pyramid.
 - **PWA runtime prompts** - the status stack now acknowledges first-install offline readiness and captures the browser install prompt with explicit Install/Later actions.
 - **CI quality gates** - Pull requests now run lint, Node tests, render tests, production build, serial Playwright, visual checks, and Lighthouse budgets in GitHub Actions, with build and failure artifacts retained for review.
 - **Deterministic portfolio demo** - the labelled `?mock=missing` route no longer starts live weather provider requests, which keeps trust-contract demos and Lighthouse budget checks stable.
-- **Honest GPS label, then a real name** - successful browser geolocation renders immediately as "Current location" (no inherited Chicago label), and a best-effort reverse geocode (BigDataCloud's key-less `reverse-geocode-client` endpoint) then upgrades it to the resolved city/region. The lookup is off the critical path: it has a short timeout, is superseded by any newer location request via a request-id guard, and on any failure the generic label simply stays. `useWeatherData` keys its forecast request on coordinates only, so the name-only re-resolve does not re-hit the weather API.
+- **Friendly GPS label** - successful browser geolocation now upgrades from a generic "Current location" label into a nearby place name when reverse geocoding succeeds, while still falling back safely if that lookup fails.
+- **Recent vs saved search groups** - the empty city search now separates recent switches from longer-lived saved cities, so repeat daily use is easier to scan.
+- **Expandable forecast details** - each day in the 7-day forecast now opens inline details for rain chance, UV, wind, and sunrise/sunset without adding a charting dependency.
 - **React render-test coverage** — `@testing-library/react` + `jsdom` now run inside the `node:test` runner via a tiny bootstrap that maps CSS imports to empty modules and transforms `.jsx` on the fly with esbuild (already a transitive dep). The HeroCard, ForecastCard, RainCard, and Stat suites pin the missing-data trust contract at the React DOM level — the contract is now enforced unit + integration + render + e2e.
 - **`?mock=missing` demo state** — `/?mock=missing` is a labelled portfolio demo route for the trust contract. It shows a clear demo notice and serves a local missing-data model without live provider calls.
 - **Hero helper note** — when any hero stat is missing the card appends a short "Some readings are unavailable from the provider" line with `role="status"` so the user understands *why* a value is shown as `—`.
@@ -382,21 +382,10 @@ bug, the contract, and the test pyramid.
 
 - **U.S.-only severe alerts.** NOAA / NWS coverage stops at the U.S. border; non-U.S. locations fall back to explanatory messaging instead of a false all-clear.
 - **Lightweight cloud sync.** The optional sync flow uses a public jsonblob.com store and expects either a full sync URL or a configured `VITE_AURA_SYNC_API_BASE`. It is not encrypted at rest and is not a substitute for an account system.
-- **Geolocation falls back fast.** If the browser's geolocation prompt does not resolve in 5 seconds the app drops to the Chicago default rather than blocking the dashboard. Successful device GPS shows "Current location" instantly and then a reverse-geocoded city/region name; if the reverse-geocode provider is unreachable or returns no usable name, the generic label stays — there is no critical-path dependency on it.
+- **Geolocation falls back fast.** If the browser's geolocation prompt does not resolve in 5 seconds the app drops to the Chicago default rather than blocking the dashboard. Reverse geocoding is best-effort, so a successful GPS lookup can still fall back to a generic label if the naming request fails.
 - **Historical archive lag.** The Open-Meteo archive is updated daily and may not include the most recent week; on those days the climate-context panel shows "Climate context unavailable" instead of a stale comparison.
 - **Service worker is shell-only.** After one successful production visit, Aura can restore same-origin app-shell/build assets offline. Live weather providers remain network truth sources and still degrade through the saved-forecast banner.
 - **Lighthouse budget passes locally** against the deterministic `?mock=missing` app shell, but real-world performance varies with live provider latency. The CSS and JS footprint shrunk substantially during the audit (App.css 2,067 → ~500 lines), but image pre-caching and paint-cost tuning would still be useful next wins.
-- **No JavaScript, no app.** The dashboard is fully client-rendered; with JS disabled the page shows a short `<noscript>` notice rather than any weather data. Server-side rendering is out of scope for a static-hosted portfolio build.
-
-## Roadmap
-
-Honest, prioritised next steps — none of these are implemented yet:
-
-1. **Non-U.S. severe-alert coverage** via a secondary provider (e.g. MeteoAlarm for Europe), keeping the explicit "no coverage" fallback everywhere a provider is silent.
-2. **Image/paint-cost pass** — pre-cache the static scene assets in the service worker and profile backdrop-filter cost on low-end mobile GPUs.
-3. **Account-backed sync** to replace the lightweight public-blob sync flow with something encrypted and authenticated.
-4. **Per-card refresh** so a single failing provider can be retried in place instead of through the global refresh-error banner.
-5. **Content-Security-Policy** in `public/_headers` once it can be validated in a browser (the inline font-link `onload` handler and the third-party API/font origins make a blind policy risky).
 
 ## Portfolio / Case Study Notes
 
@@ -407,7 +396,7 @@ Other strong stories:
 - **Resilient client composition** — three independent fetch tracks (forecast, supplemental AQI/alerts, historical archive) with separate AbortControllers and request-id stale-result guards, plus a per-panel error boundary so a lazy chunk failure cannot blank out the dashboard.
 - **Responsive, mobile-first dashboard** — the bento layout has explicit breakpoints at 1200/980/860/760/640/560/420 px, hover-only effects gated behind `(hover: hover)`, and `prefers-reduced-motion` overrides for every animation. Co-located component CSS replaces what was a 2k-line monolith.
 - **Accessibility past axe baseline** — scoped live regions (`role="alert"` for errors, `role="status"` for last-synced metadata), `aria-busy` on async buttons, decorative SVG cleanup, keyboard combobox for search, and a regression test that scans rendered text for literal `\uXXXX` escape sequences.
-- **QA maturity** — 300+ Node tests across 64 suites covering API normalization, source retries, climate comparison, location persistence, sync helpers, service worker registration/update/install-prompt flows, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, document-title sync, render-level fallback states, and the null-coercion contract at every domain layer; 28 Playwright smoke/flow checks for cached offline restore, offline app-shell reload, honest GPS labels, search, sync failure, regional alerts, missing-demo provider isolation, mobile overflow, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
+- **QA maturity** — 244 Node tests covering API normalization, source retries, climate comparison, location persistence, sync helpers, service worker registration/update/install-prompt flows, time-series snap, AQI/UV/weather-code lookup, trust-meta age formatting, render-level fallback states, and the null-coercion contract at every domain layer; 15 Playwright smoke/flow checks for cached offline restore, offline app-shell reload, honest GPS labels, search, sync failure, regional alerts, missing-demo provider isolation, mobile overflow, axe-core, and the unicode-escape leak guard; CI Lighthouse budget gate.
 
 ## Screenshot Guidance
 

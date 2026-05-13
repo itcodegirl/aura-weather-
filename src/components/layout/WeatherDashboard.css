@@ -15,10 +15,10 @@
   min-height: 24px;
   margin: 2px 0 -4px;
   padding-left: 14px;
-  color: rgba(226, 237, 255, 0.94);
+  color: rgba(230, 238, 250, 0.92);
   font-size: 12px;
   font-weight: 720;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   opacity: 1;
   animation: label-reveal var(--motion-label-reveal) var(--ease-standard) forwards;
@@ -34,8 +34,8 @@
   height: 16px;
   border-radius: var(--radius-pill);
   transform: translateY(-50%);
-  background: linear-gradient(180deg, rgba(148, 228, 255, 0.95), rgba(123, 155, 255, 0.82));
-  box-shadow: 0 0 0 2px rgba(110, 231, 255, 0.16);
+  background: linear-gradient(180deg, rgba(139, 211, 255, 0.95), rgba(246, 196, 83, 0.72));
+  box-shadow: 0 0 0 2px rgba(139, 211, 255, 0.1);
 }
 
 .bento-group-label::after {
@@ -44,7 +44,7 @@
   height: 1px;
   margin-left: 12px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, rgba(166, 209, 255, 0.56), rgba(166, 209, 255, 0.06));
+  background: linear-gradient(90deg, rgba(190, 207, 232, 0.42), rgba(190, 207, 232, 0.04));
 }
 
 .bento > section {
@@ -55,12 +55,11 @@
   border-radius: var(--card-radius);
   border: var(--card-border);
   opacity: 1;
-  backdrop-filter: blur(var(--card-backdrop-blur));
-  -webkit-backdrop-filter: blur(var(--card-backdrop-blur));
   animation: card-slide-up var(--card-enter-duration) cubic-bezier(0.25, 0.95, 0.3, 1) forwards;
   animation-delay: calc(var(--i, 0) * var(--card-enter-stagger));
   background:
-    linear-gradient(165deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.10));
+    linear-gradient(168deg, rgba(13, 23, 43, 0.82), rgba(8, 15, 30, 0.72)),
+    linear-gradient(132deg, rgba(139, 211, 255, 0.045), rgba(246, 196, 83, 0.035) 62%, transparent 84%);
   box-shadow: var(--card-shadow);
   transition:
     transform var(--motion-medium) var(--ease-emphasis),
@@ -75,7 +74,7 @@
   inset: 1px;
   border-radius: calc(var(--card-radius) - 1px);
   pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .bento > section::before {
@@ -85,7 +84,7 @@
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(circle at 24% 0%, rgba(255, 255, 255, 0.22), transparent 62%);
+  background: radial-gradient(circle at 24% 0%, rgba(231, 241, 255, 0.1), transparent 62%);
   transition: opacity var(--motion-medium) var(--ease-standard);
 }
 
@@ -93,37 +92,52 @@
   opacity: 1;
 }
 
-/*
- * Refreshing state used to render a bright pulsing "Refreshing" pill on
- * every card during background updates. Per the audit, that broadcast
- * a low-grade anxiety on every refresh — work the user did not ask
- * about. Now the only visual cue is a subtle inset cyan rim. The
- * single global "Updating..." status pill in StatusStack carries the
- * announcement role.
- */
 .bento > section[data-refreshing="true"] {
   box-shadow:
-    var(--card-shadow),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+    0 30px 72px rgba(2, 8, 24, 0.42),
+    0 6px 18px rgba(7, 20, 46, 0.24),
+    inset 0 0 0 1px rgba(128, 226, 255, 0.34);
+}
+
+.bento > section[data-refreshing="true"]::before {
+  content: "Refreshing";
+  inset: auto 14px auto auto;
+  top: 12px;
+  width: auto;
+  height: auto;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(130, 228, 255, 0.36);
+  background: rgba(10, 25, 52, 0.8);
+  color: rgba(218, 244, 255, 0.94);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: none;
+  opacity: 1;
+  animation: refreshing-chip-pulse 1.3s ease-in-out infinite;
 }
 
 .bento > section:focus-within {
-  border-color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(133, 230, 255, 0.72);
   box-shadow:
-    var(--card-shadow),
-    0 0 0 2px rgba(255, 255, 255, 0.55);
+    0 28px 62px rgba(3, 9, 24, 0.42),
+    0 0 0 2px rgba(133, 230, 255, 0.45),
+    inset 0 1px 0 rgba(243, 248, 255, 0.18);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .bento > section:hover {
-    transform: translateY(var(--card-hover-shift));
-    border-color: rgba(255, 255, 255, 0.42);
+    transform: translateY(-2px);
+    border-color: rgba(198, 218, 243, 0.34);
     background:
-      linear-gradient(165deg, rgba(255, 255, 255, 0.27), rgba(255, 255, 255, 0.14));
+      linear-gradient(165deg, rgba(17, 29, 52, 0.86), rgba(8, 16, 32, 0.74)),
+      linear-gradient(130deg, rgba(139, 211, 255, 0.055), rgba(246, 196, 83, 0.04) 60%, transparent 86%);
     box-shadow:
-      0 26px 56px rgba(30, 70, 120, 0.24),
-      0 12px 28px rgba(30, 70, 120, 0.14),
-      inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      0 24px 58px rgba(3, 9, 24, 0.38),
+      0 10px 26px rgba(80, 119, 150, 0.1),
+      inset 0 1px 0 rgba(243, 248, 255, 0.12);
   }
 
   .bento > section:hover::before {
@@ -136,100 +150,6 @@
   min-height: clamp(280px, 28vw, 360px);
   animation: hero-landing 500ms cubic-bezier(0.25, 1, 0.3, 1) forwards;
   animation-delay: calc(var(--i, 0) * 80ms);
-}
-
-/*
- * "Where this data comes from" disclosure lives outside the bento
- * so the four data sources (forecast, air quality, alerts,
- * historical comparison) stay accessible without hogging a full
- * grid card on every page load. Default closed.
- */
-.data-status-disclosure {
-  grid-column: 1 / -1;
-  margin-top: 8px;
-  border-radius: var(--radius-sm);
-  border: 1px dashed rgba(var(--border-base), 0.22);
-  background: var(--surface-1);
-  /* Diagnostic disclosure lives below the bento and is collapsed by
-     default; skip rendering its subtree until scrolled into view so
-     it does not pay layout cost during the first paint of the live
-     dashboard above it. */
-  content-visibility: auto;
-  contain-intrinsic-size: 56px;
-}
-
-.data-status-disclosure[open] {
-  background: var(--surface-2);
-  border-style: solid;
-}
-
-.data-status-summary {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 10px 14px;
-  cursor: pointer;
-  list-style: none;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: var(--track-default);
-  text-transform: uppercase;
-  border-radius: inherit;
-  transition: color var(--motion-fast) var(--ease-standard);
-}
-
-.data-status-summary::-webkit-details-marker {
-  display: none;
-}
-
-.data-status-summary::after {
-  content: "";
-  margin-left: auto;
-  width: 8px;
-  height: 8px;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  transform: rotate(45deg) translate(-2px, -2px);
-  transition: transform var(--motion-fast) var(--ease-standard);
-}
-
-.data-status-disclosure[open] .data-status-summary::after {
-  transform: rotate(225deg) translate(-2px, -2px);
-}
-
-.data-status-summary:hover,
-.data-status-summary:focus-visible {
-  color: #f3f8ff;
-}
-
-.data-status-summary:focus-visible {
-  outline: 2px solid var(--focus-outline);
-  outline-offset: 2px;
-}
-
-.data-status-summary-label {
-  letter-spacing: var(--track-default);
-}
-
-.data-status-summary-hint {
-  color: var(--text-dim);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: var(--track-tight);
-  text-transform: none;
-}
-
-.data-status-disclosure .source-health-card {
-  margin: 0 14px 14px;
-  animation: none;
-}
-
-@media (max-width: 640px) {
-  .data-status-summary-hint {
-    display: none;
-  }
 }
 
 .bento-exposure {
@@ -302,77 +222,21 @@
     gap: 12px;
   }
 
-  /*
-   * Group labels are navigational scaffolding — useful on a wide
-   * bento where multiple cards sit under one heading, but on a
-   * single-column phone they double the visible label count
-   * (every section already has its own h3). Quieten them so the
-   * cards lead the rhythm; the labels remain in the DOM for screen
-   * readers and the hash-link affordance stays intact.
-   */
   .bento-group-label {
-    margin: 4px 0 -2px;
-    padding-left: 10px;
-    color: rgba(220, 233, 255, 0.74);
-    font-size: 10px;
-    letter-spacing: 0.14em;
     justify-content: flex-start;
-  }
-
-  .bento-group-label::before {
-    width: 3px;
-    height: 11px;
-    box-shadow: none;
-    background: rgba(166, 209, 255, 0.62);
-  }
-
-  .bento-group-label::after {
-    display: none;
   }
 
   .bento > [class*="bento-"] {
     grid-column: auto;
     min-height: 0;
   }
-
-  /*
-   * Skip layout/paint for cards that aren't on screen yet. On a
-   * phone the bento is one tall column; the storm watch and source
-   * health rows live well below the fold and pay full render cost
-   * on first load even though the user can't see them. content-
-   * visibility lets the browser short-circuit until they scroll
-   * into the viewport. The fixed intrinsic size avoids the layout
-   * shift the bare directive would otherwise produce.
-   *
-   * Hero stays opted-out — it's always visible and we want its
-   * card-slide-up animation to run on first paint.
-   */
-  .bento > section:not(.bento-hero) {
-    content-visibility: auto;
-    contain-intrinsic-size: 320px;
-  }
 }
 
 @media (max-width: 420px) {
-  .bento {
-    /*
-     * Tighter gap on the narrowest phones — every gap pixel adds
-     * to total scroll length and the cards already have generous
-     * internal padding for breathing room.
-     */
-    gap: 10px;
-  }
-
   .bento-group-label {
-    margin: 2px 0 -4px;
-    padding-left: 9px;
+    padding-left: 13px;
     font-size: 10px;
     letter-spacing: 0.1em;
-  }
-
-  .bento-group-label::before {
-    width: 3px;
-    height: 11px;
   }
 
   .bento-group-label::after {
@@ -382,7 +246,7 @@
 
 @media (prefers-contrast: more) {
   .bento > section {
-    background: rgba(20, 44, 72, 0.95);
+    background: rgba(4, 11, 25, 0.9);
   }
 }
 

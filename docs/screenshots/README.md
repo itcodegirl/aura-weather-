@@ -39,10 +39,9 @@ That single command runs both specs and produces all five PNGs.
   regression baseline) so the images stay byte-stable across runs.
 - Animations and transitions are disabled and the font is pinned to
   Arial so images stay stable across machines.
-- The PNGs are not currently committed to git (the `.gitkeep` keeps
-  the folder tracked). Run `npm run screenshots` after a checkout to
-  produce them. See the project root `README.md` for the rendered
-  trust-contract narrative.
+- The PNGs are committed so the project README renders a visual-first
+  portfolio pass on GitHub, but they should still be regenerated with
+  `npm run screenshots` whenever the UI changes materially.
 
 ## Animated demo (`trust-contract-demo.webm`)
 

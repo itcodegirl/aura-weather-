@@ -2,53 +2,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 18px;
-  position: relative;
-  isolation: isolate;
-}
-
-/*
- * Earned warm wash: a soft, low-opacity overlay that surfaces only
- * within +/- 30 minutes of sunrise or sunset. Sunrise blooms warm-cool
- * from the lower-left; sunset blooms amber-magenta from the upper-right.
- * The user lands on the app during the actual golden-hour window and
- * the hero quietly acknowledges the time of day. Earned, not constant.
- */
-.hero-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 0;
-  transition: opacity 900ms var(--ease-standard);
-  mix-blend-mode: screen;
-}
-
-.hero-card > * {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-card--phase-sunrise::after {
-  opacity: 0.55;
-  background:
-    radial-gradient(circle at 18% 88%, rgba(253, 186, 116, 0.6), transparent 60%),
-    radial-gradient(circle at 84% 12%, rgba(125, 211, 252, 0.32), transparent 64%);
-}
-
-.hero-card--phase-sunset::after {
-  opacity: 0.6;
-  background:
-    radial-gradient(circle at 86% 18%, rgba(251, 146, 60, 0.62), transparent 58%),
-    radial-gradient(circle at 12% 86%, rgba(244, 114, 182, 0.34), transparent 64%);
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .hero-card::after {
-    display: none;
-  }
+  gap: 16px;
 }
 
 .hero-meta {
@@ -76,7 +30,7 @@
 .hero-date {
   color: var(--text-dim);
   font-size: 13px;
-  letter-spacing: var(--track-tight);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -85,10 +39,10 @@
   align-items: stretch;
   gap: 14px;
   padding: 10px 14px;
-  border-radius: var(--radius-md);
-  border: var(--border-default);
-  background: var(--surface-2);
-  box-shadow: var(--subcard-shadow);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(198, 215, 242, 0.2);
+  background: rgba(11, 20, 38, 0.64);
+  box-shadow: inset 0 1px 0 rgba(233, 242, 255, 0.06);
 }
 
 .hero-high-low-item {
@@ -101,7 +55,7 @@
   color: var(--text-dim);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: var(--track-loose);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -125,82 +79,6 @@
   margin: 2px 0;
 }
 
-/*
- * One-line synthesis of the most decision-relevant fact for right
- * now. The sentence is opinionated by design — it's the moment of
- * editorial voice the rest of the dashboard intentionally avoids.
- * Tone modifiers (alert / watch / notice / calm) shift the leading
- * accent line so the eye knows whether it's reading a warning or a
- * pleasantry without parsing the text.
- */
-.hero-reading {
-  /* Lives inside .hero-temp-block now (was sibling of .hero-main).
-     Top margin gives breathing room from the condition line above
-     without reaching the larger spacing the climate insight uses. */
-  margin: 12px 0 0;
-  position: relative;
-  padding: 8px 14px 8px 18px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  border: var(--border-soft);
-  color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0;
-  max-width: 640px;
-}
-
-/* Tighter top margin when both reading and climate insight stack —
-   they shouldn't double up on space, since both are supplemental. */
-.hero-reading + .hero-insight {
-  margin-top: 10px;
-}
-
-.hero-reading::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: calc(100% - 14px);
-  border-radius: var(--radius-pill);
-  background: currentColor;
-  opacity: 0.7;
-}
-
-.hero-reading--alert {
-  color: #fda4af;
-  background: rgba(225, 70, 90, 0.26);
-  border-color: rgba(248, 113, 113, 0.42);
-}
-
-.hero-reading--watch {
-  color: #fcd34d;
-  background: rgba(235, 165, 55, 0.24);
-  border-color: rgba(251, 191, 36, 0.32);
-}
-
-.hero-reading--notice {
-  color: #93c5fd;
-  background: rgba(95, 165, 235, 0.26);
-  border-color: rgba(125, 211, 252, 0.32);
-}
-
-.hero-reading--calm {
-  color: #c4b5fd;
-  background: rgba(170, 150, 245, 0.24);
-  border-color: rgba(196, 181, 253, 0.28);
-}
-
-@media (max-width: 640px) {
-  .hero-reading {
-    font-size: 13px;
-    padding: 7px 12px 7px 16px;
-  }
-}
-
 .hero-temp-block {
   width: 100%;
 }
@@ -214,10 +92,10 @@
 
 .hero-temp {
   font-family: var(--font-display);
-  font-size: clamp(96px, 11vw, 136px);
+  font-size: clamp(96px, 9vw, 124px);
   font-weight: 700;
   line-height: 0.9;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
 
@@ -242,38 +120,27 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: clamp(120px, 13vw, 160px);
+  width: clamp(114px, 12vw, 150px);
   aspect-ratio: 1;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.12) 58%, transparent 76%);
-  filter: drop-shadow(0 14px 28px rgba(30, 70, 120, 0.28));
-}
-
-.hero-condition-line {
-  margin: 8px 0 0;
-  display: inline-flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
-  color: var(--text-muted);
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.28), rgba(139, 211, 255, 0.08) 62%, transparent 76%),
+    rgba(10, 18, 34, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(240, 247, 255, 0.14),
+    0 16px 34px rgba(4, 9, 23, 0.34);
 }
 
 .hero-condition {
+  margin-top: 8px;
   font-size: 22px;
   font-weight: 650;
   letter-spacing: 0;
-  color: var(--text);
-}
-
-.hero-condition-separator {
-  color: var(--text-dim);
-  font-size: 16px;
-  line-height: 1;
-  user-select: none;
 }
 
 .hero-feels {
+  margin-top: 5px;
+  color: var(--text-muted);
   font-size: 15px;
   font-weight: 600;
 }
@@ -283,8 +150,8 @@
   max-width: 620px;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  background: var(--surface-3);
-  border: var(--border-default);
+  background: rgba(12, 22, 42, 0.68);
+  border: 1px solid rgba(198, 215, 242, 0.18);
   color: rgba(227, 236, 255, 0.95);
   font-size: 14px;
   line-height: 1.5;
@@ -292,13 +159,8 @@
 
 .hero-guidance {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  /* Native <ul>; reset user-agent list defaults so the grid layout
-   * stays exactly as designed. */
-  list-style: none;
-  margin: 0;
-  padding: 0;
 }
 
 .hero-guidance-item {
@@ -307,11 +169,11 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: 9px;
   align-items: flex-start;
-  padding: var(--subcard-padding);
+  padding: 11px 12px;
   min-height: 96px;
   border-radius: var(--radius-sm);
-  border: var(--subcard-border);
-  background: var(--subcard-bg);
+  border: 1px solid rgba(198, 215, 242, 0.14);
+  background: rgba(11, 20, 38, 0.58);
   box-shadow: var(--subcard-shadow);
 }
 
@@ -320,9 +182,9 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: var(--radius-control);
+  border-radius: 8px;
   color: #e8f6ff;
-  background: rgba(160, 190, 240, 0.16);
+  background: rgba(160, 190, 240, 0.12);
 }
 
 .hero-guidance-copy {
@@ -334,8 +196,8 @@
 .hero-guidance-label {
   color: var(--text-dim);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: var(--track-default);
+  font-weight: 760;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -344,7 +206,7 @@
   color: #f4f9ff;
   font-size: 14px;
   line-height: 1.2;
-  font-weight: 700;
+  font-weight: 780;
 }
 
 .hero-guidance-detail {
@@ -352,103 +214,85 @@
   color: rgba(211, 226, 250, 0.78);
   font-size: 12px;
   line-height: 1.35;
-  font-weight: 600;
+  font-weight: 620;
 }
 
 .hero-guidance-item--calm {
-  border-color: rgba(110, 231, 183, 0.24);
-  background: linear-gradient(160deg, rgba(110, 220, 170, 0.20), rgba(255, 255, 255, 0.10));
+  border-color: rgba(139, 220, 168, 0.26);
+  background: linear-gradient(160deg, rgba(16, 48, 40, 0.3), rgba(11, 20, 38, 0.48));
 }
 
 .hero-guidance-item--notice {
-  border-color: rgba(251, 191, 36, 0.28);
-  background: linear-gradient(160deg, rgba(245, 200, 90, 0.20), rgba(255, 255, 255, 0.10));
+  border-color: rgba(246, 196, 83, 0.32);
+  background: linear-gradient(160deg, rgba(60, 48, 22, 0.32), rgba(11, 20, 38, 0.48));
 }
 
 .hero-guidance-item--watch {
-  border-color: rgba(251, 146, 60, 0.34);
-  background: linear-gradient(160deg, rgba(245, 150, 80, 0.22), rgba(255, 255, 255, 0.10));
+  border-color: rgba(241, 160, 168, 0.34);
+  background: linear-gradient(160deg, rgba(66, 29, 35, 0.3), rgba(11, 20, 38, 0.48));
 }
 
 .hero-guidance-item--unavailable {
   border-color: rgba(148, 163, 184, 0.24);
 }
 
-/*
- * Sunlight info collapsed from three boxed chips to a single line.
- * Each segment is icon + value; segments are separated by a thin
- * dot. The line wraps gracefully on narrow viewports because both
- * segment and separator are flex-direction friendly.
- */
-.hero-sunlight-line {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  border: var(--subcard-border);
-  background: var(--subcard-bg);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+.hero-sunlight {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.hero-sunlight-segment {
+.hero-sun-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  min-height: 72px;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--subcard-bg);
+  border: var(--subcard-border);
+  box-shadow: var(--subcard-shadow);
+}
+
+.hero-sun-chip--daylight {
+  background:
+    linear-gradient(165deg, rgba(20, 33, 64, 0.52), rgba(10, 20, 42, 0.44)),
+    var(--subcard-bg);
+}
+
+.hero-sun-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #edf5ff;
-}
-
-.hero-sunlight-segment svg {
-  color: rgba(199, 220, 255, 0.78);
-  flex-shrink: 0;
-}
-
-.hero-sunlight-separator {
   color: var(--text-dim);
-  font-size: 12px;
-  line-height: 1;
-  user-select: none;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-/*
- * The hero card's bottom block is a two-column grid: guidance pills
- * + sunlight line on the left, the four stat cards in a 2x2 on the
- * right. Equal-width columns balance the visual weight so the card
- * does not leave dead empty space below the temperature row at wide
- * viewports. Mobile collapses to a single stack.
- */
-.hero-bottom {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: stretch;
-}
-
-.hero-bottom-left {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
+.hero-sun-value {
+  color: #edf5ff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-content: start;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  min-width: 0;
+  padding-top: 18px;
+  border-top: 1px solid rgba(178, 202, 244, 0.2);
 }
 
 .stat {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: var(--subcard-padding);
+  padding: 12px;
   border-radius: var(--radius-sm);
   background: var(--subcard-bg);
   border: var(--subcard-border);
@@ -461,9 +305,9 @@
   height: 34px;
   display: grid;
   place-items: center;
-  border-radius: var(--radius-xs);
+  border-radius: 10px;
   color: #dcf7ff;
-  background: linear-gradient(160deg, rgba(110, 231, 255, 0.26), rgba(72, 103, 214, 0.12));
+  background: linear-gradient(160deg, rgba(139, 211, 255, 0.18), rgba(246, 196, 83, 0.09));
 }
 
 .stat-label {
@@ -471,7 +315,7 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: var(--track-default);
+  letter-spacing: 0.11em;
 }
 
 .stat-value {
@@ -494,43 +338,26 @@
   margin: 12px 0 0;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  border: 1px dashed rgba(var(--border-base), 0.34);
-  background: var(--surface-1);
+  border: 1px dashed rgba(186, 212, 252, 0.34);
+  background: rgba(8, 17, 36, 0.4);
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.45;
 }
 
-/*
- * Hero placeholder copy renders when buildHeroData returns null:
- * we have a hero shell but no current readings. Mirror the dashed-
- * border treatment of .hero-stats-note so the user reads the same
- * "intentionally blank" cue, scaled up to body size.
- */
-.hero-card--placeholder {
-  /* Match a typical resolved-hero footprint so the bento doesn't
-     visibly shrink on the placeholder path. */
-  min-height: clamp(240px, 22vw, 300px);
-}
-
-.hero-placeholder-copy {
-  margin: 0;
-  padding: 14px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px dashed rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.5;
-  max-width: 640px;
-}
-
 /* Shared responsive tiers: 1200, 980, 860, 760, 640, 560, 420. */
-@media (max-width: 980px) {
-  .hero-bottom {
-    grid-template-columns: 1fr;
+@media (max-width: 1200px) {
+  .hero-sunlight {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-sun-chip--daylight {
+    grid-column: span 2;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -604,12 +431,9 @@
   }
 
   .hero-temp-row {
-    align-items: center;
-    gap: 14px;
-  }
-
-  .hero-icon {
-    width: clamp(86px, 28vw, 108px);
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 10px;
   }
 
   .hero-feels {
@@ -627,40 +451,35 @@
     padding: 10px;
   }
 
-  .hero-sunlight-line {
+  .hero-sunlight {
     gap: 8px;
-    padding: 7px 12px;
-    font-size: 12px;
+  }
+
+  .hero-sun-chip {
+    padding: 9px 10px;
+    min-height: 66px;
+  }
+
+  .hero-sun-value {
+    font-size: 15px;
   }
 }
 
 @media (max-width: 560px) {
+  .hero-sunlight {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-sun-chip--daylight {
+    grid-column: auto;
+  }
 
   .hero-icon {
-    width: clamp(80px, 26vw, 96px);
+    width: 102px;
   }
 
-  /*
-   * Keep the four readings in a 2x2 grid even on phones. Collapsing to
-   * a single column produced four full-width rows of stats below the
-   * temperature, which pushed the rest of the dashboard ~240px off the
-   * fold. A 2x2 grid at this width still leaves each cell ~160px wide,
-   * which is enough room for "Comfortable" / "1013 hPa" without
-   * truncation. Stats remain stacked at the very narrow tier below.
-   */
   .hero-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .stat {
-    padding: 10px;
-    gap: 10px;
-  }
-
-  .stat-icon {
-    width: 30px;
-    height: 30px;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -687,35 +506,31 @@
   }
 
   .hero-icon {
-    width: 76px;
+    width: 88px;
   }
 
   .hero-condition {
     font-size: 18px;
   }
 
-  .hero-sunlight-line {
-    padding: 6px 11px;
-    font-size: 11px;
+  .hero-sun-chip {
+    min-height: 60px;
+    gap: 4px;
   }
 
+  .hero-sun-label,
   .stat-label {
     font-size: 10px;
   }
 
+  .hero-sun-value,
   .stat-value {
     font-size: 15px;
   }
 
   .stat {
-    gap: 8px;
-    padding: 9px;
-  }
-
-  .stat-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    gap: 10px;
+    padding: 10px;
   }
 }
 
