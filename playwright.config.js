@@ -6,6 +6,7 @@ const previewPort = Number.parseInt(
 );
 const shouldSkipWebServer =
   globalThis.process?.env?.PLAYWRIGHT_SKIP_WEBSERVER === "1";
+const npmRunner = globalThis.process?.platform === "win32" ? "npm.cmd" : "npm";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -36,7 +37,7 @@ export default defineConfig({
   webServer: shouldSkipWebServer
     ? undefined
     : {
-        command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${previewPort} --strictPort`,
+        command: `${npmRunner} run build && ${npmRunner} run preview -- --host 127.0.0.1 --port ${previewPort} --strictPort`,
         port: previewPort,
         timeout: 180_000,
         reuseExistingServer: false,
