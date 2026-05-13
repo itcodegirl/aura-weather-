@@ -23,7 +23,9 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
 
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(
-    page.getByText("Chicago is loaded for now. Use your location or search any city.")
+    page.getByText(
+      "Aura opens on Chicago so the dashboard is useful immediately. Use your location or search any city when you're ready."
+    )
   ).toBeVisible();
   await expect(
     page.getByLabel("Location onboarding").getByRole("button", { name: "Allow location access" })
@@ -73,9 +75,10 @@ test("labels granted browser coordinates as current location", async ({ page }) 
     .getByRole("button", { name: "Allow location access" })
     .click();
 
-  await expect(page.locator(".hero-location")).toContainText("Current location");
-  await expect(page.locator(".hero-location")).not.toContainText("United States");
-  await expect(page.getByText("Showing your device location")).toBeVisible();
+  await expect(page.locator(".hero-location")).toContainText("Crystal Lake, United States");
+  await expect(
+    page.getByText("Showing your device location near Crystal Lake")
+  ).toBeVisible();
 });
 
 test("renders a cached forecast on cold start when the browser is offline", async ({ page }) => {
@@ -185,10 +188,57 @@ test("updates hero location when a city is selected from search", async ({ page 
 
   await searchInput.focus();
   await expect(
-    page.getByRole("option", { name: /Tokyo, Saved city.*Japan/ })
+    page.getByRole("option", { name: /Tokyo, Recent.*Japan/ })
   ).toBeVisible();
   await searchInput.press("Enter");
   await expect(page.locator(".hero-location")).toContainText("Tokyo, Japan");
+});
+
+test("groups idle suggestions into recent and saved sections", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "aura-weather-recent-cities",
+      JSON.stringify([
+        {
+          lat: 35.6762,
+          lon: 139.6503,
+          name: "Tokyo",
+          country: "Japan",
+        },
+      ])
+    );
+    window.localStorage.setItem(
+      "aura-weather-saved-cities",
+      JSON.stringify([
+        {
+          lat: 51.5072,
+          lon: -0.1276,
+          name: "London",
+          country: "United Kingdom",
+        },
+        {
+          lat: 35.6762,
+          lon: 139.6503,
+          name: "Tokyo",
+          country: "Japan",
+        },
+      ])
+    );
+  });
+
+  await openDashboard(page);
+
+  const searchInput = page.getByRole("combobox", { name: "Search for a city" });
+  await searchInput.focus();
+
+  await expect(page.locator(".city-search-group-label", { hasText: "Recent" })).toBeVisible();
+  await expect(page.locator(".city-search-group-label", { hasText: "Saved" })).toBeVisible();
+  await expect(
+    page.getByRole("option", { name: /Tokyo, Recent.*Japan/ })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("option", { name: /London, Saved.*United Kingdom/ })
+  ).toBeVisible();
 });
 
 test("shows a searching state before empty search results resolve", async ({ page }) => {
@@ -329,6 +379,46 @@ test("keeps the mobile dashboard within the viewport width", async ({ page }) =>
   });
 
   expect(hasHorizontalOverflow).toBe(false);
+});
+
+test("expands a forecast day for richer detail", async ({ page }) => {
+  await page.addInitScript(() => {
+    const fixedTime = new Date("2026-04-21T12:00:00-05:00").valueOf();
+    const RealDate = Date;
+
+    class MockDate extends RealDate {
+      constructor(...args) {
+        if (args.length === 0) {
+          super(fixedTime);
+          return;
+        }
+        super(...args);
+      }
+
+      static now() {
+        return fixedTime;
+      }
+    }
+
+    Object.setPrototypeOf(MockDate, RealDate);
+    globalThis.Date = MockDate;
+  });
+
+  await openDashboard(page);
+
+  const detailTrigger = page.getByRole("button", {
+    name: /show forecast details for today/i,
+  });
+  await detailTrigger.click();
+
+  const detailRegion = page.getByRole("region", {
+    name: "Today forecast details",
+  });
+  await expect(detailRegion).toBeVisible();
+  await expect(detailRegion).toContainText("Peak UV");
+  await expect(detailRegion).toContainText("Sunrise");
+  await expect(detailRegion).toContainText("Sunset");
+  await expect(detailRegion).toContainText("SW 14 mph");
 });
 
 test("renders the missing-data placeholder when the forecast reports null fields", async ({ page }) => {

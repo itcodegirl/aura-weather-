@@ -34,7 +34,10 @@
  *   sunset: string[],
  *   uvIndexMax: number[],
  *   rainChanceMax: number[],
- *   rainAmountTotal: number[]
+ *   rainAmountTotal: number[],
+ *   windSpeedMax: number[],
+ *   windGustMax: number[],
+ *   windDirectionDominant: number[]
  * }} WeatherDaily
  * @typedef {{
  *   time: string[],
@@ -97,6 +100,9 @@ export function createEmptyWeatherModel() {
       uvIndexMax: [],
       rainChanceMax: [],
       rainAmountTotal: [],
+      windSpeedMax: [],
+      windGustMax: [],
+      windDirectionDominant: [],
     },
     nowcast: {
       time: [],

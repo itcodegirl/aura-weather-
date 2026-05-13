@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
 }
 
 .hero-meta {
@@ -39,10 +39,10 @@
   align-items: stretch;
   gap: 14px;
   padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(188, 212, 252, 0.24);
-  background: rgba(8, 18, 39, 0.52);
-  box-shadow: inset 0 1px 0 rgba(233, 242, 255, 0.08);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(198, 215, 242, 0.2);
+  background: rgba(11, 20, 38, 0.64);
+  box-shadow: inset 0 1px 0 rgba(233, 242, 255, 0.06);
 }
 
 .hero-high-low-item {
@@ -92,7 +92,7 @@
 
 .hero-temp {
   font-family: var(--font-display);
-  font-size: clamp(92px, 9vw, 122px);
+  font-size: clamp(96px, 9vw, 124px);
   font-weight: 700;
   line-height: 0.9;
   letter-spacing: 0;
@@ -124,11 +124,11 @@
   aspect-ratio: 1;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.36), rgba(130, 171, 255, 0.1) 62%, transparent 76%),
-    rgba(7, 15, 33, 0.38);
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.28), rgba(139, 211, 255, 0.08) 62%, transparent 76%),
+    rgba(10, 18, 34, 0.5);
   box-shadow:
-    inset 0 1px 0 rgba(240, 247, 255, 0.18),
-    0 20px 40px rgba(4, 9, 23, 0.42);
+    inset 0 1px 0 rgba(240, 247, 255, 0.14),
+    0 16px 34px rgba(4, 9, 23, 0.34);
 }
 
 .hero-condition {
@@ -150,8 +150,8 @@
   max-width: 620px;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  background: rgba(10, 19, 40, 0.64);
-  border: 1px solid rgba(193, 217, 255, 0.2);
+  background: rgba(12, 22, 42, 0.68);
+  border: 1px solid rgba(198, 215, 242, 0.18);
   color: rgba(227, 236, 255, 0.95);
   font-size: 14px;
   line-height: 1.5;
@@ -172,8 +172,8 @@
   padding: 11px 12px;
   min-height: 96px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(190, 214, 252, 0.18);
-  background: rgba(7, 16, 34, 0.42);
+  border: 1px solid rgba(198, 215, 242, 0.14);
+  background: rgba(11, 20, 38, 0.58);
   box-shadow: var(--subcard-shadow);
 }
 
@@ -182,9 +182,9 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 9px;
+  border-radius: 8px;
   color: #e8f6ff;
-  background: rgba(160, 190, 240, 0.16);
+  background: rgba(160, 190, 240, 0.12);
 }
 
 .hero-guidance-copy {
@@ -218,18 +218,18 @@
 }
 
 .hero-guidance-item--calm {
-  border-color: rgba(110, 231, 183, 0.24);
-  background: linear-gradient(160deg, rgba(13, 42, 39, 0.3), rgba(7, 16, 34, 0.36));
+  border-color: rgba(139, 220, 168, 0.26);
+  background: linear-gradient(160deg, rgba(16, 48, 40, 0.3), rgba(11, 20, 38, 0.48));
 }
 
 .hero-guidance-item--notice {
-  border-color: rgba(251, 191, 36, 0.28);
-  background: linear-gradient(160deg, rgba(62, 47, 16, 0.28), rgba(7, 16, 34, 0.36));
+  border-color: rgba(246, 196, 83, 0.32);
+  background: linear-gradient(160deg, rgba(60, 48, 22, 0.32), rgba(11, 20, 38, 0.48));
 }
 
 .hero-guidance-item--watch {
-  border-color: rgba(251, 146, 60, 0.34);
-  background: linear-gradient(160deg, rgba(76, 32, 17, 0.3), rgba(7, 16, 34, 0.36));
+  border-color: rgba(241, 160, 168, 0.34);
+  background: linear-gradient(160deg, rgba(66, 29, 35, 0.3), rgba(11, 20, 38, 0.48));
 }
 
 .hero-guidance-item--unavailable {
@@ -307,7 +307,7 @@
   place-items: center;
   border-radius: 10px;
   color: #dcf7ff;
-  background: linear-gradient(160deg, rgba(110, 231, 255, 0.26), rgba(72, 103, 214, 0.12));
+  background: linear-gradient(160deg, rgba(139, 211, 255, 0.18), rgba(246, 196, 83, 0.09));
 }
 
 .stat-label {

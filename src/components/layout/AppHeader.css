@@ -4,17 +4,17 @@
   align-items: center;
   gap: 14px 28px;
   margin-bottom: 28px;
-  padding: 16px 22px;
+  padding: 14px 18px;
   border-radius: var(--radius);
   border: var(--card-border);
   background:
-    linear-gradient(180deg, rgba(18, 30, 58, 0.62), rgba(8, 16, 34, 0.56)),
-    linear-gradient(130deg, rgba(186, 170, 255, 0.11), rgba(120, 195, 255, 0.06) 56%, transparent 84%),
-    rgba(6, 14, 31, 0.44);
+    linear-gradient(180deg, rgba(18, 30, 54, 0.78), rgba(8, 16, 32, 0.72)),
+    linear-gradient(130deg, rgba(139, 211, 255, 0.06), rgba(246, 196, 83, 0.035) 58%, transparent 84%),
+    rgba(6, 14, 31, 0.58);
   box-shadow:
-    0 24px 56px rgba(3, 10, 25, 0.34),
-    0 8px 20px rgba(17, 29, 59, 0.2),
-    inset 0 1px 0 rgba(228, 240, 255, 0.12);
+    0 18px 42px rgba(3, 10, 25, 0.3),
+    0 6px 16px rgba(17, 29, 59, 0.16),
+    inset 0 1px 0 rgba(228, 240, 255, 0.1);
   animation: header-settle var(--motion-slow) var(--ease-emphasis) both;
 }
 
@@ -35,7 +35,7 @@
   grid-area: brand;
   margin: 0;
   font-family: var(--font-display);
-  font-size: 33px;
+  font-size: 31px;
   font-weight: 680;
   line-height: 1;
   letter-spacing: 0;
@@ -51,11 +51,11 @@
 
 .tagline {
   grid-area: tag;
-  color: rgba(193, 207, 237, 0.85);
+  color: rgba(205, 218, 239, 0.88);
   font-size: 10px;
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
 }
 

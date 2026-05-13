@@ -48,6 +48,7 @@ function App() {
     loadCurrentLocation,
     clearSavedLocation,
     savedCities,
+    recentCities,
     loadSavedCity,
     forgetSavedCity,
     syncConnected,
@@ -118,6 +119,7 @@ function App() {
         loadCurrentLocation={loadCurrentLocation}
         clearSavedLocation={clearSavedLocation}
         savedCities={savedCities}
+        recentCities={recentCities}
         location={location}
         loadSavedCity={loadSavedCity}
         forgetSavedCity={forgetSavedCity}

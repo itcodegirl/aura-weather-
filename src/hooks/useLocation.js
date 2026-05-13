@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { reverseGeocodeCoordinates } from "../api";
 import { parseCoordinates } from "../utils/weatherUnits.js";
 
 export const DEFAULT_LOCATION = {
@@ -16,7 +17,9 @@ export const CURRENT_LOCATION_NAME = "Current location";
 export const CURRENT_LOCATION_NOTICE = "Showing your device location";
 const LAST_LOCATION_KEY = "aura-weather-last-location";
 const SAVED_CITIES_KEY = "aura-weather-saved-cities";
+const RECENT_CITIES_KEY = "aura-weather-recent-cities";
 export const MAX_SAVED_CITIES = 6;
+export const MAX_RECENT_CITIES = 4;
 const LAST_LOCATION_TTL_DAYS = 30;
 const GEOLOCATION_TIMEOUT_MS = 5000;
 export const LOCATION_FALLBACK_DELAY_MS = GEOLOCATION_TIMEOUT_MS + 1000;
@@ -87,6 +90,37 @@ function normalizeSavedCities(value) {
     .slice(0, MAX_SAVED_CITIES);
 }
 
+function normalizeRecentCities(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seen = new Set();
+
+  return value
+    .map((city) => {
+      const coordinates = parseCoordinates(city?.lat, city?.lon);
+      if (!coordinates) {
+        return null;
+      }
+
+      const key = toCityKey(coordinates.latitude, coordinates.longitude);
+      if (seen.has(key)) {
+        return null;
+      }
+      seen.add(key);
+
+      return {
+        lat: coordinates.latitude,
+        lon: coordinates.longitude,
+        name: normalizeLocationName(city?.name, "Recent place"),
+        country: normalizeLocationName(city?.country, ""),
+      };
+    })
+    .filter(Boolean)
+    .slice(0, MAX_RECENT_CITIES);
+}
+
 export function getPersistedLocation() {
   try {
     if (typeof window === "undefined" || !window.localStorage) return null;
@@ -142,12 +176,46 @@ export function getSavedCities() {
   }
 }
 
+export function getRecentCities() {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return [];
+    const saved = window.localStorage.getItem(RECENT_CITIES_KEY);
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    const normalized = normalizeRecentCities(parsed);
+    if (!Array.isArray(parsed) || parsed.length !== normalized.length) {
+      window.localStorage.setItem(RECENT_CITIES_KEY, JSON.stringify(normalized));
+    }
+    return normalized;
+  } catch {
+    try {
+      window.localStorage.removeItem(RECENT_CITIES_KEY);
+    } catch {
+      // localStorage may be unavailable in restricted contexts.
+    }
+    return [];
+  }
+}
+
 function persistSavedCities(cities) {
   const normalized = normalizeSavedCities(cities);
 
   try {
     if (typeof window === "undefined" || !window.localStorage) return normalized;
     window.localStorage.setItem(SAVED_CITIES_KEY, JSON.stringify(normalized));
+  } catch {
+    // localStorage may be unavailable in restricted contexts.
+  }
+
+  return normalized;
+}
+
+function persistRecentCities(cities) {
+  const normalized = normalizeRecentCities(cities);
+
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return normalized;
+    window.localStorage.setItem(RECENT_CITIES_KEY, JSON.stringify(normalized));
   } catch {
     // localStorage may be unavailable in restricted contexts.
   }
@@ -207,6 +275,30 @@ export function upsertSavedCity(lat, lon, name, country) {
   return persistSavedCities(nextCities);
 }
 
+export function upsertRecentCity(lat, lon, name, country) {
+  const coordinates = parseCoordinates(lat, lon);
+  if (!coordinates) {
+    return getRecentCities();
+  }
+
+  const nextEntry = {
+    lat: coordinates.latitude,
+    lon: coordinates.longitude,
+    name: normalizeLocationName(name, "Recent place"),
+    country: normalizeLocationName(country, ""),
+  };
+
+  const existingCities = getRecentCities();
+  const nextCities = [
+    nextEntry,
+    ...existingCities.filter((city) => {
+      return !(city.lat === nextEntry.lat && city.lon === nextEntry.lon);
+    }),
+  ];
+
+  return persistRecentCities(nextCities);
+}
+
 export function removeSavedCity(lat, lon) {
   const coordinates = parseCoordinates(lat, lon);
   if (!coordinates) {
@@ -229,7 +321,15 @@ export function clearPersistedLocation() {
   }
 }
 
-function notifyResolvedLocation(callback, lat, lon, name, country, notice) {
+function notifyResolvedLocation(
+  callback,
+  lat,
+  lon,
+  name,
+  country,
+  notice,
+  metadata = null
+) {
   if (typeof callback !== "function") return;
 
   const coordinates = parseCoordinates(lat, lon);
@@ -240,8 +340,23 @@ function notifyResolvedLocation(callback, lat, lon, name, country, notice) {
     coordinates.longitude,
     normalizeLocationName(name, DEFAULT_LOCATION.name),
     normalizeLocationName(country, ""),
-    notice
+    notice,
+    metadata
   );
+}
+
+function getPreferredReverseGeocodeLanguage() {
+  if (typeof navigator === "undefined") {
+    return "";
+  }
+
+  if (Array.isArray(navigator.languages) && navigator.languages.length > 0) {
+    return navigator.languages
+      .filter((language) => typeof language === "string" && language.trim())
+      .join(",");
+  }
+
+  return typeof navigator.language === "string" ? navigator.language.trim() : "";
 }
 
 export function useLocation(onResolved) {
@@ -249,6 +364,7 @@ export function useLocation(onResolved) {
   const [isGeolocationSupported] = useState(() => hasGeolocationSupport());
   const isMountedRef = useRef(false);
   const fallbackTimerRef = useRef(null);
+  const reverseGeocodeRequestRef = useRef(null);
   const activeRequestRef = useRef(0);
   const onResolvedRef = useRef(
     typeof onResolved === "function" ? onResolved : null
@@ -263,14 +379,24 @@ export function useLocation(onResolved) {
     fallbackTimerRef.current = null;
   }, []);
 
+  const clearReverseGeocodeRequest = useCallback(() => {
+    if (!reverseGeocodeRequestRef.current) {
+      return;
+    }
+
+    reverseGeocodeRequestRef.current.abort();
+    reverseGeocodeRequestRef.current = null;
+  }, []);
+
   useEffect(() => {
     isMountedRef.current = true;
 
     return () => {
       isMountedRef.current = false;
       clearFallbackTimer();
+      clearReverseGeocodeRequest();
     };
-  }, [clearFallbackTimer]);
+  }, [clearFallbackTimer, clearReverseGeocodeRequest]);
 
   useEffect(() => {
     onResolvedRef.current =
@@ -299,6 +425,7 @@ export function useLocation(onResolved) {
 
       const fallback = () => {
         clearFallbackTimer();
+        clearReverseGeocodeRequest();
         if (requestId !== activeRequestRef.current || !isMountedRef.current) {
           return;
         }
@@ -341,22 +468,92 @@ export function useLocation(onResolved) {
 
       try {
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          async (position) => {
             if (requestId !== activeRequestRef.current || !isMountedRef.current) {
               return;
             }
 
             clearFallbackTimer();
             markLookupComplete();
+            const latitude = position?.coords?.latitude;
+            const longitude = position?.coords?.longitude;
 
             notifyResolvedLocation(
               resolveCallback,
-              position?.coords?.latitude,
-              position?.coords?.longitude,
+              latitude,
+              longitude,
               CURRENT_LOCATION_NAME,
               "",
-              CURRENT_LOCATION_NOTICE
+              CURRENT_LOCATION_NOTICE,
+              {
+                saveCity: false,
+                persistLocation: false,
+                trackRecent: false,
+              }
             );
+
+            clearReverseGeocodeRequest();
+            const controller = new AbortController();
+            reverseGeocodeRequestRef.current = controller;
+
+            try {
+              const reverseResult = await reverseGeocodeCoordinates(
+                latitude,
+                longitude,
+                {
+                  signal: controller.signal,
+                  language: getPreferredReverseGeocodeLanguage(),
+                }
+              );
+              if (
+                requestId !== activeRequestRef.current ||
+                !isMountedRef.current ||
+                reverseGeocodeRequestRef.current !== controller
+              ) {
+                return;
+              }
+
+              notifyResolvedLocation(
+                resolveCallback,
+                latitude,
+                longitude,
+                normalizeLocationName(reverseResult?.name, CURRENT_LOCATION_NAME),
+                normalizeLocationName(reverseResult?.country, ""),
+                CURRENT_LOCATION_NOTICE,
+                {
+                  saveCity: true,
+                  persistLocation: true,
+                  trackRecent: true,
+                }
+              );
+            } catch (reverseGeocodeError) {
+              if (
+                reverseGeocodeError?.name === "AbortError" ||
+                requestId !== activeRequestRef.current ||
+                !isMountedRef.current ||
+                reverseGeocodeRequestRef.current !== controller
+              ) {
+                return;
+              }
+
+              notifyResolvedLocation(
+                resolveCallback,
+                latitude,
+                longitude,
+                CURRENT_LOCATION_NAME,
+                "",
+                CURRENT_LOCATION_NOTICE,
+                {
+                  saveCity: true,
+                  persistLocation: true,
+                  trackRecent: true,
+                }
+              );
+            } finally {
+              if (reverseGeocodeRequestRef.current === controller) {
+                reverseGeocodeRequestRef.current = null;
+              }
+            }
           },
           () => {
             if (requestId !== activeRequestRef.current || !isMountedRef.current) {
@@ -373,7 +570,7 @@ export function useLocation(onResolved) {
         }
       }
     },
-    [clearFallbackTimer]
+    [clearFallbackTimer, clearReverseGeocodeRequest]
   );
 
   const loadCurrentLocation = useCallback(

@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import "../../scripts/test-render-setup.mjs";
 
 const React = (await import("react")).default;
-const { render, screen, cleanup } = await import("@testing-library/react");
+const { render, screen, cleanup, fireEvent } = await import("@testing-library/react");
 const ForecastCard = (await import("./ForecastCard.jsx")).default;
 
 afterEach(() => {
@@ -85,5 +85,30 @@ describe("ForecastCard missing daily readings", () => {
     assert.ok(screen.getByLabelText("Rain chance unavailable"));
     assert.equal(container.querySelector(".forecast-precip").textContent.trim(), "\u2014");
     assert.equal(container.textContent.includes("0%"), false);
+  });
+
+  test("reveals richer day details when a forecast row is expanded", () => {
+    renderForecastWithDaily({
+      sunrise: ["2026-05-12T05:41:00-05:00"],
+      sunset: ["2026-05-12T20:03:00-05:00"],
+      uvIndexMax: [7.1],
+      windSpeedMax: [18],
+      windGustMax: [27],
+      windDirectionDominant: [235],
+    });
+
+    const trigger = screen.getByRole("button", {
+      name: /show forecast details for today/i,
+    });
+    fireEvent.click(trigger);
+
+    assert.ok(
+      screen.getByRole("region", { name: "Today forecast details" })
+    );
+    assert.ok(screen.getByText("Peak UV"));
+    assert.ok(screen.getByText("Sunrise"));
+    assert.ok(screen.getByText("Sunset"));
+    assert.ok(screen.getByText("SW 18 mph"));
+    assert.ok(screen.getByText("Gusts 27 mph"));
   });
 });

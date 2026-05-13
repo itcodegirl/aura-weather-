@@ -77,6 +77,9 @@ export function normalizeWeatherResponse(raw) {
       uvIndexMax: asArray(daily.uv_index_max),
       rainChanceMax: asArray(daily.precipitation_probability_max),
       rainAmountTotal: asArray(daily.precipitation_sum),
+      windSpeedMax: asArray(daily.wind_speed_10m_max),
+      windGustMax: asArray(daily.wind_gusts_10m_max),
+      windDirectionDominant: asArray(daily.wind_direction_10m_dominant),
     },
     nowcast: {
       ...model.nowcast,

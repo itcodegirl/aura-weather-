@@ -26,6 +26,7 @@ function buildMissingMockViewModel() {
     loadCurrentLocation: NOOP,
     clearSavedLocation: NOOP,
     savedCities: [],
+    recentCities: [],
     loadSavedCity: NOOP,
     forgetSavedCity: NOOP,
     syncConnected: false,

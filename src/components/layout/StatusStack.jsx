@@ -114,11 +114,11 @@ function StatusStack({
       {showSetupPrompts && showPermissionOnboarding && (
         <section className="permission-onboarding" aria-label="Location onboarding">
           <p className="permission-onboarding-kicker">First-time setup</p>
-          <h2 className="permission-onboarding-title">Set your forecast once</h2>
+          <h2 className="permission-onboarding-title">Start with Chicago, switch anytime</h2>
           <p className="permission-onboarding-copy">
             {isGeolocationSupported
-              ? "Chicago is loaded for now. Use your location or search any city."
-              : "Chicago is loaded for now. Location sharing is unavailable here, so search any city."}
+              ? "Aura opens on Chicago so the dashboard is useful immediately. Use your location or search any city when you're ready."
+              : "Aura opens on Chicago so the dashboard is useful immediately. Location sharing is unavailable here, so search any city when you're ready."}
           </p>
           <div className="permission-onboarding-actions">
             {isGeolocationSupported ? (
@@ -154,8 +154,8 @@ function StatusStack({
         <section className="location-setup-prompt" aria-label="Location setup">
           <p className="location-setup-title">
             {isGeolocationSupported
-              ? "Use your location or search any city."
-              : "Search any city. Browser location is unavailable here."}
+              ? "Want a closer forecast? Use your location or search any city."
+              : "Want a different forecast? Search any city. Browser location is unavailable here."}
           </p>
           <div className="location-setup-actions">
             {isGeolocationSupported ? (

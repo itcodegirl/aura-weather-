@@ -8,6 +8,7 @@ function AppHeader({
   loadCurrentLocation,
   clearSavedLocation,
   savedCities,
+  recentCities,
   location,
   loadSavedCity,
   forgetSavedCity,
@@ -46,6 +47,7 @@ function AppHeader({
         loadCurrentLocation={loadCurrentLocation}
         clearSavedLocation={clearSavedLocation}
         savedCities={savedCities}
+        recentCities={recentCities}
         location={location}
         loadSavedCity={loadSavedCity}
         forgetSavedCity={forgetSavedCity}
