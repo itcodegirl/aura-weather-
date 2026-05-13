@@ -6,7 +6,9 @@ const UNDO_TIMEOUT_MS = 6000;
 function SavedCitiesStrip({
   savedCities,
   location,
+  startupLocation,
   loadSavedCity,
+  setStartupCity,
   forgetSavedCity,
   restoreSavedCity,
 }) {
@@ -45,7 +47,7 @@ function SavedCitiesStrip({
   );
 
   const handleForgetSavedCity = useCallback(
-    (event, city) => {
+    (event, city, wasStartup = false) => {
       event.stopPropagation();
       if (typeof forgetSavedCity === "function") {
         forgetSavedCity(city);
@@ -60,7 +62,7 @@ function SavedCitiesStrip({
       // button. We flip this BEFORE setPendingUndo so the effect that
       // reads it on the next render finds it set.
       shouldFocusUndoRef.current = true;
-      setPendingUndo(city);
+      setPendingUndo({ city, wasStartup });
       undoTimeoutRef.current = setTimeout(() => {
         setPendingUndo(null);
         undoTimeoutRef.current = null;
@@ -69,13 +71,25 @@ function SavedCitiesStrip({
     [forgetSavedCity, clearUndoTimer]
   );
 
+  const handleSetStartupCity = useCallback(
+    (event, city) => {
+      event.stopPropagation();
+      if (typeof setStartupCity === "function") {
+        setStartupCity(city);
+      }
+    },
+    [setStartupCity]
+  );
+
   const handleUndo = useCallback(() => {
     if (!pendingUndo || typeof restoreSavedCity !== "function") {
       setPendingUndo(null);
       clearUndoTimer();
       return;
     }
-    restoreSavedCity(pendingUndo);
+    restoreSavedCity(pendingUndo.city, {
+      makeStartup: pendingUndo.wasStartup,
+    });
     setPendingUndo(null);
     clearUndoTimer();
   }, [pendingUndo, restoreSavedCity, clearUndoTimer]);
@@ -104,6 +118,8 @@ function SavedCitiesStrip({
             // saved city with null lat/lon.
             const activeLat = toFiniteNumber(location?.lat);
             const activeLon = toFiniteNumber(location?.lon);
+            const startupLat = toFiniteNumber(startupLocation?.lat);
+            const startupLon = toFiniteNumber(startupLocation?.lon);
             const cityLat = toFiniteNumber(city.lat);
             const cityLon = toFiniteNumber(city.lon);
             const isActive =
@@ -111,16 +127,21 @@ function SavedCitiesStrip({
               activeLon !== null &&
               activeLat === cityLat &&
               activeLon === cityLon;
+            const isStartup =
+              startupLat !== null &&
+              startupLon !== null &&
+              startupLat === cityLat &&
+              startupLon === cityLon;
 
             return (
               <div
                 key={key}
-                className={`saved-city-chip-wrap ${isActive ? "is-active" : ""}`}
+                className={`saved-city-chip-wrap ${isActive ? "is-active" : ""} ${isStartup ? "is-startup" : ""}`.trim()}
                 role="listitem"
               >
                 <button
                   type="button"
-                  className={`saved-city-chip ${isActive ? "is-active" : ""}`}
+                  className={`saved-city-chip ${isActive ? "is-active" : ""} ${isStartup ? "is-startup" : ""}`.trim()}
                   onClick={() => handleLoadSavedCity(city)}
                   /*
                    * aria-current rather than aria-pressed: the active
@@ -132,13 +153,28 @@ function SavedCitiesStrip({
                 >
                   {city.name}
                 </button>
+                {isStartup ? (
+                  <span className="saved-city-startup-badge">Startup</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="saved-city-startup"
+                    onClick={(event) => handleSetStartupCity(event, city)}
+                    aria-label={`Make ${city.name} your startup city`}
+                    title={`Make ${city.name} your startup city`}
+                  >
+                    Start
+                  </button>
+                )}
                 <button
                   type="button"
                   className="saved-city-remove"
-                  onClick={(event) => handleForgetSavedCity(event, city)}
+                  onClick={(event) =>
+                    handleForgetSavedCity(event, city, isStartup)
+                  }
                   aria-label={`Remove ${city.name} from saved cities`}
                 >
-                  {"×"}
+                  {"\u00D7"}
                 </button>
               </div>
             );
@@ -152,7 +188,7 @@ function SavedCitiesStrip({
           aria-live="polite"
         >
           <span className="saved-city-undo-text">
-            Removed <strong>{pendingUndo.name}</strong>
+            Removed <strong>{pendingUndo.city.name}</strong>
           </span>
           <button
             type="button"
@@ -168,7 +204,7 @@ function SavedCitiesStrip({
             onClick={handleDismissUndo}
             aria-label="Dismiss undo notice"
           >
-            {"×"}
+            {"\u00D7"}
           </button>
         </div>
       )}

@@ -17,7 +17,6 @@ import {
 } from "./useLocation";
 import { useSavedLocationsSync } from "./useSavedLocationsSync";
 import { useWeatherData } from "./useWeatherData";
-import { reverseGeocodeCoordinates } from "../api";
 import {
   hasMatchingCoordinates,
   toLocationPayload,
@@ -38,6 +37,7 @@ function getInitialLocationState() {
   if (persistedLocation) {
     return {
       location: persistedLocation,
+      startupLocation: persistedLocation,
       notice: SAVED_LOCATION_NOTICE,
       hasPersistedLocation: true,
     };
@@ -45,6 +45,7 @@ function getInitialLocationState() {
 
   return {
     location: DEFAULT_LOCATION,
+    startupLocation: null,
     notice: LOCATION_FALLBACK_NOTICE,
     hasPersistedLocation: false,
   };
@@ -54,6 +55,9 @@ export function useWeather(options = {}) {
   const { climateEnabled = true, weatherEnabled = true } = options;
   const [initialLocationState] = useState(() => getInitialLocationState());
   const [location, setLocation] = useState(initialLocationState.location);
+  const [startupLocation, setStartupLocation] = useState(
+    initialLocationState.startupLocation
+  );
   const [locationNotice, setLocationNotice] = useState(initialLocationState.notice);
   const [hasPersistedLocation, setHasPersistedLocation] = useState(
     initialLocationState.hasPersistedLocation
@@ -62,8 +66,6 @@ export function useWeather(options = {}) {
   const [recentCities, setRecentCities] = useState(() => getRecentCities());
   const locationRef = useRef(location);
   const locationNoticeRef = useRef(locationNotice);
-  const reverseGeocodeAbortRef = useRef(null);
-  const reverseGeocodeRequestIdRef = useRef(0);
 
   useEffect(() => {
     locationRef.current = location;
@@ -73,21 +75,6 @@ export function useWeather(options = {}) {
     locationNoticeRef.current = locationNotice;
   }, [locationNotice]);
 
-  const abortReverseGeocode = useCallback(() => {
-    if (!reverseGeocodeAbortRef.current) {
-      return;
-    }
-
-    reverseGeocodeAbortRef.current.abort();
-    reverseGeocodeAbortRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      abortReverseGeocode();
-    };
-  }, [abortReverseGeocode]);
-
   const persistLocationPayload = useCallback((nextLocation) => {
     persistLocation(
       nextLocation.lat,
@@ -95,6 +82,7 @@ export function useWeather(options = {}) {
       nextLocation.name,
       nextLocation.country
     );
+    setStartupLocation(nextLocation);
     setHasPersistedLocation(true);
   }, []);
 
@@ -103,7 +91,7 @@ export function useWeather(options = {}) {
       const {
         saveCity = true,
         persistLocation: shouldPersistLocation = true,
-        saveRecent = false,
+        saveRecent = saveCity,
       } = options;
       const currentLocation = locationRef.current;
       const hasSameLocation =
@@ -155,99 +143,34 @@ export function useWeather(options = {}) {
     [persistLocationPayload]
   );
 
-  const resolveFriendlyCurrentLocation = useCallback(
-    async (lat, lon) => {
-      abortReverseGeocode();
-
-      const requestId = reverseGeocodeRequestIdRef.current + 1;
-      reverseGeocodeRequestIdRef.current = requestId;
-      const controller = new AbortController();
-      reverseGeocodeAbortRef.current = controller;
-
-      try {
-        const language =
-          typeof navigator !== "undefined" &&
-          typeof navigator.language === "string"
-            ? navigator.language
-            : "";
-        const resolvedPlace = await reverseGeocodeCoordinates(lat, lon, {
-          signal: controller.signal,
-          language,
-        });
-
-        if (requestId !== reverseGeocodeRequestIdRef.current) {
-          return;
-        }
-
-        const nextLocation = toLocationPayload(
-          lat,
-          lon,
-          resolvedPlace?.name,
-          resolvedPlace?.country
-        );
-        if (!nextLocation || !nextLocation.name) {
-          return;
-        }
-
-        const activeLocation = locationRef.current;
-        if (
-          !activeLocation ||
-          activeLocation.lat !== nextLocation.lat ||
-          activeLocation.lon !== nextLocation.lon
-        ) {
-          return;
-        }
-
-        applyLocation(nextLocation, buildCurrentLocationNotice(nextLocation.name), {
-          saveCity: true,
-          persistLocation: true,
-          saveRecent: true,
-        });
-      } catch (error) {
-        if (error?.name !== "AbortError") {
-          return;
-        }
-      } finally {
-        if (
-          reverseGeocodeRequestIdRef.current === requestId &&
-          reverseGeocodeAbortRef.current === controller
-        ) {
-          reverseGeocodeAbortRef.current = null;
-        }
-      }
-    },
-    [abortReverseGeocode, applyLocation]
-  );
-
   const handleLocationResolved = useCallback(
-    (lat, lon, name, country, notice = null) => {
+    (lat, lon, name, country, notice = null, metadata = null) => {
       const nextLocation = toLocationPayload(lat, lon, name, country);
       if (!nextLocation) {
         return;
       }
 
-      if (notice === CURRENT_LOCATION_NOTICE) {
-        applyLocation(nextLocation, buildCurrentLocationNotice(nextLocation.name), {
-          saveCity: true,
-          persistLocation: true,
-          saveRecent: true,
-        });
-        void resolveFriendlyCurrentLocation(nextLocation.lat, nextLocation.lon);
-        return;
-      }
-
-      applyLocation(nextLocation, notice, {
-        saveCity: false,
-        persistLocation: false,
-        saveRecent: false,
+      const nextNotice =
+        notice === CURRENT_LOCATION_NOTICE
+          ? buildCurrentLocationNotice(nextLocation.name)
+          : notice;
+      const isUserDrivenSelection = notice === null;
+      applyLocation(nextLocation, nextNotice, {
+        saveCity: metadata?.saveCity ?? isUserDrivenSelection,
+        persistLocation:
+          metadata?.persistLocation ?? isUserDrivenSelection,
+        saveRecent: metadata?.trackRecent ?? isUserDrivenSelection,
       });
     },
-    [applyLocation, resolveFriendlyCurrentLocation]
+    [applyLocation]
   );
 
-  const { isLocatingCurrent, isGeolocationSupported, loadCurrentLocation } = useLocation(
-    handleLocationResolved
-  );
+  const {
+    isLocatingCurrent,
+    isGeolocationSupported,
+    loadCurrentLocation,
+    cancelCurrentLocationLookup,
+  } = useLocation(handleLocationResolved);
 
   const {
     weather,
@@ -262,37 +185,100 @@ export function useWeather(options = {}) {
     enabled: weatherEnabled,
   });
 
-  // Shared entrypoint used by both the search bar (loadWeather, called
-  // with positional args) and the saved-cities strip (loadSavedCity,
-  // called with a city object). Both flows resolve to the same
-  // applyLocation invocation; keeping a single body makes it impossible
-  // for the two to drift.
-  const applyResolvedLocation = useCallback(
+  // Shared entrypoint used by the search bar (loadWeather, called with
+  // positional args). Search/manual picks remain intentional enough to
+  // refresh the startup city preference automatically.
+  const applyResolvedSearchLocation = useCallback(
     (lat, lon, name, country) => {
       const nextLocation = toLocationPayload(lat, lon, name, country);
       if (!nextLocation) {
         return;
       }
-      abortReverseGeocode();
+      cancelCurrentLocationLookup();
       applyLocation(nextLocation, null, {
         saveCity: true,
         persistLocation: true,
         saveRecent: true,
       });
     },
-    [abortReverseGeocode, applyLocation]
+    [applyLocation, cancelCurrentLocationLookup]
   );
 
   const loadWeather = useCallback(
-    (lat, lon, name, country) => applyResolvedLocation(lat, lon, name, country),
-    [applyResolvedLocation]
+    (lat, lon, name, country) =>
+      applyResolvedSearchLocation(lat, lon, name, country),
+    [applyResolvedSearchLocation]
   );
 
   const loadSavedCity = useCallback(
-    (city) =>
-      applyResolvedLocation(city?.lat, city?.lon, city?.name, city?.country),
-    [applyResolvedLocation]
+    (city) => {
+      const nextLocation = toLocationPayload(
+        city?.lat,
+        city?.lon,
+        city?.name,
+        city?.country
+      );
+      if (!nextLocation) {
+        return;
+      }
+
+      cancelCurrentLocationLookup();
+      applyLocation(nextLocation, null, {
+        saveCity: true,
+        persistLocation: false,
+        saveRecent: true,
+      });
+    },
+    [applyLocation, cancelCurrentLocationLookup]
   );
+
+  const setStartupCity = useCallback((city) => {
+    const nextLocation = toLocationPayload(
+      city?.lat,
+      city?.lon,
+      city?.name,
+      city?.country
+    );
+    if (!nextLocation) {
+      return;
+    }
+
+    persistLocationPayload(nextLocation);
+    const isCurrentCity =
+      hasMatchingCoordinates(locationRef.current, nextLocation);
+    const startupNotice = isCurrentCity
+      ? `${nextLocation.name} is now your startup city.`
+      : `${nextLocation.name} will open when Aura starts.`;
+    setLocationNotice(startupNotice);
+    locationNoticeRef.current = startupNotice;
+  }, [persistLocationPayload]);
+
+  const restoreSavedCity = useCallback((city, options = {}) => {
+    const nextLocation = toLocationPayload(
+      city?.lat,
+      city?.lon,
+      city?.name,
+      city?.country
+    );
+    if (!nextLocation) {
+      return;
+    }
+
+    const updatedSavedCities = upsertSavedCity(
+      nextLocation.lat,
+      nextLocation.lon,
+      nextLocation.name,
+      nextLocation.country
+    );
+    setSavedCities(updatedSavedCities);
+
+    if (options?.makeStartup) {
+      persistLocationPayload(nextLocation);
+      const restoredNotice = `${nextLocation.name} is your startup city again.`;
+      setLocationNotice(restoredNotice);
+      locationNoticeRef.current = restoredNotice;
+    }
+  }, [persistLocationPayload]);
 
   const forgetSavedCity = useCallback((city) => {
     const updatedSavedCities = removeSavedCity(city?.lat, city?.lon);
@@ -304,6 +290,7 @@ export function useWeather(options = {}) {
     }
 
     clearPersistedLocation();
+    setStartupLocation(null);
     setHasPersistedLocation(false);
     const removedSavedLocationNotice =
       "Saved startup location removed. Aura will open to Chicago next time.";
@@ -322,6 +309,7 @@ export function useWeather(options = {}) {
 
   const clearSavedLocation = useCallback(() => {
     clearPersistedLocation();
+    setStartupLocation(null);
     setHasPersistedLocation(false);
     setLocationNotice("Saved location removed for future sessions.");
     locationNoticeRef.current = "Saved location removed for future sessions.";
@@ -342,10 +330,13 @@ export function useWeather(options = {}) {
     isLocatingCurrent,
     isGeolocationSupported,
     hasPersistedLocation,
+    startupLocation,
     clearSavedLocation,
     savedCities,
     recentCities,
     loadSavedCity,
+    setStartupCity,
+    restoreSavedCity,
     forgetSavedCity,
     syncConnected,
     syncAccount,

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { reverseGeocodeCoordinates } from "../api";
+import { reverseGeocode } from "../api/index.js";
 import { parseCoordinates } from "../utils/weatherUnits.js";
 
 export const DEFAULT_LOCATION = {
@@ -497,7 +497,7 @@ export function useLocation(onResolved) {
             reverseGeocodeRequestRef.current = controller;
 
             try {
-              const reverseResult = await reverseGeocodeCoordinates(
+              const reverseResult = await reverseGeocode(
                 latitude,
                 longitude,
                 {
@@ -587,6 +587,15 @@ export function useLocation(onResolved) {
     [requestCurrentPositionWithFallback]
   );
 
+  const cancelCurrentLocationLookup = useCallback(() => {
+    activeRequestRef.current += 1;
+    clearFallbackTimer();
+    clearReverseGeocodeRequest();
+    if (isMountedRef.current) {
+      setIsLocatingCurrent(false);
+    }
+  }, [clearFallbackTimer, clearReverseGeocodeRequest]);
+
   useEffect(() => {
     const persistedLocation = getPersistedLocation();
     if (persistedLocation) {
@@ -617,5 +626,6 @@ export function useLocation(onResolved) {
     isLocatingCurrent,
     isGeolocationSupported,
     loadCurrentLocation,
+    cancelCurrentLocationLookup,
   };
 }

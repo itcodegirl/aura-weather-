@@ -24,7 +24,7 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(
     page.getByText(
-      "Aura opens on Chicago so the dashboard is useful immediately. Use your location or search any city when you're ready."
+      "Aura opens on Chicago so the dashboard is useful immediately. Use your location for local conditions or search any city when you're ready."
     )
   ).toBeVisible();
   await expect(
@@ -167,7 +167,7 @@ test("renders a cached forecast on cold start when the browser is offline", asyn
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(page.locator(".hero-temp")).toContainText("61");
   await expect(
-    page.getByText(/Browser is offline\. Showing a saved forecast from/)
+    page.getByText(/Browser is offline\. Showing your most recent saved forecast from/)
   ).toBeVisible();
 });
 
@@ -239,6 +239,57 @@ test("groups idle suggestions into recent and saved sections", async ({ page }) 
   await expect(
     page.getByRole("option", { name: /London, Saved.*United Kingdom/ })
   ).toBeVisible();
+});
+
+test("keeps startup city explicit when switching between saved cities", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "aura-weather-last-location",
+      JSON.stringify({
+        lat: 35.6762,
+        lon: 139.6503,
+        name: "Tokyo",
+        country: "Japan",
+        updatedAt: new Date().toISOString(),
+      })
+    );
+    window.localStorage.setItem(
+      "aura-weather-saved-cities",
+      JSON.stringify([
+        {
+          lat: 35.6762,
+          lon: 139.6503,
+          name: "Tokyo",
+          country: "Japan",
+        },
+        {
+          lat: 51.5072,
+          lon: -0.1276,
+          name: "London",
+          country: "United Kingdom",
+        },
+      ])
+    );
+  });
+
+  await openDashboard(page);
+
+  const tokyoChip = page.locator(".saved-city-chip-wrap").filter({
+    has: page.getByRole("button", { name: "Tokyo", exact: true }),
+  });
+  const londonChip = page.locator(".saved-city-chip-wrap").filter({
+    has: page.getByRole("button", { name: "London", exact: true }),
+  });
+
+  await expect(tokyoChip.getByText("Startup")).toBeVisible();
+  await page.getByRole("button", { name: "London", exact: true }).click();
+  await expect(page.locator(".hero-location")).toContainText("London, United Kingdom");
+  await expect(tokyoChip.getByText("Startup")).toBeVisible();
+
+  await londonChip.getByRole("button", { name: "Make London your startup city" }).click();
+  await expect(page.getByText("London is now your startup city.")).toBeVisible();
+  await expect(londonChip.getByText("Startup")).toBeVisible();
+  await expect(tokyoChip.getByText("Startup")).toHaveCount(0);
 });
 
 test("shows a searching state before empty search results resolve", async ({ page }) => {

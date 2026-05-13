@@ -25,7 +25,7 @@ describe("StatusStack", () => {
 
     assert.ok(
       screen.getByText(
-        "Live weather is unavailable. Showing a saved forecast."
+        "Live weather is unavailable. Showing your most recent saved forecast."
       )
     );
     assert.equal(screen.getByRole("alert").textContent.includes("Retry"), true);
@@ -88,7 +88,7 @@ describe("StatusStack", () => {
 
     assert.ok(
       screen.getByText(
-        "Offline shell ready. Aura can reopen after the network drops."
+        "Offline shell ready. Aura can reopen if the network drops and clearly label saved forecasts."
       )
     );
 

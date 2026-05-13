@@ -27,11 +27,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "vite",
-    "dev:safe": "vite --host 127.0.0.1 --port 5173 --strictPort false",
-    "build": "vite build",
+    "dev": "vite --configLoader runner",
+    "dev:safe": "vite --configLoader runner --host 127.0.0.1 --port 5173 --strictPort false",
+    "build": "vite build --configLoader runner",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview --configLoader runner",
     "test": "node --test",
     "test:render": "node scripts/run-render-tests.mjs",
     "test:components": "npm run test:render",
@@ -40,7 +40,7 @@
     "test:visual": "playwright test e2e/visual-regression.spec.js",
     "test:visual:update": "playwright test e2e/visual-regression.spec.js --update-snapshots",
     "test:lighthouse": "npm run build && node scripts/run-lighthouse-budgets.mjs",
-    "screenshots": "playwright test e2e/readme-screenshots.spec.js e2e/trust-contract-screenshot.spec.js",
+    "screenshots": "node scripts/run-screenshots.mjs",
     "record:trust-contract-demo": "node scripts/record-trust-contract-demo.mjs"
   },
   "dependencies": {

@@ -54,6 +54,7 @@ function App() {
     savedCities,
     recentCities,
     loadSavedCity,
+    setStartupCity,
     restoreSavedCity,
     forgetSavedCity,
     syncConnected,
@@ -69,6 +70,7 @@ function App() {
     isLocatingCurrent,
     isGeolocationSupported,
     hasPersistedLocation,
+    startupLocation,
     showGlobalLoading,
     isBackgroundLoading,
     showGlobalError,
@@ -148,6 +150,7 @@ function App() {
         recentCities={recentCities}
         location={location}
         loadSavedCity={loadSavedCity}
+        setStartupCity={setStartupCity}
         restoreSavedCity={restoreSavedCity}
         forgetSavedCity={forgetSavedCity}
         syncConnected={syncConnected}
@@ -164,6 +167,7 @@ function App() {
         unit={unit}
         setUnit={setUnit}
         hasPersistedLocation={hasPersistedLocation}
+        startupLocation={startupLocation}
       />
 
       <StatusStack

@@ -317,7 +317,7 @@ function CitySearch({ onSelect, savedCities, recentCities }, ref) {
                 ]
                   .filter(Boolean)
                   .join(" \u00B7 ");
-                const accessibleMeta = [sourceGroup || sourceLabel, admin1, country]
+                const accessibleMeta = [sourceLabel || sourceGroup, admin1, country]
                   .filter(Boolean)
                   .join(" \u00B7 ");
                 const optionLabel = `${name}${accessibleMeta ? `, ${accessibleMeta}` : ""}`;
