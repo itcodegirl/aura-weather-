@@ -24,7 +24,7 @@ test("loads the dashboard with fallback location and core controls", async ({ pa
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(
     page.getByText(
-      "Aura opens on Chicago so the dashboard is useful immediately. Use your location or search any city when you're ready."
+      "Aura opens on Chicago so the dashboard is useful immediately. Use your location for local conditions or search any city when you're ready."
     )
   ).toBeVisible();
   await expect(
@@ -167,7 +167,7 @@ test("renders a cached forecast on cold start when the browser is offline", asyn
   await expect(page.locator(".hero-location")).toContainText("Chicago, United States");
   await expect(page.locator(".hero-temp")).toContainText("61");
   await expect(
-    page.getByText(/Browser is offline\. Showing a saved forecast from/)
+    page.getByText(/Browser is offline\. Showing your most recent saved forecast from/)
   ).toBeVisible();
 });
 

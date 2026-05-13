@@ -96,7 +96,7 @@ function StatusStack({
   );
   const cacheCapturedLabel = formatCacheCapturedAt(cacheCapturedAt);
   const refreshErrorMessage = isShowingCachedForecast
-    ? `${refreshErrorBase}. Showing a saved forecast${cacheCapturedLabel ? ` from ${cacheCapturedLabel}` : ""}.`
+    ? `${refreshErrorBase}. Showing your most recent saved forecast${cacheCapturedLabel ? ` from ${cacheCapturedLabel}` : ""}.`
     : `${refreshErrorBase}. Showing last known data.`;
 
   if (!hasStatusStack) {
@@ -117,8 +117,8 @@ function StatusStack({
           <h2 className="permission-onboarding-title">Start with Chicago, switch anytime</h2>
           <p className="permission-onboarding-copy">
             {isGeolocationSupported
-              ? "Aura opens on Chicago so the dashboard is useful immediately. Use your location or search any city when you're ready."
-              : "Aura opens on Chicago so the dashboard is useful immediately. Location sharing is unavailable here, so search any city when you're ready."}
+              ? "Aura opens on Chicago so the dashboard is useful immediately. Use your location for local conditions or search any city when you're ready."
+              : "Aura opens on Chicago so the dashboard is useful immediately. Browser location is unavailable here, so search any city for local conditions when you're ready."}
           </p>
           <div className="permission-onboarding-actions">
             {isGeolocationSupported ? (
@@ -154,8 +154,8 @@ function StatusStack({
         <section className="location-setup-prompt" aria-label="Location setup">
           <p className="location-setup-title">
             {isGeolocationSupported
-              ? "Want a closer forecast? Use your location or search any city."
-              : "Want a different forecast? Search any city. Browser location is unavailable here."}
+              ? "Want a closer forecast? Use your location for a local read or search any city."
+              : "Want a different forecast? Search any city for local conditions. Browser location is unavailable here."}
           </p>
           <div className="location-setup-actions">
             {isGeolocationSupported ? (
@@ -213,7 +213,7 @@ function StatusStack({
       {showRuntimeStatus && serviceWorkerOfflineReady && (
         <div className="app-status app-status--ready" role="status" aria-live="polite">
           <span className="app-status-message">
-            Offline shell ready. Aura can reopen after the network drops.
+            Offline shell ready. Aura can reopen if the network drops and clearly label saved forecasts.
           </span>
           <span className="app-status-actions">
             <button
